@@ -1,0 +1,316 @@
+{
+  "drawing": "nist_ctc_04_asme1_rd",
+  "page_count": 1,
+  "title_block": {
+    "title": "Test Model 4",
+    "revision": "D",
+    "units": "mm",
+    "units_source": "inferred",
+    "drawing_number": "nist_ctc_04_asme1_rd",
+    "sheet_note": "PMI Complex Test Case 4. Includes Atomic Test Cases - 5, 9, 10, 12, 15, 16, 22, 30, 40, 49",
+    "standard": null
+  },
+  "features": [
+    {
+      "id": "hole_rail_left",
+      "type": "hole",
+      "label": "hole in the side of the left raised rail",
+      "description": "Round hole in the long side face of the raised rail at the back left of the plate, the rail next to datum feature G.",
+      "page": 1
+    },
+    {
+      "id": "holes_rail_top",
+      "type": "pattern",
+      "label": "six small holes in the tops of the raised rails (6X)",
+      "description": "Pattern of six small holes drilled into the top faces of the two raised rails in the middle of the plate. The leader points to one of them.",
+      "page": 1
+    },
+    {
+      "id": "tapped_holes",
+      "type": "thread",
+      "label": "four M12 tapped holes in the wedge bosses (4X)",
+      "description": "Four M12 x 1.75 threaded holes, the smaller outer holes in the tops of the two wedge-shaped bosses on the right half of the plate.",
+      "page": 1
+    },
+    {
+      "id": "flange_holes",
+      "type": "pattern",
+      "label": "ring of 30 holes in the flange (30X)",
+      "description": "The 30 through holes spaced around the flat outer flange of the plate.",
+      "page": 1
+    },
+    {
+      "id": "pocket_area",
+      "type": "plane",
+      "label": "hatched circular area in the front-left pocket",
+      "description": "Circular area, shown hatched and not dimensioned, on the floor of the shallow pocket at the front left of the plate.",
+      "page": 1
+    },
+    {
+      "id": "hole_corner",
+      "type": "hole",
+      "label": "small hole at the front corner",
+      "description": "Small hole in the flange at the front corner of the plate, where the coordinate triad sits. Its axis is datum B.",
+      "page": 1
+    }
+  ],
+  "values": [
+    {
+      "id": "ctc04-01",
+      "raw": "⌀10",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 10,
+      "unit": "mm",
+      "feature_id": "hole_rail_left",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Basic diameter (boxed): the hole is exactly 10 mm in diameter in theory; its variation is set by a geometric tolerance, not by this dimension.",
+      "page": 1,
+      "bbox": [
+        0.244,
+        0.229,
+        0.268,
+        0.267
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-02",
+      "raw": "6X ⌀6.65 ±0.12",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 6.65,
+      "unit": "mm",
+      "feature_id": "holes_rail_top",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 6.53,
+        "upper": 6.77
+      },
+      "meaning": "Each of the six small rail holes must be 6.65 mm in diameter plus or minus 0.12 mm, so between 6.53 and 6.77 mm.",
+      "page": 1,
+      "bbox": [
+        0.565,
+        0.265,
+        0.643,
+        0.333
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-03",
+      "raw": "⌖ ⌀0.75Ⓟ50 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.75,
+      "unit": "mm",
+      "feature_id": "tapped_holes",
+      "applies_to": "axis projected 50 mm out of each hole (projected tolerance zone)",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.75
+      },
+      "meaning": "Position with a projected tolerance zone: the axis of each tapped hole, projected 50 mm out of the hole, must lie in a 0.75 mm diameter cylinder at its true position from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.739,
+        0.295,
+        0.856,
+        0.409
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-04",
+      "raw": "30X ⌀14 ±0.1",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 14,
+      "unit": "mm",
+      "feature_id": "flange_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 13.9,
+        "upper": 14.1
+      },
+      "meaning": "Each of the 30 flange holes must be 14 mm in diameter plus or minus 0.1 mm, so between 13.9 and 14.1 mm.",
+      "page": 1,
+      "bbox": [
+        0.872,
+        0.436,
+        0.933,
+        0.491
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-05",
+      "raw": "⌖ ⌀0.35 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.35,
+      "unit": "mm",
+      "feature_id": "flange_holes",
+      "applies_to": "the flange holes (leader points to the edge of one hole in the pattern)",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.35
+      },
+      "meaning": "Position: the axis of each flange hole must lie in a 0.35 mm diameter cylinder at its true position from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.099,
+        0.533,
+        0.198,
+        0.607
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-06",
+      "raw": "⌓ 0.5 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.5,
+      "unit": "mm",
+      "feature_id": "pocket_area",
+      "applies_to": "only the hatched circular area",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.5
+      },
+      "meaning": "Profile of a surface on a limited area: the hatched circular area of the pocket floor must lie in a 0.5 mm band around its true shape, located from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.204,
+        0.625,
+        0.284,
+        0.703
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-07",
+      "raw": "75",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 75,
+      "unit": "mm",
+      "feature_id": "flange_holes",
+      "applies_to": "spacing between two neighbouring holes on the front edge",
+      "datums": [],
+      "limits": null,
+      "meaning": "Basic dimension (boxed): the two neighbouring flange holes are exactly 75 mm apart in theory; the position tolerance on the holes controls the real spacing.",
+      "page": 1,
+      "bbox": [
+        0.338,
+        0.736,
+        0.369,
+        0.767
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-08",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "hole_corner",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B: the axis of the small front-corner hole is the secondary reference.",
+      "page": 1,
+      "bbox": [
+        0.445,
+        0.828,
+        0.471,
+        0.848
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-09",
+      "raw": "Test Model 4",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Title of the sheet: NIST test model 4.",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.083,
+        0.157,
+        0.108
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc04-10",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: D.",
+      "page": 1,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    }
+  ]
+}

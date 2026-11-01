@@ -1,0 +1,2423 @@
+{
+  "drawing": "nist_ftc_06_asme1_rd",
+  "page_count": 3,
+  "title_block": {
+    "title": "PMI Fully-Toleranced Test Case 6",
+    "revision": "D",
+    "units": "in",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_06_asme1_rd",
+    "sheet_note": "PMI Fully-Toleranced Test Case 6 - View A. Includes Atomic Test Cases - 52, 53, 72, 87, 88, 89; PMI Fully-Toleranced Test Case 6 - View B. Includes Atomic Test Cases - 57, 58; PMI Fully-Toleranced Test Case 6 - View C. Includes Atomic Test Cases - 73, 80",
+    "standard": "ASME Y14.5M-1994 (dimensioning and tolerancing); ASME Y14.41-2003 (dataset)"
+  },
+  "features": [
+    {
+      "id": "part",
+      "type": "other",
+      "label": "whole part",
+      "description": "The whole machined block shown on all three sheets. Used for general notes that apply to the part as a whole.",
+      "page": 1
+    },
+    {
+      "id": "dimple",
+      "type": "other",
+      "label": "spherical dimple in the top of the left block",
+      "description": "Shallow round spherical recess in the top face of the raised block at the back left of View A.",
+      "page": 1
+    },
+    {
+      "id": "upright_corners",
+      "type": "fillet",
+      "label": "2X rounded corners of the uprights",
+      "description": "The rounded top corners of the two upright lugs that carry the cross holes; the leader points to the back lug in View A.",
+      "page": 1
+    },
+    {
+      "id": "fillets",
+      "type": "fillet",
+      "label": "24X small fillets",
+      "description": "Small rounded inside corners where walls meet floors around the part; the leader points to the one at the foot of the back lug in View A.",
+      "page": 1
+    },
+    {
+      "id": "spheres",
+      "type": "pattern",
+      "label": "2X ball studs",
+      "description": "Two spherical balls standing on short posts on the top face of the base.",
+      "page": 1
+    },
+    {
+      "id": "base_top",
+      "type": "plane",
+      "label": "top face of the base",
+      "description": "The large flat top face of the base plate, on which the balls, cones and bosses stand. It is datum feature D.",
+      "page": 1
+    },
+    {
+      "id": "upright_holes",
+      "type": "pattern",
+      "label": "2X counterbored cross holes in the uprights",
+      "description": "Round holes running sideways through the two upright lugs, each with a counterbore; the leader points to the one in the front lug in View A.",
+      "page": 1
+    },
+    {
+      "id": "base_holes",
+      "type": "pattern",
+      "label": "4X counterbored holes in the base",
+      "description": "Four counterbored mounting holes in the top face of the base; the leader points to the one at the front left in View A.",
+      "page": 1
+    },
+    {
+      "id": "base_bottom",
+      "type": "plane",
+      "label": "bottom face of the base",
+      "description": "The flat underside of the base plate; the leader lands on its front edge. It is datum feature A.",
+      "page": 1
+    },
+    {
+      "id": "bosses",
+      "type": "pattern",
+      "label": "4X horizontal cylindrical bosses",
+      "description": "Four short cylinders lying on their sides along the front edge of the base in View A. Each one's outer surface is its own datum feature F.",
+      "page": 1
+    },
+    {
+      "id": "boss_holes",
+      "type": "pattern",
+      "label": "4X counterbored holes in the bosses",
+      "description": "Small holes along the axis of each horizontal boss, with a counterbore at the boss end face.",
+      "page": 1
+    },
+    {
+      "id": "slope_face",
+      "type": "plane",
+      "label": "sloped face of the wedge",
+      "description": "The inclined top face of the wedge-shaped block in the middle of the part, dimensioned by a slope of 1 in 2.",
+      "page": 1
+    },
+    {
+      "id": "cones",
+      "type": "pattern",
+      "label": "2X tapered cones",
+      "description": "Two cone-shaped posts on the top face of the base, each with a small hole in its flat top.",
+      "page": 1
+    },
+    {
+      "id": "boss_end_face",
+      "type": "plane",
+      "label": "end face of the block beside the bosses",
+      "description": "The flat vertical face of the block at the back of View B, next to the row of horizontal bosses and facing the same way as their end faces, so the boss axes are square to it. It is datum feature E.",
+      "page": 2
+    },
+    {
+      "id": "base_length",
+      "type": "other",
+      "label": "length of the base (end faces)",
+      "description": "The 12.00 in overall length of the base, measured between its two end faces; this width is datum feature B.",
+      "page": 2
+    },
+    {
+      "id": "side_face",
+      "type": "plane",
+      "label": "long side face of the part",
+      "description": "The long flat side face at the front right of View B, running the full 12.00 in length; both upright cross holes break through it. It is datum feature C.",
+      "page": 2
+    },
+    {
+      "id": "vgroove_left",
+      "type": "slot",
+      "label": "left V-groove and slot",
+      "description": "V-shaped groove at the top left of View C, ending in a narrow straight slot at its bottom. Datum targets J1 and J2 sit on its two sloping faces.",
+      "page": 3
+    },
+    {
+      "id": "vgroove_right",
+      "type": "slot",
+      "label": "right V-groove and slot",
+      "description": "V-shaped groove at the top right of View C, ending in a narrow straight slot at its bottom. Datum targets K1 and K2 sit on its two sloping faces.",
+      "page": 3
+    },
+    {
+      "id": "cone_g",
+      "type": "cylinder",
+      "label": "cone at lower left of View C",
+      "description": "The cone at the lower left of View C. A circular target line G1 around it defines datum G, and a small blind hole is drilled in its top.",
+      "page": 3
+    },
+    {
+      "id": "cone_h",
+      "type": "cylinder",
+      "label": "cone at lower right of View C",
+      "description": "The cone at the lower right of View C. A circular target line H1 around it defines datum H, and a small blind hole is drilled in its top.",
+      "page": 3
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc06-01",
+      "raw": "1. CAD MODEL ___________ REV. __ IS REQUIRED TO COMPLETE PRODUCT DEFINITION.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 1: the drawing is incomplete on its own; the CAD model (name and revision left blank) is needed to define the part.",
+      "page": 1,
+      "bbox": [
+        0.054,
+        0.118,
+        0.334,
+        0.153
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-02",
+      "raw": "2. DIRECTLY-TOLERANCED DIMENSIONS AND BASIC DIMENSIONS DEFINED ON THE DRAWING TAKE PRECEDENCE OVER DIMENSIONAL DATA DEFINED BY THE MODEL. OBTAIN ALL OTHER DIMENSIONAL DATA FROM THE MODEL. THE MODEL REPRESENTS BASIC DIMENSIONAL DATA UNLESS OTHERWISE SPECIFIED.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 2: numbers on the drawing win over the model; every other size comes from the model and counts as a basic (exact) value.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.172,
+        0.348,
+        0.295
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-03",
+      "raw": "3. APPLICABLE STANDARDS: ASME Y14.41-2003 APPLIES TO DATASET. ASME Y14.5M-1994 APPLIES TO DIMENSIONING AND TOLERANCING.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 3: the model follows ASME Y14.41-2003 and the dimensions and tolerances follow ASME Y14.5M-1994.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.314,
+        0.333,
+        0.384
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-04",
+      "raw": "⌓ .05 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "part",
+      "applies_to": "all untoleranced surfaces (general note 4: APPLIES TO ALL UNTOLERANCED SURFACES)",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "General note 4: every surface that has no other tolerance must lie within a 0.05 in profile band around its true shape, located from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.396,
+        0.26,
+        0.437
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-05",
+      "raw": "5. UNITS: INCHES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 5: all dimensions on the drawing are in inches.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.456,
+        0.154,
+        0.473
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-06",
+      "raw": "(SR.500)",
+      "callout": "dimension",
+      "kind": "radius",
+      "tolerance_style": "reference",
+      "value": 0.5,
+      "unit": "in",
+      "feature_id": "dimple",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference dimension: the dimple is a spherical recess of about 0.500 in radius; for information only.",
+      "page": 1,
+      "bbox": [
+        0.403,
+        0.263,
+        0.446,
+        0.308
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-07",
+      "raw": "2X CR.50 ±.02",
+      "callout": "dimension",
+      "kind": "radius",
+      "tolerance_style": "plus_minus",
+      "value": 0.5,
+      "unit": "in",
+      "feature_id": "upright_corners",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.48,
+        "upper": 0.52
+      },
+      "meaning": "Controlled radius at two places: each corner must be a smooth arc of 0.50 in radius, plus or minus 0.02 in, with no flats or reversals.",
+      "page": 1,
+      "bbox": [
+        0.636,
+        0.167,
+        0.706,
+        0.227
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-08",
+      "raw": "24X R.125 ±.020",
+      "callout": "dimension",
+      "kind": "radius",
+      "tolerance_style": "plus_minus",
+      "value": 0.125,
+      "unit": "in",
+      "feature_id": "fillets",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.105,
+        "upper": 0.145
+      },
+      "meaning": "At 24 places, the fillet radius must be 0.125 in, plus or minus 0.020 in, so between 0.105 and 0.145 in.",
+      "page": 1,
+      "bbox": [
+        0.653,
+        0.187,
+        0.733,
+        0.255
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-09",
+      "raw": "2X S⌀1.250 ±.008",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 1.25,
+      "unit": "in",
+      "feature_id": "spheres",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 1.242,
+        "upper": 1.258
+      },
+      "meaning": "Each of the two balls must be 1.250 in in spherical diameter, plus or minus 0.008 in.",
+      "page": 1,
+      "bbox": [
+        0.694,
+        0.235,
+        0.782,
+        0.307
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-10",
+      "raw": "⌖ S⌀.025 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "spheres",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.025
+      },
+      "meaning": "Position: each ball's centre must lie inside a 0.025 in diameter sphere at its true location, measured from datums D, B and C.",
+      "page": 1,
+      "bbox": [
+        0.697,
+        0.239,
+        0.797,
+        0.337
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-11",
+      "raw": "⌓ .02 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "base_top",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Profile of a surface: the base top face must lie within a 0.02 in band around its true position and shape, located from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.756,
+        0.296,
+        0.841,
+        0.375
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-12",
+      "raw": "▱ .01",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "base_top",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Flatness: the base top face must also lie between two parallel planes 0.01 in apart.",
+      "page": 1,
+      "bbox": [
+        0.756,
+        0.351,
+        0.799,
+        0.402
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-13",
+      "raw": "D",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "base_top",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature D: the base top face is a reference plane for the controls that name D.",
+      "page": 1,
+      "bbox": [
+        0.779,
+        0.401,
+        0.793,
+        0.43
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-14",
+      "raw": "2X ⌀.562 ±.008",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.562,
+      "unit": "in",
+      "feature_id": "upright_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.554,
+        "upper": 0.57
+      },
+      "meaning": "Each of the two cross holes must be 0.562 in across, plus or minus 0.008 in.",
+      "page": 1,
+      "bbox": [
+        0.206,
+        0.478,
+        0.28,
+        0.544
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-15",
+      "raw": "⌖ ⌀.015 | C | A | B",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "upright_holes",
+      "applies_to": null,
+      "datums": [
+        "C",
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Position: each cross hole's axis must lie inside a 0.015 in diameter cylinder at its true location, measured from datums C, A and B.",
+      "page": 1,
+      "bbox": [
+        0.185,
+        0.5,
+        0.28,
+        0.592
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-16",
+      "raw": "2X ⌴⌀.812 ±.020",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.812,
+      "unit": "in",
+      "feature_id": "upright_holes",
+      "applies_to": "counterbore",
+      "datums": [],
+      "limits": {
+        "lower": 0.792,
+        "upper": 0.832
+      },
+      "meaning": "Each cross hole's counterbore must be 0.812 in across, plus or minus 0.020 in.",
+      "page": 1,
+      "bbox": [
+        0.138,
+        0.561,
+        0.233,
+        0.651
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-17",
+      "raw": "↧.56 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.56,
+      "unit": "in",
+      "feature_id": "upright_holes",
+      "applies_to": "counterbore depth",
+      "datums": [],
+      "limits": {
+        "lower": 0.54,
+        "upper": 0.58
+      },
+      "meaning": "Each counterbore must be 0.56 in deep, plus or minus 0.02 in.",
+      "page": 1,
+      "bbox": [
+        0.233,
+        0.533,
+        0.28,
+        0.58
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-18",
+      "raw": "⌖ ⌀.025Ⓜ | C | A | B",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "upright_holes",
+      "applies_to": "counterbore",
+      "datums": [
+        "C",
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.025
+      },
+      "meaning": "Position: each counterbore's axis must lie inside a 0.025 in diameter cylinder at its true location when the counterbore is at its smallest size (MMC), measured from datums C, A and B.",
+      "page": 1,
+      "bbox": [
+        0.173,
+        0.555,
+        0.28,
+        0.657
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-19",
+      "raw": "4X ⌀.415 ±.008",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.415,
+      "unit": "in",
+      "feature_id": "base_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.407,
+        "upper": 0.423
+      },
+      "meaning": "Each of the four base holes must be 0.415 in across, plus or minus 0.008 in.",
+      "page": 1,
+      "bbox": [
+        0.223,
+        0.651,
+        0.3,
+        0.714
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-20",
+      "raw": "⌴⌀.625 ±.020",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.625,
+      "unit": "in",
+      "feature_id": "base_holes",
+      "applies_to": "counterbore",
+      "datums": [],
+      "limits": {
+        "lower": 0.605,
+        "upper": 0.645
+      },
+      "meaning": "Each base hole's counterbore must be 0.625 in across, plus or minus 0.020 in.",
+      "page": 1,
+      "bbox": [
+        0.187,
+        0.689,
+        0.273,
+        0.759
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-21",
+      "raw": "↧.50 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.5,
+      "unit": "in",
+      "feature_id": "base_holes",
+      "applies_to": "counterbore depth",
+      "datums": [],
+      "limits": {
+        "lower": 0.48,
+        "upper": 0.52
+      },
+      "meaning": "Each base-hole counterbore must be 0.50 in deep, plus or minus 0.02 in.",
+      "page": 1,
+      "bbox": [
+        0.268,
+        0.661,
+        0.314,
+        0.702
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-22",
+      "raw": "⌖ ⌀.025Ⓜ | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "base_holes",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.025
+      },
+      "meaning": "Position: each counterbored base hole's axis must lie inside a 0.025 in diameter cylinder at its true location when the hole is at its smallest size (MMC), measured from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.218,
+        0.667,
+        0.341,
+        0.759
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-23",
+      "raw": "▱ .01",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "base_bottom",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Flatness: the bottom face of the base must lie between two parallel planes 0.01 in apart.",
+      "page": 1,
+      "bbox": [
+        0.391,
+        0.767,
+        0.433,
+        0.82
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-24",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "base_bottom",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A: the bottom face of the base is the primary reference plane.",
+      "page": 1,
+      "bbox": [
+        0.404,
+        0.824,
+        0.42,
+        0.857
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-25",
+      "raw": "4X ⌀.281 ±.008",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.281,
+      "unit": "in",
+      "feature_id": "boss_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.273,
+        "upper": 0.289
+      },
+      "meaning": "Each of the four boss holes must be 0.281 in across, plus or minus 0.008 in.",
+      "page": 1,
+      "bbox": [
+        0.484,
+        0.763,
+        0.558,
+        0.824
+      ],
+      "confidence": 0.65,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-26",
+      "raw": "⌖ ⌀.015 | E | A | B",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "boss_holes",
+      "applies_to": null,
+      "datums": [
+        "E",
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Position: each boss hole's axis must lie inside a 0.015 in diameter cylinder at its true location, measured from datums E, A and B.",
+      "page": 1,
+      "bbox": [
+        0.485,
+        0.765,
+        0.579,
+        0.857
+      ],
+      "confidence": 0.65,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-27",
+      "raw": "F",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "bosses",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature F, applied to each boss on its own: the outer cylinder of each boss is the reference for that boss's counterbore.",
+      "page": 1,
+      "bbox": [
+        0.615,
+        0.737,
+        0.629,
+        0.77
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-28",
+      "raw": "4X INDIVIDUALLY",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "bosses",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Text beside datum F: the datum symbol applies to each of the four bosses separately.",
+      "page": 1,
+      "bbox": [
+        0.627,
+        0.678,
+        0.718,
+        0.753
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-29",
+      "raw": "⌴⌀.40 ±.01",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.4,
+      "unit": "in",
+      "feature_id": "boss_holes",
+      "applies_to": "counterbore",
+      "datums": [],
+      "limits": {
+        "lower": 0.39,
+        "upper": 0.41
+      },
+      "meaning": "Each boss's counterbore must be 0.40 in across, plus or minus 0.01 in.",
+      "page": 1,
+      "bbox": [
+        0.799,
+        0.532,
+        0.867,
+        0.587
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-30",
+      "raw": "↧.31 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.31,
+      "unit": "in",
+      "feature_id": "boss_holes",
+      "applies_to": "counterbore depth",
+      "datums": [],
+      "limits": {
+        "lower": 0.29,
+        "upper": 0.33
+      },
+      "meaning": "Each boss counterbore must be 0.31 in deep, plus or minus 0.02 in.",
+      "page": 1,
+      "bbox": [
+        0.87,
+        0.49,
+        0.918,
+        0.533
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-31",
+      "raw": "⌖ ⌀.02Ⓜ | F",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "boss_holes",
+      "applies_to": "counterbore",
+      "datums": [
+        "F"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Position: each counterbore's axis must lie inside a 0.02 in diameter cylinder (at MMC) centred on its own boss's axis, datum F.",
+      "page": 1,
+      "bbox": [
+        0.801,
+        0.54,
+        0.876,
+        0.617
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-32",
+      "raw": "4X INDIVIDUALLY",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "boss_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Text under the frame: the counterbore callout and its position apply to each of the four bosses separately.",
+      "page": 1,
+      "bbox": [
+        0.801,
+        0.561,
+        0.891,
+        0.635
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-33",
+      "raw": "Feature and Specification Index nist_ftc_06_asme1_rd_fsi.pdf",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Box naming the separate PDF that indexes the features and specifications of this part.",
+      "page": 1,
+      "bbox": [
+        0.755,
+        0.073,
+        0.955,
+        0.13
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-34",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Series header: the sheet belongs to the 2014 NIST PMI test model set.",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-35",
+      "raw": "PMI Fully-Toleranced Test Case 6 - View A",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note naming the test case (fully-toleranced test case 6, FTC-06) and the view on this sheet (A).",
+      "page": 1,
+      "bbox": [
+        0.354,
+        0.911,
+        0.646,
+        0.933
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-36",
+      "raw": "Includes Atomic Test Cases - 52, 53, 72, 87, 88, 89",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note listing the NIST atomic test cases whose annotations appear on this sheet.",
+      "page": 1,
+      "bbox": [
+        0.327,
+        0.935,
+        0.673,
+        0.957
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-37",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: D.",
+      "page": 1,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-38",
+      "raw": "nist_ftc_06_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Drawing number (file identifier) printed along the right border.",
+      "page": 1,
+      "bbox": [
+        0.961,
+        0.786,
+        0.975,
+        0.947
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-39",
+      "raw": "⌓ .04 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "slope_face",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Profile of a surface: the wedge's sloped face must lie within a 0.04 in band around its true shape, located from datums A, B and C.",
+      "page": 2,
+      "bbox": [
+        0.312,
+        0.2,
+        0.397,
+        0.286
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-40",
+      "raw": "⌳ 1.00 : 2.00",
+      "callout": "dimension",
+      "kind": "angular",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "slope_face",
+      "applies_to": "slope of the face",
+      "datums": [],
+      "limits": null,
+      "meaning": "Slope: the face drops 1.00 for every 2.00 along its length (a ratio, not a length); its tolerance comes from the profile control.",
+      "page": 2,
+      "bbox": [
+        0.359,
+        0.183,
+        0.448,
+        0.265
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-41",
+      "raw": "2X ⌲ 1.00 : 3.00",
+      "callout": "dimension",
+      "kind": "angular",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "cones",
+      "applies_to": "taper of each cone",
+      "datums": [],
+      "limits": null,
+      "meaning": "Conical taper at two places: each cone's diameter changes by 1.00 for every 3.00 along its axis (a ratio, not a length).",
+      "page": 2,
+      "bbox": [
+        0.161,
+        0.361,
+        0.272,
+        0.453
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-42",
+      "raw": "⌓ .05 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "cones",
+      "applies_to": "cone at front left of View B; upper segment of a composite frame",
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Composite profile, upper segment: the cone's surface must lie within a 0.05 in band at its true location from datums D, B and C.",
+      "page": 2,
+      "bbox": [
+        0.126,
+        0.449,
+        0.211,
+        0.557
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-43",
+      "raw": "⌓ .01 | D",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "cones",
+      "applies_to": "cone at front left of View B; lower segment of a composite frame",
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Composite profile, lower segment: the cone's shape and its orientation to datum D must hold within a tighter 0.01 in band.",
+      "page": 2,
+      "bbox": [
+        0.126,
+        0.449,
+        0.211,
+        0.557
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-44",
+      "raw": "⌓ .02 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "boss_end_face",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Profile of a surface: the end face of the block beside the bosses must lie within a 0.02 in band around its true position, located from datums A, B and C.",
+      "page": 2,
+      "bbox": [
+        0.594,
+        0.122,
+        0.679,
+        0.205
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-45",
+      "raw": "▱ .01",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "boss_end_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Flatness: the end face of the block beside the bosses must lie between two parallel planes 0.01 in apart.",
+      "page": 2,
+      "bbox": [
+        0.594,
+        0.145,
+        0.636,
+        0.196
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-46",
+      "raw": "E",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "boss_end_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature E: the end face of the block beside the bosses is a reference plane.",
+      "page": 2,
+      "bbox": [
+        0.599,
+        0.193,
+        0.613,
+        0.225
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-47",
+      "raw": "⌓ .05 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "cones",
+      "applies_to": "cone at the back of View B; upper segment of a composite frame",
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Composite profile, upper segment: the cone's surface must lie within a 0.05 in band at its true location from datums D, B and C.",
+      "page": 2,
+      "bbox": [
+        0.578,
+        0.212,
+        0.662,
+        0.318
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-48",
+      "raw": "⌓ .01 | D",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "cones",
+      "applies_to": "cone at the back of View B; lower segment of a composite frame",
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Composite profile, lower segment: the cone's shape and its orientation to datum D must hold within a tighter 0.01 in band.",
+      "page": 2,
+      "bbox": [
+        0.578,
+        0.212,
+        0.662,
+        0.318
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-49",
+      "raw": "⊥ .012 | A | B",
+      "callout": "feature_control_frame",
+      "kind": "perpendicularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.012,
+      "unit": "in",
+      "feature_id": "side_face",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.012
+      },
+      "meaning": "Perpendicularity: the long side face must lie between two parallel planes 0.012 in apart that are square to datum A and oriented to datum B.",
+      "page": 2,
+      "bbox": [
+        0.791,
+        0.431,
+        0.867,
+        0.511
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-50",
+      "raw": "C",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "side_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature C: the long side face of the part is a reference plane.",
+      "page": 2,
+      "bbox": [
+        0.808,
+        0.49,
+        0.821,
+        0.524
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-51",
+      "raw": "12.00 ±.01",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 12.0,
+      "unit": "in",
+      "feature_id": "base_length",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 11.99,
+        "upper": 12.01
+      },
+      "meaning": "The base must be 12.00 in long between its end faces, plus or minus 0.01 in.",
+      "page": 2,
+      "bbox": [
+        0.627,
+        0.645,
+        0.682,
+        0.69
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-52",
+      "raw": "⊥ .012 | A",
+      "callout": "feature_control_frame",
+      "kind": "perpendicularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.012,
+      "unit": "in",
+      "feature_id": "base_length",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.012
+      },
+      "meaning": "Perpendicularity: the centre plane of the 12.00 in length must lie between two parallel planes 0.012 in apart, square to datum A.",
+      "page": 2,
+      "bbox": [
+        0.632,
+        0.649,
+        0.712,
+        0.706
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-53",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "base_length",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B: the centre plane of the 12.00 in length is a reference.",
+      "page": 2,
+      "bbox": [
+        0.687,
+        0.692,
+        0.714,
+        0.712
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-54",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Series header: the sheet belongs to the 2014 NIST PMI test model set.",
+      "page": 2,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-55",
+      "raw": "PMI Fully-Toleranced Test Case 6 - View B",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note naming the test case (fully-toleranced test case 6, FTC-06) and the view on this sheet (B).",
+      "page": 2,
+      "bbox": [
+        0.354,
+        0.911,
+        0.646,
+        0.933
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-56",
+      "raw": "Includes Atomic Test Cases - 57, 58",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note listing the NIST atomic test cases whose annotations appear on this sheet.",
+      "page": 2,
+      "bbox": [
+        0.378,
+        0.935,
+        0.622,
+        0.957
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-57",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: D.",
+      "page": 2,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-58",
+      "raw": "nist_ftc_06_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Drawing number (file identifier) printed along the right border.",
+      "page": 2,
+      "bbox": [
+        0.961,
+        0.786,
+        0.975,
+        0.947
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-59",
+      "raw": "(1.106)",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "reference",
+      "value": 1.106,
+      "unit": "in",
+      "feature_id": "vgroove_left",
+      "applies_to": "distance between target lines J1 and J2",
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference dimension: the target lines J1 and J2 on the two sloping faces of the left V-groove are about 1.106 in apart; for information only.",
+      "page": 3,
+      "bbox": [
+        0.435,
+        0.167,
+        0.483,
+        0.182
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-60",
+      "raw": ".500 ±.008",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.5,
+      "unit": "in",
+      "feature_id": "vgroove_left",
+      "applies_to": "width of the slot at the bottom of the V",
+      "datums": [],
+      "limits": {
+        "lower": 0.492,
+        "upper": 0.508
+      },
+      "meaning": "The narrow slot at the bottom of the left V-groove must be 0.500 in wide, plus or minus 0.008 in.",
+      "page": 3,
+      "bbox": [
+        0.258,
+        0.205,
+        0.325,
+        0.22
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-61",
+      "raw": "⌖ .025 | D | C | J",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "vgroove_left",
+      "applies_to": "width of the slot at the bottom of the V",
+      "datums": [
+        "D",
+        "C",
+        "J"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.025
+      },
+      "meaning": "Position: the centre plane of the left slot must lie in a 0.025 in wide zone at its true location, measured from datums D, C and J.",
+      "page": 3,
+      "bbox": [
+        0.256,
+        0.222,
+        0.375,
+        0.241
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-62",
+      "raw": "J1",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "vgroove_left",
+      "applies_to": "target line on a sloping face of the V",
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target J1: a target line on one sloping face of the left V-groove; with J2 it establishes datum J.",
+      "page": 3,
+      "bbox": [
+        0.315,
+        0.284,
+        0.358,
+        0.322
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-63",
+      "raw": "J2",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "vgroove_left",
+      "applies_to": "target line on a sloping face of the V",
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target J2: a target line on the other sloping face of the left V-groove; with J1 it establishes datum J.",
+      "page": 3,
+      "bbox": [
+        0.447,
+        0.284,
+        0.49,
+        0.322
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-64",
+      "raw": "⌓ .05 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "vgroove_left",
+      "applies_to": "both sloping faces of the V; upper segment of a composite frame",
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Composite profile, upper segment: the two sloping faces of the left V-groove must lie within a 0.05 in band at their true location from datums D, B and C.",
+      "page": 3,
+      "bbox": [
+        0.178,
+        0.351,
+        0.296,
+        0.388
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-65",
+      "raw": "⌓ .01 | D",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "vgroove_left",
+      "applies_to": "both sloping faces of the V; lower segment of a composite frame",
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Composite profile, lower segment: the shape of the two sloping faces and their orientation to datum D must hold within a tighter 0.01 in band.",
+      "page": 3,
+      "bbox": [
+        0.178,
+        0.351,
+        0.296,
+        0.388
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-66",
+      "raw": "2 SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "vgroove_left",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Text under the profile frame: it applies to both sloping faces of the left V-groove.",
+      "page": 3,
+      "bbox": [
+        0.178,
+        0.39,
+        0.27,
+        0.406
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-67",
+      "raw": "(1.106)",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "reference",
+      "value": 1.106,
+      "unit": "in",
+      "feature_id": "vgroove_right",
+      "applies_to": "distance between target lines K1 and K2",
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference dimension: the target lines K1 and K2 on the two sloping faces of the right V-groove are about 1.106 in apart; for information only.",
+      "page": 3,
+      "bbox": [
+        0.662,
+        0.167,
+        0.709,
+        0.182
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-68",
+      "raw": ".500 ±.008",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.5,
+      "unit": "in",
+      "feature_id": "vgroove_right",
+      "applies_to": "width of the slot at the bottom of the V",
+      "datums": [],
+      "limits": {
+        "lower": 0.492,
+        "upper": 0.508
+      },
+      "meaning": "The narrow slot at the bottom of the right V-groove must be 0.500 in wide, plus or minus 0.008 in.",
+      "page": 3,
+      "bbox": [
+        0.705,
+        0.205,
+        0.774,
+        0.22
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-69",
+      "raw": "⌖ .025 | D | C | K",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "vgroove_right",
+      "applies_to": "width of the slot at the bottom of the V",
+      "datums": [
+        "D",
+        "C",
+        "K"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.025
+      },
+      "meaning": "Position: the centre plane of the right slot must lie in a 0.025 in wide zone at its true location, measured from datums D, C and K.",
+      "page": 3,
+      "bbox": [
+        0.656,
+        0.222,
+        0.778,
+        0.241
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-70",
+      "raw": "K1",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "vgroove_right",
+      "applies_to": "target line on a sloping face of the V",
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target K1: a target line on one sloping face of the right V-groove; with K2 it establishes datum K.",
+      "page": 3,
+      "bbox": [
+        0.541,
+        0.284,
+        0.584,
+        0.322
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-71",
+      "raw": "K2",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "vgroove_right",
+      "applies_to": "target line on a sloping face of the V",
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target K2: a target line on the other sloping face of the right V-groove; with K1 it establishes datum K.",
+      "page": 3,
+      "bbox": [
+        0.674,
+        0.284,
+        0.716,
+        0.322
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-72",
+      "raw": "⌓ .05 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "vgroove_right",
+      "applies_to": "both sloping faces of the V; upper segment of a composite frame",
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Composite profile, upper segment: the two sloping faces of the right V-groove must lie within a 0.05 in band at their true location from datums D, B and C.",
+      "page": 3,
+      "bbox": [
+        0.739,
+        0.341,
+        0.856,
+        0.379
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-73",
+      "raw": "⌓ .01 | D",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "vgroove_right",
+      "applies_to": "both sloping faces of the V; lower segment of a composite frame",
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Composite profile, lower segment: the shape of the two sloping faces and their orientation to datum D must hold within a tighter 0.01 in band.",
+      "page": 3,
+      "bbox": [
+        0.739,
+        0.341,
+        0.856,
+        0.379
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-74",
+      "raw": "2 SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "vgroove_right",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Text under the profile frame: it applies to both sloping faces of the right V-groove.",
+      "page": 3,
+      "bbox": [
+        0.739,
+        0.382,
+        0.832,
+        0.396
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-75",
+      "raw": "⌀.250 ±.008",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "cone_g",
+      "applies_to": "blind hole in the top of the cone",
+      "datums": [],
+      "limits": {
+        "lower": 0.242,
+        "upper": 0.258
+      },
+      "meaning": "The hole in the top of the left cone must be 0.250 in across, plus or minus 0.008 in.",
+      "page": 3,
+      "bbox": [
+        0.205,
+        0.549,
+        0.285,
+        0.563
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-76",
+      "raw": "↧.50 ±.05",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.5,
+      "unit": "in",
+      "feature_id": "cone_g",
+      "applies_to": "depth of the blind hole",
+      "datums": [],
+      "limits": {
+        "lower": 0.45,
+        "upper": 0.55
+      },
+      "meaning": "The hole in the top of the left cone must be 0.50 in deep, plus or minus 0.05 in.",
+      "page": 3,
+      "bbox": [
+        0.221,
+        0.563,
+        0.285,
+        0.576
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-77",
+      "raw": "⌖ ⌀.015 | D | G",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "cone_g",
+      "applies_to": "blind hole in the top of the cone",
+      "datums": [
+        "D",
+        "G"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Position: the cone-top hole's axis must lie inside a 0.015 in diameter cylinder at its true location, measured from datums D and G.",
+      "page": 3,
+      "bbox": [
+        0.172,
+        0.579,
+        0.286,
+        0.598
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-78",
+      "raw": "(⌀1.000)",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "reference",
+      "value": 1.0,
+      "unit": "in",
+      "feature_id": "cone_g",
+      "applies_to": "diameter of target circle G1",
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference dimension: the circular target line G1 on the left cone is about 1.000 in across; for information only.",
+      "page": 3,
+      "bbox": [
+        0.225,
+        0.639,
+        0.282,
+        0.653
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-79",
+      "raw": "G1",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "cone_g",
+      "applies_to": "circular target line on the cone",
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target G1: a circular target line around the left cone where it is 1.000 in across; it establishes datum G, the cone's axis.",
+      "page": 3,
+      "bbox": [
+        0.241,
+        0.696,
+        0.282,
+        0.735
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-80",
+      "raw": "⌀.250 ±.008",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "cone_h",
+      "applies_to": "blind hole in the top of the cone",
+      "datums": [],
+      "limits": {
+        "lower": 0.242,
+        "upper": 0.258
+      },
+      "meaning": "The hole in the top of the right cone must be 0.250 in across, plus or minus 0.008 in.",
+      "page": 3,
+      "bbox": [
+        0.747,
+        0.549,
+        0.826,
+        0.563
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-81",
+      "raw": "↧.50 ±.05",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.5,
+      "unit": "in",
+      "feature_id": "cone_h",
+      "applies_to": "depth of the blind hole",
+      "datums": [],
+      "limits": {
+        "lower": 0.45,
+        "upper": 0.55
+      },
+      "meaning": "The hole in the top of the right cone must be 0.50 in deep, plus or minus 0.05 in.",
+      "page": 3,
+      "bbox": [
+        0.747,
+        0.563,
+        0.811,
+        0.576
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-82",
+      "raw": "⌖ ⌀.015 | D | H",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "cone_h",
+      "applies_to": "blind hole in the top of the cone",
+      "datums": [
+        "D",
+        "H"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Position: the cone-top hole's axis must lie inside a 0.015 in diameter cylinder at its true location, measured from datums D and H.",
+      "page": 3,
+      "bbox": [
+        0.747,
+        0.579,
+        0.861,
+        0.598
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-83",
+      "raw": "(⌀1.000)",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "reference",
+      "value": 1.0,
+      "unit": "in",
+      "feature_id": "cone_h",
+      "applies_to": "diameter of target circle H1",
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference dimension: the circular target line H1 on the right cone is about 1.000 in across; for information only.",
+      "page": 3,
+      "bbox": [
+        0.748,
+        0.639,
+        0.806,
+        0.653
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-84",
+      "raw": "H1",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "cone_h",
+      "applies_to": "circular target line on the cone",
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target H1: a circular target line around the right cone where it is 1.000 in across; it establishes datum H, the cone's axis.",
+      "page": 3,
+      "bbox": [
+        0.747,
+        0.696,
+        0.79,
+        0.735
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-85",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Series header: the sheet belongs to the 2014 NIST PMI test model set.",
+      "page": 3,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-86",
+      "raw": "PMI Fully-Toleranced Test Case 6 - View C",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note naming the test case (fully-toleranced test case 6, FTC-06) and the view on this sheet (C).",
+      "page": 3,
+      "bbox": [
+        0.354,
+        0.911,
+        0.646,
+        0.933
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-87",
+      "raw": "Includes Atomic Test Cases - 73, 80",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note listing the NIST atomic test cases whose annotations appear on this sheet.",
+      "page": 3,
+      "bbox": [
+        0.378,
+        0.935,
+        0.622,
+        0.957
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-88",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: D.",
+      "page": 3,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc06-89",
+      "raw": "nist_ftc_06_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Drawing number (file identifier) printed along the right border.",
+      "page": 3,
+      "bbox": [
+        0.961,
+        0.786,
+        0.975,
+        0.947
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    }
+  ]
+}

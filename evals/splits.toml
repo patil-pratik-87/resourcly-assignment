@@ -1,0 +1,19 @@
+# Which gold cases each eval split holds. Tune on dev; run test only at milestones.
+# FTC-07 is in dev because its callouts are real text, which makes it unlike the others.
+
+[reader]
+dev = [
+    "nist_ctc_01_asme1_rd",
+    "nist_ctc_02_asme1_rc",
+    "nist_ctc_04_asme1_rd",
+    "nist_ftc_07_asme1_rd",
+    "nist_ftc_09_asme1_rd",
+]
+test = [
+    "nist_ctc_03_asme1_rc",
+    "nist_ftc_06_asme1_rd",
+    "nist_ctc_05_asme1_rd",
+    "nist_ftc_08_asme1_rc",
+    "nist_ftc_10_asme1_rb",
+    "nist_ftc_11_asme1_rb",
+]

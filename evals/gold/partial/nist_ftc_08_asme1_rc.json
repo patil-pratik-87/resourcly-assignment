@@ -1,0 +1,326 @@
+{
+  "drawing": "nist_ftc_08_asme1_rc",
+  "page_count": 4,
+  "title_block": {
+    "title": "PMI Fully-Toleranced Test Case 8",
+    "revision": "C",
+    "units": "in",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_08_asme1_rc",
+    "sheet_note": "PMI Fully-Toleranced Test Case 8 - View A. Includes Atomic Test Cases - 66, 90; PMI Fully-Toleranced Test Case 8 - View B. Includes Atomic Test Cases - 68, 76, 94; PMI Fully-Toleranced Test Case 8 - View C. Includes Atomic Test Cases - 54; PMI Fully-Toleranced Test Case 8 - View D. Includes Atomic Test Cases - 76, 77, 99",
+    "standard": "ASME Y14.5M-1994 (dimensioning and tolerancing); ASME Y14.41-2003 (dataset)"
+  },
+  "features": [
+    {
+      "id": "part",
+      "type": "other",
+      "label": "whole part",
+      "description": "The part as a whole. General notes apply to all of it.",
+      "page": 1
+    },
+    {
+      "id": "corner_holes",
+      "type": "hole",
+      "label": "two corner holes in the flange (2X)",
+      "description": "Two of the four small holes in the corners of the outer flange: the back one and the right one in view A.",
+      "page": 1
+    },
+    {
+      "id": "flange_top",
+      "type": "plane",
+      "label": "top face of the flange",
+      "description": "The wide flat top face of the outer flange around the raised deck (view A). It is datum feature A.",
+      "page": 1
+    },
+    {
+      "id": "deck_top",
+      "type": "plane",
+      "label": "top face of the raised deck",
+      "description": "The flat top face of the raised deck in the middle of the part, beside the long slot (view B).",
+      "page": 2
+    },
+    {
+      "id": "wall_band",
+      "type": "plane",
+      "label": "hatched band on the front wall",
+      "description": "The hatched band on the long front wall of the raised deck, between the lines marked L1 and L2 (view B).",
+      "page": 2
+    },
+    {
+      "id": "square_cutout",
+      "type": "hole",
+      "label": "square cutout in the deck",
+      "description": "Square through cutout in the raised deck near the front corner, where the coordinate triad sits (view C).",
+      "page": 3
+    },
+    {
+      "id": "keyhole_left",
+      "type": "slot",
+      "label": "keyhole slot on the left",
+      "description": "Keyhole-shaped through slot (a round hole joined to a smaller lobe) in the left part of the raised deck (view D).",
+      "page": 4
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc08-01",
+      "raw": "2X ⌀.238 +.005/-.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.238,
+      "unit": "in",
+      "feature_id": "corner_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.237,
+        "upper": 0.243
+      },
+      "meaning": "Each of the two corner holes must be between .237 and .243 in in diameter (.238 in, up to .005 over or .001 under).",
+      "page": 1,
+      "bbox": [
+        0.602,
+        0.174,
+        0.691,
+        0.247
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-02",
+      "raw": "⌖ ⌀.023ⓂⒻ | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.023,
+      "unit": "in",
+      "feature_id": "corner_holes",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.023
+      },
+      "meaning": "Position at maximum material condition, checked in the free state: the axis of each corner hole must lie in a .023 in diameter cylinder at its true position from datums A, B and C, with the part unrestrained (Ⓕ) rather than held as note 5 describes.",
+      "page": 1,
+      "bbox": [
+        0.617,
+        0.163,
+        0.759,
+        0.26
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-03",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "flange_top",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A: the flange top face is the primary reference. The symbol hangs from the two flatness frames that control this face.",
+      "page": 1,
+      "bbox": [
+        0.752,
+        0.339,
+        0.768,
+        0.377
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-04",
+      "raw": "6. UNITS: INCHES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 6: all dimensions on the drawing are in inches.",
+      "page": 1,
+      "bbox": [
+        0.054,
+        0.78,
+        0.155,
+        0.798
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-05",
+      "raw": "∥ .015Ⓣ | D",
+      "callout": "feature_control_frame",
+      "kind": "parallelism",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "deck_top",
+      "applies_to": "tangent plane of the face (top row of a two-frame stack)",
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Parallelism of the tangent plane: the plane that rests on the high points of the deck top face must lie between two planes .015 in apart that are parallel to datum D.",
+      "page": 2,
+      "bbox": [
+        0.447,
+        0.117,
+        0.519,
+        0.192
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-06",
+      "raw": "▱ .015 (L1 ↔ L2)",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "wall_band",
+      "applies_to": "only the hatched band between lines L1 and L2",
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Flatness between L1 and L2: the hatched band of the front wall must lie between two parallel planes .015 in apart; no datum is used.",
+      "page": 2,
+      "bbox": [
+        0.231,
+        0.663,
+        0.282,
+        0.741
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-07",
+      "raw": "⌓ .015 | D | GⓂ (all around)",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "square_cutout",
+      "applies_to": "all side walls of the cutout (all-around circle on the leader)",
+      "datums": [
+        "D",
+        "GⓂ"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Profile of a surface, all around: every side wall of the square cutout must lie in a .015 in band around its true shape, located from datum D and from datum feature G at its maximum material boundary.",
+      "page": 3,
+      "bbox": [
+        0.214,
+        0.647,
+        0.317,
+        0.727
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-08",
+      "raw": "(□1.100)",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "reference",
+      "value": 1.1,
+      "unit": "in",
+      "feature_id": "square_cutout",
+      "applies_to": "side length of the square cutout",
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference dimension: the square cutout is about 1.100 in on a side; given for information only, not for inspection.",
+      "page": 3,
+      "bbox": [
+        0.662,
+        0.716,
+        0.713,
+        0.763
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-09",
+      "raw": "⌓ .015 | D | HⓂ-JⓂ (all around)",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "keyhole_left",
+      "applies_to": "the whole outline of the slot (all-around circle on the leader)",
+      "datums": [
+        "D",
+        "HⓂ-JⓂ"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Profile of a surface, all around: the keyhole slot's walls must lie in a .015 in band around their true shape, located from datum D and the common datum H-J, both features at maximum material boundary.",
+      "page": 4,
+      "bbox": [
+        0.241,
+        0.198,
+        0.357,
+        0.283
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc08-10",
+      "raw": "Rev C",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: C.",
+      "page": 4,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    }
+  ]
+}

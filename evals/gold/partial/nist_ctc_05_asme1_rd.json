@@ -1,0 +1,327 @@
+{
+  "drawing": "nist_ctc_05_asme1_rd",
+  "page_count": 2,
+  "title_block": {
+    "title": "Test Model 5",
+    "revision": "D",
+    "units": "in",
+    "units_source": "inferred",
+    "drawing_number": "nist_ctc_05_asme1_rd",
+    "sheet_note": "PMI Complex Test Case 5 - View 1 (of 2). Includes Atomic Test Cases - 11, 18, 19, 23, 24, 37, 42, 44; PMI Complex Test Case 5 - View 2 (of 2). Includes Atomic Test Cases - 25, 38, 42",
+    "standard": null
+  },
+  "features": [
+    {
+      "id": "part",
+      "type": "other",
+      "label": "whole part",
+      "description": "The part as a whole. General notes apply to all of it.",
+      "page": 1
+    },
+    {
+      "id": "flange_rim",
+      "type": "cylinder",
+      "label": "outer rim of the flange",
+      "description": "The outer cylindrical surface of the large round flange.",
+      "page": 1
+    },
+    {
+      "id": "hub_boss",
+      "type": "cylinder",
+      "label": "round boss on the flange front face",
+      "description": "Large round raised boss on the front face of the flange, around the hub block and shaft (view 1).",
+      "page": 1
+    },
+    {
+      "id": "hub_block",
+      "type": "boss",
+      "label": "rectangular block between shaft and flange",
+      "description": "Block with flat sides standing on the flange front face, between the flange and the shaft (view 1).",
+      "page": 1
+    },
+    {
+      "id": "notch_face",
+      "type": "plane",
+      "label": "side face of the notch at the right of the flange",
+      "description": "Flat side face of the rectangular notch cut into the right edge of the flange in view 1. The hatched rectangle on it is datum target area C1.",
+      "page": 1
+    },
+    {
+      "id": "shaft",
+      "type": "cylinder",
+      "label": "shaft",
+      "description": "The long round shaft sticking out of the hub block (view 1). Its surface carries datum feature A.",
+      "page": 1
+    },
+    {
+      "id": "flange_back",
+      "type": "plane",
+      "label": "back face of the flange",
+      "description": "The flat back face of the large flange, seen in view 2.",
+      "page": 2
+    },
+    {
+      "id": "bore",
+      "type": "hole",
+      "label": "large bore in the flange back face",
+      "description": "Large round bore in the back face of the flange, seen in view 2. Its axis is datum feature B.",
+      "page": 2
+    }
+  ],
+  "values": [
+    {
+      "id": "ctc05-01",
+      "raw": "↗ .025 | A-B",
+      "callout": "feature_control_frame",
+      "kind": "circular_runout",
+      "tolerance_style": "geometric_zone",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "flange_rim",
+      "applies_to": null,
+      "datums": [
+        "A-B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.025
+      },
+      "meaning": "Circular runout: as the part turns about the common axis of datums A and B, each circular section of the flange rim may vary by at most .025 in.",
+      "page": 1,
+      "bbox": [
+        0.445,
+        0.127,
+        0.503,
+        0.19
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-02",
+      "raw": "◎ ⌀.030 | A",
+      "callout": "feature_control_frame",
+      "kind": "concentricity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "hub_boss",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Concentricity: the median points of the round boss must lie in a .030 in diameter cylinder centred on the datum A axis.",
+      "page": 1,
+      "bbox": [
+        0.687,
+        0.29,
+        0.744,
+        0.35
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-03",
+      "raw": "5.000 ±.008 <ST>",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 5,
+      "unit": "in",
+      "feature_id": "hub_block",
+      "applies_to": "length of the block along the shaft axis",
+      "datums": [],
+      "limits": {
+        "lower": 4.992,
+        "upper": 5.008
+      },
+      "meaning": "The block length must be 5.000 in plus or minus .008 in, so between 4.992 and 5.008 in; the <ST> symbol marks it as a statistical tolerance.",
+      "page": 1,
+      "bbox": [
+        0.325,
+        0.404,
+        0.388,
+        0.461
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-04",
+      "raw": "⏤ .005",
+      "callout": "feature_control_frame",
+      "kind": "straightness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.005,
+      "unit": "in",
+      "feature_id": "hub_block",
+      "applies_to": "the line element drawn on the block's top face (supplemental geometry)",
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.005
+      },
+      "meaning": "Straightness: the marked line element on the block's top face must lie between two parallel lines .005 in apart; no datum is used.",
+      "page": 1,
+      "bbox": [
+        0.339,
+        0.517,
+        0.38,
+        0.566
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-05",
+      "raw": "2.000",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 2,
+      "unit": "in",
+      "feature_id": "notch_face",
+      "applies_to": "length of the hatched datum target area C1",
+      "datums": [],
+      "limits": null,
+      "meaning": "Basic dimension (boxed): the rectangular datum target area C1 is exactly 2.000 in long.",
+      "page": 1,
+      "bbox": [
+        0.768,
+        0.576,
+        0.796,
+        0.613
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-06",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "shaft",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A: the shaft's cylindrical surface; its axis is datum A.",
+      "page": 1,
+      "bbox": [
+        0.338,
+        0.616,
+        0.353,
+        0.65
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-07",
+      "raw": "Datum feature B and Datum target D1 defined in View 2 (of 2).",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note: datum feature B and datum target D1 are shown on the second view.",
+      "page": 1,
+      "bbox": [
+        0.068,
+        0.805,
+        0.208,
+        0.865
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-08",
+      "raw": "⌰ .015 | B",
+      "callout": "feature_control_frame",
+      "kind": "total_runout",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "flange_back",
+      "applies_to": null,
+      "datums": [
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Total runout: as the part turns about the datum B axis, the whole back face of the flange must stay within .015 in of a plane square to that axis.",
+      "page": 2,
+      "bbox": [
+        0.265,
+        0.396,
+        0.32,
+        0.455
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-09",
+      "raw": "⌀10.000 ±.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 10,
+      "unit": "in",
+      "feature_id": "bore",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 9.999,
+        "upper": 10.001
+      },
+      "meaning": "The bore diameter must be 10.000 in plus or minus .001 in, so between 9.999 and 10.001 in. Datum feature symbol B hangs on this dimension.",
+      "page": 2,
+      "bbox": [
+        0.257,
+        0.606,
+        0.316,
+        0.66
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc05-10",
+      "raw": "PMI Complex Test Case 5 - View 2 (of 2)",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note naming the test case and view: complex test case 5, second of two views.",
+      "page": 2,
+      "bbox": [
+        0.362,
+        0.911,
+        0.639,
+        0.933
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    }
+  ]
+}
