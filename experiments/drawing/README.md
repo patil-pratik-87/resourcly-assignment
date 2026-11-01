@@ -45,8 +45,19 @@ Open it from the repository root:
 The notebook reads the drawings from `../../data/drawings`, so it must run from
 `experiments/drawing/`.
 
-## Model tests
+## Other reading options
 
-The model tests (RapidOCR, Docling, Qwen3-VL 4B and 8B, MechVL-4B, on crops and whole pages)
-are not in this folder. Their raw outputs are summarised in `research/drawing/README.md` and
-`research/drawing/review.html`.
+`other_options.ipynb` repeats the first tests of the other ways to read a drawing: what the
+PDFs hold (text against vector paths, colours), RapidOCR on crops and pages, Docling on a page,
+and Qwen3-VL 8B on a whole page against one callout crop at a time, with the prompts in
+`prompts/`. It is saved with its outputs. It needs a few more packages, and downloads Qwen3-VL 8B
+(5.8 GB) and the OCR and Docling models on the first run; the model cells run only on Apple
+Silicon:
+
+```sh
+experiments/drawing/.venv/bin/pip install rapidocr onnxruntime docling mlx-vlm
+(cd experiments/drawing && .venv/bin/jupyter lab other_options.ipynb)
+```
+
+The wider comparison (Qwen3-VL 4B, MechVL-4B, scoring on 46 checks) is summarised in
+`research/drawing/README.md` and `research/drawing/review.html`.
