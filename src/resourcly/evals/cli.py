@@ -47,7 +47,7 @@ SplitsPath = Annotated[
     Path | None,
     typer.Option("--splits", help="TOML file naming each component's dev and test cases."),
 ]
-Component = Annotated[str, typer.Argument(help="reader or router")]
+Component = Annotated[str, typer.Argument(help="reader, router or failure")]
 
 
 @app.callback()
@@ -69,7 +69,7 @@ def main(
 @app.command()
 def run(
     ctx: typer.Context,
-    component: Annotated[str | None, typer.Argument(help="reader or router")] = None,
+    component: Annotated[str | None, typer.Argument(help="reader, router or failure")] = None,
     version: Annotated[str | None, typer.Option(help="A file in versions/<component>/.")] = None,
     split: Annotated[str, typer.Option(help="dev, test or all.")] = "dev",
     case_id: Annotated[
@@ -319,7 +319,7 @@ def list_(
     ctx: typer.Context,
     what: Annotated[Listing, typer.Argument(help="What to list.")],
     component: Annotated[
-        str | None, typer.Argument(help="reader or router; cases need one.")
+        str | None, typer.Argument(help="reader, router or failure; cases need one.")
     ] = None,
     split: Annotated[str, typer.Option(help="dev, test or all, for cases.")] = "dev",
     version: Annotated[str | None, typer.Option(help="Only this version's runs.")] = None,
@@ -333,7 +333,7 @@ def list_(
         _list_versions(context, component)
     elif what is Listing.cases:
         if component is None:
-            raise typer.BadParameter("cases need a component: reader or router")
+            raise typer.BadParameter("cases need a component: reader, router or failure")
         _list_cases(context, component, split)
     else:
         _list_runs(context, component, version, limit)
@@ -405,8 +405,8 @@ def _list_runs(context: Context, component: str | None, version: str | None, lim
 def check(ctx: typer.Context) -> None:
     """Check every gold file and the splits; exit 1 on an error, warn about gaps.
 
-    Drawing gold goes through the package models and the rules beyond them; router gold through its
-    row checks; and every split for leaks and gaps.
+    Drawing gold goes through the package models and the rules beyond them; router and failure gold
+    through their row checks; and every split for leaks and gaps.
     """
     context: Context = ctx.obj
     with _short_errors(), open_services(context.settings) as services:

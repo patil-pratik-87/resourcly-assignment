@@ -14,7 +14,8 @@ class JsonGoldStoreAdapter:
     """One JSON document per drawing under <root>/drawings and <root>/partial.
 
     The splits file sits apart from the gold, at `splits_path`. Router rows are
-    <root>/routes/routes.jsonl, and the files they name are under <root>/routes/.
+    <root>/routes/routes.jsonl and failure rows <root>/failure/cases.jsonl; the files they name
+    are under their folders.
     """
 
     def __init__(self, root: Path, splits_path: Path):
@@ -60,7 +61,13 @@ class JsonGoldStoreAdapter:
             raise InvalidDocument([issue]) from error
 
     def load_route_cases(self) -> list[dict[str, Any]]:
-        path = self.root / "routes" / "routes.jsonl"
+        return self._rows(self.root / "routes" / "routes.jsonl")
+
+    def load_failure_cases(self) -> list[dict[str, Any]]:
+        return self._rows(self.root / "failure" / "cases.jsonl")
+
+    def _rows(self, path: Path) -> list[dict[str, Any]]:
+        """One JSON value per line of a JSONL file; no file, no rows."""
         if not path.is_file():
             return []
         rows = []

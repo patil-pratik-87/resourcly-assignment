@@ -97,6 +97,17 @@ class GoldService:
         data = self.store.load_file(f"routes/{file}")
         return Attachment(file, guess_media_type(file, data), data)
 
+    def failure_cases(self) -> list[dict[str, Any]]:
+        return self.store.load_failure_cases()
+
+    def failure_file_exists(self, image: str) -> bool:
+        return self.store.file_exists(f"failure/{image}")
+
+    def failure_photo(self, image: str) -> Attachment:
+        """An image the failure gold names, as the photo of a request."""
+        data = self.store.load_file(f"failure/{image}")
+        return Attachment(image, guess_media_type(image, data), data)
+
     def render_page(self, drawing: str, page: int, dpi: int) -> bytes:
         _check_name(drawing)
         return self.pages.render(drawing, page, dpi)

@@ -74,6 +74,52 @@ def _route_row_problem(row: Any, by_id: dict[str, dict[str, Any]]) -> str | None
     return None
 
 
+FAILURE_KINDS = ("positive", "negative_drawing", "negative_unrelated")
+FAILURE_FIELDS = ("case_id", "image", "kind", "unit")
+# what a photo of a report figure must say about the figure it shows
+EXPECTED_FIELDS = ("expected_report", "expected_figure", "section", "failure_mode")
+
+
+def failure_cases(services: Services, split: str) -> list[Case]:
+    """One case per row of evals/gold/failure/cases.jsonl, stratified by its kind.
+
+    A failure split names units, a report figure with all its copies or one negative, and takes
+    every case of those units. A row that `evals check` reports as broken is skipped with a
+    warning.
+    """
+    splits = _splits(services, "failure", split)
+    split_of = {unit: name for name, units in splits.items() for unit in units}
+    cases = []
+    for row in services.gold.failure_cases():
+        problem = _failure_row_problem(row)
+        if problem:
+            log.warning("%s; skipped", problem)
+            continue
+        name = split_of.get(row["unit"], "unsplit")
+        if split == "all" or name == split:
+            cases.append(Case(row["case_id"], name, row["kind"], row))
+    return sorted(cases, key=lambda case: case.case_id)
+
+
+def _failure_row_problem(row: Any) -> str | None:
+    missing = _failure_fields_missing(row)
+    if missing:
+        return f"a cases.jsonl row lacks {', '.join(missing)}"
+    if row["kind"] not in FAILURE_KINDS:
+        return (
+            f"{row['case_id']} has kind '{row['kind']}';"
+            " use positive, negative_drawing or negative_unrelated"
+        )
+    missing = [name for name in EXPECTED_FIELDS if not row.get(name)]
+    if row["kind"] == "positive" and missing:
+        return f"{row['case_id']} lacks {', '.join(missing)}"
+    return None
+
+
+def _failure_fields_missing(row: Any) -> list[str]:
+    return [name for name in FAILURE_FIELDS if not isinstance(row, dict) or not row.get(name)]
+
+
 def reader_cases(services: Services, split: str) -> list[Case]:
     """One case per drawing gold file: "full" from drawings/, "partial" from partial/.
 
@@ -112,12 +158,12 @@ def check_gold(services: Services) -> list[tuple[str, str]]:
     """(level, message) pairs about the gold and splits; level is ok, warning or error.
 
     Each drawing's gold goes through the package models, then, once they accept it, the rules in
-    gold_rules, so one bad field is reported once. The router gold goes through its row checks,
-    and every split through the split checks.
+    gold_rules, so one bad field is reported once. The router and failure gold go through their
+    row checks, and every split through the split checks.
     """
     splits = services.gold.splits()
     found: list[tuple[str, str]] = []
-    for component in sorted(splits.keys() - {"reader", "router"}):
+    for component in sorted(splits.keys() - {"reader", "router", "failure"}):
         found.append(("warning", f"splits.toml names an unknown component '{component}'"))
     sources = {row.drawing: row.source for row in services.gold.list_drawings() if row.has_gold}
     issues = services.gold.check_all()
@@ -140,6 +186,7 @@ def check_gold(services: Services) -> list[tuple[str, str]]:
             found.append(("ok", f"reader {drawing} ({stratum}, {split}): {tally}"))
     _unmatched("reader", reader, set(sources), found)
     _check_routes(services, _split_of("router", splits.get("router", {}), found), found)
+    _check_failures(services, _split_of("failure", splits.get("failure", {}), found), found)
     return found
 
 
@@ -177,6 +224,47 @@ def _check_routes(
             )
         )
     _unmatched("router", split_of, units, found)
+
+
+def _check_failures(
+    services: Services, split_of: dict[str, str], found: list[tuple[str, str]]
+) -> None:
+    rows = services.gold.failure_cases()
+    ids, units, valid = [], set(), []
+    for number, row in enumerate(rows, start=1):
+        missing = _failure_fields_missing(row)
+        if missing:
+            found.append(("error", f"failure cases.jsonl line {number} lacks {', '.join(missing)}"))
+            continue
+        ids.append(row["case_id"])
+        problem = _failure_row_problem(row)
+        if problem:
+            found.append(("error", f"failure {problem}"))
+            continue
+        units.add(row["unit"])
+        valid.append(row)
+    for case_id in sorted({i for i in ids if ids.count(i) > 1}):
+        found.append(("error", f"failure case id {case_id} is used more than once"))
+    if valid:
+        photos = sum(1 for row in valid if row["kind"] == "positive")
+        found.append(
+            (
+                "ok",
+                f"failure {len(valid)} case(s): {photos} photo(s),"
+                f" {len(valid) - photos} negative(s)",
+            )
+        )
+    images = {row["image"] for row in valid}
+    absent = sum(1 for image in images if not services.gold.failure_file_exists(image))
+    if absent:
+        found.append(
+            (
+                "warning",
+                f"failure {absent} of {len(images)} image(s) are missing;"
+                " they are committed, so restore them from git",
+            )
+        )
+    _unmatched("failure", split_of, units, found)
 
 
 def _unit_leaks(rows: list[Any], by_id: dict[str, dict[str, Any]]) -> list[str]:

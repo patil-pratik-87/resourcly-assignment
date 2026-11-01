@@ -6,7 +6,7 @@ from typing import Any
 
 from resourcly.bootstrap import Services
 from resourcly.evals import metrics
-from resourcly.evals.cases import Case, reader_cases, route_cases
+from resourcly.evals.cases import Case, failure_cases, reader_cases, route_cases
 
 
 @dataclass(frozen=True)
@@ -190,6 +190,57 @@ def _summarise_routes(results: list[tuple[Case, Any]]) -> dict[str, Any]:
     )
 
 
+def _find(services: Services, case: Case, request_id: str) -> Any:
+    """Send the case's image to the failure finder of the version under test."""
+    photo = services.gold.failure_photo(case.gold["image"])
+    return services.failures.find(photo, request_id=request_id).model_dump(mode="json")
+
+
+def _figures(prediction: Any) -> list[Any] | None:
+    """The ranked figures of a stored answer; None for a failed call or a malformed answer."""
+    figures = _field(prediction, "figures")
+    return figures if isinstance(figures, list) else None
+
+
+def _score_failure(case: Case, prediction: Any) -> dict[str, Any]:
+    scores = metrics.score_failure(case.gold, _figures(prediction))
+    top = (_figures(prediction) or [None])[0]
+    return {
+        "case_score": scores["section@1" if case.stratum == "positive" else "kept_out"],
+        **scores,
+        "top": top.get("figure") if isinstance(top, dict) else None,
+    }
+
+
+def _summarise_failures(results: list[tuple[Case, Any]]) -> dict[str, Any]:
+    return metrics.summarise_failures(
+        [
+            (case.stratum, metrics.score_failure(case.gold, _figures(prediction)))
+            for case, prediction in results
+        ]
+    )
+
+
+def _explain_failure(case: Case, prediction: Any) -> list[str]:
+    gold = case.gold
+    if case.stratum == "positive":
+        lines = [
+            f"expected {gold['expected_figure']}: {gold['section']}, {gold['failure_mode']}",
+        ]
+    else:
+        lines = [f"a negative ({case.stratum.removeprefix('negative_')}): expected no figure"]
+    figures = _figures(prediction)
+    if figures is None:
+        return [*lines, "no answer"]
+    lines.append(f"{len(figures)} figure(s) back; the first three:")
+    lines += [
+        f"  {f.get('figure')}  {f.get('section')}  {f.get('failure_mode')}  score {f.get('score')}"
+        for f in figures[:3]
+        if isinstance(f, dict)
+    ]
+    return lines
+
+
 SUITES: dict[str, Suite] = {
     "reader": Suite(
         component="reader",
@@ -229,5 +280,16 @@ SUITES: dict[str, Suite] = {
         summarise=_summarise_routes,
         explain=_explain_route,
         lower_is_better=("escalation_rate", "median_ms"),
+    ),
+    "failure": Suite(
+        component="failure",
+        primary_metric="section@1",
+        metrics=("section@1", "report@1", "mode@3", "kept_out"),
+        case_columns=("top",),
+        load=failure_cases,
+        call=_find,
+        score=_score_failure,
+        summarise=_summarise_failures,
+        explain=_explain_failure,
     ),
 }

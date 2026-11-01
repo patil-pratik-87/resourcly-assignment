@@ -364,3 +364,45 @@ def _row(outcome: RouteOutcome) -> dict[str, Any]:
         "layer": outcome.layer or "-",
         "reason": outcome.reason,
     }
+
+
+PHOTO = "positive"
+
+
+def score_failure(gold: dict[str, Any], figures: list[Any] | None) -> dict[str, float]:
+    """How well the ranked figures answer one case; figures is None when the call failed.
+
+    A photo of a report figure scores report@1 and section@1 on the top figure, and mode@3 on
+    whether one of the top three shows its failure mode. A negative, a photo no report covers,
+    scores kept_out: 1 when no figure came back. A failed call keeps nothing out.
+    """
+    if gold["kind"] != PHOTO:
+        return {"kept_out": float(figures == [])}
+    ranked = [f for f in figures or [] if isinstance(f, dict)]
+    top = ranked[0] if ranked else {}
+    return {
+        "report@1": float(top.get("report") == gold["expected_report"]),
+        "section@1": float(
+            (top.get("report"), top.get("section")) == (gold["expected_report"], gold["section"])
+        ),
+        "mode@3": float(any(f.get("failure_mode") == gold["failure_mode"] for f in ranked[:3])),
+    }
+
+
+def summarise_failures(scores: list[tuple[str, dict[str, float]]]) -> dict[str, Any]:
+    """Means over the photos of report figures, and the share of negatives kept out."""
+    photos = [score for kind, score in scores if kind == PHOTO]
+    negatives = [score for kind, score in scores if kind != PHOTO]
+
+    def mean(rows: list[dict[str, float]], name: str) -> float | None:
+        return sum(row[name] for row in rows) / len(rows) if rows else None
+
+    return {
+        "cases": len(scores),
+        "photos": len(photos),
+        "negatives": len(negatives),
+        "report@1": mean(photos, "report@1"),
+        "section@1": mean(photos, "section@1"),
+        "mode@3": mean(photos, "mode@3"),
+        "kept_out": mean(negatives, "kept_out"),
+    }

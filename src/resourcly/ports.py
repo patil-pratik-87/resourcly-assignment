@@ -33,6 +33,10 @@ class GoldStorePort(Protocol):
         """Router gold rows, one per labelled item: id, label, unit, file, text, attachment..."""
         ...
 
+    def load_failure_cases(self) -> list[dict[str, Any]]:
+        """Failure gold rows, one per photo: case_id, image, kind, unit and the expected answer."""
+        ...
+
     def file_exists(self, path: str) -> bool: ...
 
     def load_file(self, path: str) -> bytes:
