@@ -237,3 +237,20 @@ all gold. Each file is in the gold schema and passes its checks.
 - Each callout is one feature typed by a fixed rule; leaders are not traced.
 - Rerun: `uv run --extra vlm evals run reader --version vector-crop-v1 --split all`, then
   `04_winner_outputs.ipynb`. Decoding is greedy, so a rerun gives the same files.
+
+## Fault detection and chat research
+
+Chose DINOv2-base alone to find the closest report figures, then Qwen3-VL 8B to write a cited answer
+from the top 3 figures and their report text. With the source figure hidden, DINOv2 put the
+right report first for 95.7% of 138 perturbed report figures and the right failure mode in the
+top 3 for 94.2%, the best of the signals compared, in under 0.1 s per photo.
+
+- Tried: SigLIP 2 image and caption vectors, DINOv2, their rank fusions, five ways to feed a
+  non-square photo, a similarity gate, and Qwen3-VL 8B end to end.
+- Failed: caption vectors drag the fusion down. The router's DINOv2-small is worse on every
+  held-out score (report@1 90.6%, mode@3 90.6%), so it is not shared. On 3 end-to-end cases the
+  model rejected the right figure every time and took about 2 minutes each.
+- Open: the answer step and the chat need a scored question set; the 0.28 gate floor rests on
+  12 unrelated photos; the router's probe has not been tried on DINOv2-base.
+
+Write-up: `research/failure/README.md`.
