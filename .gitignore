@@ -8,8 +8,9 @@ __pycache__/
 /experiments/routing/.cache/
 /experiments/routing/data/commons/
 
-# Drawing experiments: their own environment
+# Drawing experiments: their own environment and the images the notebooks write
 /experiments/drawing/.venv/
+/experiments/drawing/crops/
 
 # Python environment and tool caches
 .venv/
