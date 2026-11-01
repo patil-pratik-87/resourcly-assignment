@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+.ipynb_checkpoints/
+
+# Routing experiments: their own environment, the Hugging Face model cache, the vision-language
+# models' input images and the downloaded Commons originals
+/experiments/routing/.venv/
+/experiments/routing/.cache/
+/experiments/routing/data/commons/
