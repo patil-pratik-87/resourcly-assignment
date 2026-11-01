@@ -14,11 +14,13 @@ GoldDir = typer.Option(None, "--gold-dir", help="Folder holding drawings/ and pa
 
 @app.callback()
 def main() -> None:
-    """Keeps `ui` a subcommand, as Typer makes a lone command the whole app."""
+    """Keeps `annotation-ui` a subcommand, as Typer makes a lone command the whole app."""
 
 
-@app.command()
-def ui(host: str = "127.0.0.1", port: int = 8000, gold_dir: Path | None = GoldDir) -> None:
+@app.command("annotation-ui")
+def annotation_ui(
+    host: str = "127.0.0.1", port: int = 8000, gold_dir: Path | None = GoldDir
+) -> None:
     """Serve the gold label screen and its API."""
     settings = Settings.from_env()
     if gold_dir is not None:

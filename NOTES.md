@@ -87,7 +87,7 @@ The label screen is for reviewing and extending the gold, not for making it from
 The gold was drafted from crops and overlays; the screen is where a person checks each value
 against the page, fixes it, and approves it, or adds a value that was missed.
 
-- How: `uv run resourcly ui` shows each page with a numbered box per value and a form beside it.
+- How: `uv run resourcly annotation-ui` shows each page with a numbered box per value and a form beside it.
   It serves only the gold endpoints. The code is in `src/frontend/annotation`, so the chat screen
   can sit beside it later.
 - How saves stay safe: nothing is written until Save. The server validates the whole document
