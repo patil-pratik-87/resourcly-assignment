@@ -2,12 +2,20 @@ import json
 import shutil
 from pathlib import Path
 
+import pymupdf
 import pytest
 
 from resourcly.bootstrap import PROJECT_ROOT, Settings
 
 FIXTURE_GOLD = Path(__file__).parent / "fixtures" / "gold"
 CTC01 = "nist_ctc_01_asme1_rd"
+
+
+def png(width: int = 40, height: int = 30) -> bytes:
+    """A small grey PNG, standing in for a photo."""
+    pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, width, height), False)
+    pixmap.clear_with(200)
+    return pixmap.tobytes("png")
 
 
 @pytest.fixture
@@ -25,8 +33,9 @@ def settings(gold_dir: Path, tmp_path: Path) -> Settings:
         drawings_dir=PROJECT_ROOT / "data" / "drawings",
         ui_dist=tmp_path / "no-ui",
         trace_path=tmp_path / "var" / "traces.sqlite",
-        # the text-layer reader needs no model, so the tests can read drawings
-        versions={"reader": "textlayer-v0"},
+        uploads_dir=tmp_path / "var" / "uploads",
+        # the text-layer reader and the stub router need no model, so the tests can run them
+        versions={"reader": "textlayer-v0", "router": "stub-v0"},
     )
 
 

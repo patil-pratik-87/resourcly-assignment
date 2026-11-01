@@ -44,7 +44,7 @@ validated by the server and written in place, so the change shows up in `git dif
 
 ```sh
 (cd src/frontend/annotation && npm ci && npm run build)
-uv run resourcly ui   # http://127.0.0.1:8000
+uv run resourcly annotation-ui   # http://127.0.0.1:8000
 ```
 
 How to use it: [docs/label-screen.md](../../docs/label-screen.md).

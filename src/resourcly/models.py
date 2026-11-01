@@ -1,4 +1,6 @@
 import re
+from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
@@ -11,6 +13,7 @@ from pydantic import (
     TypeAdapter,
     ValidationError,
     WithJsonSchema,
+    computed_field,
     model_serializer,
     model_validator,
 )
@@ -448,3 +451,99 @@ class DrawingSummary(BaseModel):
     values: int
     approved: int
     issues: int
+
+
+class Route(StrEnum):
+    """The case a request goes to. The router picks it; the user never says."""
+
+    DRAWING = "drawing"
+    PHOTO = "photo"
+    TEXT = "text"
+    # an attachment that is neither a drawing nor a picture of a part, such as a report or a logo
+    UNSUPPORTED = "unsupported"
+
+
+@dataclass(frozen=True)
+class Attachment:
+    name: str
+    media_type: str
+    data: bytes = field(repr=False)
+
+
+@dataclass(frozen=True)
+class LayerVerdict:
+    """What one router layer made of a request: a route, or None to pass it to the next layer.
+
+    The reason says why either way, and the confidence is 1 for a rule.
+    """
+
+    route: Route | None
+    reason: str
+    confidence: float | None = None
+    probabilities: dict[str, float] = field(default_factory=dict)
+
+
+class Routing(BaseModel):
+    """The router's answer to one request: the route, the layer that decided it, and why."""
+
+    request_id: str
+    route: Route
+    layer: str
+    confidence: float | None
+    reason: str
+    probabilities: dict[str, float]
+    elapsed_ms: float
+
+
+class StoredFile(BaseModel):
+    """An uploaded file as the upload store keeps it; `item_id` is unique within the request."""
+
+    item_id: str
+    name: str
+    media_type: str
+    size: int
+    pages: int
+
+
+ItemStatus = Literal["routing", "queued", "reading", "done", "failed", "answered"]
+ACTIVE: tuple[ItemStatus, ...] = ("routing", "queued", "reading")
+
+
+class RequestItem(BaseModel):
+    """One file of a chat request, or its text when it has no file, and what the agent did.
+
+    An item is routed, then a drawing is queued and read, and the other cases are answered at
+    once. `values` and `issues` count the read document's values and schema issues.
+    """
+
+    item_id: str
+    kind: Literal["file", "text"]
+    name: str
+    media_type: str | None = None
+    size: int = 0
+    pages: int = 0
+    route: Routing | None = None
+    status: ItemStatus = "routing"
+    progress: ReadProgress | None = None
+    reply: str | None = None
+    values: int | None = None
+    issues: int | None = None
+    error: str | None = None
+    started_at: str | None = None
+    finished_at: str | None = None
+
+
+class RequestRecord(BaseModel):
+    """One chat message: its text, its items, and when it was sent."""
+
+    request_id: str
+    text: str
+    created_at: str
+    items: list[RequestItem]
+
+    @computed_field
+    @property
+    def status(self) -> Literal["working", "failed", "done"]:
+        if any(item.status in ACTIVE for item in self.items):
+            return "working"
+        return "failed" if any(item.status == "failed" for item in self.items) else "done"

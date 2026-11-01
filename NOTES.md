@@ -87,12 +87,31 @@ The label screen is for reviewing and extending the gold, not for making it from
 The gold was drafted from crops and overlays; the screen is where a person checks each value
 against the page, fixes it, and approves it, or adds a value that was missed.
 
-- How: `uv run resourcly ui` shows each page with a numbered box per value and a form beside it.
-  It serves only the gold endpoints. The code is in `src/frontend/annotation`, so the chat screen
-  can sit beside it later.
+- How: `uv run resourcly annotation-ui` shows each page with a numbered box per value and a form
+  beside it. The screen uses only the gold endpoints. The code is in `src/frontend/annotation`, so
+  the chat screen can sit beside it later.
 - How saves stay safe: nothing is written until Save. The server validates the whole document
   against the gold models and refuses an invalid one, listing the issues. A valid one is written
   to a temporary file and then swapped in, so a file is never half written. Every change is
   then a plain git diff to review before it is committed.
 
 How to use it: `docs/label-screen.md`.
+
+## Agent API
+
+The chat is one HTTP API, made for a later chat screen; the CLI calls the same services.
+
+- One message is one request: text, files, or both. Many files in one message is a bulk upload.
+  Each file is an item with its own case, status and result.
+- `POST /api/requests` returns 202 with the request record at once. One background worker routes
+  every item, then reads the drawings one at a time, and the client polls the record. A read can
+  take minutes with a vision model, so a held request would time out.
+- The record holds what a chat screen shows: status, progress, reply or error per item,
+  and the drawing JSON beside it.
+- Each step is written to the trace store when it ends, not when the request ends, so a live
+  trace stream can be added without changing the agent.
+- The router is the model-free `stub-v0`. Photos and text questions get a "not available yet"
+  reply, so an answerer can be swapped in later without changing the shape.
+- The request store and the worker sit behind ports: at scale they become a database and a queue.
+
+How to use it: `docs/usage.md`.

@@ -10,7 +10,7 @@ and writes the JSON file in place, so every change is an ordinary `git diff` to 
 
 ```sh
 (cd src/frontend/annotation && npm ci && npm run build)
-uv run resourcly ui   # http://127.0.0.1:8000
+uv run resourcly annotation-ui   # http://127.0.0.1:8000
 ```
 
 `--port` picks another port. `--gold-dir <dir>` or `RESOURCLY_GOLD_DIR=<dir>` reads and writes
