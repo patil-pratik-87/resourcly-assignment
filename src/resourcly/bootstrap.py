@@ -25,6 +25,7 @@ class Settings:
     gold_dir: Path = PROJECT_ROOT / "evals" / "gold"
     splits_path: Path = PROJECT_ROOT / "evals" / "splits.toml"
     drawings_dir: Path = PROJECT_ROOT / "data" / "drawings"
+    ui_dist: Path = PROJECT_ROOT / "src" / "ui" / "dist"
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
     # The version each component runs, a file in versions_dir; the app and the evals both read it
@@ -37,6 +38,7 @@ class Settings:
             gold_dir=Path(os.environ.get("RESOURCLY_GOLD_DIR", defaults.gold_dir)),
             splits_path=Path(os.environ.get("RESOURCLY_SPLITS", defaults.splits_path)),
             drawings_dir=Path(os.environ.get("RESOURCLY_DRAWINGS_DIR", defaults.drawings_dir)),
+            ui_dist=Path(os.environ.get("RESOURCLY_UI_DIST", defaults.ui_dist)),
             versions_dir=Path(os.environ.get("RESOURCLY_VERSIONS_DIR", defaults.versions_dir)),
             trace_path=Path(os.environ.get("RESOURCLY_TRACE_DB", defaults.trace_path)),
             versions={
@@ -121,7 +123,7 @@ def list_versions(settings: Settings, component: str) -> list[Version]:
 
 
 class Services:
-    """The services the CLI and the evals call.
+    """The services the API, the CLI and the evals call.
 
     The gold service is built at once. The reader and the trace file are built on first use, so
     gold work needs no version and no trace file.

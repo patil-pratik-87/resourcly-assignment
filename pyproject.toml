@@ -13,6 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
+resourcly = "resourcly.cli:app"
 evals = "resourcly.evals.cli:app"
 
 [dependency-groups]
