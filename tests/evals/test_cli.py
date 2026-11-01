@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner, Result
 
-from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation
+from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation, open_services
 from resourcly.evals.cli import app
 from resourcly.evals.models import Run
 from resourcly.evals.store import SqliteResultStore
@@ -56,6 +56,7 @@ def test_show_lists_the_cases_of_a_run_and_explains_one(evals) -> None:
 
     assert shown.exit_code == 0, shown.output
     assert "NotFound: no drawing named partial_a" in shown.output
+    assert f"uv run evals show --request {rid}:{CTC01}" in shown.output
     assert "partial_a" in failures.output
     assert "missed gold records (17)" in detail.output
     assert "page 1  diameter  '⌀35.2 / ⌀34.8'  value [34.8, 35.2]  unit mm" in detail.output
@@ -318,11 +319,39 @@ def test_run_needs_a_component_and_version_or_a_rescore_but_not_both(evals) -> N
     assert "--rescore takes no component or --version" in both.output
 
 
+def test_show_request_prints_what_a_request_did_and_called(
+    evals, settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("RESOURCLY_TRACE_DB", str(settings.trace_path))
+    with open_services(settings) as services:
+        services.drawings.read(CTC01, request_id="req-1")
+
+    result = evals("show", "--request", "req-1")
+    unknown = evals("show", "--request", "nope")
+
+    assert result.exit_code == 0, result.output
+    assert "request req-1: 1 step(s)" in result.output
+    assert "drawings.read  called reader textlayer-v0 (textlayer)" in result.output
+    assert f'input   {{"drawing": "{CTC01}"}}' in result.output
+    assert 'output  {"values": 6, "schema_issues": 0}' in result.output
+    assert unknown.exit_code == 1
+    assert "no request 'nope'" in unknown.output
+
+
+def test_show_reaches_the_trace_of_each_case_of_a_run(evals) -> None:
+    rid = run_id(evals("run", "reader", "--version", "textlayer-v0"))
+
+    result = evals("show", "--request", f"{rid}:{CTC01}")
+
+    assert result.exit_code == 0, result.output
+    assert "called reader textlayer-v0 (textlayer)" in result.output
+
+
 def test_show_needs_one_run_id_without_out(evals) -> None:
     result = evals("show")
 
     assert result.exit_code == 2
-    assert "give one run id or --out FILE" in result.output
+    assert "give one run id, --request REQUEST_ID or --out FILE" in result.output
 
 
 def gold_value(gold_dir: Path, raw: str, change) -> None:

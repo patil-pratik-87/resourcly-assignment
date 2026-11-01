@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from resourcly.bootstrap import Settings
+from resourcly.bootstrap import Settings, open_services
 from resourcly.evals import harness
 from resourcly.evals.store import SqliteResultStore
 from tests.conftest import CTC01
@@ -109,3 +109,18 @@ def test_rescore_stores_the_stratum_the_case_has_now(
     [case] = store.cases(again.run_id)
     assert case.stratum == "partial"
     assert case.scores["case_score"] == case.scores["strict_recall"]
+
+
+def test_every_case_leaves_a_trace_under_its_request_id(
+    eval_gold: Path, settings: Settings, store: SqliteResultStore
+) -> None:
+    run = harness.run("reader", "textlayer-v0", settings=settings, store=store, split="all")
+
+    with open_services(settings) as services:
+        traces = [services.traces.lookup(case.request_id) for case in store.cases(run.run_id)]
+
+    assert [[e.input["drawing"] for e in trace.events] for trace in traces] == [
+        [CTC01],
+        ["partial_a"],
+    ]
+    assert traces[1].events[0].error == "NotFound: no drawing named partial_a"
