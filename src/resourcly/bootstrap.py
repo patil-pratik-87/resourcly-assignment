@@ -12,12 +12,19 @@ from typing import Any
 
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
+from resourcly.adapters.shuffled_figures import ShuffledFiguresAdapter
 from resourcly.adapters.sqlite_trace import SqliteTraceAdapter
 from resourcly.adapters.stub_router import StubRouteAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.errors import InvalidVersion, NotFound
 from resourcly.ports import RouterPort
-from resourcly.services import DrawingService, GoldService, RouterService, TraceService
+from resourcly.services import (
+    DrawingService,
+    FailureService,
+    GoldService,
+    RouterService,
+    TraceService,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -27,12 +34,17 @@ class Settings:
     gold_dir: Path = PROJECT_ROOT / "evals" / "gold"
     splits_path: Path = PROJECT_ROOT / "evals" / "splits.toml"
     drawings_dir: Path = PROJECT_ROOT / "data" / "drawings"
+    reports_dir: Path = PROJECT_ROOT / "data" / "reports"
     ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "annotation" / "dist"
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
     # The version each component runs, a file in versions_dir; the app and the evals both read it
     versions: dict[str, str] = field(
-        default_factory=lambda: {"reader": "textlayer-v0", "router": "stub-v0"}
+        default_factory=lambda: {
+            "reader": "textlayer-v0",
+            "router": "stub-v0",
+            "failure": "shuffled-v0",
+        }
     )
 
     @classmethod
@@ -42,6 +54,7 @@ class Settings:
             gold_dir=Path(os.environ.get("RESOURCLY_GOLD_DIR", defaults.gold_dir)),
             splits_path=Path(os.environ.get("RESOURCLY_SPLITS", defaults.splits_path)),
             drawings_dir=Path(os.environ.get("RESOURCLY_DRAWINGS_DIR", defaults.drawings_dir)),
+            reports_dir=Path(os.environ.get("RESOURCLY_REPORTS_DIR", defaults.reports_dir)),
             ui_dist=Path(os.environ.get("RESOURCLY_UI_DIST", defaults.ui_dist)),
             versions_dir=Path(os.environ.get("RESOURCLY_VERSIONS_DIR", defaults.versions_dir)),
             trace_path=Path(os.environ.get("RESOURCLY_TRACE_DB", defaults.trace_path)),
@@ -93,9 +106,19 @@ ROUTERS: dict[str, Implementation] = {
         lambda settings, params: [StubRouteAdapter(**params)], settings=("min_paths",)
     ),
 }
+FINDERS: dict[str, Implementation] = {
+    # No model: a fixed random order of the report figures, the floor for the failure finders.
+    "shuffled": Implementation(
+        lambda settings, params: ShuffledFiguresAdapter(
+            settings.reports_dir / "sections.toml", **params
+        ),
+        settings=("seed",),
+    ),
+}
 IMPLEMENTATIONS: dict[str, dict[str, Implementation]] = {
     "reader": READERS,
     "router": ROUTERS,
+    "failure": FINDERS,
 }
 
 
@@ -136,8 +159,8 @@ def list_versions(settings: Settings, component: str) -> list[Version]:
 class Services:
     """The services the API, the CLI and the evals call.
 
-    The gold service is built at once. The reader, the router and the trace file are built on
-    first use, so gold work needs no version and no trace file.
+    The gold service is built at once. The reader, the router, the failure finder and the trace
+    file are built on first use, so gold work needs no version and no trace file.
     """
 
     def __init__(self, settings: Settings, stack: ExitStack):
@@ -176,6 +199,15 @@ class Services:
     @cached_property
     def _router_version(self) -> Version:
         return load_version(self._settings, "router", self._settings.versions["router"])
+
+    @cached_property
+    def failures(self) -> FailureService:
+        finder = load_version(self._settings, "failure", self._settings.versions["failure"])
+        return FailureService(
+            finder=FINDERS[finder.impl].build(self._settings, finder.params),
+            trace=self._trace(),
+            finder_name=f"{finder.name} ({finder.impl})",
+        )
 
     @cached_property
     def traces(self) -> TraceService:

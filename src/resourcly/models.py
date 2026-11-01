@@ -495,6 +495,24 @@ class Routing(BaseModel):
     elapsed_ms: float
 
 
+class FigureMatch(BaseModel):
+    """A report figure that shows the failure in a photo, with what the report says it shows."""
+
+    figure: str  # <report>/fig<nn>, such as 18-061/fig06
+    report: str
+    section: str
+    failure_mode: str
+    score: float | None = None  # how close the finder found it, when it measures that
+
+
+class FailureMatches(BaseModel):
+    """The figures a finder matched to one photo, best first; none when no report shows it."""
+
+    request_id: str
+    figures: list[FigureMatch]
+    elapsed_ms: float
+
+
 MAGIC_BYTES = (
     (b"\x89PNG\r\n\x1a\n", "image/png"),
     (b"\xff\xd8\xff", "image/jpeg"),

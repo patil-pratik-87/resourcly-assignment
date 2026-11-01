@@ -1,0 +1,3 @@
+description = "No model: every report figure in one seeded random order, the same for every photo; the floor any finder must beat"
+impl = "shuffled"
+seed = 0

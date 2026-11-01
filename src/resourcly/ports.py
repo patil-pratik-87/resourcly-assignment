@@ -3,6 +3,7 @@ from typing import Any, Literal, Protocol
 
 from resourcly.models import (
     Attachment,
+    FigureMatch,
     GoldDocument,
     LayerVerdict,
     ReadProgress,
@@ -80,4 +81,12 @@ class RouteLayerPort(Protocol):
 
     def decide(self, attachment: Attachment | None) -> LayerVerdict:
         """A verdict with a route, or with None to pass the request to the next layer."""
+        ...
+
+
+class FailureFinderPort(Protocol):
+    """Finds the report figures that show the same failure as a photo of a part."""
+
+    def find(self, photo: Attachment) -> list[FigureMatch]:
+        """The matching figures, best first; an empty list when no report shows this failure."""
         ...

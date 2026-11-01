@@ -10,6 +10,7 @@ from resourcly.errors import InvalidDocument, NotFound
 from resourcly.models import (
     Attachment,
     DrawingSummary,
+    FailureMatches,
     GoldDocument,
     Issue,
     LayerVerdict,
@@ -25,6 +26,7 @@ from resourcly.models import (
 )
 from resourcly.ports import (
     DrawingPagePort,
+    FailureFinderPort,
     GoldStorePort,
     Progress,
     ReaderPort,
@@ -296,6 +298,42 @@ def _described(attachment: Attachment | None) -> dict[str, Any] | None:
         "bytes": len(attachment.data),
         "sha256": hashlib.sha256(attachment.data).hexdigest(),
     }
+
+
+class FailureService:
+    """Finds the report figures that show the failure in a photo, and traces the call."""
+
+    def __init__(self, finder: FailureFinderPort, trace: TracePort, finder_name: str):
+        self.finder = finder
+        self.trace = trace
+        self.finder_name = finder_name
+
+    def find(self, photo: Attachment, request_id: str | None = None) -> FailureMatches:
+        request_id = request_id or uuid.uuid4().hex
+        started, began = now(), time.perf_counter()
+        figures, error = [], None
+        try:
+            figures = self.finder.find(photo)
+        except Exception as exc:
+            error = exc
+        elapsed = round((time.perf_counter() - began) * 1000, 1)
+        event = TraceEvent(
+            request_id=request_id,
+            step="failure.find",
+            called=f"finder {self.finder_name}",
+            input={"photo": _described(photo)},
+            output={"figures": len(figures), "top": figures[0].figure if figures else None},
+            error=f"{type(error).__name__}: {error}" if error else None,
+            started_at=started,
+            duration_ms=elapsed,
+        )
+        try:
+            self.trace.record(event)
+        except Exception:
+            log.exception("could not record the trace of request %s", request_id)
+        if error:
+            raise error
+        return FailureMatches(request_id=request_id, figures=figures, elapsed_ms=elapsed)
 
 
 class TraceService:
