@@ -8,8 +8,12 @@ version the evals measure is the version the app serves.
 | Path | What it is |
 | --- | --- |
 | `<component>/<name>.toml` | One version, such as `reader/textlayer-v0.toml`. |
+| `reader/textlayer-v0.toml` | Values from the PDF text layer, no model. |
+| `router/stub-v0.toml` | One structure rule per file type, no model. |
+| `failure/shuffled-v0.toml` | Every report figure in one seeded random order, no model. |
 
-The app runs `textlayer-v0` unless told otherwise. `RESOURCLY_READER_VERSION` picks another, and
+Each is the model-free floor of its component, and the version the app runs unless told
+otherwise. `RESOURCLY_<COMPONENT>_VERSION`, such as `RESOURCLY_ROUTER_VERSION`, picks another, and
 `RESOURCLY_VERSIONS_DIR` points everything at another folder.
 
 ## Add a version
