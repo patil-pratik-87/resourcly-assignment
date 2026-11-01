@@ -5,9 +5,11 @@ description = "Resourcly case study: a chat agent that routes each request, read
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "fastapi>=0.115",
     "pydantic>=2.9",
     "pymupdf>=1.24",
     "typer>=0.12",
+    "uvicorn>=0.32",
 ]
 
 [project.scripts]
@@ -15,6 +17,7 @@ evals = "resourcly.evals.cli:app"
 
 [dependency-groups]
 dev = [
+    "httpx2>=2.16.0",
     "pytest>=8.3",
     "ruff>=0.7",
 ]
