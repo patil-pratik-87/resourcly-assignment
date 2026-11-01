@@ -7,3 +7,15 @@ __pycache__/
 /experiments/routing/.venv/
 /experiments/routing/.cache/
 /experiments/routing/data/commons/
+
+# Python environment and tool caches
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Eval results and request traces
+/runs/
+/var/
+
+# Gold tool renders
+/out/
