@@ -2,7 +2,7 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-// In development the FastAPI backend (`uv run resourcly ui`) answers /api.
+// In development the FastAPI backend (`uv run resourcly annotation-ui`) answers /api.
 const backend = process.env.RESOURCLY_API ?? "http://127.0.0.1:8000";
 
 export default defineConfig({

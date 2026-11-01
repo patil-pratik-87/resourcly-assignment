@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, Literal, Protocol
 
 from resourcly.models import (
@@ -7,7 +8,9 @@ from resourcly.models import (
     GoldDocument,
     LayerVerdict,
     ReadProgress,
+    RequestRecord,
     Routing,
+    StoredFile,
     TraceEvent,
 )
 
@@ -93,4 +96,41 @@ class FailureFinderPort(Protocol):
 
     def find(self, photo: Attachment) -> list[FigureMatch]:
         """The matching figures, best first; an empty list when no report shows this failure."""
+
+
+class UploadStorePort(Protocol):
+    """The files of each chat request."""
+
+    def save_file(self, request_id: str, name: str, content: bytes) -> StoredFile:
+        """Keep an uploaded PDF or image; raises UnsupportedUpload for anything else."""
+        ...
+
+    def folder(self, request_id: str) -> Path:
+        """The folder holding `<item_id>.pdf` for every file of the request, images included."""
+        ...
+
+    def original(self, request_id: str, item_id: str) -> tuple[bytes, str]:
+        """The file as uploaded, and its media type."""
+        ...
+
+
+class RequestStorePort(Protocol):
+    """The record of each chat request and the document read from each of its drawings."""
+
+    def save(self, record: RequestRecord) -> None: ...
+
+    def load(self, request_id: str) -> RequestRecord: ...
+
+    def list(self, limit: int) -> list[RequestRecord]:
+        """The latest requests, newest first."""
+        ...
+
+    def save_result(self, request_id: str, item_id: str, document: dict[str, Any]) -> None: ...
+
+    def load_result(self, request_id: str, item_id: str) -> dict[str, Any]: ...
+
+
+class JobsPort(Protocol):
+    def submit(self, job: Callable[[], None], priority: int = 0) -> None:
+        """Run the job later, in the background; a lower priority runs first."""
         ...
