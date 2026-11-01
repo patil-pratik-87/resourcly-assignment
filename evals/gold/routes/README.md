@@ -1,10 +1,12 @@
-# Routing labelled set
+# Router gold
 
-244 labelled requests for the routing question: is a request a technical drawing, a photo of a
-part, or text, or a file that fits none of these?
+The router's gold, made for the routing research in `experiments/routing/`: 244 labelled
+requests for the routing question. Is a request a technical drawing, a photo of a part, or
+text, or a file that fits none of these?
 
 - `routes.jsonl` has one line per request: its label, the file it sends, its message, where it
-  came from and how it was made. The docstring of `../build_dataset.py` describes every field.
+  came from and how it was made. The docstring of `experiments/routing/build_dataset.py`
+  describes every field.
 - `items/` holds the 214 files the requests name, in one folder per label: 116 drawings,
   88 photos and 10 files labelled `other` because no case in the brief covers them.
 - `commons.json` records, for each of the 20 Wikimedia Commons files, its source page, author,
@@ -28,13 +30,13 @@ The files are committed, so nothing needs rebuilding. To check that the build is
 ```sh
 python -I experiments/routing/commons_dl.py
 experiments/routing/.venv/bin/python -I experiments/routing/build_dataset.py
-git status experiments/routing/data
+git status evals/gold/routes
 ```
 
-`commons_dl.py` downloads the Commons originals into `data/commons/` (ignored by git) and checks
-each hash. `build_dataset.py` then writes `items/` and `routes.jsonl` again, and with the
-library versions in `../README.md` it gives the same bytes. `commons_find.py` is the search that
-found the Commons candidates.
+`commons_dl.py` downloads the Commons originals into `experiments/routing/.cache/commons/`
+(ignored by git) and checks each hash. `build_dataset.py` then writes `items/` and
+`routes.jsonl` again, and with the library versions in `experiments/routing/README.md` it gives
+the same bytes. `commons_find.py` is the search that found the Commons candidates.
 
 ## Licences
 

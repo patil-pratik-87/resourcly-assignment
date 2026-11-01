@@ -2,8 +2,8 @@
 
     python -I experiments/routing/commons_dl.py
 
-data/commons.json names each file with its URL, size, SHA-256, licence, author and page. The files
-go to data/commons/, which git ignores. A file already there with the right hash is kept, and a
+evals/gold/routes/commons.json names each file with its URL, size, SHA-256, licence, author and
+page. The files go to .cache/commons/, which git ignores. A file already there with the right hash is kept, and a
 download whose hash differs stops the script, so build_dataset.py always starts from the same
 bytes. This is the only step of the routing set that needs the network.
 """
@@ -16,8 +16,8 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-MANIFEST = HERE / "data" / "commons.json"
-OUT = HERE / "data" / "commons"
+MANIFEST = HERE.parents[1] / "evals" / "gold" / "routes" / "commons.json"
+OUT = HERE / ".cache" / "commons"
 # Wikimedia asks every client to name itself and give a contact
 USER_AGENT = {"User-Agent": "resourcly-routing-research/0.1 (prtkvptl@gmail.com)"}
 

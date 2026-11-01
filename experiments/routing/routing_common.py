@@ -20,7 +20,7 @@ import pymupdf
 from PIL import Image
 
 HERE = Path(__file__).resolve().parent
-DATA = HERE / "data"  # routes.jsonl and the files it names
+DATA = HERE.parents[1] / "evals" / "gold" / "routes"  # routes.jsonl and the files it names
 RESULTS = HERE / "results"  # every measured number, committed
 CACHE = HERE / ".cache"  # the Hugging Face cache and model input images, not committed
 

@@ -1,4 +1,4 @@
-"""Build the labelled routing set in experiments/routing/data/.
+"""Build the labelled routing set in evals/gold/routes/, the router's gold.
 
     experiments/routing/.venv/bin/python -I experiments/routing/build_dataset.py
 
@@ -6,13 +6,13 @@ Run commons_dl.py first: it downloads the Wikimedia Commons files this script re
 else comes from the drawings and reports in data/.
 
 The set is deterministic (fixed seeds, fixed PDF metadata), so two builds give the same bytes.
-The item files go to data/items/<label>/, and data/routes.jsonl gets one line per item:
+The item files go to routes/items/<label>/, and routes/routes.jsonl gets one line per item:
 
     id          a stable name, such as d_ctc01_p1_r72
     label       the case the router must pick: drawing, photo or text, or "other" for a file
                 that fits no case (a whole report, a page of text, a logo, a physics diagram)
     kind        pdf, image or text, or text+pdf / text+image for a message with an attachment
-    file        the item's file, relative to data/ (null for text)
+    file        the item's file, relative to routes/ (null for text)
     text        the user's message (null for an attachment alone)
     attachment  for a message with an attachment, the id of the item whose file it sends
     group       the drawing, report page or Commons file the item was made from
@@ -39,10 +39,10 @@ from PIL import Image
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
-DATA = HERE / "data"
+DATA = REPO / "evals" / "gold" / "routes"
 LABELS_FILE = DATA / "routes.jsonl"
 ITEMS = DATA / "items"
-COMMONS_DOWNLOADS = DATA / "commons"  # written by commons_dl.py, not committed
+COMMONS_DOWNLOADS = HERE / ".cache" / "commons"  # written by commons_dl.py, not committed
 COMMONS_MANIFEST = DATA / "commons.json"
 DRAWINGS = sorted((REPO / "data" / "drawings").glob("*.pdf"))
 REPORTS = sorted((REPO / "data" / "reports").glob("*.pdf"))
