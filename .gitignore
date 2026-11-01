@@ -23,3 +23,7 @@ __pycache__/
 
 # Gold tool renders
 /out/
+
+# UI build and dependencies
+src/ui/node_modules/
+src/ui/dist/
