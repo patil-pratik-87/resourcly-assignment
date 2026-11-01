@@ -435,6 +435,11 @@ class TraceEvent(BaseModel):
     duration_ms: float
 
 
+class RequestTrace(BaseModel):
+    request_id: str
+    events: list[TraceEvent]
+
+
 class DrawingSummary(BaseModel):
     drawing: str
     page_count: int

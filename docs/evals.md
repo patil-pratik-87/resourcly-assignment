@@ -9,13 +9,14 @@ uv run evals check                                  # gold files and splits
 uv run evals run reader --version textlayer-v0      # dev split by default
 uv run evals show RUN_ID --case nist_ctc_01_asme1_rd
 uv run evals compare reader textlayer-v0 my-reader-v1 --fail-if-worse
+uv run evals show --request REQUEST_ID              # what one call did
 ```
 
 ## How a run works
 
 1. Open the services with `versions/<component>/<name>.toml`.
 2. Load the gold cases of the split (`evals/splits.toml`), or only those `--case-id` names.
-3. Call the reader on each case with request id `<run id>:<case id>`.
+3. Call the reader on each case with request id `<run id>:<case id>`, which leaves a trace.
 4. Store each case's raw prediction, error, time and scores in `runs/evals.sqlite`.
 5. Store the run's summary, version hash, git commit and a hash of the cases and their gold.
 

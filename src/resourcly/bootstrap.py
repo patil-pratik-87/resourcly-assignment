@@ -15,7 +15,7 @@ from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
 from resourcly.adapters.sqlite_trace import SqliteTraceAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.errors import InvalidVersion, NotFound
-from resourcly.services import DrawingService, GoldService
+from resourcly.services import DrawingService, GoldService, TraceService
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -145,6 +145,10 @@ class Services:
             trace=self._trace(),
             reader_name=f"{reader.name} ({reader.impl})",
         )
+
+    @cached_property
+    def traces(self) -> TraceService:
+        return TraceService(trace=self._trace())
 
     def _trace(self) -> SqliteTraceAdapter:
         """One trace adapter, shared by the services, even when threads ask at once."""

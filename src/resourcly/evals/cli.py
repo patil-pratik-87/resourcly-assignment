@@ -1,3 +1,4 @@
+import json
 import logging
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -212,16 +213,25 @@ def show(
     out: Annotated[
         Path | None, typer.Option(help="Write Markdown tables of the runs to this file.")
     ] = None,
+    request: Annotated[
+        str | None,
+        typer.Option(metavar="REQUEST_ID", help="What one request did and called, step by step."),
+    ] = None,
 ) -> None:
-    """A run's settings, summary and cases, or Markdown tables of runs."""
+    """A run's settings, summary and cases; a request's trace; or Markdown tables of runs."""
     context: Context = ctx.obj
+    if request is not None:
+        if run_ids or case or failures or out:
+            raise typer.BadParameter("--request takes no run id or other option")
+        _trace(context, request)
+        return
     if out is not None:
         if case or failures:
             raise typer.BadParameter("--out takes no --case or --failures")
         _report(context, run_ids or [], out)
         return
     if not run_ids or len(run_ids) > 1:
-        raise typer.BadParameter("give one run id or --out FILE")
+        raise typer.BadParameter("give one run id, --request REQUEST_ID or --out FILE")
     run_id = run_ids[0]
     with SqliteResultStore.open(context.store) as store:
         run = _run(store, run_id)
@@ -252,6 +262,24 @@ def show(
         for r in shown
     ]
     _table(["case", "stratum", "case_score", "latency", "error"], rows)
+    typer.echo("")
+    typer.echo("what a case did and called:")
+    for r in shown:
+        typer.echo(f"  uv run evals show --request {r.request_id}")
+
+
+def _trace(context: Context, request_id: str) -> None:
+    with _short_errors(), open_services(context.settings) as services:
+        trace = services.traces.lookup(request_id)
+    typer.echo(f"request {trace.request_id}: {len(trace.events)} step(s)")
+    for event in trace.events:
+        typer.echo(
+            f"  {event.started_at}  {event.step}  called {event.called}  {event.duration_ms} ms"
+        )
+        typer.echo(f"    input   {json.dumps(event.input, ensure_ascii=False)}")
+        typer.echo(f"    output  {json.dumps(event.output, ensure_ascii=False)}")
+        if event.error:
+            typer.echo(f"    error   {event.error}")
 
 
 def _report(context: Context, run_ids: list[str], out: Path) -> None:
@@ -461,6 +489,7 @@ def _explain(
     if case is None:
         raise typer.BadParameter(f"'{case_id}' has no gold now")
     typer.echo(f"{case_id}  case_score {_num(result.scores['case_score'])}")
+    typer.echo(f"request {result.request_id}  (uv run evals show --request {result.request_id})")
     if case.gold_hash != result.gold_hash:
         typer.echo("the gold changed since this run; compared with the current gold")
     if result.error:

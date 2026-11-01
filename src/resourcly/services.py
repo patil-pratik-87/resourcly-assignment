@@ -11,6 +11,7 @@ from resourcly.models import (
     GoldDocument,
     Issue,
     Reading,
+    RequestTrace,
     TitleBlock,
     TraceEvent,
     undefined_datums,
@@ -177,6 +178,17 @@ class DrawingService:
             self.trace.record(event)
         except Exception:
             log.exception("could not record the trace of request %s", event.request_id)
+
+
+class TraceService:
+    def __init__(self, trace: TracePort):
+        self.trace = trace
+
+    def lookup(self, request_id: str) -> RequestTrace:
+        events = self.trace.find(request_id)
+        if not events:
+            raise NotFound(f"no request '{request_id}'")
+        return RequestTrace(request_id=request_id, events=events)
 
 
 def now() -> str:
