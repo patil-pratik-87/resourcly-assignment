@@ -26,7 +26,7 @@ def ui(host: str = "127.0.0.1", port: int = 8000, gold_dir: Path | None = GoldDi
     if not settings.ui_dist.is_dir():
         typer.echo(
             f"No built UI at {settings.ui_dist}; serving the API only. "
-            "Run `npm run build` in src/ui first.",
+            "Run `npm run build` in src/frontend/annotation first.",
             err=True,
         )
     typer.echo(f"Label screen on http://{host}:{port} (gold files in {settings.gold_dir})")

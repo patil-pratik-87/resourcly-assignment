@@ -42,7 +42,7 @@ box per value, and a form beside it to fix a record, move its box, or approve it
 validated by the server and written in place, so the change shows up in `git diff`.
 
 ```sh
-(cd src/ui && npm ci && npm run build)
+(cd src/frontend/annotation && npm ci && npm run build)
 uv run resourcly ui   # http://127.0.0.1:8000
 ```
 

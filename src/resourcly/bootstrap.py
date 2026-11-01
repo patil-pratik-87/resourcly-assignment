@@ -25,7 +25,7 @@ class Settings:
     gold_dir: Path = PROJECT_ROOT / "evals" / "gold"
     splits_path: Path = PROJECT_ROOT / "evals" / "splits.toml"
     drawings_dir: Path = PROJECT_ROOT / "data" / "drawings"
-    ui_dist: Path = PROJECT_ROOT / "src" / "ui" / "dist"
+    ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "annotation" / "dist"
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
     # The version each component runs, a file in versions_dir; the app and the evals both read it

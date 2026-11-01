@@ -25,5 +25,5 @@ __pycache__/
 /out/
 
 # UI build and dependencies
-src/ui/node_modules/
-src/ui/dist/
+src/frontend/*/node_modules/
+src/frontend/*/dist/
