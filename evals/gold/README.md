@@ -35,6 +35,19 @@ uv run evals check
 Each partial gold file covers at least four callout kinds, three tolerance styles, every page with values,
 and one note or title-block entry.
 
+## Label screen
+
+The label screen is where a person reviews and extends the gold. It shows each page with a numbered
+box per value, and a form beside it to fix a record, move its box, or approve it. A save is
+validated by the server and written in place, so the change shows up in `git diff`.
+
+```sh
+(cd src/frontend/annotation && npm ci && npm run build)
+uv run resourcly ui   # http://127.0.0.1:8000
+```
+
+How to use it: [docs/label-screen.md](../../docs/label-screen.md).
+
 ## Conventions the schema cannot show
 
 - **`raw`** is the callout as printed: `⌀` for diameter, ` | ` between frame cells, unicode GD&T

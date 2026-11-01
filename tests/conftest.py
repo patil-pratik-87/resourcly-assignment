@@ -23,6 +23,7 @@ def settings(gold_dir: Path, tmp_path: Path) -> Settings:
         gold_dir=gold_dir,
         splits_path=gold_dir / "splits.toml",
         drawings_dir=PROJECT_ROOT / "data" / "drawings",
+        ui_dist=tmp_path / "no-ui",
         trace_path=tmp_path / "var" / "traces.sqlite",
         # the text-layer reader needs no model, so the tests can read drawings
         versions={"reader": "textlayer-v0"},
