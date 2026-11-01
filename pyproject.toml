@@ -34,6 +34,8 @@ filterwarnings = ["ignore:builtin type .* has no __module__ attribute:Deprecatio
 [tool.ruff]
 line-length = 100
 src = ["src", "tests", "scripts", "scripts/gold_tools"]
+# The drawing notebook is exploratory and kept as it was run
+extend-exclude = ["experiments/drawing/callout_boxes.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
