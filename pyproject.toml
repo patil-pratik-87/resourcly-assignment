@@ -34,8 +34,8 @@ filterwarnings = ["ignore:builtin type .* has no __module__ attribute:Deprecatio
 [tool.ruff]
 line-length = 100
 src = ["src", "tests", "scripts", "scripts/gold_tools"]
-# The drawing notebook is exploratory and kept as it was run
-extend-exclude = ["experiments/drawing/callout_boxes.ipynb"]
+# Research notebooks and scripts are exploratory and kept as they were run
+extend-exclude = ["experiments"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -43,8 +43,3 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.lint.isort]
 # First party even before a new module exists, as in a test written before its code
 known-first-party = ["resourcly", "tests", "common", "gold_schema", "grid", "overlay"]
-
-[tool.ruff.lint.per-file-ignores]
-# The routing notebook imports as it goes
-"experiments/routing/routing.py" = ["E402", "E501"]
-"experiments/routing/routing.ipynb" = ["E402", "E501"]
