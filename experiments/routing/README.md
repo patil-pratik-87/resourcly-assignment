@@ -10,6 +10,7 @@ experiments/routing/.venv/bin/jupytext --to ipynb experiments/routing/routing.py
 
 These experiments compare ways to decide whether a request is a technical drawing, a photo of a
 part or text, or a file that fits none of these (labelled `other` here).
+The results and the recommendation are in `research/routing/README.md`.
 
 ## Files
 

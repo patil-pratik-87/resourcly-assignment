@@ -26,3 +26,18 @@ be compared with the current one.
 - Built test-first (TDD) on a hexagonal architecture (ports and adapters). The core logic depends
   only on ports, small interfaces. Each model, file format or store is an adapter behind one of them, so
   it can be swapped without touching the core.
+
+## 2026-11-01: Routing research
+
+Chose a layered router: structure rules on the file, then a DINOv2-small probe at 90%
+confidence, then Qwen3-VL 8B for the rest. On 244 labelled requests it made 0 mistakes on the
+224 with a case, sent 2.5% to 3.9% of files to the model, and cost 34 ms median per file.
+
+- Tried: PDF structure, pixel and EXIF rules; linear probes on DINOv2, CLIP, SigLIP 2 and Docling
+  features; zero-shot CLIP and SigLIP 2; Qwen3-VL 2B to 8B; LiquidAI d1 decision models.
+- Failed: pixel and EXIF rules send phone photos of drawings to the photo case. The probe alone
+  sends reports and logos to the drawing case.
+- Open: the probe's image model, the 0.9 threshold and the answer for a file that fits no case
+  all need the customer's files.
+
+Write-up: `research/routing/README.md`.
