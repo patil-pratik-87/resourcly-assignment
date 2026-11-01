@@ -78,7 +78,7 @@ def test_a_failed_item_makes_ask_exit_with_1(tmp_path: Path) -> None:
     result = invoke("ask", "--file", str(notes))
 
     assert result.exit_code == 1
-    assert "notes.txt: failed" in result.output
+    assert "rejected-1 (notes.txt): failed" in result.output
     assert "notes.txt is not a PDF, PNG, JPEG or TIFF file" in result.output
 
 
