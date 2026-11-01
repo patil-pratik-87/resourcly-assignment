@@ -1,4 +1,6 @@
 import re
+from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
@@ -448,3 +450,45 @@ class DrawingSummary(BaseModel):
     values: int
     approved: int
     issues: int
+
+
+class Route(StrEnum):
+    """The case a request goes to. The router picks it; the user never says."""
+
+    DRAWING = "drawing"
+    PHOTO = "photo"
+    TEXT = "text"
+    # an attachment that is neither a drawing nor a picture of a part, such as a report or a logo
+    UNSUPPORTED = "unsupported"
+
+
+@dataclass(frozen=True)
+class Attachment:
+    name: str
+    media_type: str
+    data: bytes = field(repr=False)
+
+
+@dataclass(frozen=True)
+class LayerVerdict:
+    """What one router layer made of a request: a route, or None to pass it to the next layer.
+
+    The reason says why either way, and the confidence is 1 for a rule.
+    """
+
+    route: Route | None
+    reason: str
+    confidence: float | None = None
+    probabilities: dict[str, float] = field(default_factory=dict)
+
+
+class Routing(BaseModel):
+    """The router's answer to one request: the route, the layer that decided it, and why."""
+
+    request_id: str
+    route: Route
+    layer: str
+    confidence: float | None
+    reason: str
+    probabilities: dict[str, float]
+    elapsed_ms: float

@@ -9,8 +9,10 @@ version the evals measure is the version the app serves.
 | --- | --- |
 | `<component>/<name>.toml` | One version, such as `reader/textlayer-v0.toml`. |
 
-The app runs `textlayer-v0` unless told otherwise. `RESOURCLY_READER_VERSION` picks another, and
-`RESOURCLY_VERSIONS_DIR` points everything at another folder.
+The app runs the reader `textlayer-v0` and the router `stub-v0` unless told otherwise.
+`RESOURCLY_READER_VERSION` and `RESOURCLY_ROUTER_VERSION` pick others, and
+`RESOURCLY_VERSIONS_DIR` points everything at another folder. `stub-v0` decides the case with one
+rule and no model: a PDF drawn in vector paths is a drawing, an image is a photo, text alone is text.
 
 ## Add a version
 
