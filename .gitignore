@@ -7,3 +7,6 @@ __pycache__/
 /experiments/routing/.venv/
 /experiments/routing/.cache/
 /experiments/routing/data/commons/
+
+# Drawing experiments: their own environment
+/experiments/drawing/.venv/
