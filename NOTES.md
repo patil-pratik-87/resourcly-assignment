@@ -80,3 +80,18 @@ floor:
 - Traces: each call is stored under its request id; `evals show --request` prints it.
 
 Details: `docs/evals.md`.
+
+## Label screen
+
+The label screen is for reviewing and extending the gold, not for making it from scratch.
+The gold was drafted from crops and overlays; the screen is where a person checks each value
+against the page, fixes it, and approves it, or adds a value that was missed.
+
+- How: `uv run resourcly ui` shows each page with a numbered box per value and a form beside it.
+  It serves only the gold endpoints. The chat screen comes with the agent.
+- How saves stay safe: nothing is written until Save. The server validates the whole document
+  against the gold models and refuses an invalid one, listing the issues. A valid one is written
+  to a temporary file and then swapped in, so a file is never half written. Every change is
+  then a plain git diff to review before it is committed.
+
+How to use it: `docs/label-screen.md`.
