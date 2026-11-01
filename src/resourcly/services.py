@@ -19,6 +19,7 @@ from resourcly.models import (
     Routing,
     TitleBlock,
     TraceEvent,
+    guess_media_type,
     undefined_datums,
     validate_document,
 )
@@ -82,6 +83,17 @@ class GoldService:
 
     def splits(self) -> Splits:
         return self.store.load_splits()
+
+    def route_cases(self) -> list[dict[str, Any]]:
+        return self.store.load_route_cases()
+
+    def route_file_exists(self, file: str) -> bool:
+        return self.store.file_exists(f"routes/{file}")
+
+    def route_attachment(self, file: str) -> Attachment:
+        """A file the router gold names, as the attachment of a request."""
+        data = self.store.load_file(f"routes/{file}")
+        return Attachment(file, guess_media_type(file, data), data)
 
     def render_page(self, drawing: str, page: int, dpi: int) -> bytes:
         _check_name(drawing)

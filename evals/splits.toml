@@ -17,3 +17,70 @@ test = [
     "nist_ftc_10_asme1_rb",
     "nist_ftc_11_asme1_rb",
 ]
+
+# The router splits name units (the `unit` field of routes.jsonl), and each unit goes wholly to
+# one side: one NIST drawing with all its pages and copies, one NTSB report with its photos and
+# pages, one Commons file, or one written question. A router that learns, such as a probe, trains
+# on train only. The reports go one to each split. dev holds the reader's dev drawings, train four
+# of the reader's test drawings, and the Commons drawings and photos go round-robin in name order.
+[router]
+train = [
+    "ctc03",
+    "ctc05",
+    "ftc08",
+    "ftc11",
+    "ntsb_16-006",
+    "commons_20200320165124autodeskfu",
+    "commons_albertkoppelritning",
+    "commons_werkstattzeichnungdesnor",
+    "commons_altensiletest",
+    "commons_conchoidal",
+    "commons_limescaleinpipe",
+    "commons_ourbrokenvcrpart3detail7",
+]
+dev = [
+    "ctc01",
+    "ctc02",
+    "ctc04",
+    "ftc07",
+    "ftc09",
+    "ntsb_18-061",
+    "commons_abgewickeltesblech01",
+    "commons_ansichten2",
+    "commons_brokenshaftandterminalfr",
+    "commons_ductilefracturesurface60",
+    "commons_ndiexposingthecracks5123",
+    "commons_pedalarm",
+    "commons_abmessungen",
+    "text_01",
+    "text_02",
+    "text_03",
+    "text_04",
+    "text_05",
+    "text_06",
+    "text_07",
+    "text_08",
+    "text_09",
+    "text_10",
+]
+test = [
+    "ftc06",
+    "ftc10",
+    "ntsb_24-013",
+    "commons_aircompressorverticalsec",
+    "commons_exampleofsteelreinforcem",
+    "commons_castirontensiletest",
+    "commons_eprouvetteplatecasseefac",
+    "commons_ndiexposingthecracks5123808",
+    "commons_romanlockboltfindid10037",
+    "text_11",
+    "text_12",
+    "text_13",
+    "text_14",
+    "text_15",
+    "text_16",
+    "text_17",
+    "text_18",
+    "text_19",
+    "text_20",
+]

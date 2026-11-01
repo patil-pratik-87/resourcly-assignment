@@ -47,7 +47,7 @@ SplitsPath = Annotated[
     Path | None,
     typer.Option("--splits", help="TOML file naming each component's dev and test cases."),
 ]
-Component = Annotated[str, typer.Argument(help="reader")]
+Component = Annotated[str, typer.Argument(help="reader or router")]
 
 
 @app.callback()
@@ -69,7 +69,7 @@ def main(
 @app.command()
 def run(
     ctx: typer.Context,
-    component: Annotated[str | None, typer.Argument(help="reader")] = None,
+    component: Annotated[str | None, typer.Argument(help="reader or router")] = None,
     version: Annotated[str | None, typer.Option(help="A file in versions/<component>/.")] = None,
     split: Annotated[str, typer.Option(help="dev, test or all.")] = "dev",
     case_id: Annotated[
@@ -318,7 +318,9 @@ class Listing(StrEnum):
 def list_(
     ctx: typer.Context,
     what: Annotated[Listing, typer.Argument(help="What to list.")],
-    component: Annotated[str | None, typer.Argument(help="reader; cases need one.")] = None,
+    component: Annotated[
+        str | None, typer.Argument(help="reader or router; cases need one.")
+    ] = None,
     split: Annotated[str, typer.Option(help="dev, test or all, for cases.")] = "dev",
     version: Annotated[str | None, typer.Option(help="Only this version's runs.")] = None,
     limit: Annotated[int, typer.Option(help="How many runs.")] = 20,
@@ -331,7 +333,7 @@ def list_(
         _list_versions(context, component)
     elif what is Listing.cases:
         if component is None:
-            raise typer.BadParameter("cases need a component: reader")
+            raise typer.BadParameter("cases need a component: reader or router")
         _list_cases(context, component, split)
     else:
         _list_runs(context, component, version, limit)
@@ -403,8 +405,8 @@ def _list_runs(context: Context, component: str | None, version: str | None, lim
 def check(ctx: typer.Context) -> None:
     """Check every gold file and the splits; exit 1 on an error, warn about gaps.
 
-    Drawing gold goes through the package models and the rules beyond them, and the splits are
-    checked for leaks and gaps.
+    Drawing gold goes through the package models and the rules beyond them; router gold through its
+    row checks; and every split for leaks and gaps.
     """
     context: Context = ctx.obj
     with _short_errors(), open_services(context.settings) as services:
@@ -529,6 +531,9 @@ def _markdown(run: Run, results: list[CaseResult]) -> str:
         if rows:
             lines += ["", f"{name}:", "", "| gold | predicted | n |", "| --- | --- | --- |"]
             lines += [f"| {gold} | {predicted} | {n} |" for gold, predicted, n in rows]
+    for name, listed in _listings(summary):
+        lines += ["", f"{name} ({len(listed)}):", ""]
+        lines += [f"- {_listed(row)}" for row in listed]
     return "\n".join(lines) + "\n"
 
 
@@ -541,7 +546,9 @@ def _selected(run: Run) -> str | None:
 
 
 def _confusion_rows(value: Any) -> list[tuple[str, str, int]]:
-    """Rows of a confusion table stored as [[gold, predicted, n], ...]."""
+    """Rows of a confusion table stored as [[gold, predicted, n], ...] or {gold: {predicted: n}}."""
+    if isinstance(value, dict):
+        return [(g, p, n) for g, cells in value.items() for p, n in cells.items()]
     if isinstance(value, list) and all(isinstance(row, list) and len(row) == 3 for row in value):
         return [tuple(row) for row in value]
     return []
@@ -568,6 +575,29 @@ def _summary(primary: str, metrics: tuple[str, ...], run: Run) -> None:
     ]
     rows.append(["errors", f"{run.errors} of {run.n_cases}"])
     _table(["metric", "value"], rows)
+    for name, listed in _listings(summary):
+        typer.echo("")
+        typer.echo(f"{name} ({len(listed)})")
+        for row in listed:
+            typer.echo(f"  {_listed(row)}")
+
+
+def _listings(summary: dict[str, Any]) -> list[tuple[str, list[dict[str, Any]]]]:
+    """Summary entries that list cases, such as the router's mistakes, as (name, rows)."""
+    return [
+        (name, value)
+        for name, value in summary.items()
+        if isinstance(value, list) and value and all(isinstance(row, dict) for row in value)
+    ]
+
+
+def _listed(row: dict[str, Any]) -> str:
+    if {"case", "expected", "got", "layer", "reason"} <= row.keys():
+        return (
+            f"{row['case']}  expected {row['expected']}  got {row['got']}"
+            f"  by {row['layer']}: {row['reason']}"
+        )
+    return "  ".join(f"{key} {value}" for key, value in row.items())
 
 
 def _suite(component: str) -> Suite:

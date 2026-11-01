@@ -28,6 +28,16 @@ class GoldStorePort(Protocol):
         """Case ids per split per component, such as {"reader": {"dev": [...], "test": [...]}}."""
         ...
 
+    def load_route_cases(self) -> list[dict[str, Any]]:
+        """Router gold rows, one per labelled item: id, label, unit, file, text, attachment..."""
+        ...
+
+    def file_exists(self, path: str) -> bool: ...
+
+    def load_file(self, path: str) -> bytes:
+        """A file the gold names, by its path under the gold folder; NotFound if it is absent."""
+        ...
+
 
 class DrawingPagePort(Protocol):
     def list_drawings(self) -> list[str]: ...

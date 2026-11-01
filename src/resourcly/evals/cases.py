@@ -23,6 +23,57 @@ class Case:
         return hashlib.sha256(text.encode()).hexdigest()[:12]
 
 
+# A row's label is the route the router should give it; "other" items fit no case.
+ROUTES = ("drawing", "photo", "text", "other")
+ROUTE_FIELDS = ("id", "label", "unit")
+
+
+def route_cases(services: Services, split: str) -> list[Case]:
+    """One case per labelled item of evals/gold/routes.jsonl, stratified by its expected route.
+
+    A router split names units, the sources it keeps whole, and takes every case of those units.
+    A case's gold adds `expected_route` and `input`, the request to send: the item's text and the
+    file it names. A message sent with a file names that item in `attachment`. A row that
+    `evals check` reports as broken is skipped with a warning.
+    """
+    splits = _splits(services, "router", split)
+    split_of = {unit: name for name, units in splits.items() for unit in units}
+    rows = services.gold.route_cases()
+    by_id = {row["id"]: row for row in rows if isinstance(row, dict) and "id" in row}
+    cases = []
+    for row in rows:
+        problem = _route_row_problem(row, by_id)
+        if problem:
+            log.warning("%s; skipped", problem)
+            continue
+        name = split_of.get(row["unit"], "unsplit")
+        if split != "all" and name != split:
+            continue
+        expected = row["label"]
+        attached = by_id[row["attachment"]] if row.get("attachment") else row
+        gold = {
+            **row,
+            "expected_route": expected,
+            "input": {"text": row.get("text"), "file": attached.get("file")},
+        }
+        cases.append(Case(row["id"], name, expected, gold))
+    return sorted(cases, key=lambda case: case.case_id)
+
+
+def _route_row_problem(row: Any, by_id: dict[str, dict[str, Any]]) -> str | None:
+    missing = [name for name in ROUTE_FIELDS if not isinstance(row, dict) or name not in row]
+    if missing:
+        return f"a routes.jsonl row lacks {', '.join(missing)}"
+    if row["label"] not in ROUTES:
+        return (
+            f"{row['id']} has label '{row['label']}';"
+            " use drawing, photo, text or other (fits no case)"
+        )
+    if row.get("attachment") and row["attachment"] not in by_id:
+        return f"{row['id']} sends the file of '{row['attachment']}', which is not a case"
+    return None
+
+
 def reader_cases(services: Services, split: str) -> list[Case]:
     """One case per drawing gold file: "full" from drawings/, "partial" from partial/.
 
@@ -61,11 +112,12 @@ def check_gold(services: Services) -> list[tuple[str, str]]:
     """(level, message) pairs about the gold and splits; level is ok, warning or error.
 
     Each drawing's gold goes through the package models, then, once they accept it, the rules in
-    gold_rules, so one bad field is reported once, and the splits through the split checks.
+    gold_rules, so one bad field is reported once. The router gold goes through its row checks,
+    and every split through the split checks.
     """
     splits = services.gold.splits()
     found: list[tuple[str, str]] = []
-    for component in sorted(splits.keys() - {"reader"}):
+    for component in sorted(splits.keys() - {"reader", "router"}):
         found.append(("warning", f"splits.toml names an unknown component '{component}'"))
     sources = {row.drawing: row.source for row in services.gold.list_drawings() if row.has_gold}
     issues = services.gold.check_all()
@@ -87,7 +139,66 @@ def check_gold(services: Services) -> list[tuple[str, str]]:
             tally = gold_rules.tally(document)
             found.append(("ok", f"reader {drawing} ({stratum}, {split}): {tally}"))
     _unmatched("reader", reader, set(sources), found)
+    _check_routes(services, _split_of("router", splits.get("router", {}), found), found)
     return found
+
+
+def _check_routes(
+    services: Services, split_of: dict[str, str], found: list[tuple[str, str]]
+) -> None:
+    rows = services.gold.route_cases()
+    by_id = {row["id"]: row for row in rows if isinstance(row, dict) and "id" in row}
+    ids, units, files = [], set(), set()
+    for number, row in enumerate(rows, start=1):
+        missing = [name for name in ROUTE_FIELDS if not isinstance(row, dict) or name not in row]
+        if missing:
+            found.append(("error", f"router routes.jsonl line {number} lacks {', '.join(missing)}"))
+            continue
+        ids.append(row["id"])
+        problem = _route_row_problem(row, by_id)
+        if problem:
+            found.append(("error", f"router {problem}"))
+            continue
+        units.add(row["unit"])
+        if row.get("file"):
+            files.add(row["file"])
+    for case_id in sorted({i for i in ids if ids.count(i) > 1}):
+        found.append(("error", f"router case id {case_id} is used more than once"))
+    found.extend(("error", f"router {leak}") for leak in _unit_leaks(rows, by_id))
+    if ids:
+        found.append(("ok", f"router {len(ids)} case(s) in {len(units)} unit(s)"))
+    absent = sum(1 for file in files if not services.gold.route_file_exists(file))
+    if absent:
+        found.append(
+            (
+                "warning",
+                f"router {absent} of {len(files)} file(s) are not in routes/;"
+                " they are committed, so restore them from git",
+            )
+        )
+    _unmatched("router", split_of, units, found)
+
+
+def _unit_leaks(rows: list[Any], by_id: dict[str, dict[str, Any]]) -> list[str]:
+    """Rows that a split could put on two sides: a group whose items are in different units, and
+    a message whose file is in another unit than the message."""
+    sound = [row for row in rows if _route_row_problem(row, by_id) is None]
+    units_of: dict[str, set[str]] = {}
+    for row in sound:
+        units_of.setdefault(row.get("group", row["unit"]), set()).add(row["unit"])
+    leaks = [
+        f"group {group} spans units {', '.join(sorted(units))}"
+        for group, units in sorted(units_of.items())
+        if len(units) > 1
+    ]
+    for row in sound:
+        attached = by_id.get(row.get("attachment") or "")
+        if attached and attached.get("unit") != row["unit"]:
+            leaks.append(
+                f"{row['id']} is in unit {row['unit']} but its file {attached['id']}"
+                f" is in {attached.get('unit')}"
+            )
+    return leaks
 
 
 def _split_of(

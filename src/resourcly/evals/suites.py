@@ -6,7 +6,7 @@ from typing import Any
 
 from resourcly.bootstrap import Services
 from resourcly.evals import metrics
-from resourcly.evals.cases import Case, reader_cases
+from resourcly.evals.cases import Case, reader_cases, route_cases
 
 
 @dataclass(frozen=True)
@@ -140,6 +140,56 @@ def _schema_valid(prediction: Any) -> bool:
     return isinstance(prediction, dict) and not prediction.get("issues")
 
 
+def _route(services: Services, case: Case, request_id: str) -> Any:
+    """Send the case's request, its text and its file, to the router of the version under test."""
+    request = case.gold["input"]
+    attachment = services.gold.route_attachment(request["file"]) if request["file"] else None
+    routing = services.router.route(request["text"], attachment, request_id=request_id)
+    return routing.model_dump(mode="json")
+
+
+def _field(prediction: Any, name: str) -> Any:
+    return prediction.get(name) if isinstance(prediction, dict) else None
+
+
+def _score_route(case: Case, prediction: Any) -> dict[str, Any]:
+    correct = float(_field(prediction, "route") == case.gold["expected_route"])
+    return {
+        "case_score": correct,
+        "correct": correct,
+        "route": _field(prediction, "route"),
+        "layer": _field(prediction, "layer"),
+        "confidence": _field(prediction, "confidence"),
+    }
+
+
+def _explain_route(case: Case, prediction: Any) -> list[str]:
+    got = _field(prediction, "route") or "nothing"
+    lines = [f"expected {case.gold['expected_route']}, got {got}"]
+    if isinstance(prediction, dict):
+        lines.append(f"decided by the {prediction.get('layer')} layer: {prediction.get('reason')}")
+        lines.append(f"probabilities {prediction.get('probabilities')}")
+    lines.append(f"file {case.gold['input']['file'] or '(none)'}: {case.gold.get('notes') or ''}")
+    return lines
+
+
+def _summarise_routes(results: list[tuple[Case, Any]]) -> dict[str, Any]:
+    return metrics.summarise_routes(
+        [
+            metrics.RouteOutcome(
+                case_id=case.case_id,
+                expected=case.gold["expected_route"],
+                route=_field(prediction, "route"),
+                layer=_field(prediction, "layer"),
+                reason=_field(prediction, "reason"),
+                elapsed_ms=_field(prediction, "elapsed_ms"),
+                attached=bool(case.gold["input"]["file"]),
+            )
+            for case, prediction in results
+        ]
+    )
+
+
 SUITES: dict[str, Suite] = {
     "reader": Suite(
         component="reader",
@@ -159,5 +209,25 @@ SUITES: dict[str, Suite] = {
         score=_score_reading,
         summarise=_summarise_readings,
         explain=_explain_reading,
+    ),
+    "router": Suite(
+        component="router",
+        primary_metric="accuracy",
+        metrics=(
+            "accuracy",
+            "drawing_recall",
+            "photo_recall",
+            "text_recall",
+            "other_kept_out",
+            "escalation_rate",
+            "median_ms",
+        ),
+        case_columns=("route", "layer", "confidence"),
+        load=route_cases,
+        call=_route,
+        score=_score_route,
+        summarise=_summarise_routes,
+        explain=_explain_route,
+        lower_is_better=("escalation_rate", "median_ms"),
     ),
 }

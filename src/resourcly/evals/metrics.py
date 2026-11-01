@@ -2,6 +2,7 @@
 
 import math
 import re
+import statistics
 import unicodedata
 from collections import Counter
 from collections.abc import Iterable
@@ -289,3 +290,77 @@ def _kind_accuracy(confusion: dict[tuple[str, str], int]) -> float | None:
     pairs = sum(confusion.values())
     right = sum(n for (gold, predicted), n in confusion.items() if gold == predicted)
     return right / pairs if pairs else None
+
+
+LABELLED_ROUTES = ("drawing", "photo", "text")
+OTHER = "other"
+FAILED = "(error)"
+
+
+@dataclass(frozen=True)
+class RouteOutcome:
+    """One routed case. route is None when the call failed; elapsed_ms is the router's own time."""
+
+    case_id: str
+    expected: str
+    route: str | None
+    layer: str | None
+    reason: str | None
+    elapsed_ms: float | None
+    attached: bool
+
+
+def summarise_routes(outcomes: list[RouteOutcome]) -> dict[str, Any]:
+    """How well a router picked the case, what each layer decided, and what it cost.
+
+    Accuracy and the recall of each route cover the labelled requests: those whose case is drawing,
+    photo or text. The other files fit no case, and whether they should is a product choice, so
+    they are scored apart as the share the router kept out (routed to other), and those it sent
+    to a real case, which would reach that case's reader, are listed in other_misrouted. The
+    escalation rate and the median time cover the labelled requests with a file, since a text
+    question is always decided by its first rule. Escalation is the share decided by the vlm
+    layer. A metric with nothing to measure is None.
+    """
+    labelled = [o for o in outcomes if o.expected in LABELLED_ROUTES]
+    attached = [o for o in labelled if o.attached]
+    other = [o for o in outcomes if o.expected == OTHER]
+    summary: dict[str, Any] = {
+        "cases": len(outcomes),
+        "accuracy": _share(labelled, lambda o: o.route == o.expected),
+    }
+    for route in LABELLED_ROUTES:
+        wanted = [o for o in labelled if o.expected == route]
+        summary[f"{route}_recall"] = _share(wanted, lambda o, r=route: o.route == r)
+    summary["other_cases"] = len(other)
+    summary["other_kept_out"] = _share(other, lambda o: o.route == OTHER)
+    summary["escalation_rate"] = _share(attached, lambda o: o.layer == "vlm")
+    times = [o.elapsed_ms for o in attached if o.elapsed_ms is not None]
+    summary["median_ms"] = statistics.median(times) if times else None
+    by_id = sorted(outcomes, key=lambda o: o.case_id)
+    summary["mistakes"] = [
+        _row(o) for o in by_id if o.expected in LABELLED_ROUTES and o.route != o.expected
+    ]
+    summary["other_misrouted"] = [
+        _row(o) for o in by_id if o.expected == OTHER and o.route in LABELLED_ROUTES
+    ]
+    confusion: dict[str, Counter] = {}
+    for o in outcomes:
+        confusion.setdefault(o.expected, Counter())[o.route or FAILED] += 1
+    summary["confusion"] = {
+        expected: dict(sorted(cells.items())) for expected, cells in sorted(confusion.items())
+    }
+    return summary
+
+
+def _share(items: list[RouteOutcome], keep: Any) -> float | None:
+    return sum(1 for item in items if keep(item)) / len(items) if items else None
+
+
+def _row(outcome: RouteOutcome) -> dict[str, Any]:
+    return {
+        "case": outcome.case_id,
+        "expected": outcome.expected,
+        "got": outcome.route or FAILED,
+        "layer": outcome.layer or "-",
+        "reason": outcome.reason,
+    }
