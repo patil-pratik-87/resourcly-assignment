@@ -1,0 +1,1052 @@
+{
+  "drawing": "nist_ctc_03_asme1_rc",
+  "page_count": 1,
+  "title_block": {
+    "title": "Test Model 3",
+    "revision": "C",
+    "units": "in",
+    "units_source": "inferred",
+    "drawing_number": "nist_ctc_03_asme1_rc",
+    "sheet_note": "PMI Complex Test Case 3. Includes Atomic Test Cases - 6, 13, 14, 20, 27, 32, 36, 39, 45, 46",
+    "standard": null
+  },
+  "features": [
+    {
+      "id": "top_tab_holes",
+      "type": "pattern",
+      "label": "2X holes in the left mounting lip",
+      "description": "Two small round holes in the mounting lip at the top left of the bracket; the leader points to the nearer one.",
+      "page": 1
+    },
+    {
+      "id": "hole_large_upper",
+      "type": "hole",
+      "label": "large hole, upper, main panel",
+      "description": "The upper of the two large round holes in the main flat panel, near the right bend.",
+      "page": 1
+    },
+    {
+      "id": "slot_lower",
+      "type": "slot",
+      "label": "lower slot in the main panel",
+      "description": "The lower of the two long straight slots with rounded ends in the main panel.",
+      "page": 1
+    },
+    {
+      "id": "main_panel",
+      "type": "plane",
+      "label": "main panel face",
+      "description": "The large flat face of the bracket's main panel, the one with the slots and holes. It is datum feature D.",
+      "page": 1
+    },
+    {
+      "id": "switch_holes",
+      "type": "pattern",
+      "label": "4X switch mounting holes",
+      "description": "Row of four small round holes along the lower edge of the main panel, used to mount a switch.",
+      "page": 1
+    },
+    {
+      "id": "datum_a_faces",
+      "type": "plane",
+      "label": "two coplanar mounting lips",
+      "description": "The two flat mounting lips of the hat-section bracket, one at the top left and one at the right. They lie in one plane, parallel to the main panel (datum D) and 3.0 in below it, and together form datum A. The leader points to the right-hand lip.",
+      "page": 1
+    },
+    {
+      "id": "hole_flange_upper",
+      "type": "hole",
+      "label": "upper hole, right mounting lip",
+      "description": "Small round hole near the top of the right-hand mounting lip. Its axis is datum C.",
+      "page": 1
+    },
+    {
+      "id": "hole_bottom_flange",
+      "type": "hole",
+      "label": "large hole, bottom flange",
+      "description": "Large round hole in the middle of the angled bottom flange, surrounded by four small holes; the model coordinate system sits at its centre. It is datum feature F.",
+      "page": 1
+    },
+    {
+      "id": "bottom_flange_face",
+      "type": "plane",
+      "label": "bottom flange face",
+      "description": "The flat face of the angled flange at the lower left of the bracket. It is datum feature E and also carries angularity and flatness controls.",
+      "page": 1
+    },
+    {
+      "id": "hole_flange_lower",
+      "type": "hole",
+      "label": "lower hole, right mounting lip",
+      "description": "Small round hole near the bottom of the right-hand mounting lip, where a coordinate triad is drawn. Its axis is datum B.",
+      "page": 1
+    },
+    {
+      "id": "relief_notches",
+      "type": "pattern",
+      "label": "4X bend relief notches",
+      "description": "Small notches cut at the ends of the bends so the sheet can fold; the distance from the edge face to the notch is dimensioned at four places.",
+      "page": 1
+    },
+    {
+      "id": "hole_large_lower",
+      "type": "hole",
+      "label": "large hole, lower, main panel",
+      "description": "The lower of the two large round holes in the main panel, near the bottom bend.",
+      "page": 1
+    }
+  ],
+  "values": [
+    {
+      "id": "ctc03-01",
+      "raw": "2X ⌀.438 ±.005",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.438,
+      "unit": "in",
+      "feature_id": "top_tab_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.433,
+        "upper": 0.443
+      },
+      "meaning": "Each of the two left-lip holes must be 0.438 in across, plus or minus 0.005 in, so between 0.433 and 0.443 in.",
+      "page": 1,
+      "bbox": [
+        0.261,
+        0.114,
+        0.327,
+        0.169
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-02",
+      "raw": "⌖ ⌀.05Ⓜ | A | BⓂ | CⓂ",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "top_tab_holes",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "BⓂ",
+        "CⓂ"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Position: each left-lip hole's axis must lie inside a 0.05 in diameter cylinder at its true location when the hole is at its smallest size (MMC), measured from datum A and from datums B and C at their maximum material boundary.",
+      "page": 1,
+      "bbox": [
+        0.216,
+        0.096,
+        0.326,
+        0.195
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-03",
+      "raw": "⌀2.00 ±.01",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 2.0,
+      "unit": "in",
+      "feature_id": "hole_large_upper",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 1.99,
+        "upper": 2.01
+      },
+      "meaning": "The upper large hole must be 2.00 in across, plus or minus 0.01 in, so between 1.99 and 2.01 in.",
+      "page": 1,
+      "bbox": [
+        0.509,
+        0.267,
+        0.555,
+        0.306
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-04",
+      "raw": "⌖ ⌀.06 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "hole_large_upper",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Position: the upper large hole's axis must lie inside a 0.06 in diameter cylinder at its true location, measured from datums D, B and C.",
+      "page": 1,
+      "bbox": [
+        0.488,
+        0.265,
+        0.567,
+        0.34
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-05",
+      "raw": "(.750)",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "reference",
+      "value": 0.75,
+      "unit": "in",
+      "feature_id": "slot_lower",
+      "applies_to": "width of the slot",
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference dimension: the lower slot is about 0.750 in wide; it is for information only and is not inspected.",
+      "page": 1,
+      "bbox": [
+        0.287,
+        0.322,
+        0.312,
+        0.349
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-06",
+      "raw": "⌓ .03 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "main_panel",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Profile of a surface: the main panel face must lie within a 0.03 in band around its true shape, located from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.223,
+        0.395,
+        0.307,
+        0.458
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-07",
+      "raw": "D",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "main_panel",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature D: the main panel face, attached to the profile frame, is a reference for other controls.",
+      "page": 1,
+      "bbox": [
+        0.225,
+        0.437,
+        0.25,
+        0.457
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-08",
+      "raw": "4X ⌀.625 ±.005",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.625,
+      "unit": "in",
+      "feature_id": "switch_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.62,
+        "upper": 0.63
+      },
+      "meaning": "Each of the four switch holes must be 0.625 in across, plus or minus 0.005 in, so between 0.620 and 0.630 in.",
+      "page": 1,
+      "bbox": [
+        0.187,
+        0.463,
+        0.252,
+        0.518
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-09",
+      "raw": "⌖ ⌀.05Ⓜ | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "switch_holes",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Position: each switch hole's axis must lie inside a 0.05 in diameter cylinder at its true location when the hole is at its smallest size (MMC), measured from datums D, B and C.",
+      "page": 1,
+      "bbox": [
+        0.187,
+        0.478,
+        0.274,
+        0.563
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-10",
+      "raw": "SWITCH MOUNTING LOCATIONS",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "switch_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Text attached under the position frame saying the four holes are where the switch is mounted.",
+      "page": 1,
+      "bbox": [
+        0.185,
+        0.502,
+        0.273,
+        0.576
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-11",
+      "raw": "⌓ .01",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "datum_a_faces",
+      "applies_to": "2 coplanar surfaces",
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Profile of a surface with no datum: the two coplanar mounting lips must together lie within a 0.01 in band, which also makes them flat and in one plane.",
+      "page": 1,
+      "bbox": [
+        0.801,
+        0.403,
+        0.851,
+        0.437
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-12",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "datum_a_faces",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A: the two coplanar mounting lips form the primary reference plane.",
+      "page": 1,
+      "bbox": [
+        0.78,
+        0.426,
+        0.805,
+        0.445
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-13",
+      "raw": "2 COPLANAR SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "datum_a_faces",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Text under the profile frame saying the control and datum A apply to two surfaces that lie in one plane.",
+      "page": 1,
+      "bbox": [
+        0.801,
+        0.429,
+        0.874,
+        0.482
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-14",
+      "raw": "C",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "hole_flange_upper",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature C: the axis of the upper hole in the right mounting lip is a reference.",
+      "page": 1,
+      "bbox": [
+        0.774,
+        0.518,
+        0.787,
+        0.545
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-15",
+      "raw": "⌀.438 ±.005",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.438,
+      "unit": "in",
+      "feature_id": "hole_flange_upper",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.433,
+        "upper": 0.443
+      },
+      "meaning": "The upper lip hole must be 0.438 in across, plus or minus 0.005 in, so between 0.433 and 0.443 in.",
+      "page": 1,
+      "bbox": [
+        0.794,
+        0.51,
+        0.844,
+        0.553
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-16",
+      "raw": "⌖ ⌀.02 | A | B",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "hole_flange_upper",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Position: the upper lip hole's axis must lie inside a 0.02 in diameter cylinder at its true location, measured from datums A and B.",
+      "page": 1,
+      "bbox": [
+        0.791,
+        0.519,
+        0.858,
+        0.588
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-17",
+      "raw": "⌀1.065 ±.003",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 1.065,
+      "unit": "in",
+      "feature_id": "hole_bottom_flange",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 1.062,
+        "upper": 1.068
+      },
+      "meaning": "The large bottom-flange hole must be 1.065 in across, plus or minus 0.003 in, so between 1.062 and 1.068 in.",
+      "page": 1,
+      "bbox": [
+        0.29,
+        0.637,
+        0.347,
+        0.686
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-18",
+      "raw": "⊥ ⌀.01 | E",
+      "callout": "feature_control_frame",
+      "kind": "perpendicularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "hole_bottom_flange",
+      "applies_to": null,
+      "datums": [
+        "E"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Perpendicularity: the large bottom-flange hole's axis must lie inside a 0.01 in diameter cylinder that is exactly square to datum E.",
+      "page": 1,
+      "bbox": [
+        0.278,
+        0.649,
+        0.341,
+        0.71
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-19",
+      "raw": "F",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "hole_bottom_flange",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature F: the large bottom-flange hole is labelled datum F, though no frame on this sheet refers to it.",
+      "page": 1,
+      "bbox": [
+        0.28,
+        0.704,
+        0.299,
+        0.736
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-20",
+      "raw": "Datum Feature F not referenced - justifies placing MCS at center of large hole on flange",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "hole_bottom_flange",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Explanatory note: datum F is not used by any control; it exists only to justify putting the model coordinate system at the centre of the large flange hole.",
+      "page": 1,
+      "bbox": [
+        0.104,
+        0.684,
+        0.23,
+        0.761
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-21",
+      "raw": "∠ .04 | A",
+      "callout": "feature_control_frame",
+      "kind": "angularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "bottom_flange_face",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Angularity: the bottom flange face must lie between two parallel planes 0.04 in apart, tilted at the model's basic angle to datum A.",
+      "page": 1,
+      "bbox": [
+        0.302,
+        0.714,
+        0.347,
+        0.802
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-22",
+      "raw": "▱ .005 / .25 X .25",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.005,
+      "unit": "in",
+      "feature_id": "bottom_flange_face",
+      "applies_to": "any 0.25 x 0.25 in area of the face",
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.005
+      },
+      "meaning": "Flatness on a unit basis: any 0.25 in by 0.25 in square patch of the bottom flange face must be flat within 0.005 in.",
+      "page": 1,
+      "bbox": [
+        0.314,
+        0.745,
+        0.385,
+        0.888
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-23",
+      "raw": "⌓ .06 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "bottom_flange_face",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Profile of a surface: the bottom flange face must lie within a 0.06 in band around its true shape, located from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.359,
+        0.771,
+        0.423,
+        0.894
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-24",
+      "raw": "E",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "bottom_flange_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature E: the bottom flange face, attached to the profile frame, is a reference for the hole's perpendicularity.",
+      "page": 1,
+      "bbox": [
+        0.405,
+        0.841,
+        0.426,
+        0.87
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-25",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "hole_flange_lower",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B: the axis of the lower hole in the right mounting lip is a reference.",
+      "page": 1,
+      "bbox": [
+        0.774,
+        0.706,
+        0.788,
+        0.733
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-26",
+      "raw": "⌀.438 ±.005",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.438,
+      "unit": "in",
+      "feature_id": "hole_flange_lower",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.433,
+        "upper": 0.443
+      },
+      "meaning": "The lower lip hole must be 0.438 in across, plus or minus 0.005 in, so between 0.433 and 0.443 in.",
+      "page": 1,
+      "bbox": [
+        0.788,
+        0.69,
+        0.84,
+        0.737
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-27",
+      "raw": "⊥ ⌀.01 | A",
+      "callout": "feature_control_frame",
+      "kind": "perpendicularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "hole_flange_lower",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Perpendicularity: the lower lip hole's axis must lie inside a 0.01 in diameter cylinder that is exactly square to datum A.",
+      "page": 1,
+      "bbox": [
+        0.79,
+        0.702,
+        0.845,
+        0.767
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-28",
+      "raw": "4X .82 ±.06",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.82,
+      "unit": "in",
+      "feature_id": "relief_notches",
+      "applies_to": "distance from the edge face to the notch, measured from the dimension origin end",
+      "datums": [],
+      "limits": {
+        "lower": 0.76,
+        "upper": 0.88
+      },
+      "meaning": "At four places, the distance from the edge face (the end marked with the origin symbol) to the bend relief notch must be 0.82 in, plus or minus 0.06 in.",
+      "page": 1,
+      "bbox": [
+        0.7,
+        0.761,
+        0.75,
+        0.802
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-29",
+      "raw": "⌀1.500 ±.005",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 1.5,
+      "unit": "in",
+      "feature_id": "hole_large_lower",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 1.495,
+        "upper": 1.505
+      },
+      "meaning": "The lower large hole must be 1.500 in across, plus or minus 0.005 in, so between 1.495 and 1.505 in.",
+      "page": 1,
+      "bbox": [
+        0.638,
+        0.792,
+        0.694,
+        0.837
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-30",
+      "raw": "⌖ ⌀.08 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.08,
+      "unit": "in",
+      "feature_id": "hole_large_lower",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.08
+      },
+      "meaning": "Position: the lower large hole's axis must lie inside a 0.08 in diameter cylinder at its true location, measured from datums D, B and C.",
+      "page": 1,
+      "bbox": [
+        0.636,
+        0.802,
+        0.714,
+        0.88
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-31",
+      "raw": "⌖ .03 | D | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "hole_large_lower",
+      "applies_to": "location in the direction of the dimension line (frame attached to a dimension line with no value)",
+      "datums": [
+        "D",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Unidirectional position: in the one direction shown by the dimension line, the lower large hole's axis must lie between two parallel planes 0.03 in apart at its true location, measured from datums D, B and C.",
+      "page": 1,
+      "bbox": [
+        0.593,
+        0.82,
+        0.662,
+        0.89
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-32",
+      "raw": "NIST PMI Test Models - 2012",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Series header: the sheet belongs to the 2012 NIST PMI test model set.",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-33",
+      "raw": "Test Model 3",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Title of the sheet: NIST test model 3.",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.083,
+        0.157,
+        0.108
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-34",
+      "raw": "PMI Complex Test Case 3",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note naming the test case: complex test case 3 (CTC-03).",
+      "page": 1,
+      "bbox": [
+        0.411,
+        0.911,
+        0.589,
+        0.933
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-35",
+      "raw": "Includes Atomic Test Cases - 6, 13, 14, 20, 27, 32, 36, 39, 45, 46",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note listing the NIST atomic test cases whose annotations appear on this sheet.",
+      "page": 1,
+      "bbox": [
+        0.28,
+        0.935,
+        0.72,
+        0.957
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-36",
+      "raw": "Rev C",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: C.",
+      "page": 1,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc03-37",
+      "raw": "nist_ctc_03_asme1_rc",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Drawing number (file identifier) printed along the right border.",
+      "page": 1,
+      "bbox": [
+        0.961,
+        0.784,
+        0.975,
+        0.947
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    }
+  ]
+}

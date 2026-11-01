@@ -1,0 +1,475 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Feature": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "snake_case, unique in the drawing.",
+          "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "hole",
+            "cylinder",
+            "plane",
+            "slot",
+            "boss",
+            "thread",
+            "chamfer",
+            "fillet",
+            "edge",
+            "pattern",
+            "other"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "label",
+        "description",
+        "page"
+      ],
+      "title": "Feature",
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "properties": {
+        "lower": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Lower"
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Upper"
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "title": "Limits",
+      "type": "object"
+    },
+    "TitleBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "units": {
+          "anyOf": [
+            {
+              "enum": [
+                "mm",
+                "in"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units"
+        },
+        "units_source": {
+          "anyOf": [
+            {
+              "enum": [
+                "stated",
+                "inferred"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units Source"
+        },
+        "drawing_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Drawing Number"
+        },
+        "sheet_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheet Note"
+        },
+        "standard": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard"
+        }
+      },
+      "title": "TitleBlock",
+      "type": "object"
+    },
+    "Value": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "<drawing short>-<nn>, e.g. ctc01-15",
+          "pattern": "^[a-z0-9]+-\\d{2,}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "raw": {
+          "description": "Exactly as printed, with unicode GD&T symbols and | between frame cells.",
+          "minLength": 1,
+          "title": "Raw",
+          "type": "string"
+        },
+        "callout": {
+          "enum": [
+            "dimension",
+            "feature_control_frame",
+            "datum_feature_symbol",
+            "datum_target",
+            "note",
+            "title_block",
+            "surface_texture",
+            "thread"
+          ],
+          "title": "Callout",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "tolerance_style": {
+          "enum": [
+            "limits",
+            "plus_minus",
+            "unilateral",
+            "bilateral_unequal",
+            "basic",
+            "reference",
+            "geometric_zone",
+            "none"
+          ],
+          "title": "Tolerance Style",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A number, [lower, upper] for a limit dimension, or null with no number.",
+          "title": "Value"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "enum": [
+                "mm",
+                "in",
+                "deg"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "feature_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Points into features; null only for title_block values.",
+          "title": "Feature Id"
+        },
+        "applies_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applies To"
+        },
+        "datums": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Datums",
+          "type": "array"
+        },
+        "limits": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Limits"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "meaning": {
+          "title": "Meaning",
+          "type": "string"
+        },
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "bbox": {
+          "description": "[x0, y0, x1, y1] as fractions of the rendered page width and height.",
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number",
+          "description": "How sure the labeller is. Gold needs it; a reading sets null, as no reader measures it"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "approved"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "raw",
+        "callout",
+        "kind",
+        "tolerance_style",
+        "value",
+        "unit",
+        "feature_id",
+        "limits",
+        "meaning",
+        "page",
+        "bbox",
+        "confidence"
+      ],
+      "title": "Value",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Every value on one drawing, its feature and what it means, in ASME Y14.5 terms.",
+  "properties": {
+    "drawing": {
+      "description": "PDF file stem, e.g. nist_ctc_01_asme1_rd.",
+      "minLength": 1,
+      "title": "Drawing",
+      "type": "string"
+    },
+    "page_count": {
+      "minimum": 1,
+      "title": "Page Count",
+      "type": "integer"
+    },
+    "page_coverage": {
+      "anyOf": [
+        {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The pages labelled in full, in ascending order; absent means every page.",
+      "title": "Page Coverage"
+    },
+    "title_block": {
+      "$ref": "#/$defs/TitleBlock",
+      "default": {
+        "title": null,
+        "revision": null,
+        "units": null,
+        "units_source": null,
+        "drawing_number": null,
+        "sheet_note": null,
+        "standard": null
+      }
+    },
+    "features": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Feature"
+      },
+      "title": "Features",
+      "type": "array"
+    },
+    "values": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Value"
+      },
+      "title": "Values",
+      "type": "array"
+    }
+  },
+  "required": [
+    "drawing",
+    "page_count"
+  ],
+  "title": "Drawing gold document",
+  "type": "object"
+}

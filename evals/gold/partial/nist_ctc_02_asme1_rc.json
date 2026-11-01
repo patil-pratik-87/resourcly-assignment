@@ -1,0 +1,334 @@
+{
+  "drawing": "nist_ctc_02_asme1_rc",
+  "page_count": 3,
+  "title_block": {
+    "title": "Test Model 2",
+    "revision": "C",
+    "units": "mm",
+    "units_source": "inferred",
+    "drawing_number": "nist_ctc_02_asme1_rc",
+    "sheet_note": "PMI Complex Test Case 2 - View 1 (of 3). Includes Atomic Test Cases - 28, 29, 43, 47, 50; PMI Complex Test Case 2 - View 2 (of 3). Includes Atomic Test Cases - 26, 31, 41; PMI Complex Test Case 2 - View 3 (of 3). Includes Atomic Test Cases - 34, 35",
+    "standard": "ASME Y14.5M-1994 (dimensioning and tolerancing); ASME Y14.41-2003 (dataset)"
+  },
+  "features": [
+    {
+      "id": "housing",
+      "type": "other",
+      "label": "whole housing",
+      "description": "The part as a whole. General notes apply to all of it.",
+      "page": 1
+    },
+    {
+      "id": "top_face",
+      "type": "plane",
+      "label": "top face of the housing",
+      "description": "The large flat top face of the housing in view 1. Datum target point A1 sits on it, near the back corner.",
+      "page": 1
+    },
+    {
+      "id": "boss_cbore",
+      "type": "hole",
+      "label": "counterbore in the two side bosses (2X)",
+      "description": "Large round counterbore in the face of each of the two cylindrical bosses on the side walls of the housing. The 2X covers both bosses.",
+      "page": 1
+    },
+    {
+      "id": "front_wall",
+      "type": "plane",
+      "label": "front side wall below the right boss",
+      "description": "Flat front wall of the housing below the right-hand boss in view 1. A short supplemental line drawn on it marks the line element that the profile-of-a-line control applies to.",
+      "page": 1
+    },
+    {
+      "id": "pocket_rim",
+      "type": "plane",
+      "label": "raised rim face around the top pocket",
+      "description": "Flat raised rim around the stepped pocket in the top of the housing, carrying the ring of small bolt holes (view 2).",
+      "page": 2
+    },
+    {
+      "id": "boss_face_right",
+      "type": "plane",
+      "label": "end face inside the right side boss",
+      "description": "Flat face at the centre of the right-hand side boss in view 2. The hatched circle on it is datum target area K1.",
+      "page": 2
+    },
+    {
+      "id": "lug_face_right",
+      "type": "plane",
+      "label": "face of the right mounting lug",
+      "description": "Flat face of the tall mounting lug with two holes on the right of view 3, next to the open bolting flange.",
+      "page": 3
+    },
+    {
+      "id": "flange_face",
+      "type": "plane",
+      "label": "bolting flange face",
+      "description": "Flat face of the rectangular bolting flange around the open side of the housing in view 3, with its ring of small holes. It is datum feature D.",
+      "page": 3
+    }
+  ],
+  "values": [
+    {
+      "id": "ctc02-01",
+      "raw": "A1",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "top_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target point A1: one of the three points on the top face (A1, A2, A3) that together set up datum A.",
+      "page": 1,
+      "bbox": [
+        0.413,
+        0.132,
+        0.447,
+        0.181
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-02",
+      "raw": "2X ⌀100 ±0.15",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 100,
+      "unit": "mm",
+      "feature_id": "boss_cbore",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 99.85,
+        "upper": 100.15
+      },
+      "meaning": "Each of the two side-boss counterbores must be 100 mm in diameter plus or minus 0.15 mm, so between 99.85 and 100.15 mm.",
+      "page": 1,
+      "bbox": [
+        0.383,
+        0.593,
+        0.461,
+        0.663
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-03",
+      "raw": "⌖ ⌀1.5Ⓜ | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 1.5,
+      "unit": "mm",
+      "feature_id": "boss_cbore",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.5
+      },
+      "meaning": "Position at maximum material condition: the axis of each counterbore must lie in a 1.5 mm diameter cylinder at its true position from datums A, B and C; the zone grows as the bore departs from its smallest size.",
+      "page": 1,
+      "bbox": [
+        0.383,
+        0.611,
+        0.486,
+        0.714
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-04",
+      "raw": "⌒ 0.25 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_line",
+      "tolerance_style": "geometric_zone",
+      "value": 0.25,
+      "unit": "mm",
+      "feature_id": "front_wall",
+      "applies_to": "the line element drawn on the wall as supplemental geometry",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.25
+      },
+      "meaning": "Profile of a line: along the marked line element, the wall's cross-section must lie between two lines 0.25 mm apart around its true shape, located from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.764,
+        0.746,
+        0.855,
+        0.847
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-05",
+      "raw": "3. ASME Y14.5M-1994 APPLIES TO DIMENSIONING AND TOLERANCING.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "housing",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 3: dimensions and tolerances are read under ASME Y14.5M-1994.",
+      "page": 1,
+      "bbox": [
+        0.066,
+        0.311,
+        0.279,
+        0.345
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-06",
+      "raw": "Test Model 2",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Title of the sheet: NIST test model 2.",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.083,
+        0.157,
+        0.108
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-07",
+      "raw": "⌓ 2.5Ⓤ0.5 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 2.5,
+      "unit": "mm",
+      "feature_id": "pocket_rim",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 2.5
+      },
+      "meaning": "Profile of a surface, unequally disposed: the rim face must lie in a 2.5 mm wide band around its true shape, located from datums A, B and C, with 0.5 mm of the band on the outside of the material and 2.0 mm inside.",
+      "page": 2,
+      "bbox": [
+        0.272,
+        0.111,
+        0.388,
+        0.216
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-08",
+      "raw": "⌀85 K1",
+      "callout": "datum_target",
+      "kind": "datum_target",
+      "tolerance_style": "basic",
+      "value": 85,
+      "unit": "mm",
+      "feature_id": "boss_face_right",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum target area K1: a circular area 85 mm in diameter (basic) on the boss end face, used to set up datum K.",
+      "page": 2,
+      "bbox": [
+        0.715,
+        0.745,
+        0.745,
+        0.793
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-09",
+      "raw": "⌓ 0.5 | D | EⓂ | FⓂ",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.5,
+      "unit": "mm",
+      "feature_id": "lug_face_right",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "EⓂ",
+        "FⓂ"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.5
+      },
+      "meaning": "Profile of a surface: the lug face must lie in a 0.5 mm band around its true shape, located from datum D and from datum features E and F at their maximum material boundary.",
+      "page": 3,
+      "bbox": [
+        0.6,
+        0.351,
+        0.714,
+        0.458
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ctc02-10",
+      "raw": "D",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "flange_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature D: the bolting flange face is the primary datum for the D, E, F frames. The symbol hangs from the flatness frame that controls this face.",
+      "page": 3,
+      "bbox": [
+        0.803,
+        0.601,
+        0.819,
+        0.637
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    }
+  ]
+}

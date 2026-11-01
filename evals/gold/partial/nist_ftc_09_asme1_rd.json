@@ -1,0 +1,345 @@
+{
+  "drawing": "nist_ftc_09_asme1_rd",
+  "page_count": 4,
+  "title_block": {
+    "title": "PMI Fully-Toleranced Test Case 9",
+    "revision": "D",
+    "units": "in",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_09_asme1_rd",
+    "sheet_note": "PMI Fully-Toleranced Test Case 9 - View A. Includes Atomic Test Cases - 59, 61; PMI Fully-Toleranced Test Case 9 - View B. Includes Atomic Test Cases - 75, 96, 97; PMI Fully-Toleranced Test Case 9 - View C. Includes Atomic Test Cases - 82; PMI Fully-Toleranced Test Case 9 - View D. Includes Atomic Test Cases - 81, 95, 98",
+    "standard": "ASME Y14.5M-1994 (dimensioning and tolerancing); ASME Y14.41-2003 (dataset)"
+  },
+  "features": [
+    {
+      "id": "part",
+      "type": "other",
+      "label": "whole plate",
+      "description": "The sheet-metal plate as a whole. General notes apply to all of it.",
+      "page": 1
+    },
+    {
+      "id": "holes_250",
+      "type": "hole",
+      "label": "three holes near the back left (3X)",
+      "description": "Three round holes near the back left edge of the plate in view A; the leader points to one of them.",
+      "page": 1
+    },
+    {
+      "id": "hole_left",
+      "type": "hole",
+      "label": "hole at the left end",
+      "description": "Round hole near the left end of the plate in view A. Its axis is datum feature C.",
+      "page": 1
+    },
+    {
+      "id": "top_face",
+      "type": "plane",
+      "label": "top face of the plate",
+      "description": "The large flat top face of the plate (view A). It is datum feature A.",
+      "page": 1
+    },
+    {
+      "id": "short_slots",
+      "type": "slot",
+      "label": "two short slots near the back edge (2X)",
+      "description": "The two shorter straight slots with round ends near the back edge of the plate (view B).",
+      "page": 2
+    },
+    {
+      "id": "centre_cutout",
+      "type": "hole",
+      "label": "large cutout in the middle",
+      "description": "Large roughly rectangular through cutout with round lobes at its corners, in the middle of the plate (view B).",
+      "page": 2
+    },
+    {
+      "id": "keyed_hole",
+      "type": "hole",
+      "label": "round hole with a key notch",
+      "description": "Round through hole with a small key notch on one side, seen enlarged in view C. Its axis is datum feature G.",
+      "page": 3
+    },
+    {
+      "id": "holes_315",
+      "type": "hole",
+      "label": "two holes with dual-unit callout (2X)",
+      "description": "Two round holes in the right half of the plate in view D, the ones dimensioned in both inches and millimetres.",
+      "page": 4
+    },
+    {
+      "id": "holes_156",
+      "type": "hole",
+      "label": "two small holes near the front left (2X)",
+      "description": "The lower pair of small round holes near the large hole at the front left of view D.",
+      "page": 4
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc09-01",
+      "raw": "3X ⌀.250 +.003/-.000",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "unilateral",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "holes_250",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.25,
+        "upper": 0.253
+      },
+      "meaning": "Each of the three holes may be .250 in in diameter at least and .253 in at most (tolerance only upward).",
+      "page": 1,
+      "bbox": [
+        0.448,
+        0.279,
+        0.528,
+        0.344
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-02",
+      "raw": "⌀.234 ±.008",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.234,
+      "unit": "in",
+      "feature_id": "hole_left",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.226,
+        "upper": 0.242
+      },
+      "meaning": "The hole diameter must be .234 in plus or minus .008 in, so between .226 and .242 in.",
+      "page": 1,
+      "bbox": [
+        0.309,
+        0.476,
+        0.371,
+        0.526
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-03",
+      "raw": "▱ .01",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "top_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Flatness: every point of the plate's top face must lie between two parallel planes .01 in apart; no datum is used.",
+      "page": 1,
+      "bbox": [
+        0.366,
+        0.587,
+        0.416,
+        0.641
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-04",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "top_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A: the plate's top face is the primary reference. The symbol hangs from the flatness frame that controls this face.",
+      "page": 1,
+      "bbox": [
+        0.381,
+        0.645,
+        0.397,
+        0.68
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-05",
+      "raw": "5. MATERIAL: (.1195 THICK) 11 GA 304 SST SHT, ASTM A240.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 5: the part is 11 gauge (.1195 in thick) type 304 stainless steel sheet to ASTM A240.",
+      "page": 1,
+      "bbox": [
+        0.054,
+        0.455,
+        0.266,
+        0.492
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-06",
+      "raw": "2X 1.00 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 1,
+      "unit": "in",
+      "feature_id": "short_slots",
+      "applies_to": "overall length of each slot",
+      "datums": [],
+      "limits": {
+        "lower": 0.98,
+        "upper": 1.02
+      },
+      "meaning": "Each of the two short slots must be 1.00 in long plus or minus .02 in, so between .98 and 1.02 in.",
+      "page": 2,
+      "bbox": [
+        0.389,
+        0.197,
+        0.458,
+        0.252
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-07",
+      "raw": "⌓ .02 | A | FⓂ (all around)",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "centre_cutout",
+      "applies_to": "the whole outline of the cutout (all-around circle on the leader)",
+      "datums": [
+        "A",
+        "FⓂ"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Profile of a surface, all around: the cutout's walls must lie in a .02 in band around their true shape, located from datum A and from datum feature F at its maximum material boundary.",
+      "page": 2,
+      "bbox": [
+        0.249,
+        0.612,
+        0.346,
+        0.686
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-08",
+      "raw": "⌖ ⌀.040 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "keyed_hole",
+      "applies_to": "top row of a two-frame stack under ⌀.375 ±.008",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Position: the axis of the keyed hole must lie in a .040 in diameter cylinder at its true position from datums A, B and C.",
+      "page": 3,
+      "bbox": [
+        0.684,
+        0.407,
+        0.816,
+        0.488
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-09",
+      "raw": "2X ⌀.315 ±.008 [8 ±0.2]",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.315,
+      "unit": "in",
+      "feature_id": "holes_315",
+      "applies_to": "the bracketed values repeat the size in millimetres (note 4)",
+      "datums": [],
+      "limits": {
+        "lower": 0.307,
+        "upper": 0.323
+      },
+      "meaning": "Each of the two holes must be .315 in plus or minus .008 in, so between .307 and .323 in; the bracket gives the same size in millimetres, 8 mm plus or minus 0.2 mm.",
+      "page": 4,
+      "bbox": [
+        0.729,
+        0.597,
+        0.844,
+        0.7
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc09-10",
+      "raw": "⌖ ⌀.025Ⓜ | A | DⓂ | EⓂ SEP REQT",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "holes_156",
+      "applies_to": "the two holes as their own pattern (SEP REQT: separate requirement)",
+      "datums": [
+        "A",
+        "DⓂ",
+        "EⓂ"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.025
+      },
+      "meaning": "Position at maximum material condition, separate requirement: the axes of the two holes must each lie in a .025 in diameter cylinder at true position from datum A and datum features D and E at maximum material boundary, checked separately from the other hole pair that uses the same frame.",
+      "page": 4,
+      "bbox": [
+        0.272,
+        0.678,
+        0.426,
+        0.8
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    }
+  ]
+}

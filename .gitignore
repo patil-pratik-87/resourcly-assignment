@@ -11,3 +11,15 @@ __pycache__/
 # Drawing experiments: their own environment and the images the notebooks write
 /experiments/drawing/.venv/
 /experiments/drawing/crops/
+
+# Python environment and tool caches
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Eval results and request traces
+/runs/
+/var/
+
+# Gold tool renders
+/out/

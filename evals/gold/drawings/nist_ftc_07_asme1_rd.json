@@ -1,0 +1,725 @@
+{
+  "drawing": "nist_ftc_07_asme1_rd",
+  "page_count": 4,
+  "page_coverage": [
+    2
+  ],
+  "title_block": {
+    "title": "PMI Fully-Toleranced Test Case 7",
+    "revision": "D",
+    "units": "in",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_07_asme1_rd",
+    "sheet_note": "PMI Fully-Toleranced Test Case 7 - View A. Includes Atomic Test Cases - 84, 85; PMI Fully-Toleranced Test Case 7 - View B. Includes Atomic Test Cases - 64, 67, 69, 71, 83; PMI Fully-Toleranced Test Case 7 - View C. Includes Atomic Test Cases - 62, 67; PMI Fully-Toleranced Test Case 7 - View D. No Atomic Test Cases Included in This View",
+    "standard": "ASME Y14.5M-1994 (dimensioning and tolerancing); ASME Y14.41-2003 (dataset)"
+  },
+  "features": [
+    {
+      "id": "pad_holes",
+      "type": "hole",
+      "label": "four counterbored holes in the corner pads (4X)",
+      "description": "Counterbored through holes, one in each of the four pads in the inside corners of the cavity floor. Only the pad in the back corner can be seen in view B; the two extension lines of the ⌀.281 dimension rise from its hole, inside the larger counterbore circle.",
+      "page": 2
+    },
+    {
+      "id": "corner_pads",
+      "type": "plane",
+      "label": "tops of the four pads in the inside corners of the cavity",
+      "description": "Raised pads on the cavity floor, one in each inside corner at the foot of a flat corner web. View B shows only the back one; the other three are hidden behind the walls. Their four flat tops are coplanar and together are datum feature D.",
+      "page": 2
+    },
+    {
+      "id": "cavity_floor",
+      "type": "plane",
+      "label": "floor of the cavity",
+      "description": "The flat inside floor of the open box, seen through the opening in view B.",
+      "page": 2
+    },
+    {
+      "id": "wall_holes_594",
+      "type": "hole",
+      "label": "two holes in the front-left wall (2X)",
+      "description": "The two larger round holes through the long front-left wall of the box in view B.",
+      "page": 2
+    },
+    {
+      "id": "wall_holes_173",
+      "type": "hole",
+      "label": "four small holes in the front-left wall (4X)",
+      "description": "The four small round holes through the long front-left wall of the box in view B, in a group between the two larger holes and the front corner.",
+      "page": 2
+    },
+    {
+      "id": "wall_holes_875",
+      "type": "hole",
+      "label": "three holes in the front-right wall (3X)",
+      "description": "The three large round holes through the short front-right wall of the box in view B.",
+      "page": 2
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc07-01",
+      "raw": "4X ⌀.281 +.006/-.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.281,
+      "unit": "in",
+      "feature_id": "pad_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.287
+      },
+      "meaning": "Each of the four pad holes must be between .280 and .287 in in diameter (.281 in, up to .006 over or .001 under).",
+      "page": 2,
+      "bbox": [
+        0.288,
+        0.083,
+        0.373,
+        0.163
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-02",
+      "raw": "⌴⌀.438 ±.010",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.438,
+      "unit": "in",
+      "feature_id": "pad_holes",
+      "applies_to": "counterbore",
+      "datums": [],
+      "limits": {
+        "lower": 0.428,
+        "upper": 0.448
+      },
+      "meaning": "Each pad hole's counterbore must be .438 in across, plus or minus .010 in (.428 to .448 in).",
+      "page": 2,
+      "bbox": [
+        0.287,
+        0.109,
+        0.373,
+        0.185
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-03",
+      "raw": "↧.30 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "pad_holes",
+      "applies_to": "counterbore depth",
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.32
+      },
+      "meaning": "Each counterbore must be .30 in deep, plus or minus .02 in (.28 to .32 in).",
+      "page": 2,
+      "bbox": [
+        0.318,
+        0.153,
+        0.373,
+        0.207
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-04",
+      "raw": "⌖ ⌀.06Ⓜ | E | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "pad_holes",
+      "applies_to": "upper segment of a composite frame",
+      "datums": [
+        "E",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Composite position, upper segment: the axis of each pad hole must lie in a .06 in diameter cylinder at its true position from datums E, B and C, when the hole is at maximum material condition (the zone grows as the hole departs from MMC).",
+      "page": 2,
+      "bbox": [
+        0.256,
+        0.13,
+        0.372,
+        0.267
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-05",
+      "raw": "⌖ ⌀.02Ⓜ | E | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "pad_holes",
+      "applies_to": "lower segment of a composite frame",
+      "datums": [
+        "E",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Composite position, lower segment: the four hole axes must also lie in .02 in diameter cylinders at MMC placed by their basic spacing to each other; the group must keep its orientation to datums E, B and C but may shift within the upper segment's zones.",
+      "page": 2,
+      "bbox": [
+        0.256,
+        0.13,
+        0.372,
+        0.267
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-06",
+      "raw": "⌓ .04 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "corner_pads",
+      "applies_to": "upper segment of a composite frame",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Composite profile, upper segment: each of the four pad tops must lie within a .04 in band at its true location from datums A, B and C.",
+      "page": 2,
+      "bbox": [
+        0.548,
+        0.09,
+        0.658,
+        0.23
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-07",
+      "raw": "⌓ .01 | A",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "corner_pads",
+      "applies_to": "lower segment of a composite frame",
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Composite profile, lower segment: the four pad tops must also lie together within a .01 in band kept parallel to datum A but free in height, so they are coplanar within .01 in.",
+      "page": 2,
+      "bbox": [
+        0.548,
+        0.09,
+        0.658,
+        0.23
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-08",
+      "raw": "4 COPLANAR SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "corner_pads",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Text beside the profile frame: the frame and datum D apply to the four pad tops together, as one coplanar group.",
+      "page": 2,
+      "bbox": [
+        0.585,
+        0.156,
+        0.663,
+        0.246
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-09",
+      "raw": "D",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "corner_pads",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature D: the four coplanar pad tops in the inside corners of the cavity, taken together as one datum feature.",
+      "page": 2,
+      "bbox": [
+        0.565,
+        0.23,
+        0.582,
+        0.269
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-10",
+      "raw": "▱ .01 / ⌀1.00",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "cavity_floor",
+      "applies_to": "top row of a stack of three frames on one leader; per unit area",
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Flatness per unit area: any 1.00 in diameter circular area of the cavity floor must lie between two parallel planes .01 in apart.",
+      "page": 2,
+      "bbox": [
+        0.64,
+        0.196,
+        0.733,
+        0.292
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-11",
+      "raw": "∥ .03 | A",
+      "callout": "feature_control_frame",
+      "kind": "parallelism",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "cavity_floor",
+      "applies_to": "middle row of a stack of three frames on one leader",
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Parallelism: the cavity floor must lie between two planes .03 in apart that are parallel to datum A.",
+      "page": 2,
+      "bbox": [
+        0.64,
+        0.238,
+        0.71,
+        0.32
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-12",
+      "raw": "⌓ .06 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "cavity_floor",
+      "applies_to": "bottom row of a stack of three frames on one leader",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Profile of a surface: the cavity floor must lie within a .06 in band at its true location from datums A, B and C.",
+      "page": 2,
+      "bbox": [
+        0.64,
+        0.246,
+        0.738,
+        0.345
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-13",
+      "raw": "2X ⌀.594 +.012/-.002",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.594,
+      "unit": "in",
+      "feature_id": "wall_holes_594",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.592,
+        "upper": 0.606
+      },
+      "meaning": "Each of the two wall holes must be between .592 and .606 in in diameter (.594 in, up to .012 over or .002 under).",
+      "page": 2,
+      "bbox": [
+        0.102,
+        0.573,
+        0.186,
+        0.655
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-14",
+      "raw": "⌖ ⌀.040Ⓜ | ⌀.045 MAX | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "wall_holes_594",
+      "applies_to": "position at MMC with a maximum tolerance of ⌀.045",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Position at MMC with a cap: the axis of each of the two holes must lie in a .040 in diameter cylinder at its true position from datums A, B and C when the hole is at MMC; bonus tolerance as the hole departs from MMC may grow the zone to .045 in, never more.",
+      "page": 2,
+      "bbox": [
+        0.101,
+        0.6,
+        0.291,
+        0.773
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-15",
+      "raw": "4X ⌀.173 +.005/-.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.173,
+      "unit": "in",
+      "feature_id": "wall_holes_173",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.172,
+        "upper": 0.178
+      },
+      "meaning": "Each of the four small holes must be between .172 and .178 in in diameter (.173 in, up to .005 over or .001 under).",
+      "page": 2,
+      "bbox": [
+        0.322,
+        0.74,
+        0.406,
+        0.821
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-16",
+      "raw": "⌖ ⌀.060 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "wall_holes_173",
+      "applies_to": "upper segment of a composite frame",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Composite position, upper segment: the axis of each small hole must lie in a .060 in diameter cylinder at its true position from datums A, B and C.",
+      "page": 2,
+      "bbox": [
+        0.32,
+        0.766,
+        0.431,
+        0.878
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-17",
+      "raw": "⌖ ⌀.015 | A",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "wall_holes_173",
+      "applies_to": "lower segment of a composite frame",
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Composite position, lower segment: the four hole axes must also lie in .015 in diameter cylinders placed by their basic spacing to each other, with the group oriented to datum A but free to shift within the upper segment's zones.",
+      "page": 2,
+      "bbox": [
+        0.32,
+        0.766,
+        0.431,
+        0.878
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-18",
+      "raw": "3X ⌀.875 ±.020 <ST>",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.875,
+      "unit": "in",
+      "feature_id": "wall_holes_875",
+      "applies_to": "statistical tolerance line; the line below gives the arithmetic limit .875 ±.010",
+      "datums": [],
+      "limits": {
+        "lower": 0.855,
+        "upper": 0.895
+      },
+      "meaning": "Statistically toleranced size: each of the three holes is .875 in plus or minus .020 in (.855 to .895 in) when produced under statistical process control; otherwise the tighter .875 ±.010 on the next line applies.",
+      "page": 2,
+      "bbox": [
+        0.714,
+        0.726,
+        0.822,
+        0.819
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-19",
+      "raw": "3X ⌀.875 ±.010",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.875,
+      "unit": "in",
+      "feature_id": "wall_holes_875",
+      "applies_to": "arithmetic limit line under the statistical tolerance",
+      "datums": [],
+      "limits": {
+        "lower": 0.865,
+        "upper": 0.885
+      },
+      "meaning": "Arithmetic limits for the same three holes: .865 to .885 in. They apply when the holes are not produced under statistical process control (general note 5).",
+      "page": 2,
+      "bbox": [
+        0.714,
+        0.766,
+        0.798,
+        0.84
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-20",
+      "raw": "⌖ ⌀.050 <ST> | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "wall_holes_875",
+      "applies_to": "statistical tolerance",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Statistically toleranced position: the axis of each of the three holes must lie in a .050 in diameter cylinder at its true position from datums A, B and C; the <ST> symbol marks the tolerance as statistical (general note 5).",
+      "page": 2,
+      "bbox": [
+        0.713,
+        0.751,
+        0.847,
+        0.876
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-21",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Series header: the sheet belongs to the 2014 NIST PMI test model set.",
+      "page": 2,
+      "bbox": [
+        0.059,
+        0.034,
+        0.393,
+        0.065
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-22",
+      "raw": "PMI Fully-Toleranced Test Case 7 - View B",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note naming the test case (fully-toleranced test case 7, FTC-07) and the view on this sheet (B).",
+      "page": 2,
+      "bbox": [
+        0.355,
+        0.908,
+        0.648,
+        0.927
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-23",
+      "raw": "Includes Atomic Test Cases - 64, 67, 69, 71, 83",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note listing the NIST atomic test cases whose annotations appear on this sheet.",
+      "page": 2,
+      "bbox": [
+        0.341,
+        0.932,
+        0.662,
+        0.951
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-24",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: D.",
+      "page": 2,
+      "bbox": [
+        0.913,
+        0.94,
+        0.949,
+        0.956
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc07-25",
+      "raw": "nist_ftc_07_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Drawing number (file identifier) printed along the right border.",
+      "page": 2,
+      "bbox": [
+        0.964,
+        0.78,
+        0.976,
+        0.941
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    }
+  ]
+}

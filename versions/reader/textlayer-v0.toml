@@ -1,0 +1,2 @@
+description = "Title block and notes from the PDF text layer; reads no drawn callouts"
+impl = "textlayer"

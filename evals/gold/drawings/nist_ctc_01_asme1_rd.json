@@ -1,0 +1,715 @@
+{
+  "drawing": "nist_ctc_01_asme1_rd",
+  "page_count": 1,
+  "title_block": {
+    "title": "Test Model 1",
+    "revision": "D",
+    "units": "mm",
+    "units_source": "inferred",
+    "drawing_number": "nist_ctc_01_asme1_rd",
+    "sheet_note": "PMI Complex Test Case 1. Includes Atomic Test Cases - 1, 2, 3, 4, 7, 8, 17, 21, 33, 48",
+    "standard": null
+  },
+  "features": [
+    {
+      "id": "top_face",
+      "type": "plane",
+      "label": "top face of the plate",
+      "description": "The large flat top face of the plate. It carries datum A and a flatness control.",
+      "page": 1
+    },
+    {
+      "id": "hole_back",
+      "type": "hole",
+      "label": "through hole, back lobe",
+      "description": "Round through hole in the rounded lobe at the back (top of the view) of the plate.",
+      "page": 1
+    },
+    {
+      "id": "notch_back",
+      "type": "slot",
+      "label": "rectangular notch in the back edge",
+      "description": "Square-sided notch cut into the back edge of the plate, to the right of the back lobe. Its width is located by a position control.",
+      "page": 1
+    },
+    {
+      "id": "hole_left",
+      "type": "hole",
+      "label": "through hole, left lobe",
+      "description": "Round through hole in the rounded lobe at the left end of the plate, where the X-Y-Z coordinate triad sits. Its axis is datum B.",
+      "page": 1
+    },
+    {
+      "id": "hex_boss",
+      "type": "boss",
+      "label": "hexagonal boss",
+      "description": "Six-sided raised boss with chamfered top edges, standing on the top face near the middle of the plate.",
+      "page": 1
+    },
+    {
+      "id": "hole_right",
+      "type": "hole",
+      "label": "through hole, right lobe",
+      "description": "Round through hole in the rounded lobe at the right end of the plate.",
+      "page": 1
+    },
+    {
+      "id": "hole_mid",
+      "type": "hole",
+      "label": "small through hole, centre right",
+      "description": "Smaller round through hole in the top face, between the hexagonal boss and the right lobe.",
+      "page": 1
+    },
+    {
+      "id": "hole_side_1",
+      "type": "hole",
+      "label": "hole 1 in the front side wall",
+      "description": "Left one of the two small holes drilled into the long front side wall of the middle block.",
+      "page": 1
+    },
+    {
+      "id": "boss_left",
+      "type": "cylinder",
+      "label": "cylindrical outer wall, left lobe",
+      "description": "The rounded outer wall of the left lobe, seen as a short cylinder below the left hole.",
+      "page": 1
+    },
+    {
+      "id": "hole_side_2",
+      "type": "hole",
+      "label": "hole 2 in the front side wall",
+      "description": "Right one of the two small holes drilled into the long front side wall of the middle block.",
+      "page": 1
+    },
+    {
+      "id": "end_face_right",
+      "type": "plane",
+      "label": "right end face",
+      "description": "The flat vertical end face at the far right of the plate.",
+      "page": 1
+    },
+    {
+      "id": "vnotch_wall",
+      "type": "plane",
+      "label": "angled wall of the V-notch",
+      "description": "The slanted wall of the V-shaped notch in the front edge, just right of the middle block. It is set at 60 degrees to the block's end face across the notch.",
+      "page": 1
+    },
+    {
+      "id": "hole_front",
+      "type": "hole",
+      "label": "through hole, front lobe",
+      "description": "Round through hole in the rounded lobe at the front (bottom of the view) of the plate. Its axis is datum C.",
+      "page": 1
+    },
+    {
+      "id": "slot_right",
+      "type": "slot",
+      "label": "slot in the top face, right side",
+      "description": "Straight slot with rounded ends cut into the top face near the right end of the plate. Its width is located by a position control.",
+      "page": 1
+    },
+    {
+      "id": "boss_front",
+      "type": "cylinder",
+      "label": "cylindrical outer wall, front lobe",
+      "description": "The rounded outer wall of the front lobe, seen as a short cylinder below the front hole.",
+      "page": 1
+    }
+  ],
+  "values": [
+    {
+      "id": "ctc01-01",
+      "raw": "⌀35.2/34.8",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "limits",
+      "value": [
+        34.8,
+        35.2
+      ],
+      "unit": "mm",
+      "feature_id": "hole_back",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 34.8,
+        "upper": 35.2
+      },
+      "meaning": "The back-lobe hole's diameter must be between 34.8 and 35.2 mm (written as stacked upper and lower limits).",
+      "page": 1,
+      "bbox": [
+        0.432,
+        0.098,
+        0.46,
+        0.137
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-02",
+      "raw": "▱ 0.2",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.2,
+      "unit": "mm",
+      "feature_id": "top_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.2
+      },
+      "meaning": "Flatness: every point of the top face must lie between two parallel planes 0.2 mm apart; no datum is used.",
+      "page": 1,
+      "bbox": [
+        0.181,
+        0.205,
+        0.218,
+        0.251
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-03",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "top_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A: the top face is the primary reference; every control that names datum A is measured from it.",
+      "page": 1,
+      "bbox": [
+        0.263,
+        0.218,
+        0.275,
+        0.278
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-04",
+      "raw": "⌖ 0.75 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.75,
+      "unit": "mm",
+      "feature_id": "notch_back",
+      "applies_to": "width of the notch (frame attached to a dimension line with no value)",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.75
+      },
+      "meaning": "Position: the centre plane of the back-edge notch's width must lie in a 0.75 mm wide zone around its true location, measured from datums A, B and C; the width itself comes from the CAD model.",
+      "page": 1,
+      "bbox": [
+        0.519,
+        0.24,
+        0.605,
+        0.305
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-05",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "hole_left",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B: the axis of the left-lobe hole is the secondary reference.",
+      "page": 1,
+      "bbox": [
+        0.077,
+        0.386,
+        0.114,
+        0.413
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-06",
+      "raw": "⌓ 0.5 | A (all around)",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.5,
+      "unit": "mm",
+      "feature_id": "hex_boss",
+      "applies_to": "all side faces of the boss (all-around circle on the leader)",
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.5
+      },
+      "meaning": "Profile of a surface, all around: every side face of the hexagonal boss must lie within a 0.5 mm band around its true shape, located from datum A.",
+      "page": 1,
+      "bbox": [
+        0.672,
+        0.38,
+        0.744,
+        0.432
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-07",
+      "raw": "⌀34.8 - 35.2",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "limits",
+      "value": [
+        34.8,
+        35.2
+      ],
+      "unit": "mm",
+      "feature_id": "hole_right",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 34.8,
+        "upper": 35.2
+      },
+      "meaning": "The right-lobe hole's diameter must be between 34.8 and 35.2 mm (written as a horizontal range).",
+      "page": 1,
+      "bbox": [
+        0.84,
+        0.392,
+        0.897,
+        0.44
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-08",
+      "raw": "⌀25 ±0.15",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 25,
+      "unit": "mm",
+      "feature_id": "hole_mid",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 24.85,
+        "upper": 25.15
+      },
+      "meaning": "The small centre-right hole's diameter must be 25 mm plus or minus 0.15 mm, so between 24.85 and 25.15 mm.",
+      "page": 1,
+      "bbox": [
+        0.741,
+        0.434,
+        0.784,
+        0.468
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-09",
+      "raw": "⌀20 +0.05/-0.10",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 20,
+      "unit": "mm",
+      "feature_id": "hole_side_1",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 19.9,
+        "upper": 20.05
+      },
+      "meaning": "This side-wall hole's diameter must be between 19.90 and 20.05 mm (20 mm, up to 0.05 over or 0.10 under).",
+      "page": 1,
+      "bbox": [
+        0.304,
+        0.53,
+        0.344,
+        0.574
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-10",
+      "raw": "⌀35 0/-0.2",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "unilateral",
+      "value": 35,
+      "unit": "mm",
+      "feature_id": "boss_left",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 34.8,
+        "upper": 35
+      },
+      "meaning": "The left lobe's outside diameter may be 35 mm at most and 34.8 mm at least (tolerance only downward).",
+      "page": 1,
+      "bbox": [
+        0.215,
+        0.568,
+        0.252,
+        0.608
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-11",
+      "raw": "⌀20 +0.10/-0.05",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 20,
+      "unit": "mm",
+      "feature_id": "hole_side_2",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 19.95,
+        "upper": 20.1
+      },
+      "meaning": "This side-wall hole's diameter must be between 19.95 and 20.10 mm (20 mm, up to 0.10 over or 0.05 under).",
+      "page": 1,
+      "bbox": [
+        0.318,
+        0.589,
+        0.358,
+        0.632
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-12",
+      "raw": "⊥ 1.5 | A",
+      "callout": "feature_control_frame",
+      "kind": "perpendicularity",
+      "tolerance_style": "geometric_zone",
+      "value": 1.5,
+      "unit": "mm",
+      "feature_id": "end_face_right",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.5
+      },
+      "meaning": "Perpendicularity: the right end face must lie between two parallel planes 1.5 mm apart that are exactly square to datum A.",
+      "page": 1,
+      "bbox": [
+        0.884,
+        0.585,
+        0.935,
+        0.645
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-13",
+      "raw": "60° ±0.5°",
+      "callout": "dimension",
+      "kind": "angular",
+      "tolerance_style": "plus_minus",
+      "value": 60,
+      "unit": "deg",
+      "feature_id": "vnotch_wall",
+      "applies_to": "angle between the slanted notch wall and the middle block's end face",
+      "datums": [],
+      "limits": {
+        "lower": 59.5,
+        "upper": 60.5
+      },
+      "meaning": "The angled wall of the V-notch must sit at 60 degrees, plus or minus 0.5 degree, to the block end face across the notch.",
+      "page": 1,
+      "bbox": [
+        0.452,
+        0.612,
+        0.494,
+        0.645
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-14",
+      "raw": "C",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "hole_front",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature C: the axis of the front-lobe hole is the tertiary reference.",
+      "page": 1,
+      "bbox": [
+        0.483,
+        0.689,
+        0.52,
+        0.717
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-15",
+      "raw": "⌖ 0.75 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.75,
+      "unit": "mm",
+      "feature_id": "slot_right",
+      "applies_to": "width of the slot (frame attached to a dimension line with no value)",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.75
+      },
+      "meaning": "Position: the centre plane of the right slot's width must lie in a 0.75 mm wide zone around its true location, measured from datums A, B and C; the width itself comes from the CAD model.",
+      "page": 1,
+      "bbox": [
+        0.731,
+        0.705,
+        0.825,
+        0.78
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-16",
+      "raw": "⌓ 1.25 | A | B | C (A ↔ B)",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 1.25,
+      "unit": "mm",
+      "feature_id": "boss_front",
+      "applies_to": "curved outer wall between points A and B (the italic A and B leaders mark the end points, not datums)",
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.25
+      },
+      "meaning": "Profile of a surface between points A and B: the front lobe's curved outer wall, from point A round to point B, must lie within a 1.25 mm band around its true shape, located from datums A, B and C.",
+      "page": 1,
+      "bbox": [
+        0.404,
+        0.735,
+        0.508,
+        0.8
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-17",
+      "raw": "⌀35 +0.2/0",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "unilateral",
+      "value": 35,
+      "unit": "mm",
+      "feature_id": "boss_front",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 35,
+        "upper": 35.2
+      },
+      "meaning": "The front lobe's outside diameter may be 35.2 mm at most and 35 mm at least (tolerance only upward).",
+      "page": 1,
+      "bbox": [
+        0.621,
+        0.855,
+        0.665,
+        0.895
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-18",
+      "raw": "NIST PMI Test Models - 2012",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Series header: the sheet belongs to the 2012 NIST PMI test model set.",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-19",
+      "raw": "Test Model 1",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Title of the sheet: NIST test model 1.",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.083,
+        0.157,
+        0.108
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-20",
+      "raw": "PMI Complex Test Case 1",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note naming the test case: complex test case 1 (CTC-01).",
+      "page": 1,
+      "bbox": [
+        0.413,
+        0.911,
+        0.59,
+        0.933
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-21",
+      "raw": "Includes Atomic Test Cases - 1, 2, 3, 4, 7, 8, 17, 21, 33, 48",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Sheet note listing the NIST atomic test cases whose annotations appear on this sheet.",
+      "page": 1,
+      "bbox": [
+        0.302,
+        0.935,
+        0.699,
+        0.957
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-22",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Revision of the drawing: D.",
+      "page": 1,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ctc01-23",
+      "raw": "nist_ctc_01_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Drawing number (file identifier) printed along the right border.",
+      "page": 1,
+      "bbox": [
+        0.961,
+        0.783,
+        0.975,
+        0.947
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    }
+  ]
+}

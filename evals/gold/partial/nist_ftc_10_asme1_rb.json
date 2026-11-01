@@ -1,0 +1,337 @@
+{
+  "drawing": "nist_ftc_10_asme1_rb",
+  "page_count": 5,
+  "title_block": {
+    "title": "PMI Fully-Toleranced Test Case 10",
+    "revision": "B",
+    "units": "mm",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_10_asme1_rb",
+    "sheet_note": "PMI Fully-Toleranced Test Case 10 - View A. Includes Atomic Test Cases - N/A; PMI Fully-Toleranced Test Case 10 - View B. Includes Atomic Test Cases - 56, 60, 65, 70, 78, 86, 93; PMI Fully-Toleranced Test Case 10 - View C. Includes Atomic Test Cases - 51, 56, 63, 86, 91; PMI Fully-Toleranced Test Case 10 - View D. Includes Atomic Test Cases - 79; PMI Fully-Toleranced Test Case 10 - View E. Includes Atomic Test Cases - 63, 91",
+    "standard": "ASME Y14.5M-1994 (dimensioning and tolerancing); ASME Y14.41-2003 (dataset and movable datum targets)"
+  },
+  "features": [
+    {
+      "id": "part",
+      "type": "other",
+      "label": "whole part",
+      "description": "The part as a whole. General notes apply to all of it.",
+      "page": 1
+    },
+    {
+      "id": "pocket_holes",
+      "type": "hole",
+      "label": "eight small holes in the pocket floor (8X)",
+      "description": "Eight small round holes in the floor of the large rectangular pocket in the top face (view A). Flag 4 ties them to note 4: each must break into a cross-drilled hole.",
+      "page": 1
+    },
+    {
+      "id": "top_face",
+      "type": "plane",
+      "label": "top face",
+      "description": "The large flat top face around the pocket (view A). It is datum feature A.",
+      "page": 1
+    },
+    {
+      "id": "pad_face",
+      "type": "plane",
+      "label": "flat face beside the pin pads",
+      "description": "Flat face next to the row of raised pin pads in view B, with a short supplemental line drawn on it to mark the line element the straightness control applies to.",
+      "page": 2
+    },
+    {
+      "id": "narrow_slot",
+      "type": "slot",
+      "label": "narrow slot in the front face",
+      "description": "Narrow vertical slot cut into the front face of the part, below the round boss (view B).",
+      "page": 2
+    },
+    {
+      "id": "pin_hole_e",
+      "type": "hole",
+      "label": "⌀3.5 hole in the right pin pad",
+      "description": "Small round hole in the top of the rightmost raised pin pad (view C). Its axis is datum feature E.",
+      "page": 3
+    },
+    {
+      "id": "tapped_holes_1",
+      "type": "thread",
+      "label": "two M3 tapped holes in the first pin pad (2X)",
+      "description": "The two M3 threaded holes in the first of the three pin pads, the top one in view D.",
+      "page": 4
+    },
+    {
+      "id": "cross_holes",
+      "type": "hole",
+      "label": "four cross-drilled holes (4X)",
+      "description": "The four round holes drilled lengthwise through the scalloped lobes along one side of the part (view E).",
+      "page": 5
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc10-01",
+      "raw": "8X ⌀2.5 ±0.15 ④",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 2.5,
+      "unit": "mm",
+      "feature_id": "pocket_holes",
+      "applies_to": "flag 4 refers to general note 4",
+      "datums": [],
+      "limits": {
+        "lower": 2.35,
+        "upper": 2.65
+      },
+      "meaning": "Each of the eight pocket holes must be 2.5 mm in diameter plus or minus 0.15 mm, so between 2.35 and 2.65 mm; the flag 4 brings in note 4.",
+      "page": 1,
+      "bbox": [
+        0.634,
+        0.243,
+        0.723,
+        0.316
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-02",
+      "raw": "▱ 0.2",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.2,
+      "unit": "mm",
+      "feature_id": "top_face",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.2
+      },
+      "meaning": "Flatness: every point of the top face must lie between two parallel planes 0.2 mm apart; no datum is used.",
+      "page": 1,
+      "bbox": [
+        0.757,
+        0.36,
+        0.802,
+        0.418
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-03",
+      "raw": "6. UNITS: MILLIMETERS",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 6: all dimensions on the drawing are in millimetres.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.669,
+        0.188,
+        0.687
+      ],
+      "confidence": 0.98,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-04",
+      "raw": "⏤ 0.2 / 15",
+      "callout": "feature_control_frame",
+      "kind": "straightness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.2,
+      "unit": "mm",
+      "feature_id": "pad_face",
+      "applies_to": "the line element drawn on the face; 0.2 over any 15 mm length",
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.2
+      },
+      "meaning": "Straightness per unit length: along the marked line element, every 15 mm stretch must lie between two parallel lines 0.2 mm apart.",
+      "page": 2,
+      "bbox": [
+        0.609,
+        0.236,
+        0.674,
+        0.305
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-05",
+      "raw": "5 ±0.2",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 5,
+      "unit": "mm",
+      "feature_id": "narrow_slot",
+      "applies_to": "width of the slot",
+      "datums": [],
+      "limits": {
+        "lower": 4.8,
+        "upper": 5.2
+      },
+      "meaning": "The slot width must be 5 mm plus or minus 0.2 mm, so between 4.8 and 5.2 mm.",
+      "page": 2,
+      "bbox": [
+        0.433,
+        0.642,
+        0.468,
+        0.677
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-06",
+      "raw": "⊥ ⌀0.12 | D",
+      "callout": "feature_control_frame",
+      "kind": "perpendicularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.12,
+      "unit": "mm",
+      "feature_id": "pin_hole_e",
+      "applies_to": "lower row of the frame stack under ⌀3.5 G6",
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.12
+      },
+      "meaning": "Perpendicularity: the axis of the pin hole must lie in a 0.12 mm diameter cylinder exactly square to datum D.",
+      "page": 3,
+      "bbox": [
+        0.612,
+        0.578,
+        0.708,
+        0.65
+      ],
+      "confidence": 0.8,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-07",
+      "raw": "2X M3x0.5-6g",
+      "callout": "thread",
+      "kind": "thread",
+      "tolerance_style": "none",
+      "value": 3,
+      "unit": "mm",
+      "feature_id": "tapped_holes_1",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Two metric threads, 3 mm nominal diameter, 0.5 mm pitch, tolerance class 6g.",
+      "page": 4,
+      "bbox": [
+        0.67,
+        0.404,
+        0.763,
+        0.424
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-08",
+      "raw": "⌖ ⌀0.8Ⓟ3.2 | D | E | B",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.8,
+      "unit": "mm",
+      "feature_id": "tapped_holes_1",
+      "applies_to": "axis projected 3.2 mm out of each hole (projected tolerance zone)",
+      "datums": [
+        "D",
+        "E",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.8
+      },
+      "meaning": "Position with a projected tolerance zone: the axis of each M3 hole, projected 3.2 mm out of the hole, must lie in a 0.8 mm diameter cylinder at its true position from datums D, E and B.",
+      "page": 4,
+      "bbox": [
+        0.67,
+        0.425,
+        0.835,
+        0.447
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-09",
+      "raw": "⌖ ⌀0Ⓜ | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0,
+      "unit": "mm",
+      "feature_id": "cross_holes",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0
+      },
+      "meaning": "Zero positional tolerance at maximum material condition: at the smallest hole size the axis must be exactly at true position from datums A, B and C; any extra hole size becomes the allowed position error.",
+      "page": 5,
+      "bbox": [
+        0.39,
+        0.346,
+        0.523,
+        0.376
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc10-10",
+      "raw": "⌭ 0.1",
+      "callout": "feature_control_frame",
+      "kind": "cylindricity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.1,
+      "unit": "mm",
+      "feature_id": "cross_holes",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.1
+      },
+      "meaning": "Cylindricity: the surface of each cross hole must lie between two coaxial cylinders 0.1 mm apart (radially); no datum is used.",
+      "page": 5,
+      "bbox": [
+        0.39,
+        0.375,
+        0.451,
+        0.402
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    }
+  ]
+}

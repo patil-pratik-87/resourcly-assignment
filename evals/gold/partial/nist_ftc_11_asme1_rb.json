@@ -1,0 +1,309 @@
+{
+  "drawing": "nist_ftc_11_asme1_rb",
+  "page_count": 2,
+  "title_block": {
+    "title": "PMI Fully-Toleranced Test Case 11",
+    "revision": "B",
+    "units": "mm",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_11_asme1_rb",
+    "sheet_note": "PMI Fully-Toleranced Test Case 11 - View A. Includes Atomic Test Cases - 55, 100; PMI Fully-Toleranced Test Case 11 - View B. Includes Atomic Test Cases - N/A",
+    "standard": "ASME Y14.5M-1994 (dimensioning and tolerancing); ASME Y14.41-2003 (dataset)"
+  },
+  "features": [
+    {
+      "id": "part",
+      "type": "other",
+      "label": "whole ring",
+      "description": "The thin flexible ring as a whole. General notes apply to all of it.",
+      "page": 1
+    },
+    {
+      "id": "outer_edge",
+      "type": "cylinder",
+      "label": "outer edge of the ring",
+      "description": "The outer cylindrical edge of the flat ring (view A).",
+      "page": 1
+    },
+    {
+      "id": "bore",
+      "type": "hole",
+      "label": "centre hole of the ring",
+      "description": "The large round hole in the middle of the ring (view A). Its axis is datum feature B.",
+      "page": 1
+    },
+    {
+      "id": "beads",
+      "type": "other",
+      "label": "two raised round beads (2X)",
+      "description": "The two raised beads with round tops that run round the ring face, one near the outer edge and one near the hole; they show as round bumps in the section of view B.",
+      "page": 1
+    },
+    {
+      "id": "web",
+      "type": "plane",
+      "label": "flat web of the ring",
+      "description": "The flat annular web between the beads (section view B). Its top face carries a profile control; the bottom face is datum feature A.",
+      "page": 2
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc11-01",
+      "raw": "⌀63 ±0.5 AVG (O.D.)",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 63,
+      "unit": "mm",
+      "feature_id": "outer_edge",
+      "applies_to": "average outside diameter (AVG)",
+      "datums": [],
+      "limits": {
+        "lower": 62.5,
+        "upper": 63.5
+      },
+      "meaning": "The average of several outside-diameter measurements must be 63 mm plus or minus 0.5 mm, so between 62.5 and 63.5 mm; a non-rigid ring may be out of round, so single readings are not judged alone.",
+      "page": 1,
+      "bbox": [
+        0.498,
+        0.221,
+        0.602,
+        0.306
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-02",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "bore",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B: the centre hole, whose axis is the secondary reference. The symbol sits on the hole's diameter dimension line.",
+      "page": 1,
+      "bbox": [
+        0.644,
+        0.232,
+        0.66,
+        0.269
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-03",
+      "raw": "⌀32 ±0.3 AVG (I.D.)",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 32,
+      "unit": "mm",
+      "feature_id": "bore",
+      "applies_to": "average inside diameter (AVG)",
+      "datums": [],
+      "limits": {
+        "lower": 31.7,
+        "upper": 32.3
+      },
+      "meaning": "The average of several inside-diameter measurements must be 32 mm plus or minus 0.3 mm, so between 31.7 and 32.3 mm.",
+      "page": 1,
+      "bbox": [
+        0.501,
+        0.286,
+        0.599,
+        0.366
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-04",
+      "raw": "○ 1.2Ⓕ",
+      "callout": "feature_control_frame",
+      "kind": "circularity",
+      "tolerance_style": "geometric_zone",
+      "value": 1.2,
+      "unit": "mm",
+      "feature_id": "bore",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 1.2
+      },
+      "meaning": "Circularity in the free state: each circular section of the hole must lie between two concentric circles 1.2 mm apart (radially), measured with the ring unrestrained.",
+      "page": 1,
+      "bbox": [
+        0.522,
+        0.324,
+        0.579,
+        0.382
+      ],
+      "confidence": 0.9,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-05",
+      "raw": "↗ 1.2Ⓕ | A | B",
+      "callout": "feature_control_frame",
+      "kind": "circular_runout",
+      "tolerance_style": "geometric_zone",
+      "value": 1.2,
+      "unit": "mm",
+      "feature_id": "outer_edge",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.2
+      },
+      "meaning": "Circular runout in the free state: turning the ring on datum A about the datum B axis, each circular section of the outer edge may vary by at most 1.2 mm, with the ring unrestrained.",
+      "page": 1,
+      "bbox": [
+        0.207,
+        0.632,
+        0.31,
+        0.711
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-06",
+      "raw": "2X R1.5 ±0.04",
+      "callout": "dimension",
+      "kind": "radius",
+      "tolerance_style": "plus_minus",
+      "value": 1.5,
+      "unit": "mm",
+      "feature_id": "beads",
+      "applies_to": "radius of the rounded top of each bead",
+      "datums": [],
+      "limits": {
+        "lower": 1.46,
+        "upper": 1.54
+      },
+      "meaning": "Each of the two bead tops must have a radius of 1.5 mm plus or minus 0.04 mm, so between 1.46 and 1.54 mm.",
+      "page": 1,
+      "bbox": [
+        0.766,
+        0.699,
+        0.838,
+        0.766
+      ],
+      "confidence": 0.7,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-07",
+      "raw": "(⌒197.9)",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "reference",
+      "value": 197.9,
+      "unit": "mm",
+      "feature_id": "outer_edge",
+      "applies_to": "arc length round the outer edge (circumference; pi times 63 is 197.9)",
+      "datums": [],
+      "limits": null,
+      "meaning": "Reference arc length (arc sign printed over the number): the outer edge is about 197.9 mm round; given for information only, not for inspection.",
+      "page": 1,
+      "bbox": [
+        0.535,
+        0.824,
+        0.578,
+        0.858
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-08",
+      "raw": "4. NON-RIGID PART. DIRECTLY-TOLERANCED DIMENSIONS AND TOLERANCES APPLY IN FREE STATE.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "General note 4: the ring is non-rigid, so directly toleranced dimensions are checked with the part unrestrained (free state).",
+      "page": 1,
+      "bbox": [
+        0.054,
+        0.472,
+        0.28,
+        0.527
+      ],
+      "confidence": 0.95,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-09",
+      "raw": "⌓ 0.3Ⓕ | A | B",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.3,
+      "unit": "mm",
+      "feature_id": "web",
+      "applies_to": "top face of the web",
+      "datums": [
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.3
+      },
+      "meaning": "Profile of a surface in the free state: the web's top face must lie in a 0.3 mm band around its true shape, located from datums A and B, with the ring unrestrained.",
+      "page": 2,
+      "bbox": [
+        0.473,
+        0.37,
+        0.595,
+        0.399
+      ],
+      "confidence": 0.75,
+      "status": "draft"
+    },
+    {
+      "id": "ftc11-10",
+      "raw": "1.93 ±0.08",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 1.93,
+      "unit": "mm",
+      "feature_id": "web",
+      "applies_to": "thickness of the web, top face to bottom face",
+      "datums": [],
+      "limits": {
+        "lower": 1.85,
+        "upper": 2.01
+      },
+      "meaning": "The web must be 1.93 mm thick plus or minus 0.08 mm, so between 1.85 and 2.01 mm.",
+      "page": 2,
+      "bbox": [
+        0.715,
+        0.438,
+        0.786,
+        0.459
+      ],
+      "confidence": 0.85,
+      "status": "draft"
+    }
+  ]
+}
