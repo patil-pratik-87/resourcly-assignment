@@ -99,6 +99,7 @@ def test_the_committed_default_versions_exist() -> None:
     settings = Settings()
     assert load_version(settings, "reader", settings.versions["reader"]).impl == "textlayer"
     assert load_version(settings, "router", settings.versions["router"]).impl == "stub"
+    assert load_version(settings, "failure", settings.versions["failure"]).impl == "shuffled"
 
 
 def test_gold_work_needs_no_reader_version_or_trace_file(
