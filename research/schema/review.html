@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" data-theme="corporate">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drawing JSON: which shape?</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :where(.grid, .flex) > * { min-width: 0; }
+  :where(p, h1, h2, h3, h4, li, td, th, .badge) { overflow-wrap: anywhere; }
+  :where(img, svg) { max-width: 100%; height: auto; }
+  body { background: var(--color-base-200); color: var(--color-base-content); }
+  pre.json { max-height: 520px; overflow: auto; font-size: 12px; line-height: 1.45; background: #0f172a; color: #e2e8f0; border-radius: .5rem; padding: 1rem; }
+  .pin { position: absolute; transform: translate(-140%,-140%); width: 20px; height: 20px; opacity: .92; border-radius: 999px; background: #dc2626; color: #fff; font: 700 11px/22px system-ui; text-align: center; box-shadow: 0 0 0 2px #fff; }
+  .k { color: #7dd3fc } .s { color: #fde68a } .n { color: #86efac } .c { color: #94a3b8 }
+</style>
+</head>
+<body class="min-h-screen">
+<main class="max-w-6xl mx-auto p-6 space-y-10">
+
+<header class="space-y-3">
+  <p class="text-sm uppercase tracking-wide opacity-60">Drawing JSON shape research for the case study, 2026-10-31.</p>
+  <h1 class="text-3xl font-bold">Which JSON shape should a drawing turn into?</h1>
+  <p class="text-lg">Same 17 callouts from drawing CTC-01, shown in three shapes. The shape chosen is the one the gold labels, the eval and the pipeline all use. Recommendation: <b>Option A with two extra fields</b>, because B and C can then be produced from it, and the reverse is not true.</p>
+</header>
+
+<section class="card bg-base-100 shadow">
+  <div class="card-body space-y-4">
+    <h2 class="card-title">The drawing we are converting: CTC-01 (one sheet, 17 value callouts, no unit printed)</h2>
+    <p>Red numbers are the callout ids used in every JSON below. Hover a row in the table to read the callout in plain words.</p>
+    <div class="relative" style="width:100%">
+      <img src="ctc01.png" alt="CTC-01 drawing" style="width:100%; display:block; background:#fff; border-radius:.5rem">
+      <div id="pins"></div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table table-sm table-zebra" id="calloutTable">
+        <thead><tr><th>#</th><th>As printed</th><th>Callout</th><th>Kind (Y14.5 wording)</th><th>Belongs to</th><th>Means</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="alert text-sm">
+      <span><b>Vocabulary follows ASME Y14.5, the drawing standard the NIST sheets use.</b> <code>callout</code> is one of: dimension, feature_control_frame, datum_feature_symbol, datum_target, note, title_block, surface_texture, thread. For a feature_control_frame, <code>kind</code> is the geometric characteristic in the standard's wording: straightness, flatness, circularity, cylindricity, profile_of_a_line, profile_of_a_surface, angularity, perpendicularity, parallelism, position, concentricity, symmetry, circular_runout, total_runout. For a dimension, <code>kind</code> is diameter, radius, linear or angular, and <code>tolerance_style</code> says how the tolerance was written: limits, plus_minus, unilateral, bilateral_unequal, basic, reference. The eval matches on value, unit and kind, so these words are the ones the extractor must get right.</span>
+    </div>
+    <div class="alert alert-info text-sm">
+      <span><b>Reading tip.</b> The boxed callouts (2, 5, 6, 9, 15, 16) are <i>feature control frames</i>: the standard's name for the rectangle that holds a geometric characteristic symbol, a tolerance zone and the datums. The word inside each one here (flatness, position, profile of a surface, perpendicularity) is the <i>geometric characteristic</i>, one of the 14 named in ASME Y14.5. The record keeps both: <code>callout</code> says what sort of thing was printed, <code>kind</code> uses the standard's exact wording. A <i>size</i> is a number with a tolerance (diameter 25 ±0.15). A <i>geometric control</i> is the boxed frame with a symbol: flatness, position, profile, perpendicularity. A <i>datum</i> (A, B, C) is a reference face or hole the controls measure from. CTC-01 prints no unit; the NIST CTC sheets are millimetres by convention, so the JSON records the unit as inferred.</span>
+    </div>
+  </div>
+</section>
+
+<section class="space-y-4">
+  <h2 class="text-2xl font-bold">Who reads this JSON</h2>
+  <p>Resourcly sells parts intelligence to industrial manufacturers. Three people meet the JSON. The shape must be obvious to the first, correct for the second, and queryable for the third.</p>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="card bg-base-100 shadow"><div class="card-body">
+      <h3 class="font-bold">1. Buyer or maintenance engineer</h3>
+      <p class="text-sm">Needs to know which numbers matter when sourcing or replacing the part: critical diameters, material, revision. Reads <b>meaning</b> sentences, not symbols. Newest to drawings.</p>
+      <p class="text-xs opacity-70 mt-2">Wants: a flat list with plain words.</p>
+    </div></div>
+    <div class="card bg-base-100 shadow"><div class="card-body">
+      <h3 class="font-bold">2. Inspector or supplier quality</h3>
+      <p class="text-sm">Checks a made part against the drawing. Needs each requirement as a checkable row: nominal, lower and upper limit, which datums, which feature.</p>
+      <p class="text-xs opacity-70 mt-2">Wants: limits computed, grouped by feature.</p>
+    </div></div>
+    <div class="card bg-base-100 shadow"><div class="card-body">
+      <h3 class="font-bold">3. Data platform (a million drawings)</h3>
+      <p class="text-sm">Indexes, searches and compares drawings at scale. Needs stable field names, enums for <code>kind</code>, numbers as numbers, units explicit, a page and position to highlight.</p>
+      <p class="text-xs opacity-70 mt-2">Wants: flat, typed, deduplicable records.</p>
+    </div></div>
+  </div>
+</section>
+
+<section class="space-y-6">
+  <h2 class="text-2xl font-bold">The three shapes</h2>
+
+  <div class="card bg-base-100 shadow"><div class="card-body space-y-3">
+    <div class="flex flex-wrap items-center gap-2"><h3 class="text-xl font-bold">Option A - flat callout list</h3><span class="badge badge-success">recommended base</span></div>
+    <p>One record per thing printed on the sheet. The record says what was printed, what it belongs to, what kind it is and what it means. Nothing is nested.</p>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div><b>Good at</b><ul class="list-disc ml-5"><li>Matches how the extractor sees the page: one callout at a time, so fewer grouping mistakes.</li><li>Easiest to label and to score: a prediction either matches a gold record or it does not.</li><li>Persona 1 reads the <code>meaning</code> column; persona 3 gets typed flat rows.</li></ul></div>
+      <div><b>Weak at</b><ul class="list-disc ml-5"><li>Persona 2 has to group rows by feature in their head.</li><li>Limits are not computed; "35 +0.2/0" stays a string plus a nominal.</li></ul></div>
+    </div>
+    <pre class="json" id="jsonA"></pre>
+  </div></div>
+
+  <div class="card bg-base-100 shadow"><div class="card-body space-y-3">
+    <h3 class="text-xl font-bold">Option B - feature tree</h3>
+    <p>The part is a list of features (a hole, a face, a boss). Each feature carries its size and its geometric controls. Datums are listed once at the top. This is how an engineer talks about a part: "the hole at B is 35 wide and positioned within 0.75 to A, B, C".</p>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div><b>Good at</b><ul class="list-disc ml-5"><li>Persona 2's natural view.</li><li>Shows relationships: a feature with a size and a position control reads as one requirement set.</li></ul></div>
+      <div><b>Weak at</b><ul class="list-disc ml-5"><li>The extractor must decide which callouts share a feature. On a 3D view like CTC-01 that is the hardest step, so B adds the riskiest judgement to every record.</li><li>Scoring needs flattening anyway, and a wrong grouping hides correct values.</li><li>Features that have no printed size (both notches) still need an entry.</li></ul></div>
+    </div>
+    <pre class="json" id="jsonB"></pre>
+  </div></div>
+
+  <div class="card bg-base-100 shadow"><div class="card-body space-y-3">
+    <h3 class="text-xl font-bold">Option C - inspection ledger</h3>
+    <p>Every requirement becomes a checkable row with nominal, lower, upper, the datum frame and a one-line "how to check". Datums become rows too. This is the quality department's checklist.</p>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div><b>Good at</b><ul class="list-disc ml-5"><li>Directly useful to persona 2 and to automated conformance checks.</li><li>Limits make the tolerance explicit, so "0/-0.2" versus "+0.2/0" cannot be misread.</li></ul></div>
+      <div><b>Weak at</b><ul class="list-disc ml-5"><li>Computing limits needs rules per tolerance type (a position zone is a width, a size has two limits, an angle is in degrees). A rule mistake multiplies across a million drawings.</li><li>Loses "what was printed", so a disagreement cannot be traced back to the sheet.</li><li>Persona 1 reads worse: rows look like a spreadsheet, not an explanation.</li></ul></div>
+    </div>
+    <pre class="json" id="jsonC"></pre>
+  </div></div>
+</section>
+
+<section class="card bg-base-100 shadow"><div class="card-body space-y-3">
+  <h2 class="card-title">Scorecard</h2>
+  <div class="overflow-x-auto"><table class="table table-sm">
+    <thead><tr><th>Criterion</th><th>A flat list</th><th>B feature tree</th><th>C ledger</th></tr></thead>
+    <tbody>
+      <tr><td>Newcomer can read it (persona 1)</td><td>good</td><td>fair</td><td>poor</td></tr>
+      <tr><td>Inspector can use it (persona 2)</td><td>fair</td><td>good</td><td>good</td></tr>
+      <tr><td>Platform can index it (persona 3)</td><td>good</td><td>fair (nested)</td><td>good</td></tr>
+      <tr><td>Extraction risk added by the shape</td><td>low</td><td>high (grouping)</td><td>medium (limit rules)</td></tr>
+      <tr><td>Gold labelling effort per drawing</td><td>lowest</td><td>highest</td><td>medium</td></tr>
+      <tr><td>Scoring rule</td><td>direct match</td><td>flatten first</td><td>direct match on limits</td></tr>
+      <tr><td>Traceable to what was printed</td><td>yes (raw)</td><td>partly</td><td>no, unless raw is kept</td></tr>
+      <tr><td>Can produce the other two shapes</td><td>yes, with feature_id and limits</td><td>A yes, C partly</td><td>A partly, B yes</td></tr>
+    </tbody></table></div>
+</div></section>
+
+<section class="card bg-base-100 shadow border-2 border-success"><div class="card-body space-y-3">
+  <h2 class="card-title">Recommendation: Option A plus a flat features list, so B and C are views</h2>
+  <p>Store and score the flat value record (A). Beside the values, keep a flat <code>features</code> list at the drawing level (id, type, label, description), and give each value a <code>feature_id</code> that points into it, plus <code>limits</code> (lower and upper). Nothing is nested: a feature is written once, a value row stays one line, and grouping (B) or a ledger (C) is a join on <code>feature_id</code>. The extractor still reads one callout at a time; the grouping and the limit rules become small, testable functions on top instead of extra places for the model to be wrong. One gold file serves all three personas.</p>
+  <pre class="json" id="jsonAplus"></pre>
+  <p class="text-sm"><b>Why this holds up in the review call.</b> The record mirrors the drawing standard: a callout is a value, a symbol (its kind), a feature it attaches to, and the datums it references. The eval matches on value, unit and kind, which are the fields a human can verify without interpretation. <code>meaning</code> is the only free text, and it is judged by a rubric, not by exact match.</p>
+</div></section>
+
+
+
+<section class="card bg-base-100 shadow"><div class="card-body space-y-3">
+  <h2 class="card-title">Decisions taken</h2>
+  <ul class="list-disc pl-5 space-y-1">
+    <li><b>A plus</b>: flat records with <code>feature_id</code> and <code>limits</code> are the stored shape. B and C are views of it.</li>
+    <li>The 17 CTC-01 records become the first gold file once they are corrected.</li>
+  </ul>
+</div></section>
+
+</main>
+<script>
+const R = [
+ {id:1, raw:"⌀35.2 / ⌀34.8", callout:"dimension", kind:"diameter", tolerance_style:"limits", value:[34.8,35.2], limits:{lower:34.8,upper:35.2}, unit:"mm", feature_id:"hole_top", feature:"through hole, top lobe", ftype:"hole", datums:[], pos:[0.44,0.12], meaning:"This hole's diameter must measure between 34.8 and 35.2 mm (written as upper and lower limits)."},
+ {id:2, raw:"▱ 0.2", callout:"feature_control_frame", kind:"flatness", tolerance_style:"geometric_zone", value:0.2, limits:{lower:0,upper:0.2}, unit:"mm", feature_id:"top_face", feature:"top face", ftype:"plane", datums:[], pos:[0.21,0.23], meaning:"Flatness: the top face must fit between two parallel planes 0.2 mm apart. No datum is needed; flatness is checked on the face alone."},
+ {id:3, raw:"A", callout:"datum_feature_symbol", kind:"datum_feature", tolerance_style:"none", value:null, limits:null, unit:null, feature_id:"top_face", feature:"top face", ftype:"plane", datums:[], pos:[0.27,0.23], meaning:"Datum feature A: the top face is the primary reference. Every control that names A is measured from this face."},
+ {id:4, raw:"B", callout:"datum_feature_symbol", kind:"datum_feature", tolerance_style:"none", value:null, limits:null, unit:null, feature_id:"hole_left", feature:"hole, left lobe", ftype:"hole", datums:[], pos:[0.09,0.40], meaning:"Datum feature B: the axis of this hole is the second reference."},
+ {id:5, raw:"⌖ 0.75 | A | B | C", callout:"feature_control_frame", kind:"position", tolerance_style:"geometric_zone", value:0.75, limits:{lower:0,upper:0.75}, unit:"mm", feature_id:"notch_top", feature:"rectangular notch, upper right edge (width)", ftype:"slot", datums:["A","B","C"], pos:[0.56,0.27], meaning:"Position: the centre plane of this notch must lie within a 0.75 mm wide zone at its true location, measured from datums A, B and C. The notch size itself comes from the CAD model."},
+ {id:6, raw:"⌓ 0.5 | A", callout:"feature_control_frame", kind:"profile_of_a_surface", tolerance_style:"geometric_zone", value:0.5, limits:{lower:0,upper:0.5}, unit:"mm", feature_id:"hex_top", feature:"hexagonal boss, top face", ftype:"plane", datums:["A"], pos:[0.71,0.40], meaning:"Profile of a surface: the hexagonal boss's top face must lie within a 0.5 mm band around its true shape, located from datum A."},
+ {id:7, raw:"⌀25 ±0.15", callout:"dimension", kind:"diameter", tolerance_style:"plus_minus", value:25, limits:{lower:24.85,upper:25.15}, unit:"mm", feature_id:"hole_mid", feature:"small hole, centre right", ftype:"hole", datums:[], pos:[0.76,0.45], meaning:"This hole's diameter must be 25 mm plus or minus 0.15 mm, so between 24.85 and 25.15."},
+ {id:8, raw:"⌀34.8 - 35.2", callout:"dimension", kind:"diameter", tolerance_style:"limits", value:[34.8,35.2], limits:{lower:34.8,upper:35.2}, unit:"mm", feature_id:"hole_right", feature:"hole, right lobe", ftype:"hole", datums:[], pos:[0.86,0.43], meaning:"This hole's diameter must be between 34.8 and 35.2 mm (the same requirement as callout 1, written as a range)."},
+ {id:9, raw:"⊥ 1.5 | A", callout:"feature_control_frame", kind:"perpendicularity", tolerance_style:"geometric_zone", value:1.5, limits:{lower:0,upper:1.5}, unit:"mm", feature_id:"end_face_right", feature:"right end face", ftype:"plane", datums:["A"], pos:[0.90,0.62], meaning:"Perpendicularity: the right end face must be square to datum A within a 1.5 mm wide zone."},
+ {id:10, raw:"⌀35 0/-0.2", callout:"dimension", kind:"diameter", tolerance_style:"unilateral", value:35, limits:{lower:34.8,upper:35.0}, unit:"mm", feature_id:"boss_left", feature:"cylindrical boss, left lobe (outside)", ftype:"cylinder", datums:[], pos:[0.23,0.58], meaning:"This boss's outside diameter may be 35 mm at most and 34.8 mm at least (one-sided tolerance, downward only)."},
+ {id:11, raw:"⌀20 +0.05/-0.10", callout:"dimension", kind:"diameter", tolerance_style:"bilateral_unequal", value:20, limits:{lower:19.90,upper:20.05}, unit:"mm", feature_id:"hole_angled_1", feature:"hole 1 on the angled face", ftype:"hole", datums:[], pos:[0.33,0.55], meaning:"This hole's diameter must be between 19.90 and 20.05 mm."},
+ {id:12, raw:"⌀20 +0.10/-0.05", callout:"dimension", kind:"diameter", tolerance_style:"bilateral_unequal", value:20, limits:{lower:19.95,upper:20.10}, unit:"mm", feature_id:"hole_angled_2", feature:"hole 2 on the angled face", ftype:"hole", datums:[], pos:[0.34,0.61], meaning:"This hole's diameter must be between 19.95 and 20.10 mm."},
+ {id:13, raw:"60° ±0.5°", callout:"dimension", kind:"angular", tolerance_style:"plus_minus", value:60, limits:{lower:59.5,upper:60.5}, unit:"deg", feature_id:"angled_face", feature:"angled face", ftype:"plane", datums:[], pos:[0.47,0.63], meaning:"The angled face must sit at 60 degrees, plus or minus half a degree, to the base."},
+ {id:14, raw:"C", callout:"datum_feature_symbol", kind:"datum_feature", tolerance_style:"none", value:null, limits:null, unit:null, feature_id:"hole_front", feature:"hole, front lobe", ftype:"hole", datums:[], pos:[0.49,0.71], meaning:"Datum feature C: the axis of this hole is the third reference."},
+ {id:15, raw:"⌓ 1.25 | A | B | C  (A ◄► B)", callout:"feature_control_frame", kind:"profile_of_a_surface", tolerance_style:"geometric_zone", value:1.25, limits:{lower:0,upper:1.25}, unit:"mm", feature_id:"boss_front", feature:"cylindrical boss, front lobe, curved surface between points A and B", ftype:"cylinder", datums:["A","B","C"], pos:[0.45,0.77], meaning:"Profile of a surface between points A and B: the curved outer surface of this boss, from point A round to point B, must lie within a 1.25 mm band around its true shape, located from datums A, B and C. The italic A and B on the sheet mark the start and end points; they are not the datums."},
+ {id:16, raw:"⌖ 0.75 | A | B | C", callout:"feature_control_frame", kind:"position", tolerance_style:"geometric_zone", value:0.75, limits:{lower:0,upper:0.75}, unit:"mm", feature_id:"notch_bottom", feature:"rectangular notch, lower right edge (width)", ftype:"slot", datums:["A","B","C"], pos:[0.77,0.76], meaning:"Position: this notch's centre plane must lie within a 0.75 mm wide zone from datums A, B and C."},
+ {id:17, raw:"⌀35 +0.2/0", callout:"dimension", kind:"diameter", tolerance_style:"unilateral", value:35, limits:{lower:35.0,upper:35.2}, unit:"mm", feature_id:"boss_front", feature:"cylindrical boss, front lobe (outside)", ftype:"cylinder", datums:[], pos:[0.64,0.87], meaning:"This boss's outside diameter may be 35.2 mm at most and 35.0 mm at least (one-sided tolerance, upward only)."},
+];
+const TITLE = {drawing_number:"nist_ctc_01_asme1_rd", title:"Test Model 1", series:"NIST PMI Test Models - 2012", sheet_note:"PMI Complex Test Case 1; includes atomic test cases 1, 2, 3, 4, 7, 8, 17, 21, 33, 48", revision:"D", units:"mm", units_source:"inferred (no unit printed; NIST CTC convention)", standard:"ASME Y14.5 (NIST PMI test models)"};
+
+// pins and table
+const pins = document.getElementById('pins');
+const tb = document.querySelector('#calloutTable tbody');
+for (const r of R) {
+  const p = document.createElement('div'); p.className='pin'; p.textContent=r.id; p.style.left=(r.pos[0]*100)+'%'; p.style.top=(r.pos[1]*100)+'%'; p.title=r.raw; pins.appendChild(p);
+  const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.id}</td><td><code>${r.raw}</code></td><td>${r.callout}</td><td>${r.kind}</td><td>${r.feature}</td><td class="text-xs">${r.meaning}</td>`; tb.appendChild(tr);
+}
+function hl(obj){ return JSON.stringify(obj,null,2).replace(/"([^"]+)":/g,'<span class="k">"$1"</span>:').replace(/: "([^"]*)"/g,': <span class="s">"$1"</span>').replace(/: (-?\d+\.?\d*)/g,': <span class="n">$1</span>'); }
+
+// A
+const A = {drawing: TITLE.drawing_number, page_count: 1, title_block: {title:TITLE.title, revision:TITLE.revision, units:TITLE.units, units_source:TITLE.units_source},
+  values: R.slice(0,6).map(r=>({id:"ctc01-"+String(r.id).padStart(2,'0'), raw:r.raw, callout:r.callout, kind:r.kind, tolerance_style:r.tolerance_style, value:r.value, unit:r.unit, feature:r.feature, datums:r.datums, meaning:r.meaning, page:1, bbox:[r.pos[0]-0.04, r.pos[1]-0.02, r.pos[0]+0.04, r.pos[1]+0.02], confidence:0.9}))};
+A.values.push("... 11 more records (callouts 7 to 17), same fields");
+document.getElementById('jsonA').innerHTML = hl(A);
+
+// B
+const feats = {};
+for (const r of R) { if (r.callout==='datum_feature_symbol') continue; (feats[r.feature_id] ||= {id:r.feature_id, label:r.feature, type:r.ftype, size:null, controls:[]}); const f=feats[r.feature_id]; if (r.callout==='dimension') f.size={raw:r.raw, nominal:Array.isArray(r.value)?null:r.value, limits:r.limits, unit:r.unit}; else f.controls.push({raw:r.raw, characteristic:r.kind, zone:r.value, unit:r.unit, datums:r.datums}); }
+const B = {drawing: TITLE.drawing_number, units: TITLE.units, datums: R.filter(r=>r.callout==='datum_feature_symbol').map(r=>({label:r.raw, feature:r.feature_id, kind: r.ftype==='plane'?'planar face':'hole axis'})), features: Object.values(feats).slice(0,5)};
+B.features.push("... 9 more features");
+document.getElementById('jsonB').innerHTML = hl(B);
+
+// C
+const C = {drawing: TITLE.drawing_number, units: TITLE.units, requirements: R.filter(r=>r.callout!=='datum_feature_symbol').slice(0,6).map(r=>({req:"ctc01-R"+String(r.id).padStart(2,'0'), characteristic:r.kind, feature:r.feature, nominal:Array.isArray(r.value)?null:r.value, lower:r.limits.lower, upper:r.limits.upper, unit:r.unit, datum_frame:r.datums.join('|')||null, how_to_check: r.callout==='dimension'&&r.kind==='diameter'?'measure the diameter with a bore gauge or CMM':(r.kind==='angular'?'measure the angle on a CMM or with a protractor':'CMM check against the datum frame')}))};
+C.requirements.push("... 8 more requirement rows, plus 3 datum rows");
+document.getElementById('jsonC').innerHTML = hl(C);
+
+// A plus
+const r = R[14];
+const r17 = R[16];
+const AP = {drawing: TITLE.drawing_number, page_count: 1,
+  title_block: {title:TITLE.title, revision:TITLE.revision, units:TITLE.units, units_source:TITLE.units_source},
+  features: [
+    {id:"boss_front", type:"cylinder", label:"cylindrical boss, front lobe", description:"A boss is a raised round lump of material. This one is the front-right lobe of the plate: a short cylinder whose curved outer wall is the feature.", page:1},
+    {id:"hole_front", type:"hole", label:"hole through the front boss", description:"Through hole in the middle of the front boss; its axis is datum C.", page:1},
+    "... one entry per feature (14 on CTC-01)"
+  ],
+  values: [
+    {id:"ctc01-15", raw:r.raw, callout:r.callout, kind:r.kind, tolerance_style:r.tolerance_style, value:r.value, unit:r.unit, feature_id:"boss_front", applies_to:"curved outer wall between points A and B", datums:r.datums, limits:r.limits, meaning:r.meaning, page:1, bbox:[0.41,0.75,0.49,0.79], confidence:0.86},
+    {id:"ctc01-17", raw:r17.raw, callout:r17.callout, kind:r17.kind, tolerance_style:r17.tolerance_style, value:r17.value, unit:r17.unit, feature_id:"boss_front", applies_to:null, datums:[], limits:r17.limits, meaning:r17.meaning, page:1, bbox:[0.60,0.85,0.68,0.89], confidence:0.93},
+    "... one entry per callout (17 on CTC-01)"
+  ]};
+document.getElementById('jsonAplus').innerHTML = hl(AP);
+</script>
+</body>
+</html>

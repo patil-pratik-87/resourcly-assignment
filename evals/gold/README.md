@@ -12,6 +12,7 @@ Every record is a draft (`"status": "draft"`) until a person reviews it and sets
 | `schema.json` | JSON Schema of one gold document, generated from `src/resourcly/models.py`. |
 | `drawings/<drawing>.json` | Full gold: every value on every page, or on the pages `page_coverage` lists. |
 | `partial/<drawing>.json` | Partial gold: same shape, about ten values per drawing, scored for recall only. |
+| `../../research/schema/README.md` | Why the gold has this shape, and the options that were compared. |
 | `../splits.toml` | Which drawings are in the dev and test splits. |
 | `../../scripts/gold_tools/` | Grid render, bbox overlay, and the writer of `schema.json`. |
 
