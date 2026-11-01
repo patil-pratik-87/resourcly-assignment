@@ -1,0 +1,377 @@
+{
+ "qwen3vl_2b": {
+  "approach": "D",
+  "acc": 1.0,
+  "confusion": {
+   "drawing": {
+    "drawing": 114,
+    "photo": 0
+   },
+   "photo": {
+    "drawing": 0,
+    "photo": 88
+   }
+  },
+  "scored": 202,
+  "not_run": [
+   "d_ftc06_package_pdf",
+   "d_ftc07_p1_ocrscan",
+   "o_report_18061_page5_scan",
+   "o_report_18061_page5_ocrscan"
+  ],
+  "wrong": [],
+  "ece": 0.00030547586998141973,
+  "mean_conf_when_wrong": null,
+  "pairs_acc_image_only": 1.0,
+  "pairs_acc_with_text": 1.0,
+  "pairs_flipped_by_text": [],
+  "edge": {
+   "o_logo_18061_x677": "other",
+   "o_logo_24013_x159": "other",
+   "o_report_16006_pdf": "other",
+   "o_report_18061_pdf": "other",
+   "o_report_24013_pdf": "other",
+   "o_report_16006_page2": "other",
+   "o_report_18061_page3": "photo",
+   "o_commons_abmessungen": "drawing"
+  },
+  "load_s": 4.605942083057016,
+  "ms_median": 1095.2389789745212,
+  "ms_p95": 1231.6708168364128,
+  "peak_mlx_gb": 2.948251318,
+  "rss_delta_mb": 56.016896
+ },
+ "qwen3vl_4b": {
+  "approach": "D",
+  "acc": 0.995049504950495,
+  "confusion": {
+   "drawing": {
+    "drawing": 113,
+    "photo": 0,
+    "other": 1
+   },
+   "photo": {
+    "drawing": 0,
+    "photo": 88,
+    "other": 0
+   }
+  },
+  "scored": 202,
+  "not_run": [
+   "d_ftc06_package_pdf",
+   "d_ftc07_p1_ocrscan",
+   "o_report_18061_page5_scan",
+   "o_report_18061_page5_ocrscan"
+  ],
+  "wrong": [
+   [
+    "d_commons_abgewickeltesblech01",
+    "other",
+    0.731
+   ]
+  ],
+  "ece": 0.00447965907578416,
+  "mean_conf_when_wrong": 0.7310584187507629,
+  "pairs_acc_image_only": 1.0,
+  "pairs_acc_with_text": 1.0,
+  "pairs_flipped_by_text": [],
+  "edge": {
+   "o_logo_18061_x677": "other",
+   "o_logo_24013_x159": "other",
+   "o_report_16006_pdf": "other",
+   "o_report_18061_pdf": "other",
+   "o_report_24013_pdf": "other",
+   "o_report_16006_page2": "other",
+   "o_report_18061_page3": "other",
+   "o_commons_abmessungen": "drawing"
+  },
+  "load_s": 5.327362458221614,
+  "ms_median": 2009.3154375208542,
+  "ms_p95": 2256.480729370378,
+  "peak_mlx_gb": 4.262533814,
+  "rss_delta_mb": 863.125504
+ },
+ "qwen3vl_8b": {
+  "approach": "D",
+  "acc": 0.995049504950495,
+  "confusion": {
+   "drawing": {
+    "drawing": 113,
+    "photo": 0,
+    "other": 1
+   },
+   "photo": {
+    "drawing": 0,
+    "photo": 88,
+    "other": 0
+   }
+  },
+  "scored": 202,
+  "not_run": [
+   "d_ftc06_package_pdf",
+   "d_ftc07_p1_ocrscan",
+   "o_report_18061_page5_scan",
+   "o_report_18061_page5_ocrscan"
+  ],
+  "wrong": [
+   [
+    "d_commons_abgewickeltesblech01",
+    "other",
+    0.963
+   ]
+  ],
+  "ece": 0.004736820660015129,
+  "mean_conf_when_wrong": 0.9626190662384033,
+  "pairs_acc_image_only": 1.0,
+  "pairs_acc_with_text": 1.0,
+  "pairs_flipped_by_text": [],
+  "edge": {
+   "o_logo_18061_x677": "other",
+   "o_logo_24013_x159": "other",
+   "o_report_16006_pdf": "other",
+   "o_report_18061_pdf": "other",
+   "o_report_24013_pdf": "other",
+   "o_report_16006_page2": "other",
+   "o_report_18061_page3": "other",
+   "o_commons_abmessungen": "drawing"
+  },
+  "load_s": 6.477237290935591,
+  "ms_median": 3451.752145541832,
+  "ms_p95": 3866.675439849496,
+  "peak_mlx_gb": 6.882054443,
+  "rss_delta_mb": 253.1328
+ },
+ "d1_omni_600m": {
+  "approach": "F",
+  "acc": 0.9257425742574258,
+  "confusion": {
+   "drawing": {
+    "drawing": 104,
+    "photo": 3,
+    "other": 7
+   },
+   "photo": {
+    "drawing": 0,
+    "photo": 83,
+    "other": 5
+   }
+  },
+  "scored": 202,
+  "not_run": [
+   "d_ftc06_package_pdf",
+   "d_ftc07_p1_ocrscan",
+   "o_report_18061_page5_scan",
+   "o_report_18061_page5_ocrscan"
+  ],
+  "wrong": [
+   [
+    "d_ctc02_p3_photo",
+    "other",
+    0.628
+   ],
+   [
+    "d_ctc05_p1_photo",
+    "other",
+    0.527
+   ],
+   [
+    "d_ftc06_p3_r72",
+    "other",
+    0.493
+   ],
+   [
+    "d_ftc06_p3_jpeg",
+    "other",
+    0.589
+   ],
+   [
+    "d_ftc08_p1_photo",
+    "other",
+    0.673
+   ],
+   [
+    "d_ftc11_p2_r300",
+    "photo",
+    0.986
+   ],
+   [
+    "d_ftc11_p2_photo",
+    "photo",
+    0.978
+   ],
+   [
+    "d_ftc11_p2_scanpdf",
+    "photo",
+    0.928
+   ],
+   [
+    "d_commons_aircompressorverticalsec",
+    "other",
+    0.503
+   ],
+   [
+    "d_commons_werkstattzeichnungdesnor",
+    "other",
+    0.646
+   ],
+   [
+    "p_16006_p07_x40",
+    "other",
+    0.524
+   ],
+   [
+    "p_16006_p12_x107",
+    "other",
+    0.448
+   ],
+   [
+    "p_18061_p10_x62",
+    "other",
+    0.714
+   ],
+   [
+    "p_18061_p21_x448",
+    "other",
+    0.525
+   ],
+   [
+    "p_commons_ourbrokenvcrpart3detail7",
+    "other",
+    0.846
+   ]
+  ],
+  "ece": 0.07049950495049499,
+  "mean_conf_when_wrong": 0.6673000000000001,
+  "pairs_acc_image_only": 0.9,
+  "pairs_acc_with_text": 0.6,
+  "pairs_flipped_by_text": [
+   "tp_02",
+   "tp_03",
+   "tp_09",
+   "tp_10"
+  ],
+  "edge": {
+   "o_logo_18061_x677": "other",
+   "o_logo_24013_x159": "other",
+   "o_report_16006_pdf": "other",
+   "o_report_18061_pdf": "other",
+   "o_report_24013_pdf": "other",
+   "o_report_16006_page2": "drawing",
+   "o_report_18061_page3": "photo",
+   "o_commons_abmessungen": "other"
+  },
+  "load_s": 3.7643265000078827,
+  "ms_median": 132.39754200913012,
+  "ms_p95": 139.6432044333778,
+  "peak_mlx_gb": 1.655829374,
+  "rss_delta_mb": 592.7731200000001
+ },
+ "d1_2b": {
+  "approach": "F",
+  "acc": 0.995049504950495,
+  "confusion": {
+   "drawing": {
+    "drawing": 114,
+    "photo": 0
+   },
+   "photo": {
+    "drawing": 1,
+    "photo": 87
+   }
+  },
+  "scored": 202,
+  "not_run": [
+   "d_ftc06_package_pdf",
+   "d_ftc07_p1_ocrscan",
+   "o_report_18061_page5_scan",
+   "o_report_18061_page5_ocrscan"
+  ],
+  "wrong": [
+   [
+    "p_commons_romanlockboltfindid10037",
+    "drawing",
+    0.478
+   ]
+  ],
+  "ece": 0.04948888117900287,
+  "mean_conf_when_wrong": 0.47809415310783676,
+  "pairs_acc_image_only": 1.0,
+  "pairs_acc_with_text": 1.0,
+  "pairs_flipped_by_text": [],
+  "edge": {
+   "o_logo_18061_x677": "other",
+   "o_logo_24013_x159": "other",
+   "o_report_16006_pdf": "other",
+   "o_report_18061_pdf": "other",
+   "o_report_24013_pdf": "other",
+   "o_report_16006_page2": "other",
+   "o_report_18061_page3": "other",
+   "o_commons_abmessungen": "drawing"
+  },
+  "load_s": 4.7802074160426855,
+  "ms_median": 655.1977085182443,
+  "ms_p95": 4237.859422841572,
+  "peak_mlx_gb": 2.39230579,
+  "rss_delta_mb": -141.459456
+ },
+ "d1_3b": {
+  "approach": "F",
+  "acc": 0.9851485148514851,
+  "confusion": {
+   "drawing": {
+    "drawing": 114,
+    "photo": 0,
+    "other": 0
+   },
+   "photo": {
+    "drawing": 2,
+    "photo": 85,
+    "other": 1
+   }
+  },
+  "scored": 202,
+  "not_run": [
+   "d_ftc06_package_pdf",
+   "d_ftc07_p1_ocrscan",
+   "o_report_18061_page5_scan",
+   "o_report_18061_page5_ocrscan"
+  ],
+  "wrong": [
+   [
+    "p_16006_p09_x74",
+    "drawing",
+    0.48
+   ],
+   [
+    "p_commons_romanlockboltfindid10037",
+    "drawing",
+    0.525
+   ],
+   [
+    "p_commons_ndiexposingthecracks5123",
+    "other",
+    0.654
+   ]
+  ],
+  "ece": 0.07736732673267321,
+  "mean_conf_when_wrong": 0.5531333333333334,
+  "pairs_acc_image_only": 1.0,
+  "pairs_acc_with_text": 1.0,
+  "pairs_flipped_by_text": [],
+  "edge": {
+   "o_logo_18061_x677": "other",
+   "o_logo_24013_x159": "other",
+   "o_report_16006_pdf": "other",
+   "o_report_18061_pdf": "other",
+   "o_report_24013_pdf": "other",
+   "o_report_16006_page2": "other",
+   "o_report_18061_page3": "other",
+   "o_commons_abmessungen": "drawing"
+  },
+  "load_s": 4.594966749893501,
+  "ms_median": 753.1348535558209,
+  "ms_p95": 5222.403147479052,
+  "peak_mlx_gb": 3.182841798,
+  "rss_delta_mb": -169.62355200000002
+ }
+}

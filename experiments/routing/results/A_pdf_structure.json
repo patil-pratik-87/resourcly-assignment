@@ -1,0 +1,483 @@
+{
+ "files": [
+  {
+   "id": "d_ctc01_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 1797,
+   "path_types": {
+    "s": 261,
+    "f": 1263,
+    "fs": 273
+   },
+   "pieces": {
+    "l": 8908,
+    "c": 583,
+    "qu": 33,
+    "re": 1
+   },
+   "image_cover": 0.0,
+   "chars": 153
+  },
+  {
+   "id": "d_ctc02_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 1247,
+   "path_types": {
+    "f": 725,
+    "s": 381,
+    "fs": 141
+   },
+   "pieces": {
+    "l": 4976,
+    "c": 550,
+    "qu": 7,
+    "re": 1
+   },
+   "image_cover": 0.0,
+   "chars": 719
+  },
+  {
+   "id": "d_ctc03_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 4049,
+   "path_types": {
+    "f": 3170,
+    "s": 404,
+    "fs": 475
+   },
+   "pieces": {
+    "l": 16656,
+    "c": 1050,
+    "qu": 57,
+    "re": 1
+   },
+   "image_cover": 0.0,
+   "chars": 247
+  },
+  {
+   "id": "d_ctc04_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 1217,
+   "path_types": {
+    "s": 512,
+    "fs": 352,
+    "f": 353
+   },
+   "pieces": {
+    "l": 8380,
+    "c": 877,
+    "qu": 27,
+    "re": 1
+   },
+   "image_cover": 0.0,
+   "chars": 308
+  },
+  {
+   "id": "d_ctc05_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 3069,
+   "path_types": {
+    "f": 2563,
+    "s": 366,
+    "fs": 140
+   },
+   "pieces": {
+    "l": 9353,
+    "c": 447,
+    "qu": 27,
+    "re": 1
+   },
+   "image_cover": 0.0,
+   "chars": 235
+  },
+  {
+   "id": "d_ftc06_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 1264,
+   "path_types": {
+    "s": 394,
+    "fs": 498,
+    "f": 372
+   },
+   "pieces": {
+    "l": 10029,
+    "c": 1101,
+    "qu": 55,
+    "re": 3
+   },
+   "image_cover": 0.0,
+   "chars": 802
+  },
+  {
+   "id": "d_ftc07_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 613,
+   "path_types": {
+    "fs": 87,
+    "s": 340,
+    "f": 186
+   },
+   "pieces": {
+    "l": 35367,
+    "qu": 11,
+    "c": 35
+   },
+   "image_cover": 0.0,
+   "chars": 1284
+  },
+  {
+   "id": "d_ftc08_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 2591,
+   "path_types": {
+    "f": 2053,
+    "s": 319,
+    "fs": 219
+   },
+   "pieces": {
+    "l": 8623,
+    "c": 621,
+    "qu": 31,
+    "re": 3
+   },
+   "image_cover": 0.0,
+   "chars": 1152
+  },
+  {
+   "id": "d_ftc09_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 5319,
+   "path_types": {
+    "f": 4656,
+    "s": 302,
+    "fs": 361
+   },
+   "pieces": {
+    "l": 16566,
+    "c": 1102,
+    "qu": 40,
+    "re": 2
+   },
+   "image_cover": 0.0,
+   "chars": 844
+  },
+  {
+   "id": "d_ftc10_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 2954,
+   "path_types": {
+    "f": 2467,
+    "s": 269,
+    "fs": 218
+   },
+   "pieces": {
+    "l": 9133,
+    "c": 540,
+    "qu": 23,
+    "re": 3
+   },
+   "image_cover": 0.0,
+   "chars": 978
+  },
+  {
+   "id": "d_ftc11_pdf",
+   "label": "drawing",
+   "variant": "pdf",
+   "paths": 1922,
+   "path_types": {
+    "f": 1644,
+    "s": 149,
+    "fs": 129
+   },
+   "pieces": {
+    "l": 5502,
+    "c": 304,
+    "qu": 15,
+    "re": 2
+   },
+   "image_cover": 0.0,
+   "chars": 799
+  },
+  {
+   "id": "d_ctc01_p1_scanpdf",
+   "label": "drawing",
+   "variant": "scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 0.9999998414108854,
+   "chars": 0
+  },
+  {
+   "id": "d_ctc03_p1_scanpdf",
+   "label": "drawing",
+   "variant": "scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 0.9999999276697545,
+   "chars": 0
+  },
+  {
+   "id": "d_ftc06_p2_scanpdf",
+   "label": "drawing",
+   "variant": "scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 0.9999999280788613,
+   "chars": 0
+  },
+  {
+   "id": "d_ftc08_p3_scanpdf",
+   "label": "drawing",
+   "variant": "scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 0.9999999267531273,
+   "chars": 0
+  },
+  {
+   "id": "d_ftc10_p4_scanpdf",
+   "label": "drawing",
+   "variant": "scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 0
+  },
+  {
+   "id": "d_ftc11_p2_scanpdf",
+   "label": "drawing",
+   "variant": "scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 0.9999999061575123,
+   "chars": 0
+  },
+  {
+   "id": "p_16006_p06_x32_pdf",
+   "label": "photo",
+   "variant": "photo_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 0
+  },
+  {
+   "id": "p_18061_p13_x201_pdf",
+   "label": "photo",
+   "variant": "photo_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 0
+  },
+  {
+   "id": "p_18061_p17_x336_pdf",
+   "label": "photo",
+   "variant": "photo_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 0.9999999172157744,
+   "chars": 0
+  },
+  {
+   "id": "p_24013_p05_x17_pdf",
+   "label": "photo",
+   "variant": "photo_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 0
+  },
+  {
+   "id": "p_24013_p06_x21_pdf",
+   "label": "photo",
+   "variant": "photo_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 0
+  },
+  {
+   "id": "o_report_16006_pdf",
+   "label": "other",
+   "variant": "report_pdf",
+   "paths": 1,
+   "path_types": {
+    "f": 1
+   },
+   "pieces": {
+    "re": 1
+   },
+   "image_cover": 0.01861960516280055,
+   "chars": 2140
+  },
+  {
+   "id": "o_report_18061_pdf",
+   "label": "other",
+   "variant": "report_pdf",
+   "paths": 1,
+   "path_types": {
+    "f": 1
+   },
+   "pieces": {
+    "re": 1
+   },
+   "image_cover": 0.01861960964879085,
+   "chars": 2247
+  },
+  {
+   "id": "o_report_24013_pdf",
+   "label": "other",
+   "variant": "report_pdf",
+   "paths": 17,
+   "path_types": {
+    "f": 17
+   },
+   "pieces": {
+    "re": 17
+   },
+   "image_cover": 0.01919233879445205,
+   "chars": 200
+  },
+  {
+   "id": "d_ftc06_package_pdf",
+   "label": "drawing",
+   "variant": "package_pdf",
+   "paths": 6,
+   "path_types": {
+    "s": 6
+   },
+   "pieces": {
+    "re": 1,
+    "l": 5
+   },
+   "image_cover": 0.0,
+   "chars": 144
+  },
+  {
+   "id": "d_ftc07_p1_ocrscan",
+   "label": "drawing",
+   "variant": "ocr_scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 1284
+  },
+  {
+   "id": "o_report_18061_page5_scan",
+   "label": "other",
+   "variant": "report_scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 0
+  },
+  {
+   "id": "o_report_18061_page5_ocrscan",
+   "label": "other",
+   "variant": "report_ocr_scan_pdf",
+   "paths": 0,
+   "path_types": {},
+   "pieces": {},
+   "image_cover": 1.0,
+   "chars": 3512
+  }
+ ],
+ "by_variant": [
+  {
+   "variant": "ocr_scan_pdf",
+   "files": 1,
+   "paths_min": 0,
+   "paths_median": 0.0,
+   "paths_max": 0,
+   "image_cover_median": 1.0,
+   "chars_median": 1284.0
+  },
+  {
+   "variant": "package_pdf",
+   "files": 1,
+   "paths_min": 6,
+   "paths_median": 6.0,
+   "paths_max": 6,
+   "image_cover_median": 0.0,
+   "chars_median": 144.0
+  },
+  {
+   "variant": "pdf",
+   "files": 11,
+   "paths_min": 613,
+   "paths_median": 1922.0,
+   "paths_max": 5319,
+   "image_cover_median": 0.0,
+   "chars_median": 799.0
+  },
+  {
+   "variant": "photo_pdf",
+   "files": 5,
+   "paths_min": 0,
+   "paths_median": 0.0,
+   "paths_max": 0,
+   "image_cover_median": 1.0,
+   "chars_median": 0.0
+  },
+  {
+   "variant": "report_ocr_scan_pdf",
+   "files": 1,
+   "paths_min": 0,
+   "paths_median": 0.0,
+   "paths_max": 0,
+   "image_cover_median": 1.0,
+   "chars_median": 3512.0
+  },
+  {
+   "variant": "report_pdf",
+   "files": 3,
+   "paths_min": 1,
+   "paths_median": 1.0,
+   "paths_max": 17,
+   "image_cover_median": 0.01861960964879085,
+   "chars_median": 2140.0
+  },
+  {
+   "variant": "report_scan_pdf",
+   "files": 1,
+   "paths_min": 0,
+   "paths_median": 0.0,
+   "paths_max": 0,
+   "image_cover_median": 1.0,
+   "chars_median": 0.0
+  },
+  {
+   "variant": "scan_pdf",
+   "files": 6,
+   "paths_min": 0,
+   "paths_median": 0.0,
+   "paths_max": 0,
+   "image_cover_median": 0.9999999272114409,
+   "chars_median": 0.0
+  }
+ ]
+}
