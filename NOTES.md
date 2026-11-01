@@ -96,3 +96,22 @@ against the page, fixes it, and approves it, or adds a value that was missed.
   then a plain git diff to review before it is committed.
 
 How to use it: `docs/label-screen.md`.
+
+## One harness for every use case
+
+The router and the failure finder are scored by the same harness as the reader. Each is one more
+suite: gold cases, a version file, a score per case, a stored run and a comparison. The
+model-free versions set the floors, on the dev split:
+
+| Version | Cases | Primary | Other |
+| --- | --- | --- | --- |
+| router `stub-v0` | 123 | accuracy 0.607 | drawing recall 0.120, photo recall 0.965, other kept out 0.500 |
+| failure `shuffled-v0` | 86 | section@1 0.038 | report@1 0.269, mode@3 0.769, kept out 0.000 |
+
+- How: the router gold is the 244 requests of the routing research, moved to `evals/gold/routes`.
+  The failure gold is 3 perturbed copies of each of the 46 report figures, plus 11 drawings and
+  5 unrelated images that should match nothing.
+- Why the floors are low: the stub router calls every image a photo, so it misses drawings sent
+  as pictures. The shuffled finder gives the same order for every photo and never keeps one out.
+
+Details: `docs/evals.md`.
