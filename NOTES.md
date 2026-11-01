@@ -27,7 +27,7 @@ be compared with the current one.
   only on ports, small interfaces. Each model, file format or store is an adapter behind one of them, so
   it can be swapped without touching the core.
 
-## 2026-11-01: Routing research
+## Routing research
 
 Chose a layered router: structure rules on the file, then a DINOv2-small probe at 90%
 confidence, then Qwen3-VL 8B for the rest. On 244 labelled requests it made 0 mistakes on the
@@ -41,3 +41,19 @@ confidence, then Qwen3-VL 8B for the rest. On 244 labelled requests it made 0 mi
   all need the customer's files.
 
 Write-up: `research/routing/README.md`.
+
+## Drawing-to-JSON research
+
+Chose to find each callout from the PDF's vector paths, then read one crop at a time with
+Qwen3-VL 8B. Every annotation on these NIST PDFs is pure blue, so PyMuPDF boxes all of them
+with no model in 33 s for 30 pages. On 8 test crops the 8B passed 42 of 46 checks and named
+all 6 GD&T symbols, at 5 s per crop. The whole page to the same model is the baseline.
+
+- Tried: the PDF tags and structure, Docling, RapidOCR, Qwen3-VL 4B and 8B on whole pages and
+  on crops, MechVL-4B SFT and RL, and OCR text as a prompt hint.
+- Failed: Docling turns the drawing into one picture. OCR loses every GD&T symbol. The whole
+  page loops and misreads digits on dense sheets. MechVL scores below plain Qwen3-VL 4B.
+- Open: grouping merges close callouts on dense sheets, no model reads the counterbore or depth
+  symbols, and drawings that are not blue or are scanned are untested.
+
+Write-up: `research/drawing/README.md`.
