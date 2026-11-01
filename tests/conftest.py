@@ -2,12 +2,19 @@ import json
 import shutil
 from pathlib import Path
 
+import pymupdf
 import pytest
 
 from resourcly.bootstrap import PROJECT_ROOT, Settings
 
 FIXTURE_GOLD = Path(__file__).parent / "fixtures" / "gold"
 CTC01 = "nist_ctc_01_asme1_rd"
+
+
+def png(width: int = 40, height: int = 30) -> bytes:
+    pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, width, height), False)
+    pixmap.clear_with(200)
+    return pixmap.tobytes("png")
 
 
 @pytest.fixture

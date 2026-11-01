@@ -98,6 +98,7 @@ def test_a_setting_the_implementation_does_not_take_is_refused(versioned: Settin
 def test_the_committed_default_versions_exist() -> None:
     settings = Settings()
     assert load_version(settings, "reader", settings.versions["reader"]).impl == "textlayer"
+    assert load_version(settings, "router", settings.versions["router"]).impl == "stub"
 
 
 def test_gold_work_needs_no_reader_version_or_trace_file(
