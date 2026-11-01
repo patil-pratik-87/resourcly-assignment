@@ -1,4 +1,7 @@
+import mimetypes
 import re
+from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
@@ -448,3 +451,67 @@ class DrawingSummary(BaseModel):
     values: int
     approved: int
     issues: int
+
+
+class Route(StrEnum):
+    """The case a request goes to. The router picks it; the user never says."""
+
+    DRAWING = "drawing"
+    PHOTO = "photo"
+    TEXT = "text"
+    # an attachment that fits no case, such as a whole report or a logo
+    OTHER = "other"
+
+
+@dataclass(frozen=True)
+class Attachment:
+    name: str
+    media_type: str
+    data: bytes = field(repr=False)
+
+
+@dataclass(frozen=True)
+class LayerVerdict:
+    """What one router layer made of a request: a route, or None to pass it to the next layer.
+
+    The reason says why either way, and the confidence is 1 for a rule.
+    """
+
+    route: Route | None
+    reason: str
+    confidence: float | None = None
+    probabilities: dict[str, float] = field(default_factory=dict)
+
+
+class Routing(BaseModel):
+    """The router's answer to one request: the route, the layer that decided it, and why."""
+
+    request_id: str
+    route: Route
+    layer: str
+    confidence: float | None
+    reason: str
+    probabilities: dict[str, float]
+    elapsed_ms: float
+
+
+MAGIC_BYTES = (
+    (b"\x89PNG\r\n\x1a\n", "image/png"),
+    (b"\xff\xd8\xff", "image/jpeg"),
+    (b"GIF8", "image/gif"),
+    (b"II*\x00", "image/tiff"),
+    (b"MM\x00*", "image/tiff"),
+)
+
+
+def guess_media_type(name: str, data: bytes) -> str:
+    """The media type of a file from its first bytes, else from its name."""
+    head = data[:1024]
+    if b"%PDF-" in head:
+        return "application/pdf"
+    for magic, media_type in MAGIC_BYTES:
+        if head.startswith(magic):
+            return media_type
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return "image/webp"
+    return mimetypes.guess_type(name)[0] or "application/octet-stream"

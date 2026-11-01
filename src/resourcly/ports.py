@@ -1,7 +1,14 @@
 from collections.abc import Callable
 from typing import Any, Literal, Protocol
 
-from resourcly.models import GoldDocument, ReadProgress, TraceEvent
+from resourcly.models import (
+    Attachment,
+    GoldDocument,
+    LayerVerdict,
+    ReadProgress,
+    Routing,
+    TraceEvent,
+)
 
 Source = Literal["drawings", "partial"]
 Splits = dict[str, dict[str, list[str]]]
@@ -42,4 +49,25 @@ class ReaderPort(Protocol):
 
         A reader that works in steps calls `progress` before each one.
         """
+        ...
+
+
+class RouterPort(Protocol):
+    """Picks the case of a request from its attachment; the user never says which it is."""
+
+    def route(
+        self, text: str | None, attachment: Attachment | None, request_id: str | None = None
+    ) -> Routing:
+        """The route, the layer that decided it, its confidence and why, traced under request_id."""
+        ...
+
+
+class RouteLayerPort(Protocol):
+    """One layer of the router, such as the structure rules, the probe or the fallback model."""
+
+    name: str
+    called: str  # what the layer runs, for the trace
+
+    def decide(self, attachment: Attachment | None) -> LayerVerdict:
+        """A verdict with a route, or with None to pass the request to the next layer."""
         ...

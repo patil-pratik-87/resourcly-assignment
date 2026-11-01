@@ -13,9 +13,11 @@ from typing import Any
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
 from resourcly.adapters.sqlite_trace import SqliteTraceAdapter
+from resourcly.adapters.stub_router import StubRouteAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.errors import InvalidVersion, NotFound
-from resourcly.services import DrawingService, GoldService, TraceService
+from resourcly.ports import RouterPort
+from resourcly.services import DrawingService, GoldService, RouterService, TraceService
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -29,7 +31,9 @@ class Settings:
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
     # The version each component runs, a file in versions_dir; the app and the evals both read it
-    versions: dict[str, str] = field(default_factory=lambda: {"reader": "textlayer-v0"})
+    versions: dict[str, str] = field(
+        default_factory=lambda: {"reader": "textlayer-v0", "router": "stub-v0"}
+    )
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -83,8 +87,15 @@ READERS: dict[str, Implementation] = {
         lambda settings, params: PyMuPDFTextReaderAdapter(settings.drawings_dir)
     ),
 }
+ROUTERS: dict[str, Implementation] = {
+    # A model-free stand-in, for tests and machines without the router's models.
+    "stub": Implementation(
+        lambda settings, params: [StubRouteAdapter(**params)], settings=("min_paths",)
+    ),
+}
 IMPLEMENTATIONS: dict[str, dict[str, Implementation]] = {
     "reader": READERS,
+    "router": ROUTERS,
 }
 
 
@@ -125,8 +136,8 @@ def list_versions(settings: Settings, component: str) -> list[Version]:
 class Services:
     """The services the API, the CLI and the evals call.
 
-    The gold service is built at once. The reader and the trace file are built on first use, so
-    gold work needs no version and no trace file.
+    The gold service is built at once. The reader, the router and the trace file are built on
+    first use, so gold work needs no version and no trace file.
     """
 
     def __init__(self, settings: Settings, stack: ExitStack):
@@ -147,6 +158,24 @@ class Services:
             trace=self._trace(),
             reader_name=f"{reader.name} ({reader.impl})",
         )
+
+    @cached_property
+    def router(self) -> RouterPort:
+        return RouterService(
+            layers=ROUTERS[self._router_version.impl].build(
+                self._settings, self._router_version.params
+            ),
+            trace=self._trace(),
+            router_name=self.router_name,
+        )
+
+    @property
+    def router_name(self) -> str:
+        return f"{self._router_version.name} ({self._router_version.impl})"
+
+    @cached_property
+    def _router_version(self) -> Version:
+        return load_version(self._settings, "router", self._settings.versions["router"])
 
     @cached_property
     def traces(self) -> TraceService:

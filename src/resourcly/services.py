@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import re
 import time
@@ -7,11 +8,15 @@ from typing import Any
 
 from resourcly.errors import InvalidDocument, NotFound
 from resourcly.models import (
+    Attachment,
     DrawingSummary,
     GoldDocument,
     Issue,
+    LayerVerdict,
     Reading,
     RequestTrace,
+    Route,
+    Routing,
     TitleBlock,
     TraceEvent,
     undefined_datums,
@@ -22,6 +27,7 @@ from resourcly.ports import (
     GoldStorePort,
     Progress,
     ReaderPort,
+    RouteLayerPort,
     Source,
     Splits,
     TracePort,
@@ -178,6 +184,106 @@ class DrawingService:
             self.trace.record(event)
         except Exception:
             log.exception("could not record the trace of request %s", event.request_id)
+
+
+class RouterService:
+    """Picks the case of a request by asking each layer in turn, from the cheapest.
+
+    The first layer that gives a route decides, and the later layers are not asked. A request
+    that no layer is sure of fits no case. Every layer asked is traced under the request id with
+    what it made of the request, so `evals show --request` shows which layer decided and why. The
+    user's text is traced by length only, and it never changes the route.
+    """
+
+    def __init__(self, layers: list[RouteLayerPort], trace: TracePort, router_name: str):
+        self.layers = layers
+        self.trace = trace
+        self.router_name = router_name
+
+    def route(
+        self, text: str | None, attachment: Attachment | None, request_id: str | None = None
+    ) -> Routing:
+        request_id = request_id or uuid.uuid4().hex
+        began = time.perf_counter()
+        request = {"text_chars": len(text or ""), "attachment": _described(attachment)}
+        last = None
+        for layer in self.layers:
+            last = self._ask(layer, attachment, request_id, request)
+            if last.route is not None:
+                return self._routing(request_id, layer.name, last, began)
+        reason = f"no layer was sure; the last said: {last.reason}" if last else "no layers"
+        return self._routing(request_id, "none", LayerVerdict(Route.OTHER, reason, None, {}), began)
+
+    def _ask(
+        self,
+        layer: RouteLayerPort,
+        attachment: Attachment | None,
+        request_id: str,
+        request: dict[str, Any],
+    ) -> LayerVerdict:
+        started, began = now(), time.perf_counter()
+        try:
+            verdict = layer.decide(attachment)
+        except Exception as error:
+            self._record(layer, request_id, request, {"decided": False}, error, started, began)
+            raise
+        output = {
+            "decided": verdict.route is not None,
+            "route": verdict.route.value if verdict.route else None,
+            "confidence": verdict.confidence,
+            "reason": verdict.reason,
+            "probabilities": verdict.probabilities,
+        }
+        self._record(layer, request_id, request, output, None, started, began)
+        return verdict
+
+    def _record(
+        self,
+        layer: RouteLayerPort,
+        request_id: str,
+        request: dict[str, Any],
+        output: dict[str, Any],
+        error: Exception | None,
+        started: str,
+        began: float,
+    ) -> None:
+        event = TraceEvent(
+            request_id=request_id,
+            step=f"route.{layer.name}",
+            called=f"router {self.router_name}: {layer.called}",
+            input=request,
+            output=output,
+            error=f"{type(error).__name__}: {error}" if error else None,
+            started_at=started,
+            duration_ms=round((time.perf_counter() - began) * 1000, 1),
+        )
+        try:
+            self.trace.record(event)
+        except Exception:
+            log.exception("could not record the trace of request %s", request_id)
+
+    @staticmethod
+    def _routing(request_id: str, layer: str, verdict: LayerVerdict, began: float) -> Routing:
+        return Routing(
+            request_id=request_id,
+            route=verdict.route,
+            layer=layer,
+            confidence=verdict.confidence,
+            reason=verdict.reason,
+            probabilities=verdict.probabilities,
+            elapsed_ms=round((time.perf_counter() - began) * 1000, 1),
+        )
+
+
+def _described(attachment: Attachment | None) -> dict[str, Any] | None:
+    if attachment is None:
+        return None
+    return {
+        "name": attachment.name,
+        "media_type": attachment.media_type,
+        "bytes": len(attachment.data),
+        "sha256": hashlib.sha256(attachment.data).hexdigest(),
+    }
 
 
 class TraceService:
