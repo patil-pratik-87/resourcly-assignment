@@ -1,9 +1,11 @@
+from collections.abc import Callable
 from typing import Any, Literal, Protocol
 
-from resourcly.models import GoldDocument
+from resourcly.models import GoldDocument, ReadProgress, TraceEvent
 
 Source = Literal["drawings", "partial"]
 Splits = dict[str, dict[str, list[str]]]
+Progress = Callable[[ReadProgress], None]
 
 
 class GoldStorePort(Protocol):
@@ -26,3 +28,18 @@ class DrawingPagePort(Protocol):
     def page_count(self, drawing: str) -> int: ...
 
     def render(self, drawing: str, page: int, dpi: int) -> bytes: ...
+
+
+class TracePort(Protocol):
+    def record(self, event: TraceEvent) -> None: ...
+
+    def find(self, request_id: str) -> list[TraceEvent]: ...
+
+
+class ReaderPort(Protocol):
+    def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
+        """The drawing's values as a document in the gold schema's shape, possibly invalid.
+
+        A reader that works in steps calls `progress` before each one.
+        """
+        ...

@@ -41,3 +41,25 @@ confidence, then Qwen3-VL 8B for the rest. On 244 labelled requests it made 0 mi
   all need the customer's files.
 
 Write-up: `research/routing/README.md`.
+
+## Eval harness
+
+`uv run evals` scores any reader version against the gold labels and stores every run, so two
+versions can be compared on the same cases. The text-layer reader, which needs no model, sets the
+floor:
+
+| Metric (all gold) | Value |
+| --- | --- |
+| Strict F1 | 0.344 |
+| Strict precision | 0.902 |
+| Strict recall | 0.213 |
+| Partial-gold recall | 0.129 |
+
+- How: a value matches on page, unit, kind and number. Only 4 drawings are labelled in full
+  (full gold). The other 7 have about 10 values each (partial gold), so they give recall only.
+  Without them the test split would hold 2 drawings.
+- Why the text layer is the floor: it reads the title block and notes, which are real PDF text.
+  Most callouts are drawn as vector paths, so it misses them. A real reader must raise recall
+  without giving up much precision.
+
+Details: `docs/evals.md`.

@@ -397,6 +397,44 @@ def _field_loc(loc: list[str | int]) -> list[str | int]:
     return loc[:depth]
 
 
+class ReadProgress(BaseModel):
+    """How far a read has got, sent before each step so a person can watch a slow read.
+
+    `done` of `total` steps are finished over the whole drawing: callouts for a reader that reads
+    them one at a time, pages for one that reads whole pages. `boxes` are the callouts found on
+    `page`, as page fractions, and the first `page_done` of them are read. `latest` is the text the
+    step before this one read, so a person sees what the reader finds as it goes.
+    """
+
+    page: int
+    pages: int
+    done: int
+    total: int
+    boxes: list[tuple[float, float, float, float]] = []
+    page_done: int = 0
+    latest: list[str] = []
+
+
+class Reading(BaseModel):
+    request_id: str
+    drawing: str
+    document: dict[str, Any]
+    issues: list[Issue]
+
+
+class TraceEvent(BaseModel):
+    """One step of a request: what the service did, what it called, with what, and the outcome."""
+
+    request_id: str
+    step: str
+    called: str
+    input: dict[str, Any]
+    output: dict[str, Any]
+    error: str | None
+    started_at: str
+    duration_ms: float
+
+
 class DrawingSummary(BaseModel):
     drawing: str
     page_count: int
