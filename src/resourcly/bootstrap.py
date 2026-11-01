@@ -12,9 +12,13 @@ from typing import Any
 
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
+from resourcly.adapters.request_store import JsonRequestStoreAdapter
 from resourcly.adapters.sqlite_trace import SqliteTraceAdapter
 from resourcly.adapters.stub_router import StubRouteAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
+from resourcly.adapters.thread_jobs import ThreadJobsAdapter
+from resourcly.adapters.upload_store import FileUploadStoreAdapter
+from resourcly.agent import AgentService, recover
 from resourcly.errors import InvalidVersion, NotFound
 from resourcly.ports import RouterPort
 from resourcly.services import DrawingService, GoldService, RouterService, TraceService
@@ -30,6 +34,11 @@ class Settings:
     ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "annotation" / "dist"
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
+    uploads_dir: Path = PROJECT_ROOT / "var" / "uploads"
+    # A chat message's files are read into memory whole, so each file's size is capped, and so is
+    # the number of files in one message.
+    max_upload_bytes: int = 50 * 1024 * 1024
+    max_files: int = 50
     # The version each component runs, a file in versions_dir; the app and the evals both read it
     versions: dict[str, str] = field(
         default_factory=lambda: {"reader": "textlayer-v0", "router": "stub-v0"}
@@ -45,6 +54,11 @@ class Settings:
             ui_dist=Path(os.environ.get("RESOURCLY_UI_DIST", defaults.ui_dist)),
             versions_dir=Path(os.environ.get("RESOURCLY_VERSIONS_DIR", defaults.versions_dir)),
             trace_path=Path(os.environ.get("RESOURCLY_TRACE_DB", defaults.trace_path)),
+            uploads_dir=Path(os.environ.get("RESOURCLY_UPLOADS_DIR", defaults.uploads_dir)),
+            max_upload_bytes=int(
+                os.environ.get("RESOURCLY_MAX_UPLOAD_BYTES", defaults.max_upload_bytes)
+            ),
+            max_files=int(os.environ.get("RESOURCLY_MAX_FILES", defaults.max_files)),
             versions={
                 component: os.environ.get(f"RESOURCLY_{component.upper()}_VERSION", name)
                 for component, name in defaults.versions.items()
@@ -136,8 +150,8 @@ def list_versions(settings: Settings, component: str) -> list[Version]:
 class Services:
     """The services the API, the CLI and the evals call.
 
-    The gold service is built at once. The reader, the router and the trace file are built on
-    first use, so gold work needs no version and no trace file.
+    The gold service is built at once. The reader, the router, the trace file and the chat agent
+    are built on first use, so gold work needs no version and no trace file.
     """
 
     def __init__(self, settings: Settings, stack: ExitStack):
@@ -145,6 +159,8 @@ class Services:
         self._stack = stack
         self._lock = threading.Lock()
         self._trace_adapter: SqliteTraceAdapter | None = None
+        self._agent_lock = threading.Lock()
+        self._agent: AgentService | None = None
         pages = PyMuPDFPageAdapter(settings.drawings_dir)
         stack.callback(pages.close)
         store = JsonGoldStoreAdapter(settings.gold_dir, settings.splits_path)
@@ -152,9 +168,47 @@ class Services:
 
     @cached_property
     def drawings(self) -> DrawingService:
+        return self._drawings_in(self._settings.drawings_dir)
+
+    @property
+    def agent(self) -> AgentService:
+        """The chat agent and its background worker, built once even when threads ask at once."""
+        with self._agent_lock:
+            if self._agent is None:
+                trace = self._trace()  # first, so it closes after the worker that writes to it
+                jobs = ThreadJobsAdapter()
+                self._stack.callback(jobs.close)
+                self._agent = AgentService(
+                    uploads=FileUploadStoreAdapter(self._settings.uploads_dir),
+                    requests=self._requests,
+                    router=self.router,
+                    router_name=self.router_name,
+                    drawings_in=self._drawings_in,
+                    trace=trace,
+                    jobs=jobs,
+                )
+            return self._agent
+
+    def recover(self) -> None:
+        """Mark the chat work a previous server left unfinished as failed."""
+        recover(self._requests)
+
+    @cached_property
+    def _requests(self) -> JsonRequestStoreAdapter:
+        return JsonRequestStoreAdapter(self._settings.uploads_dir)
+
+    @property
+    def reader_name(self) -> str:
+        reader = load_version(self._settings, "reader", self._settings.versions["reader"])
+        return f"{reader.name} ({reader.impl})"
+
+    def _drawings_in(self, folder: Path) -> DrawingService:
+        """A drawing service whose reader reads the PDFs in `folder`."""
         reader = load_version(self._settings, "reader", self._settings.versions["reader"])
         return DrawingService(
-            reader=READERS[reader.impl].build(self._settings, reader.params),
+            reader=READERS[reader.impl].build(
+                replace(self._settings, drawings_dir=folder), reader.params
+            ),
             trace=self._trace(),
             reader_name=f"{reader.name} ({reader.impl})",
         )
