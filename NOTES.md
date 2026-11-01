@@ -27,7 +27,7 @@ be compared with the current one.
   only on ports, small interfaces. Each model, file format or store is an adapter behind one of them, so
   it can be swapped without touching the core.
 
-## 2026-11-01: Routing research
+## Routing research
 
 Chose a layered router: structure rules on the file, then a DINOv2-small probe at 90%
 confidence, then Qwen3-VL 8B for the rest. On 244 labelled requests it made 0 mistakes on the
