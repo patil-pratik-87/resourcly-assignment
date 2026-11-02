@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from resourcly import bootstrap
 from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter
 from resourcly.adapters.vlm_readers import VectorCropReaderAdapter, WholePageReaderAdapter
 from resourcly.bootstrap import (
@@ -13,7 +14,7 @@ from resourcly.bootstrap import (
     load_version,
     open_services,
 )
-from resourcly.errors import InvalidVersion, NotFound
+from resourcly.errors import InvalidVersion, ModelNotCached, NotFound
 from tests.conftest import CTC01
 
 
@@ -100,7 +101,7 @@ def test_a_setting_the_implementation_does_not_take_is_refused(versioned: Settin
 def test_the_committed_default_versions_exist() -> None:
     settings = Settings()
     for component, impl in (
-        ("reader", "textlayer"),
+        ("reader", "vector-crop"),
         ("router", "three-layer"),
         ("failure", "shuffled"),
     ):
@@ -150,3 +151,35 @@ def test_a_vlm_version_without_its_model_or_prompt_is_refused(
 
     with pytest.raises(InvalidVersion, match=f"needs the setting {missing}"):
         load_version(versioned, "reader", "incomplete")
+
+
+def _read_with_model(settings: Settings, model: str) -> str:
+    """The error a vision reader whose model is `model` gives when it reads CTC-01."""
+    _write(settings, "absent", f'impl = "vector-crop"\nmodel = "{model}"\nprompt = "p"\n')
+    with open_services(settings.with_version("reader", "absent")) as services:
+        with pytest.raises(ModelNotCached) as raised:
+            services.drawings.read(CTC01)
+    return str(raised.value)
+
+
+def test_a_model_that_is_not_cached_says_how_to_download_it_or_fall_back(
+    versioned: Settings,
+) -> None:
+    pytest.importorskip("huggingface_hub")
+
+    message = _read_with_model(versioned, "org/absent")
+
+    assert "org/absent is not in the local Hugging Face cache" in message
+    assert "hf download org/absent" in message
+    assert "RESOURCLY_READER_VERSION=textlayer-v0" in message
+
+
+def test_a_machine_without_the_vlm_extra_says_how_to_install_it_or_fall_back(
+    versioned: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(bootstrap, "find_spec", lambda name: None)
+
+    message = _read_with_model(versioned, "org/model")
+
+    assert "uv sync --extra vlm" in message
+    assert "RESOURCLY_READER_VERSION=textlayer-v0" in message

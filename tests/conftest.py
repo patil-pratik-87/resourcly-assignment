@@ -18,6 +18,12 @@ def png(width: int = 40, height: int = 30) -> bytes:
     return pixmap.tobytes("png")
 
 
+@pytest.fixture(autouse=True)
+def model_free_reader(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The app's default reader runs a vision model; tests read with the text layer instead."""
+    monkeypatch.setenv("RESOURCLY_READER_VERSION", "textlayer-v0")
+
+
 @pytest.fixture
 def gold_dir(tmp_path: Path) -> Path:
     target = tmp_path / "gold"
