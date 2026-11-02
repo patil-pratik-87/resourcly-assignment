@@ -1,22 +1,6 @@
 # How to read the project
 
-Seven short steps, about 30 minutes. The models for step 6 are over 6 GB, so start its setup first.
-
-## 0. The map (2 minutes)
-
-Each task item of [INSTRUCTIONS.md](INSTRUCTIONS.md). Code is under `src/resourcly/`.
-
-| Item | Built in | Measured by | Status |
-| --- | --- | --- | --- |
-| 1 Input | `agent.py`, `api.py` | tests | Done; text questions get "not available yet" |
-| 2 Picture | `answers.py`, `adapters/nearest_figures.py` | `failure`, `answer` evals | Finder mode@3 0.942; answer 0.625 on 8 cases |
-| 3 Drawing | `adapters/vlm_readers.py`, [outputs/](outputs) | `reader` eval | F1 0.725, precision 0.625 |
-| 4 Automatic | `adapters/route_*.py` | `router` eval | Accuracy 0.992 dev, 1.000 test, on an easy set |
-| 5 Bulk upload | `agent.py` | tests | Done; one worker, files in turn |
-| 6 Private | `adapters/mlx_vlm_model.py` | tests | Models load from the local cache only |
-| 7 Scale | stores and worker behind `ports.py` | not measured | Design only |
-| 8 Tracking | `adapters/sqlite_trace.py` | tests | Done |
-| 9 Validation | `eval_harness/` | its own tests | 4 parts; no whole-agent score |
+Six short steps, about 30 minutes. The models for step 6 are over 6 GB, so start its setup first.
 
 ## 1. The research (8 minutes)
 
@@ -47,10 +31,34 @@ message -> agent: one request, one item per file
 Models and stores are adapters behind `ports.py`. Each part runs a version file:
 [versions/README.md](versions/README.md).
 
-## 4. The measuring (4 minutes)
+## 4. The eval harness (6 minutes)
 
-Read [the eval harness README](src/resourcly/eval_harness/README.md), then compare two fault
-finders. This takes seconds and needs only DINOv2-base.
+Every part is scored on its own, the same way: run a version of a part on chosen gold cases,
+store the result, and compare it with another version.
+
+```text
+gold cases + split -> version file -> call the part -> score per case -> stored run
+                                                                           |
+                                          compare (better or worse) <------+
+```
+
+| Piece | Where |
+| --- | --- |
+| Gold cases, the known answers | `evals/gold/`: `drawings/`, `partial/`, `routes/`, `failure/` |
+| Dev and test splits | `evals/splits.toml`; related cases stay on one side |
+| Versions under test | `versions/<part>/<name>.toml` |
+| One suite per part: load, call, score, metrics | `src/resourcly/eval_harness/suites.py` |
+| Runs and per-case scores | `runs/evals.sqlite` |
+| A case's trace | `uv run resourcly request <run id>:<case id>` |
+
+| Part | Task | Primary metric |
+| --- | --- | --- |
+| `reader` | drawing to JSON | F1 |
+| `router` | file to its case | accuracy |
+| `failure` | photo to report figure, its own figure hidden | section@1 |
+| `answer` | photo to a cited answer | correct |
+
+Try it: compare two fault finders. This takes seconds and needs only DINOv2-base.
 
 ```sh
 uv run evals run failure --version shuffled-v0
@@ -59,7 +67,8 @@ make compare COMPONENT=failure A=shuffled-v0 B=dinov2-base-v1
 # (uv run evals compare failure shuffled-v0 dinov2-base-v1)
 ```
 
-Section@1 goes from 0.038 to 0.564 on dev. All numbers: [docs/evals.md](docs/evals.md).
+Section@1 goes from 0.038 to 0.564 on dev. More: [the harness README](src/resourcly/eval_harness/README.md)
+and all numbers in [docs/evals.md](docs/evals.md).
 
 ## 5. The code (5 minutes)
 
