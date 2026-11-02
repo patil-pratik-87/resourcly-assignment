@@ -24,10 +24,16 @@ from pathlib import Path
 from typing import Any
 
 import pymupdf
+from pydantic import ValidationError
 
 from resourcly.adapters.callout_locator import Callout, Rect, locate
 from resourcly.adapters.text_reader import text_records
 from resourcly.callout_values import (
+    Answer,
+    LetterAnswer,
+    PageAnswer,
+    SymbolAnswer,
+    Transcription,
     datum_letter,
     feature_type,
     name_symbols,
@@ -153,17 +159,19 @@ class VectorCropReaderAdapter:
             return build_document(drawing, pdf, _merge_repeats(groups))
 
     def _read_crop(self, image: bytes, callout: Callout) -> list[dict[str, Any]]:
-        transcription = first_json(self.model.generate(self.prompt, [image], self.max_tokens))
+        answer = self.model.generate(self.prompt, [image], self.max_tokens)
+        transcription = parse_answer(Transcription, answer) or Transcription(lines=[])
         if self.symbol_prompt and needs_symbol(transcription):
-            answer = first_json(self.model.generate(self.symbol_prompt, [image], 40))
-            name = answer.get("symbol_name") if isinstance(answer, dict) else None
-            if isinstance(name, str):
-                transcription = name_symbols(transcription, name)
+            answer = self.model.generate(self.symbol_prompt, [image], 40)
+            symbol = parse_answer(SymbolAnswer, answer)
+            if symbol:
+                transcription = name_symbols(transcription, symbol.symbol_name)
         found = readings(transcription, framed=callout.framed, letters=callout.letters)
         if not found and self.letter_prompt and callout.framed and callout.letters <= 3:
-            letter = datum_letter(first_json(self.model.generate(self.letter_prompt, [image], 30)))
-            if letter:
-                found = readings({"lines": [letter]}, framed=True, letters=1)
+            answer = self.model.generate(self.letter_prompt, [image], 30)
+            letter = parse_answer(LetterAnswer, answer)
+            if letter and (found_letter := datum_letter(letter)):
+                found = readings(Transcription(lines=[found_letter]), framed=True, letters=1)
         return found
 
 
@@ -218,8 +226,9 @@ def page_groups(
     image = page.get_pixmap(dpi=dpi).tobytes("png")
     callouts, datums = _page_answer(model.generate(prompt, [image], max_tokens))
     number = page.number + 1
-    found = [readings(c) for c in _collapse(callouts)]
-    found += [readings({"lines": [d]}, framed=True, letters=1) for d in datums]
+    transcriptions = [parse_answer(Transcription, c) for c in _collapse(callouts)]
+    found = [readings(t) for t in transcriptions if t]
+    found += [readings(Transcription(lines=[d]), framed=True, letters=1) for d in datums]
     return [Group(number, WHOLE_PAGE, r, description) for r in found]
 
 
@@ -247,6 +256,17 @@ def crop_png(
             crop.set_rect(covered, (255,) * pixmap.n)
     crop.copy(pixmap, pixels(box) & region)
     return crop.tobytes("png")
+
+
+def parse_answer[A: Answer](model: type[A], answer: str | dict[str, Any]) -> A | None:
+    """The first JSON object in a model answer as `model`, or None if there is none of its shape."""
+    found = first_json(answer) if isinstance(answer, str) else answer
+    if found is None:
+        return None
+    try:
+        return model.model_validate(found)
+    except ValidationError:
+        return None
 
 
 def first_json(text: str) -> Any:
@@ -379,11 +399,9 @@ def _meaning(fields: dict[str, Any]) -> str:
 
 def _page_answer(text: str) -> tuple[list[dict[str, Any]], list[str]]:
     """The callouts and datum letters of a whole-page answer, also from a cut-off answer."""
-    whole = first_json(text)
-    if isinstance(whole, dict) and isinstance(whole.get("callouts"), list):
-        datums = whole.get("datum_feature_symbols")
-        letters = [str(d) for d in datums] if isinstance(datums, list) else []
-        return [c for c in whole["callouts"] if isinstance(c, dict)], letters
+    whole = parse_answer(PageAnswer, text)
+    if whole:
+        return whole.callouts, whole.datum_feature_symbols
     start = text.find("[", text.find('"callouts"'))
     return (json_objects(text[start + 1 :]) if start > 0 else []), []
 
