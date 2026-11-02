@@ -26,12 +26,14 @@ def run(
     store: SqliteResultStore,
     split: str = "dev",
     case_ids: tuple[str, ...] = (),
+    limit: int | None = None,
     note: str | None = None,
     on_start: Callable[[Run, list[Case], int], None] | None = None,
     on_case: Callable[[CaseResult], None] | None = None,
 ) -> Run:
-    """Run one version of a component on every gold case of a split, or only the named ones, and
-    store the result. `compare` scores the stored answers again on the current gold.
+    """Run one version of a component on every gold case of a split, only the named ones, or the
+    first `limit` of them, and store the result. `compare` scores the stored answers again on the
+    current gold.
 
     A case whose call fails is stored with its error and scored as if it returned nothing.
     """
@@ -39,7 +41,7 @@ def run(
     resolved = load_version(settings, component, version)
     with open_services(settings.with_version(component, version)) as services:
         pool = suite.load(services, split)
-        chosen = _choose(pool, case_ids)
+        chosen = _choose(pool, case_ids)[:limit]
         if not chosen:
             raise ValueError(
                 f"no {component} case of the {split} split was selected; nothing was stored"

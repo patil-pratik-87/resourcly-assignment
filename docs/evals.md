@@ -9,6 +9,7 @@ and its modules: [src/resourcly/eval_harness/README.md](../src/resourcly/eval_ha
 uv run evals check                                   # every gold file and split
 uv run evals run router --version stub-v0            # the dev split by default
 uv run evals run reader --version textlayer-v0 --split all
+uv run evals run failure --version shuffled-v0 --limit 10   # the first 10 cases only
 uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
 uv run resourcly request RUN_ID:CASE_ID              # what one call did

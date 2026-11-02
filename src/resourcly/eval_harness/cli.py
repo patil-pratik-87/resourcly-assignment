@@ -63,6 +63,9 @@ def run(
     case_id: Annotated[
         list[str] | None, typer.Option(help="Run only these cases; every case by default.")
     ] = None,
+    limit: Annotated[
+        int | None, typer.Option(min=1, help="Run only the first N cases, in case id order.")
+    ] = None,
     note: Annotated[str | None, typer.Option(help="Free text stored with the run.")] = None,
 ) -> None:
     """Run a version of a component on the gold cases of a split."""
@@ -92,6 +95,7 @@ def run(
             store=store,
             split=split,
             case_ids=tuple(case_id or ()),
+            limit=limit,
             note=note,
             on_start=started,
             on_case=finished,
