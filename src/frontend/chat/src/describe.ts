@@ -22,6 +22,13 @@ export function layerLabel(layer: string): string {
   return LAYER_LABELS[layer.toLowerCase()] ?? layer;
 }
 
+/** Which router layer decided, as a sentence. */
+export function chosenBy(layer: string): string {
+  if (layer.toLowerCase() === "none") return `Chosen by ${layerLabel(layer)}.`;
+  const known = layer.toLowerCase() in LAYER_LABELS;
+  return known ? `Chosen by the ${layerLabel(layer)}.` : `Chosen by the ${layer} layer.`;
+}
+
 export function isActive(item: RequestItem): boolean {
   return item.status === "routing" || item.status === "queued" || item.status === "reading";
 }

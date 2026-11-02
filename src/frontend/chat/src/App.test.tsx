@@ -198,7 +198,9 @@ describe("the agent's answer for each item", () => {
       route: routing({ route: "text", confidence: 1, reason: "A message without a file is text." }),
       reply: "Answering questions from the NTSB reports is not available yet.",
     });
-    const { api } = fakeAgentApi([record({ text: "why did the bracket crack?", items: [question] })]);
+    const { api } = fakeAgentApi([
+      record({ text: "why did the bracket crack?", items: [question] }),
+    ]);
     render(<App api={api} />);
 
     const card = await screen.findByRole("region", { name: "Your message" });
@@ -213,7 +215,12 @@ describe("the agent's answer for each item", () => {
       name: "scan.pdf",
       status: "answered",
       values: null,
-      route: routing({ route: "other", layer: "none", confidence: null, reason: "no layer was sure" }),
+      route: routing({
+        route: "other",
+        layer: "none",
+        confidence: null,
+        reason: "no layer was sure",
+      }),
       reply: "This fits neither case the agent handles.",
     });
     const { api } = fakeAgentApi([record({ items: [unsure] })]);
