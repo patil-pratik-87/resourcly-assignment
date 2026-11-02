@@ -28,8 +28,10 @@ from resourcly.adapters.stub_router import StubRouteAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.adapters.thread_jobs import ThreadJobsAdapter
 from resourcly.adapters.upload_store import FileUploadStoreAdapter
+from resourcly.adapters.vlm_answer import VlmPhotoAnswerAdapter
 from resourcly.adapters.vlm_readers import VectorCropReaderAdapter, WholePageReaderAdapter
 from resourcly.agent import AgentService, recover
+from resourcly.answers import PhotoAnswerService
 from resourcly.errors import InvalidVersion, ModelNotCached, NotFound
 from resourcly.ports import ImageEncoderPort, RouteLayerPort, RouterPort
 from resourcly.services import (
@@ -65,8 +67,8 @@ class Settings:
         default_factory=lambda: {
             "reader": "vector-crop-v2",
             "router": "three-layer-v1",
-            "failure": "shuffled-v0",
-            "answer": "captions-v0",
+            "failure": "dinov2-base-v1",
+            "answer": "photo-v1",
         }
     )
 
@@ -309,13 +311,34 @@ FINDERS: dict[str, Implementation] = {
         check=_known_encoder,
     ),
 }
-# Every answerer names the figure index whose report text and figure images it cites, as `index`.
+# Every answer version names the figure index whose report text and figure images it cites, and
+# may set how many of the closest figures it is shown, how many as images and at what size.
+EVIDENCE_SETTINGS = ("index", "figures", "images", "figure_side")
 ANSWERERS: dict[str, Implementation] = {
     # No model: the closest figures' captions, the floor for the photo answers.
     "captions": Implementation(
         lambda settings, params: CaptionsAnswerAdapter(),
-        settings=("index",),
+        settings=EVIDENCE_SETTINGS,
         required=("index",),
+        files=("index",),
+    ),
+    "vlm": Implementation(
+        lambda settings, params: VlmPhotoAnswerAdapter(
+            vision_model(params["model"]),
+            params["prompt"],
+            params["max_tokens"],
+            params.get("photo_side", 1024),
+            params.get("paragraph_chars", 700),
+        ),
+        settings=(
+            *EVIDENCE_SETTINGS,
+            "model",
+            "prompt",
+            "max_tokens",
+            "photo_side",
+            "paragraph_chars",
+        ),
+        required=("index", "model", "prompt", "max_tokens"),
         files=("index",),
     ),
 }
@@ -410,6 +433,7 @@ class Services:
                     router=self.router,
                     router_name=self.router_name,
                     drawings_in=self._drawings_in,
+                    photos=lambda: self.photo_answers,
                     pages_in=PyMuPDFPageAdapter,
                     trace=trace,
                     jobs=jobs,
@@ -491,6 +515,21 @@ class Services:
     @cached_property
     def reports(self) -> ReportService:
         return ReportService(self._evidence)
+
+    @cached_property
+    def photo_answers(self) -> PhotoAnswerService:
+        """Finds the report figures nearest a photo and answers from them; loads no model yet."""
+        version = self._answer_version
+        return PhotoAnswerService(
+            failures=self.failures,
+            evidence=self._evidence,
+            answerer=ANSWERERS[version.impl].build(self._settings, version.params),
+            trace=self._trace(),
+            answer_name=self.answer_name,
+            figures=version.params.get("figures", 3),
+            images=version.params.get("images", 2),
+            figure_side=version.params.get("figure_side", 768),
+        )
 
     @cached_property
     def traces(self) -> TraceService:

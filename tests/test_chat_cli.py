@@ -54,7 +54,7 @@ def test_ask_with_a_folder_uploads_every_file_in_it_as_one_request(tmp_path: Pat
     assert "a: drawing (stub, 0.7), done" in result.output
     assert "b: drawing (stub, 0.7), done" in result.output
     assert "crack: photo (stub, 0.6), answered" in result.output
-    assert "not available yet" in result.output
+    assert "The closest report figure is" in result.output
     assert ".DS_Store" not in result.output
 
 
@@ -154,3 +154,33 @@ def test_serve_runs_the_api_on_the_given_port(monkeypatch: pytest.MonkeyPatch) -
     assert served == {"host": "127.0.0.1", "port": 8123}
     assert "Chat on http://127.0.0.1:8123" in result.output
     assert "reader textlayer-v0, router stub-v0" in result.output
+
+
+def test_ask_with_a_photo_prints_the_answer_its_citations_and_the_closest_figures(
+    tmp_path: Path,
+) -> None:
+    photo = tmp_path / "crack.png"
+    photo.write_bytes(png())
+
+    result = invoke("ask", "what is wrong?", "--file", str(photo))
+
+    assert result.exit_code == 0, result.output
+    lines = result.output.splitlines()
+    start = lines.index("  crack: photo (stub, 0.6), answered")
+    answer = lines[start + 1 :]
+    assert answer[0].startswith("    The closest report figure is")
+    assert "    From the reports:" in answer
+    assert any(re.match(r"    - Figure \d+\. .* \[\d\d-\d\d\d fig\d\d\]$", line) for line in answer)
+    assert any(line.startswith("    Closest report figures: ") for line in answer)
+
+
+def test_request_shows_the_retrieval_and_answer_steps_of_a_photo(tmp_path: Path) -> None:
+    photo = tmp_path / "crack.png"
+    photo.write_bytes(png())
+    sent = invoke("ask", "--file", str(photo))
+
+    result = invoke("request", request_id(sent))
+
+    assert result.exit_code == 0, result.output
+    assert "failure.find  called finder shuffled-v0 (shuffled)" in result.output
+    assert "answer.photo  called answer captions-v0 (captions)" in result.output

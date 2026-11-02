@@ -616,7 +616,7 @@ class PhotoEvidence:
     """
 
     question: str
-    photo: bytes  # PNG
+    photo: Attachment
     figures: list[FigureEvidence]
     images: list[bytes]
     reports: list[ReportEvidence]

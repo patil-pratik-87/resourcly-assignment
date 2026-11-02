@@ -134,14 +134,57 @@ def test_the_json_downloads_as_a_file_named_after_the_upload(client: TestClient)
     assert response.json()["drawing"] == "ctc"
 
 
-def test_a_photo_gets_a_reply_that_diagnosis_is_not_available_yet(client: TestClient) -> None:
+def test_a_photo_is_answered_from_the_report_figures_closest_to_it(client: TestClient) -> None:
     sent = send(client, "what is wrong with this bolt?", ("bolt.png", png()))
 
     [item] = finished(client, sent["request_id"])["items"]
 
     assert (item["route"]["route"], item["status"]) == ("photo", "answered")
-    assert "not available yet" in item["reply"]
-    assert item["values"] is None
+    answer = item["answer"]
+    assert (answer["not_in_reports"], answer["matched"]) == (False, True)
+    # the model-free versions: the shuffled finder and the closest figures' captions
+    best = answer["figures"][0]
+    assert answer["answer"].startswith(f"The closest report figure is {best['figure'][:6]} fig")
+    citation = answer["findings"][0]["citation"]
+    assert citation["figure"] == best["figure"]
+    assert item["reply"].startswith(answer["answer"])
+    assert item["values"] is None and item["finished_at"]
+
+
+def test_a_photo_waits_its_turn_then_shows_it_is_being_answered(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    gate = threading.Event()
+    services = client.app.state.services
+    answer = services.photo_answers.answer
+
+    def slow(*args: Any) -> Any:
+        gate.wait(timeout=10)
+        return answer(*args)
+
+    monkeypatch.setattr(services.photo_answers, "answer", slow)
+    sent = send(client, "", ("bolt.png", png()))
+
+    record = wait_for(client, sent["request_id"], lambda r: r["items"][0]["status"] == "answering")
+    gate.set()
+
+    assert record["status"] == "working" and record["items"][0]["started_at"]
+    assert finished(client, sent["request_id"])["items"][0]["status"] == "answered"
+
+
+def test_a_photo_whose_answer_fails_says_why(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def broken(*args: Any) -> Any:
+        raise ModelNotCached("org/model is not in the local Hugging Face cache")
+
+    monkeypatch.setattr(client.app.state.services.photo_answers, "answer", broken)
+    sent = send(client, "", ("bolt.png", png()))
+
+    [item] = finished(client, sent["request_id"])["items"]
+
+    assert item["status"] == "failed"
+    assert item["error"] == "org/model is not in the local Hugging Face cache"
 
 
 def test_text_alone_is_one_item_routed_and_answered(client: TestClient) -> None:
@@ -293,14 +336,19 @@ def test_every_step_is_traced_under_the_request_id(client: TestClient) -> None:
         ("router.route", "ctc"),
         ("route.stub", None),
         ("router.route", "crack"),
-        ("answer.reply", "crack"),
         ("drawings.read", None),
+        ("failure.find", None),
+        ("answer.photo", None),
     ]
     events = {event["step"]: event for event in trace["events"]}
     assert events["router.route"]["called"] == "router stub-v0 (stub)"
     assert events["drawings.read"]["called"] == "reader textlayer-v0 (textlayer)"
     assert events["drawings.read"]["input"] == {"drawing": "ctc"}
-    assert events["answer.reply"]["called"] == "nothing: picture answering is not available yet"
+    assert events["failure.find"]["called"] == "finder shuffled-v0 (shuffled)"
+    assert events["answer.photo"]["called"] == (
+        "answer captions-v0 (captions): no model: the closest figures' captions"
+    )
+    assert events["answer.photo"]["input"]["question_chars"] == 10
     assert events["requests.receive"]["input"] == {
         "text_chars": 10,
         "text_sha256": hashlib.sha256(b"two things").hexdigest(),

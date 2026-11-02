@@ -9,14 +9,15 @@ def test_the_eval_data_defaults_to_the_evals_folder_and_the_versions_to_the_root
     assert settings.splits_path == PROJECT_ROOT / "evals" / "splits.toml"
 
 
-def test_the_app_runs_the_layered_router_and_vector_crop_reader_by_default(monkeypatch) -> None:
-    monkeypatch.delenv("RESOURCLY_READER_VERSION")
+def test_the_app_runs_the_researched_version_of_each_component_by_default(monkeypatch) -> None:
+    for component in ("READER", "FAILURE", "ANSWER"):
+        monkeypatch.delenv(f"RESOURCLY_{component}_VERSION")
 
     assert Settings().versions == {
         "reader": "vector-crop-v2",
         "router": "three-layer-v1",
-        "failure": "shuffled-v0",
-        "answer": "captions-v0",
+        "failure": "dinov2-base-v1",
+        "answer": "photo-v1",
     }
     assert Settings.from_env().versions == Settings().versions
 

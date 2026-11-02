@@ -150,7 +150,9 @@ def _show(record: RequestRecord) -> None:
         if item.values is not None:
             typer.echo(f"    {item.values} values, {item.issues} issues")
         if item.reply:
-            typer.echo(f"    {item.reply}")
+            # a photo's answer runs over lines: its findings, actions and closest figures
+            for line in item.reply.splitlines():
+                typer.echo(f"    {line}" if line else "")
         if item.error:
             typer.echo(f"    error: {item.error}")
 
