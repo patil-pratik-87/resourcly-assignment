@@ -13,7 +13,9 @@ SOURCES: tuple[Source, ...] = ("drawings", "partial")
 class JsonGoldStoreAdapter:
     """One JSON document per drawing under <root>/drawings and <root>/partial.
 
-    The splits file sits apart from the gold, at `splits_path`.
+    The splits file sits apart from the gold, at `splits_path`. Router rows are
+    <root>/routes/routes.jsonl and failure rows <root>/failure/cases.jsonl; the files they name
+    are under their folders.
     """
 
     def __init__(self, root: Path, splits_path: Path):
@@ -57,6 +59,43 @@ class JsonGoldStoreAdapter:
         except tomllib.TOMLDecodeError as error:
             issue = Issue(loc=[], message=f"{path.name} is not valid TOML: {error}")
             raise InvalidDocument([issue]) from error
+
+    def load_route_cases(self) -> list[dict[str, Any]]:
+        return self._rows(self.root / "routes" / "routes.jsonl")
+
+    def load_failure_cases(self) -> list[dict[str, Any]]:
+        return self._rows(self.root / "failure" / "cases.jsonl")
+
+    def _rows(self, path: Path) -> list[dict[str, Any]]:
+        """One JSON value per line of a JSONL file; no file, no rows."""
+        if not path.is_file():
+            return []
+        rows = []
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            if not line.strip():
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError as error:
+                issue = Issue(loc=[number], message=f"{path.name} line {number}: {error}")
+                raise InvalidDocument([issue]) from error
+        return rows
+
+    def file_exists(self, path: str) -> bool:
+        return self._file(path).is_file()
+
+    def load_file(self, path: str) -> bytes:
+        file = self._file(path)
+        if not file.is_file():
+            raise NotFound(f"{path} is not in {self.root}; it is committed, so restore it from git")
+        return file.read_bytes()
+
+    def _file(self, path: str) -> Path:
+        root = self.root.resolve()
+        file = (root / path).resolve()
+        if not file.is_relative_to(root):
+            raise NotFound(f"{path} is outside the gold folder")
+        return file
 
     def _existing(self, drawing: str) -> Path | None:
         for source in SOURCES:

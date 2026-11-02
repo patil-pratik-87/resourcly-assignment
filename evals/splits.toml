@@ -17,3 +17,104 @@ test = [
     "nist_ftc_10_asme1_rb",
     "nist_ftc_11_asme1_rb",
 ]
+
+# The router splits name units (the `unit` field of routes.jsonl), and each unit goes wholly to
+# one side: one NIST drawing with all its pages and copies, one NTSB report with its photos and
+# pages, one Commons file, or one written question. A router that learns, such as a probe, trains
+# on train only. The reports go one to each split. dev holds the reader's dev drawings, train four
+# of the reader's test drawings, and the Commons drawings and photos go round-robin in name order.
+[router]
+train = [
+    "ctc03",
+    "ctc05",
+    "ftc08",
+    "ftc11",
+    "ntsb_16-006",
+    "commons_20200320165124autodeskfu",
+    "commons_albertkoppelritning",
+    "commons_werkstattzeichnungdesnor",
+    "commons_altensiletest",
+    "commons_conchoidal",
+    "commons_limescaleinpipe",
+    "commons_ourbrokenvcrpart3detail7",
+]
+dev = [
+    "ctc01",
+    "ctc02",
+    "ctc04",
+    "ftc07",
+    "ftc09",
+    "ntsb_18-061",
+    "commons_abgewickeltesblech01",
+    "commons_ansichten2",
+    "commons_brokenshaftandterminalfr",
+    "commons_ductilefracturesurface60",
+    "commons_ndiexposingthecracks5123",
+    "commons_pedalarm",
+    "commons_abmessungen",
+    "text_01",
+    "text_02",
+    "text_03",
+    "text_04",
+    "text_05",
+    "text_06",
+    "text_07",
+    "text_08",
+    "text_09",
+    "text_10",
+]
+test = [
+    "ftc06",
+    "ftc10",
+    "ntsb_24-013",
+    "commons_aircompressorverticalsec",
+    "commons_exampleofsteelreinforcem",
+    "commons_castirontensiletest",
+    "commons_eprouvetteplatecasseefac",
+    "commons_ndiexposingthecracks5123808",
+    "commons_romanlockboltfindid10037",
+    "text_11",
+    "text_12",
+    "text_13",
+    "text_14",
+    "text_15",
+    "text_16",
+    "text_17",
+    "text_18",
+    "text_19",
+    "text_20",
+]
+
+# The failure splits name units (the `unit` field of failure/cases.jsonl): a report figure with all
+# its perturbed copies, or one negative. Within each report section the figures alternate between
+# dev and test, so both see every section. The drawings follow the reader split.
+[failure]
+dev = [
+    "16-006/fig01", "16-006/fig03", "16-006/fig05", "16-006/fig07", "16-006/fig08", "16-006/fig10",
+    "16-006/fig12", "18-061/fig01", "18-061/fig03", "18-061/fig05", "18-061/fig07", "18-061/fig09",
+    "18-061/fig11", "18-061/fig13", "18-061/fig15", "18-061/fig17", "18-061/fig18", "18-061/fig20",
+    "18-061/fig21", "18-061/fig23", "18-061/fig25", "18-061/fig26", "18-061/fig28", "24-013/fig01",
+    "24-013/fig03", "24-013/fig05",
+    "neg_drawing_nist_ctc_01_asme1_rd",
+    "neg_drawing_nist_ctc_02_asme1_rc",
+    "neg_drawing_nist_ctc_04_asme1_rd",
+    "neg_drawing_nist_ftc_07_asme1_rd",
+    "neg_drawing_nist_ftc_09_asme1_rd",
+    "neg_unrelated_commons_abmessungen",
+    "neg_unrelated_logo_18061_x677",
+    "neg_unrelated_report_16006_page2",
+]
+test = [
+    "16-006/fig02", "16-006/fig04", "16-006/fig06", "16-006/fig09", "16-006/fig11", "18-061/fig02",
+    "18-061/fig04", "18-061/fig06", "18-061/fig08", "18-061/fig10", "18-061/fig12", "18-061/fig14",
+    "18-061/fig16", "18-061/fig19", "18-061/fig22", "18-061/fig24", "18-061/fig27", "18-061/fig29",
+    "24-013/fig02", "24-013/fig04",
+    "neg_drawing_nist_ctc_03_asme1_rc",
+    "neg_drawing_nist_ctc_05_asme1_rd",
+    "neg_drawing_nist_ftc_06_asme1_rd",
+    "neg_drawing_nist_ftc_08_asme1_rc",
+    "neg_drawing_nist_ftc_10_asme1_rb",
+    "neg_drawing_nist_ftc_11_asme1_rb",
+    "neg_unrelated_logo_24013_x159",
+    "neg_unrelated_report_18061_page3",
+]

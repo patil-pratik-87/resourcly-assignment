@@ -1,0 +1,71 @@
+# What each report figure shows, by figure range, labelled by hand from the report text. The
+# section names the part and assembly the figures are about, and the failure mode is the coarse
+# answer to what is wrong. reference_no_defect marks figures of intact or exemplar parts, or of a
+# mechanism working as it should.
+
+[[section]]
+report = "16-006"
+figures = [1, 2]
+section = "heat_damage"
+failure_mode = "heat_damage"
+
+[[section]]
+report = "16-006"
+figures = [3, 7]
+section = "throttle_lock_mechanism"
+failure_mode = "reference_no_defect"
+
+[[section]]
+report = "16-006"
+figures = [8, 12]
+section = "mixture_control_jam"
+failure_mode = "jam_corrosion"
+
+[[section]]
+report = "18-061"
+figures = [1, 12]
+section = "spar_fatigue_N106ER"
+failure_mode = "fatigue"
+
+[[section]]
+report = "18-061"
+figures = [13, 14]
+section = "microstructure"
+failure_mode = "reference_no_defect"
+
+[[section]]
+report = "18-061"
+figures = [15, 17]
+section = "spar_fatigue_N106ER"
+failure_mode = "fatigue"
+
+[[section]]
+report = "18-061"
+figures = [18, 20]
+section = "spar_fatigue_N104ER"
+failure_mode = "fatigue"
+
+[[section]]
+report = "18-061"
+figures = [21, 22]
+section = "microstructure"
+failure_mode = "reference_no_defect"
+
+# N3986M was eddy-current inspected with no crack indications (page 8), so it is a reference spar
+[[section]]
+report = "18-061"
+figures = [23, 25]
+section = "spar_N3986M"
+failure_mode = "reference_no_defect"
+
+[[section]]
+report = "18-061"
+figures = [26, 29]
+section = "new_extrusion"
+failure_mode = "reference_no_defect"
+
+[[section]]
+report = "24-013"
+figures = [1, 5]
+section = "bending_overstress"
+failure_mode = "overstress"

@@ -103,7 +103,7 @@ def test_a_request_no_layer_is_sure_of_fits_no_case() -> None:
 
     routing = RouterService(layers, MemoryTrace(), "v1").route(None, PHOTO)
 
-    assert (routing.route, routing.layer, routing.confidence) == (Route.UNSUPPORTED, "none", None)
+    assert (routing.route, routing.layer, routing.confidence) == (Route.OTHER, "none", None)
     assert routing.reason == f"no layer was sure; the last said: {UNSURE.reason}"
     assert routing.request_id
 

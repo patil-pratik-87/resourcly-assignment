@@ -45,7 +45,7 @@ REPLIES = {
         "Answering questions from the NTSB reports is not available yet. Attach a technical"
         " drawing, or many at once, and each comes back as JSON with every value on it."
     ),
-    Route.UNSUPPORTED: (
+    Route.OTHER: (
         "This fits neither case the agent handles: a technical drawing to turn into JSON, or a"
         " photo of a damaged part to diagnose."
     ),
@@ -53,7 +53,7 @@ REPLIES = {
 NO_ANSWERER = {
     Route.PHOTO: "nothing: picture answering is not available yet",
     Route.TEXT: "nothing: text answering is not available yet",
-    Route.UNSUPPORTED: "nothing: no case applies",
+    Route.OTHER: "nothing: no case applies",
 }
 INTERRUPTED = "The server stopped before this finished. Send the file again."
 

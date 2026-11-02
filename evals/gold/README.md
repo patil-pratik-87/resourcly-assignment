@@ -1,7 +1,9 @@
 # Gold labels
 
-The answer keys the reader evals score against. A gold document lists every value printed on a
-drawing, the physical feature it belongs to, and what it means, in ASME Y14.5 terms.
+The answer keys the evals score against. Most of this page is about the reader's gold: a gold
+document lists every value printed on a drawing, the physical feature it belongs to, and what it
+means, in ASME Y14.5 terms. The router and the failure finder have their own folders, each with
+its README.
 
 Every record is a draft (`"status": "draft"`) until a person reviews it and sets it to `approved`.
 
@@ -12,8 +14,10 @@ Every record is a draft (`"status": "draft"`) until a person reviews it and sets
 | `schema.json` | JSON Schema of one gold document, generated from `src/resourcly/models.py`. |
 | `drawings/<drawing>.json` | Full gold: every value on every page, or on the pages `page_coverage` lists. |
 | `partial/<drawing>.json` | Partial gold: same shape, about ten values per drawing, scored for recall only. |
+| `routes/` | Router gold: 244 requests and the files they send ([README](routes/README.md)). |
+| `failure/` | Failure gold: 154 photos and the report figure each shows ([README](failure/README.md)). |
 | `../../research/schema/README.md` | Why the gold has this shape, and the options that were compared. |
-| `../splits.toml` | Which drawings are in the dev and test splits. |
+| `../splits.toml` | Which cases of each component are in the dev and test splits. |
 | `../../scripts/gold_tools/` | Grid render, bbox overlay, and the writer of `schema.json`. |
 
 Check the gold after any change. It runs the package models, then the rules only gold needs (limits

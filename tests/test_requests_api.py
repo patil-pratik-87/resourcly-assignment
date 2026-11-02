@@ -160,7 +160,7 @@ def test_a_file_that_fits_no_case_says_so(client: TestClient) -> None:
 
     [item] = finished(client, sent["request_id"])["items"]
 
-    assert (item["route"]["route"], item["status"]) == ("unsupported", "answered")
+    assert (item["route"]["route"], item["status"]) == ("other", "answered")
     assert "neither case" in item["reply"]
 
 
@@ -180,7 +180,7 @@ def test_many_files_in_one_message_are_one_request(client: TestClient) -> None:
     assert routes == {
         "a": ("drawing", "done"),
         "b": ("drawing", "done"),
-        "report": ("unsupported", "answered"),
+        "report": ("other", "answered"),
         "crack": ("photo", "answered"),
     }
     [listed] = client.get("/api/requests").json()

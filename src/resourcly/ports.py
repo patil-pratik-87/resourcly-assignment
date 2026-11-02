@@ -4,6 +4,7 @@ from typing import Any, Literal, Protocol
 
 from resourcly.models import (
     Attachment,
+    FigureMatch,
     GoldDocument,
     LayerVerdict,
     ReadProgress,
@@ -29,6 +30,20 @@ class GoldStorePort(Protocol):
 
     def load_splits(self) -> Splits:
         """Case ids per split per component, such as {"reader": {"dev": [...], "test": [...]}}."""
+        ...
+
+    def load_route_cases(self) -> list[dict[str, Any]]:
+        """Router gold rows, one per labelled item: id, label, unit, file, text, attachment..."""
+        ...
+
+    def load_failure_cases(self) -> list[dict[str, Any]]:
+        """Failure gold rows, one per photo: case_id, image, kind, unit and the expected answer."""
+        ...
+
+    def file_exists(self, path: str) -> bool: ...
+
+    def load_file(self, path: str) -> bytes:
+        """A file the gold names, by its path under the gold folder; NotFound if it is absent."""
         ...
 
 
@@ -74,6 +89,13 @@ class RouteLayerPort(Protocol):
     def decide(self, attachment: Attachment | None) -> LayerVerdict:
         """A verdict with a route, or with None to pass the request to the next layer."""
         ...
+
+
+class FailureFinderPort(Protocol):
+    """Finds the report figures that show the same failure as a photo of a part."""
+
+    def find(self, photo: Attachment) -> list[FigureMatch]:
+        """The matching figures, best first; an empty list when no report shows this failure."""
 
 
 class UploadStorePort(Protocol):

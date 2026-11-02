@@ -27,7 +27,7 @@ class StubRouteAdapter:
             with pymupdf.open(stream=attachment.data, filetype="pdf") as pdf:
                 paths = len(pdf[0].get_drawings())
         except (pymupdf.FileDataError, RuntimeError, ValueError):
-            return LayerVerdict(Route.UNSUPPORTED, "Not a readable PDF.", 1.0)
+            return LayerVerdict(Route.OTHER, "Not a readable PDF.", 1.0)
         if paths >= self.min_paths:
             return LayerVerdict(
                 Route.DRAWING,
@@ -36,7 +36,7 @@ class StubRouteAdapter:
                 0.7,
             )
         return LayerVerdict(
-            Route.UNSUPPORTED,
+            Route.OTHER,
             f"The first page has {paths} vector paths, fewer than {self.min_paths}:"
             " a document of text or photos, not a drawing.",
             0.6,

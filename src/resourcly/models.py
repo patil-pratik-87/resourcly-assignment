@@ -1,3 +1,4 @@
+import mimetypes
 import re
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -459,8 +460,8 @@ class Route(StrEnum):
     DRAWING = "drawing"
     PHOTO = "photo"
     TEXT = "text"
-    # an attachment that is neither a drawing nor a picture of a part, such as a report or a logo
-    UNSUPPORTED = "unsupported"
+    # an attachment that fits no case, such as a whole report or a logo
+    OTHER = "other"
 
 
 @dataclass(frozen=True)
@@ -493,6 +494,46 @@ class Routing(BaseModel):
     reason: str
     probabilities: dict[str, float]
     elapsed_ms: float
+
+
+class FigureMatch(BaseModel):
+    """A report figure that shows the failure in a photo, with what the report says it shows."""
+
+    figure: str  # <report>/fig<nn>, such as 18-061/fig06
+    report: str
+    section: str
+    failure_mode: str
+    score: float | None = None  # how close the finder found it, when it measures that
+
+
+class FailureMatches(BaseModel):
+    """The figures a finder matched to one photo, best first; none when no report shows it."""
+
+    request_id: str
+    figures: list[FigureMatch]
+    elapsed_ms: float
+
+
+MAGIC_BYTES = (
+    (b"\x89PNG\r\n\x1a\n", "image/png"),
+    (b"\xff\xd8\xff", "image/jpeg"),
+    (b"GIF8", "image/gif"),
+    (b"II*\x00", "image/tiff"),
+    (b"MM\x00*", "image/tiff"),
+)
+
+
+def guess_media_type(name: str, data: bytes) -> str:
+    """The media type of a file from its first bytes, else from its name."""
+    head = data[:1024]
+    if b"%PDF-" in head:
+        return "application/pdf"
+    for magic, media_type in MAGIC_BYTES:
+        if head.startswith(magic):
+            return media_type
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return "image/webp"
+    return mimetypes.guess_type(name)[0] or "application/octet-stream"
 
 
 class StoredFile(BaseModel):

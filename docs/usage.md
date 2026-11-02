@@ -2,7 +2,8 @@
 
 The agent takes one message at a time: text, files (PDFs or images), or both. You never say what
 you want. The agent decides the case for each file. A drawing comes back as JSON with every value
-on it. A picture or a text question gets a reply that this answer is not available yet.
+on it. A picture or a text question gets a reply that this answer is not available yet, and a
+file that fits no case, such as a whole report, gets a reply that says so.
 
 There are two ways in. The CLI runs the agent inside the command. The HTTP API is what a chat
 screen uses. Both store requests in the same place, so either one can look up the other's
@@ -29,9 +30,10 @@ curl -F text="read this" -F files=@data/drawings/nist_ctc_01_asme1_rd.pdf \
 ```
 
 The API answers `202` at once with the request record and does the work in the background.
-Poll `GET /api/requests/<id>` until `status` is `done` or `failed`. Each file is one item. An item
-goes from `routing` to `queued`, `reading` and `done` for a drawing, or to `answered` for the
-other cases. Any step can end in `failed`, with the reason in `error`.
+Poll `GET /api/requests/<id>` until `status` is `done` or `failed`. Each file is one item, and its
+`route` says the case the router picked: `drawing`, `photo`, `text`, or `other` for a file that
+fits no case. An item goes from `routing` to `queued`, `reading` and `done` for a drawing, or to
+`answered` for the other cases. Any step can end in `failed`, with the reason in `error`.
 
 ## Bulk upload
 
@@ -58,8 +60,7 @@ length and hash.
 
 ```sh
 uv run resourcly requests                 # the latest requests, newest first
-uv run resourcly request <id>             # each item, then every step
-uv run evals show --request <id>          # the steps only
+uv run resourcly request <id>             # each item, then every step; an eval case's steps too
 ```
 
 ```sh

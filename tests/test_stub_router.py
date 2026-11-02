@@ -22,7 +22,7 @@ def test_a_pdf_drawn_in_vector_paths_is_a_drawing() -> None:
 def test_a_report_of_text_and_photos_fits_no_case() -> None:
     verdict = StubRouteAdapter().decide(pdf(DATA / "reports" / "ntsb_16-006.pdf"))
 
-    assert verdict.route == Route.UNSUPPORTED
+    assert verdict.route == Route.OTHER
 
 
 def test_an_image_is_a_photo_and_text_alone_is_text() -> None:
@@ -35,7 +35,7 @@ def test_an_image_is_a_photo_and_text_alone_is_text() -> None:
 def test_an_unreadable_pdf_fits_no_case() -> None:
     broken = Attachment("broken.pdf", "application/pdf", b"%PDF-1.7 and then nothing")
 
-    assert StubRouteAdapter().decide(broken).route == Route.UNSUPPORTED
+    assert StubRouteAdapter().decide(broken).route == Route.OTHER
 
 
 def test_the_stub_version_routes_without_a_model(settings: Settings) -> None:

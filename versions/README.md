@@ -8,11 +8,13 @@ version the evals measure is the version the app serves.
 | Path | What it is |
 | --- | --- |
 | `<component>/<name>.toml` | One version, such as `reader/textlayer-v0.toml`. |
+| `reader/textlayer-v0.toml` | Values from the PDF text layer, no model. |
+| `router/stub-v0.toml` | One structure rule per file type, no model. |
+| `failure/shuffled-v0.toml` | Every report figure in one seeded random order, no model. |
 
-The app runs the reader `textlayer-v0` and the router `stub-v0` unless told otherwise.
-`RESOURCLY_READER_VERSION` and `RESOURCLY_ROUTER_VERSION` pick others, and
-`RESOURCLY_VERSIONS_DIR` points everything at another folder. `stub-v0` decides the case with one
-rule and no model: a PDF drawn in vector paths is a drawing, an image is a photo, text alone is text.
+Each is the model-free floor of its component, and the version the app runs unless told
+otherwise. `RESOURCLY_<COMPONENT>_VERSION`, such as `RESOURCLY_ROUTER_VERSION`, picks another, and
+`RESOURCLY_VERSIONS_DIR` points everything at another folder.
 
 ## Add a version
 
@@ -26,4 +28,5 @@ uv run evals list versions reader
 uv run evals run reader --version my-reader-v1 --split dev
 ```
 
-The keys a version may set are in [docs/evals.md](../docs/evals.md#adding-a-version).
+The keys a version may set are in the
+[eval harness README](../src/resourcly/eval_harness/README.md#add-a-version).

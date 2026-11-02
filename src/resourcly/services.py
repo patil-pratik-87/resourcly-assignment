@@ -10,6 +10,7 @@ from resourcly.errors import InvalidDocument, NotFound
 from resourcly.models import (
     Attachment,
     DrawingSummary,
+    FailureMatches,
     GoldDocument,
     Issue,
     LayerVerdict,
@@ -19,11 +20,13 @@ from resourcly.models import (
     Routing,
     TitleBlock,
     TraceEvent,
+    guess_media_type,
     undefined_datums,
     validate_document,
 )
 from resourcly.ports import (
     DrawingPagePort,
+    FailureFinderPort,
     GoldStorePort,
     Progress,
     ReaderPort,
@@ -82,6 +85,26 @@ class GoldService:
 
     def splits(self) -> Splits:
         return self.store.load_splits()
+
+    def route_cases(self) -> list[dict[str, Any]]:
+        return self.store.load_route_cases()
+
+    def file_exists(self, path: str) -> bool:
+        """Whether a file the gold names, by its path under the gold folder, is there."""
+        return self.store.file_exists(path)
+
+    def route_attachment(self, file: str) -> Attachment:
+        """A file the router gold names, as the attachment of a request."""
+        data = self.store.load_file(f"routes/{file}")
+        return Attachment(file, guess_media_type(file, data), data)
+
+    def failure_cases(self) -> list[dict[str, Any]]:
+        return self.store.load_failure_cases()
+
+    def failure_photo(self, image: str) -> Attachment:
+        """An image the failure gold names, as the photo of a request."""
+        data = self.store.load_file(f"failure/{image}")
+        return Attachment(image, guess_media_type(image, data), data)
 
     def render_page(self, drawing: str, page: int, dpi: int) -> bytes:
         _check_name(drawing)
@@ -191,7 +214,7 @@ class RouterService:
 
     The first layer that gives a route decides, and the later layers are not asked. A request
     that no layer is sure of fits no case. Every layer asked is traced under the request id with
-    what it made of the request, so `evals show --request` shows which layer decided and why. The
+    what it made of the request, so `resourcly request` shows which layer decided and why. The
     user's text is traced by length only, and it never changes the route.
     """
 
@@ -212,9 +235,7 @@ class RouterService:
             if last.route is not None:
                 return self._routing(request_id, layer.name, last, began)
         reason = f"no layer was sure; the last said: {last.reason}" if last else "no layers"
-        return self._routing(
-            request_id, "none", LayerVerdict(Route.UNSUPPORTED, reason, None, {}), began
-        )
+        return self._routing(request_id, "none", LayerVerdict(Route.OTHER, reason, None, {}), began)
 
     def _ask(
         self,
@@ -286,6 +307,42 @@ def _described(attachment: Attachment | None) -> dict[str, Any] | None:
         "bytes": len(attachment.data),
         "sha256": hashlib.sha256(attachment.data).hexdigest(),
     }
+
+
+class FailureService:
+    """Finds the report figures that show the failure in a photo, and traces the call."""
+
+    def __init__(self, finder: FailureFinderPort, trace: TracePort, finder_name: str):
+        self.finder = finder
+        self.trace = trace
+        self.finder_name = finder_name
+
+    def find(self, photo: Attachment, request_id: str | None = None) -> FailureMatches:
+        request_id = request_id or uuid.uuid4().hex
+        started, began = now(), time.perf_counter()
+        figures, error = [], None
+        try:
+            figures = self.finder.find(photo)
+        except Exception as exc:
+            error = exc
+        elapsed = round((time.perf_counter() - began) * 1000, 1)
+        event = TraceEvent(
+            request_id=request_id,
+            step="failure.find",
+            called=f"finder {self.finder_name}",
+            input={"photo": _described(photo)},
+            output={"figures": len(figures), "top": figures[0].figure if figures else None},
+            error=f"{type(error).__name__}: {error}" if error else None,
+            started_at=started,
+            duration_ms=elapsed,
+        )
+        try:
+            self.trace.record(event)
+        except Exception:
+            log.exception("could not record the trace of request %s", request_id)
+        if error:
+            raise error
+        return FailureMatches(request_id=request_id, figures=figures, elapsed_ms=elapsed)
 
 
 class TraceService:

@@ -2,11 +2,10 @@
 __pycache__/
 .ipynb_checkpoints/
 
-# Routing experiments: their own environment, the Hugging Face model cache, the vision-language
-# models' input images and the downloaded Commons originals
+# Routing experiments: their own environment, and a cache of the Hugging Face models, the
+# vision-language models' input images and the downloaded Commons originals
 /experiments/routing/.venv/
 /experiments/routing/.cache/
-/experiments/routing/data/commons/
 
 # Drawing experiments: their own environment and the images the notebooks write
 /experiments/drawing/.venv/

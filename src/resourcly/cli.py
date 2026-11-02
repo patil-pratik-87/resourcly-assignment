@@ -88,12 +88,21 @@ def request(
     request_id: Annotated[str, typer.Argument(help="An id from `resourcly requests`.")],
     out: Out = None,
 ) -> None:
-    """Look up one request: what each item became, and every step the agent took and called."""
+    """Look up one request: what each item became, and every step it took and called.
+
+    A request the agent did not take, such as an eval case `<run id>:<case id>`, has only steps.
+    """
     with _short_errors(), open_services(Settings.from_env()) as services:
-        record = services.agent.load(request_id)
-        _show(record)
-        _show_trace(services.traces.lookup(request_id))
-        _save(services, record, out)
+        try:
+            record = services.agent.load(request_id)
+        except NotFound:
+            record = None
+        trace = services.traces.lookup(request_id)
+        if record is not None:
+            _show(record)
+        _show_trace(trace)
+        if record is not None:
+            _save(services, record, out)
 
 
 @app.command()

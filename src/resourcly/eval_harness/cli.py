@@ -1,0 +1,392 @@
+import functools
+import logging
+from collections.abc import Callable
+from enum import StrEnum
+from pathlib import Path
+from typing import Annotated, Any
+
+import typer
+
+from resourcly.bootstrap import (
+    PROJECT_ROOT,
+    Settings,
+    list_versions,
+    load_version,
+    open_services,
+)
+from resourcly.eval_harness import harness
+from resourcly.eval_harness.cases import check_gold
+from resourcly.eval_harness.compare import EPSILON, compare_runs
+from resourcly.eval_harness.models import Case, CaseResult, Run
+from resourcly.eval_harness.store import SqliteResultStore
+from resourcly.eval_harness.suites import SUITES, Suite
+
+app = typer.Typer(help="Measure each part of the agent on its gold cases.", no_args_is_help=True)
+
+DEFAULT_STORE = PROJECT_ROOT / "runs" / "evals.sqlite"
+
+
+StorePath = Annotated[
+    Path, typer.Option("--store", envvar="RESOURCLY_EVALS_DB", help="SQLite file of the results.")
+]
+NAMES = ", ".join(SUITES)
+Component = Annotated[str, typer.Argument(help=f"One of {NAMES}.")]
+
+
+@app.callback()
+def main(ctx: typer.Context, store: StorePath = DEFAULT_STORE) -> None:
+    """The gold and the versions come from the RESOURCLY_* settings, as for the app."""
+    logging.basicConfig(format="warning: %(message)s", level=logging.WARNING, force=True)
+    ctx.obj = store
+
+
+def _user_errors(command: Callable[..., None]) -> Callable[..., None]:
+    """A missing or invalid version, case, run or file is the user's to fix: one line, exit 1."""
+
+    @functools.wraps(command)
+    def wrapped(*args: Any, **kwargs: Any) -> None:
+        try:
+            command(*args, **kwargs)
+        except (LookupError, ValueError) as error:
+            typer.echo(f"error: {error}", err=True)
+            raise typer.Exit(1) from error
+
+    return wrapped
+
+
+@app.command()
+@_user_errors
+def run(
+    ctx: typer.Context,
+    component: Component,
+    version: Annotated[str, typer.Option(help="A file in versions/<component>/.")],
+    split: Annotated[str, typer.Option(help="dev, test or all; train for the router.")] = "dev",
+    case_id: Annotated[
+        list[str] | None, typer.Option(help="Run only these cases; every case by default.")
+    ] = None,
+    limit: Annotated[
+        int | None,
+        typer.Option(min=1, help="Run a sample of N cases, spread over the strata, seed 0."),
+    ] = None,
+) -> None:
+    """Run a version of a component on the gold cases of a split."""
+    suite = _suite(component)
+    progress = {"done": 0, "total": 0}
+
+    def started(run: Run, chosen: list[Case], pool: int) -> None:
+        progress["total"] = len(chosen)
+        typer.echo(f"selected {len(chosen)} of {pool} {split} cases")
+        typer.echo(f"version {run.version}  hash {run.version_hash}  git {_git_label(run)}")
+
+    def finished(result: CaseResult) -> None:
+        progress["done"] += 1
+        outcome = (
+            f"error {result.error}"
+            if result.error
+            else f"case_score {_num(result.scores['case_score'])}"
+        )
+        counter = f"[{progress['done']}/{progress['total']}]"
+        typer.echo(f"{counter} {result.case_id}  {outcome}  {result.latency_ms:.0f} ms")
+
+    with SqliteResultStore.open(ctx.obj) as store:
+        result = harness.run(
+            component,
+            version,
+            settings=Settings.from_env(),
+            store=store,
+            split=split,
+            case_ids=tuple(case_id or ()),
+            limit=limit,
+            on_start=started,
+            on_case=finished,
+        )
+    typer.echo(f"run {result.run_id}  (case set {result.case_set_hash}, store {ctx.obj})")
+    typer.echo("")
+    _summary(suite, result)
+
+
+@app.command()
+@_user_errors
+def compare(
+    ctx: typer.Context,
+    component: Component,
+    base: Annotated[str, typer.Argument(help="A run id, or a version for its latest run.")],
+    candidate: Annotated[str, typer.Argument(help="A run id, or a version for its latest run.")],
+    fail_if_worse: Annotated[bool, typer.Option(help="Exit 1 if the primary got worse.")] = False,
+    force: Annotated[
+        bool, typer.Option(help="Compare runs on other splits or cases, on the cases both ran.")
+    ] = False,
+) -> None:
+    """Whether the candidate is better or worse than the base, metric by metric and case by case.
+
+    Both runs' stored answers are scored again on the current gold, on the cases both ran.
+    """
+    suite = _suite(component)
+    settings = Settings.from_env()
+    with SqliteResultStore.open(ctx.obj) as store:
+        runs = [_resolve(store, settings, component, ref) for ref in (base, candidate)]
+        with open_services(settings) as services:
+            gold = {case.case_id: case for case in suite.load(services, "all")}
+        comparison = compare_runs(
+            suite,
+            gold,
+            runs[0],
+            store.cases(runs[0].run_id),
+            runs[1],
+            store.cases(runs[1].run_id),
+            force=force,
+        )
+    for label, run in (("base", runs[0]), ("candidate", runs[1])):
+        typer.echo(
+            f"{label.ljust(9)}  {run.run_id}  {run.version}  hash {run.version_hash}"
+            f"  split {run.split}  {run.n_cases} case(s){'  partial' if run.case_ids else ''}"
+        )
+    typer.echo("")
+    rows = [
+        [
+            f"{m.name} (primary)" if m.name == suite.primary else m.name,
+            _num(m.base),
+            _num(m.candidate),
+            "-" if m.delta is None else f"{m.delta:+.3f}",
+            m.verdict,
+        ]
+        for m in comparison.metrics
+    ]
+    _table(["metric", "base", "candidate", "delta", "verdict"], rows)
+    typer.echo("")
+    changed = [c for c in comparison.cases if abs(c.delta) > EPSILON]
+    typer.echo(f"{len(changed)} of {len(comparison.cases)} case(s) changed case_score")
+    for change in sorted(changed, key=lambda c: (c.delta, c.case_id)):
+        typer.echo(
+            f"  {change.case_id}  {_num(change.base)} -> {_num(change.candidate)}"
+            f"  {change.delta:+.3f}"
+        )
+    for warning in comparison.warnings:
+        typer.echo(f"warning: {warning}", err=True)
+    if fail_if_worse and comparison.metrics[0].verdict == "not measured":
+        typer.echo(f"{suite.primary} was not measured, so there is no verdict", err=True)
+        raise typer.Exit(1)
+    if fail_if_worse and comparison.worse:
+        typer.echo(f"{suite.primary} got worse", err=True)
+        raise typer.Exit(1)
+
+
+@app.command()
+@_user_errors
+def show(
+    ctx: typer.Context,
+    run_id: Annotated[str, typer.Argument(help="A run id from `evals list runs`.")],
+    case: Annotated[str | None, typer.Option(help="Explain one case against the gold.")] = None,
+    failures: Annotated[
+        bool, typer.Option(help="Only cases that failed or scored below 1.")
+    ] = False,
+) -> None:
+    """A run's settings, summary and cases.
+
+    What a case did and called: `resourcly request <run id>:<case id>`.
+    """
+    with SqliteResultStore.open(ctx.obj) as store:
+        run = store.run(run_id)
+        results = store.cases(run_id)
+    suite = SUITES[run.component]
+    if case is not None:
+        _explain(run, suite, next((r for r in results if r.case_id == case), None), case)
+        return
+    typer.echo(f"run {run.run_id}  {run.component} {run.version} (hash {run.version_hash})")
+    chosen = f"partial: {len(run.case_ids)} chosen case(s)" if run.case_ids else "every case"
+    typer.echo(f"split {run.split}, {chosen}, case set {run.case_set_hash}")
+    finished = run.finished_at or "-"
+    typer.echo(f"started {run.started_at}  finished {finished}  git {_git_label(run)}")
+    typer.echo("")
+    _summary(suite, run)
+    typer.echo("")
+    shown = [r for r in results if not failures or r.error or r.scores["case_score"] < 1]
+    columns = ["case_score", *suite.case_columns]
+    rows = [
+        [
+            r.case_id,
+            r.stratum,
+            *(_num(r.scores.get(column)) for column in columns),
+            f"{r.latency_ms:.0f} ms" if r.latency_ms is not None else "-",
+            r.error or "",
+        ]
+        for r in shown
+    ]
+    _table(["case", "stratum", *columns, "latency", "error"], rows)
+
+
+class Listing(StrEnum):
+    versions = "versions"
+    cases = "cases"
+    runs = "runs"
+
+
+@app.command("list")
+@_user_errors
+def list_(
+    ctx: typer.Context,
+    what: Annotated[Listing, typer.Argument(help="What to list.")],
+    component: Annotated[
+        str | None, typer.Argument(help=f"One of {NAMES}; cases need one.")
+    ] = None,
+    split: Annotated[
+        str, typer.Option(help="For cases: dev, test or all; train for the router.")
+    ] = "dev",
+    version: Annotated[str | None, typer.Option(help="Only this version's runs.")] = None,
+    limit: Annotated[int, typer.Option(help="How many runs.")] = 20,
+) -> None:
+    """Version files, a component's cases, or runs."""
+    if what is Listing.versions:
+        _list_versions(ctx.obj, component)
+    elif what is Listing.cases:
+        if component is None:
+            raise ValueError(f"cases need a component: {NAMES}")
+        _list_cases(component, split)
+    else:
+        _list_runs(ctx.obj, component, version, limit)
+
+
+def _list_versions(path: Path, component: str | None) -> None:
+    settings = Settings.from_env()
+    with SqliteResultStore.open(path) as store:
+        rows = [
+            [
+                version.component,
+                version.name,
+                version.impl,
+                version.hash,
+                f"{len(store.runs(version.component, version.name))} run(s)",
+                version.description,
+            ]
+            for name in ([_suite(component).component] if component else list(SUITES))
+            for version in list_versions(settings, name)
+        ]
+    _table(["component", "version", "impl", "hash", "runs", "description"], rows)
+
+
+def _list_cases(component: str, split: str) -> None:
+    with open_services(Settings.from_env()) as services:
+        cases = _suite(component).load(services, split)
+    _table(
+        ["case", "split", "stratum", "gold hash"],
+        [[case.case_id, case.split, case.stratum, case.gold_hash] for case in cases],
+    )
+
+
+def _list_runs(path: Path, component: str | None, version: str | None, limit: int) -> None:
+    with SqliteResultStore.open(path) as store:
+        runs = store.runs(component, version, limit)
+    rows = []
+    for run in runs:
+        primary = SUITES[run.component].primary
+        value = (run.summary or {}).get(primary)
+        rows.append(
+            [
+                run.run_id,
+                run.version,
+                run.split,
+                str(run.n_cases),
+                str(run.errors),
+                f"{primary} {_num(value)}" if run.finished_at else "unfinished",
+            ]
+        )
+    _table(["run", "version", "split", "cases", "errors", "primary"], rows)
+
+
+@app.command()
+@_user_errors
+def check(ctx: typer.Context) -> None:
+    """Check every gold file and the splits; exit 1 on an error, warn about gaps.
+
+    Drawing gold goes through the package models and the rules beyond them; router and failure gold
+    through their row checks; and every split for leaks and gaps.
+    """
+    with open_services(Settings.from_env()) as services:
+        found = check_gold(services, SUITES)
+    for level, message in found:
+        typer.echo(f"{'ok   ' if level == 'ok' else level + ':'} {message}")
+    errors = sum(1 for level, _ in found if level == "error")
+    warnings = sum(1 for level, _ in found if level == "warning")
+    typer.echo(f"{errors} error(s), {warnings} warning(s)")
+    if errors:
+        raise typer.Exit(1)
+
+
+def _resolve(store: SqliteResultStore, settings: Settings, component: str, ref: str) -> Run:
+    """The run a ref names: a run id, or a version for its latest finished run on every case of
+    a split, so a run of a few cases never stands for the version."""
+    try:
+        run = store.run(ref)
+    except LookupError:
+        runs = [run for run in store.runs(component, ref) if run.finished_at and not run.case_ids]
+        if not runs:
+            raise LookupError(
+                f"'{ref}' is neither a run id nor a version with a full run"
+            ) from None
+        run = runs[0]
+        _warn_if_edited(settings, component, ref, run)
+    if run.component != component:
+        raise ValueError(f"run {run.run_id} is a {run.component} run")
+    return run
+
+
+def _warn_if_edited(settings: Settings, component: str, version: str, run: Run) -> None:
+    try:
+        now = load_version(settings, component, version).hash
+    except (LookupError, ValueError) as error:
+        typer.echo(f"warning: {version} can't be loaded now ({error})", err=True)
+        return
+    if now != run.version_hash:
+        typer.echo(f"warning: {version} changed since run {run.run_id}", err=True)
+
+
+def _explain(run: Run, suite: Suite, result: CaseResult | None, case_id: str) -> None:
+    if result is None:
+        raise LookupError(f"run {run.run_id} has no case '{case_id}'")
+    with open_services(Settings.from_env()) as services:
+        current = {case.case_id: case for case in suite.load(services, "all")}
+    case = current.get(case_id)
+    if case is None:
+        raise LookupError(f"'{case_id}' has no gold now")
+    typer.echo(f"{case_id}  case_score {_num(result.scores['case_score'])}")
+    typer.echo(f"request {result.request_id}  (resourcly request {result.request_id})")
+    if case.gold_hash != result.gold_hash:
+        typer.echo("the gold changed since this run; compared with the current gold")
+    if result.error:
+        typer.echo(f"error {result.error}")
+    for line in suite.explain(case, result.prediction):
+        typer.echo(line)
+
+
+def _summary(suite: Suite, run: Run) -> None:
+    summary = run.summary or {}
+    rows = [
+        [f"{name} (primary)" if name == suite.primary else name, _num(summary.get(name))]
+        for name in suite.metrics
+    ]
+    _table(["metric", "value"], [*rows, ["errors", f"{run.errors} of {run.n_cases}"]])
+
+
+def _suite(component: str) -> Suite:
+    if component not in SUITES:
+        raise LookupError(f"'{component}' is not a component; use {NAMES}")
+    return SUITES[component]
+
+
+def _git_label(run: Run) -> str:
+    return f"{run.git_sha}{' with local changes' if run.git_dirty else ''}"
+
+
+def _num(value: Any) -> str:
+    if value is None:
+        return "-"
+    if isinstance(value, float):
+        return f"{value:.3f}"
+    return str(value)
+
+
+def _table(headers: list[str], rows: list[list[str]]) -> None:
+    widths = [max(len(str(cell)) for cell in column) for column in zip(headers, *rows, strict=True)]
+    for row in [headers, *rows]:
+        cells = (str(cell).ljust(width) for cell, width in zip(row, widths, strict=True))
+        typer.echo("  ".join(cells).rstrip())

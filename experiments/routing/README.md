@@ -16,7 +16,7 @@ The results and the recommendation are in `research/routing/README.md`.
 
 | File | What it is |
 | --- | --- |
-| `data/` | the labelled set: 244 requests in `routes.jsonl` and 214 files in `items/` (see `data/README.md`) |
+| `../../evals/gold/routes/` | the labelled set, now the router's gold: 244 requests in `routes.jsonl` and 214 files in `items/` (see its `README.md`) |
 | `build_dataset.py`, `commons_dl.py`, `commons_find.py` | build the labelled set, download the Commons files, and the search that found them |
 | `routing.py`, `routing.ipynb` | the notebook (jupytext source, and with outputs): rules A, probes B, zero-shot C, Docling G, local models D and F, layered router E |
 | `routing_common.py` | shared code: items, page images, rule features |
