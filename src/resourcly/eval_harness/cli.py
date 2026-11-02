@@ -16,7 +16,7 @@ from resourcly.bootstrap import (
 )
 from resourcly.eval_harness import harness
 from resourcly.eval_harness.cases import Case, check_gold
-from resourcly.eval_harness.compare import compare_runs
+from resourcly.eval_harness.compare import EPSILON, compare_runs
 from resourcly.eval_harness.models import CaseResult, Run
 from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES, Suite
@@ -71,8 +71,7 @@ def run(
 
     def started(run: Run, chosen: list[Case], pool: int) -> None:
         progress["total"] = len(chosen)
-        names = " ".join(case.case_id for case in chosen)
-        typer.echo(f"selected {len(chosen)} of {pool} {split} cases: {names}")
+        typer.echo(f"selected {len(chosen)} of {pool} {split} cases")
         typer.echo(f"version {run.version}  hash {run.version_hash}  git {_git_label(run)}")
 
     def finished(result: CaseResult) -> None:
@@ -147,8 +146,9 @@ def compare(
     ]
     _table(["metric", "base", "candidate", "delta", "verdict"], rows)
     typer.echo("")
-    typer.echo("cases by change in case_score")
-    for change in sorted(comparison.cases, key=lambda c: (c.delta, c.case_id)):
+    changed = [c for c in comparison.cases if abs(c.delta) > EPSILON]
+    typer.echo(f"{len(changed)} of {len(comparison.cases)} case(s) changed case_score")
+    for change in sorted(changed, key=lambda c: (c.delta, c.case_id)):
         typer.echo(
             f"  {change.case_id}  {_num(change.base)} -> {_num(change.candidate)}"
             f"  {change.delta:+.3f}"

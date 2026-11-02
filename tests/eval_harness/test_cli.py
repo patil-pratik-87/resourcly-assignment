@@ -34,7 +34,7 @@ def test_run_prints_the_selection_progress_and_summary_and_lists_the_run(evals) 
     result = evals("run", "reader", "--version", "textlayer-v0")
 
     assert result.exit_code == 0, result.output
-    assert f"selected 1 of 1 dev cases: {CTC01}" in result.output
+    assert "selected 1 of 1 dev cases\n" in result.output
     assert f"[1/1] {CTC01}  case_score 0.160" in result.output
     assert re.search(r"f1 +\(primary\) +0\.160", result.output)
     listed = evals("list", "runs")
@@ -108,6 +108,8 @@ def test_compare_scores_both_runs_on_the_current_gold(evals, eval_gold: Path) ->
 
     assert result.exit_code == 0, result.output
     assert re.search(r"f1 +\(primary\) +0\.083 +0\.083 +\+0\.000 +no +change", result.output)
+    assert "0 of 1 case(s) changed case_score" in result.output
+    assert CTC01 not in result.output
     assert "warning" not in result.output
 
 
