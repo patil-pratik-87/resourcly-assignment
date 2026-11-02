@@ -106,6 +106,8 @@ export interface RequestRecord {
   created_at: string;
   items: RequestItem[];
   status: "working" | "failed" | "done";
+  /** Answered before and loaded from demo/ when the server started; see demo/README.md. */
+  demo: boolean;
 }
 
 export interface TraceEvent {

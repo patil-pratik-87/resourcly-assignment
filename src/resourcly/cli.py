@@ -25,9 +25,17 @@ Out = Annotated[
 
 
 @app.command()
-def serve(host: str = "127.0.0.1", port: int = 8000) -> None:
+def serve(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    no_demo: Annotated[
+        bool, typer.Option("--no-demo", help="Open the chat without the demo chats in demo/.")
+    ] = False,
+) -> None:
     """Serve the chat screen and the API: the chat requests, their traces and the gold endpoints."""
     settings = Settings.from_env()
+    if no_demo:
+        settings = replace(settings, demo_dir=None)
     _warn_unbuilt(settings.chat_ui_dist, "chat")
     typer.echo(
         f"Chat on http://{host}:{port}"
@@ -108,7 +116,7 @@ def requests(limit: Annotated[int, typer.Option(min=1)] = 20) -> None:
         records = services.agent.list(limit)
     for record in records:
         line = f"{record.request_id}  {record.status}  {len(record.items)} item(s)"
-        line += f"  {record.created_at}"
+        line += f"{'  demo' if record.demo else ''}  {record.created_at}"
         typer.echo(f'{line}  "{_shorten(record.text)}"' if record.text else line)
 
 

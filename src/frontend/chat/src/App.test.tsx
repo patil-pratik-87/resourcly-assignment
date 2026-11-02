@@ -280,6 +280,38 @@ describe("the agent's answer for each item", () => {
   });
 });
 
+describe("the demo chats", () => {
+  const demo = record({ request_id: "d1", text: "", demo: true });
+
+  it("marks a demo request in the chat as answered before, and not one the person sent", async () => {
+    open("/chat");
+    render(<App api={fakeAgentApi([record(), demo]).api} />);
+
+    const shown = await screen.findByRole("article", { name: "Request d1" });
+    const label = within(shown).getByText("Demo");
+    expect(label).toHaveAttribute("title", expect.stringContaining("answered before"));
+    const sent = screen.getByRole("article", { name: "Request r1" });
+    expect(within(sent).queryByText("Demo")).toBeNull();
+  });
+
+  it("marks a demo request in the list of requests", async () => {
+    window.localStorage.clear();
+    open("/requests/d1/ctc");
+    const user = userEvent.setup();
+    render(<App api={fakeAgentApi([record(), demo]).api} />);
+    await screen.findByRole("button", { name: "JSON of value 1" });
+
+    await user.click(screen.getByRole("button", { name: "Show the requests" }));
+
+    const rows = within(screen.getByRole("navigation", { name: "Requests" })).getAllByRole(
+      "listitem",
+    );
+    const labelled = rows.filter((row) => within(row).queryByText("Demo"));
+    expect(labelled).toHaveLength(1);
+    expect(labelled[0]).toHaveTextContent("1 file");
+  });
+});
+
 describe("a photo answered from the reports", () => {
   const photoRoute = routing({
     route: "photo",

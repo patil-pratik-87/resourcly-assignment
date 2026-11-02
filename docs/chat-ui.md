@@ -19,6 +19,15 @@ It routes with the default `three-layer-v1` router, which needs the extras and m
 `RESOURCLY_ANSWER_VERSION=captions-v0` answers a photo without a model. `RESOURCLY_CHAT_UI_DIST`
 points it at another build. The label screen stays on `uv run resourcly annotation-ui`.
 
+The chat opens with two demo chats, each marked Demo: the NIST drawing CTC-01 read by
+`vector-crop-v2`, and a photo of a cracked spar cap answered by `photo-v2`. They were answered
+before, so their page, values, figures and trace show at once, with or without the models. `serve`
+adds them from `demo/` to the request store when it starts, unless the store has them already; a
+request you send is never replaced. `uv run resourcly serve --no-demo` or `RESOURCLY_DEMO_CHATS=0`
+opens the chat without them. Where each output comes from is in [demo/README.md](../demo/README.md).
+
+![The photo demo, marked Demo, answered from the reports](img/chat-ui/demo-chats.png)
+
 To work on the screen, run the API and the Vite dev server side by side. Vite reloads on each
 edit and sends every `/api` call to the API.
 

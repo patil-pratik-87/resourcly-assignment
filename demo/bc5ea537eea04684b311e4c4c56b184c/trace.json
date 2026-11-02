@@ -1,0 +1,166 @@
+[
+  {
+    "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+    "step": "requests.receive",
+    "called": "agent",
+    "input": {
+      "text_chars": 0,
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": [
+        "pos_18-061_fig05_v1.jpg"
+      ]
+    },
+    "output": {
+      "request_id": "bc5ea537eea04684b311e4c4c56b184c"
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.679+00:00",
+    "duration_ms": 0.0
+  },
+  {
+    "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+    "step": "uploads.save",
+    "called": "upload store",
+    "input": {
+      "name": "pos_18-061_fig05_v1.jpg",
+      "bytes": 39810,
+      "item": "pos_18-061_fig05_v1"
+    },
+    "output": {
+      "media_type": "image/jpeg",
+      "pages": 1
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.680+00:00",
+    "duration_ms": 5.1
+  },
+  {
+    "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+    "step": "route.structure",
+    "called": "router three-layer-v1 (three-layer): PyMuPDF structure rules (300 paths, first 10 pages)",
+    "input": {
+      "text_chars": 0,
+      "attachment": {
+        "name": "pos_18-061_fig05_v1.jpg",
+        "media_type": "image/jpeg",
+        "bytes": 39810,
+        "sha256": "c5c779e0e5482e01e1d1e1fb57a12d8d8486e5fb316c5a5e29dca6a8ba4e4144"
+      }
+    },
+    "output": {
+      "decided": false,
+      "route": null,
+      "confidence": null,
+      "reason": "an image; the picture decides",
+      "probabilities": {}
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.686+00:00",
+    "duration_ms": 5.5
+  },
+  {
+    "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+    "step": "route.probe",
+    "called": "router three-layer-v1 (three-layer): linear probe on facebook/dinov2-small (snapshot ed25f3a31f01632728cabb09d1542f84ab7b0056), deciding at 0.9",
+    "input": {
+      "text_chars": 0,
+      "attachment": {
+        "name": "pos_18-061_fig05_v1.jpg",
+        "media_type": "image/jpeg",
+        "bytes": 39810,
+        "sha256": "c5c779e0e5482e01e1d1e1fb57a12d8d8486e5fb316c5a5e29dca6a8ba4e4144"
+      }
+    },
+    "output": {
+      "decided": true,
+      "route": "photo",
+      "confidence": 0.9500674543997658,
+      "reason": "the probe gives photo 0.950",
+      "probabilities": {
+        "drawing": 0.047859797629636436,
+        "other": 0.002072747970597779,
+        "photo": 0.9500674543997658
+      }
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.693+00:00",
+    "duration_ms": 21263.5
+  },
+  {
+    "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+    "step": "router.route",
+    "called": "router three-layer-v1 (three-layer)",
+    "input": {
+      "item": "pos_18-061_fig05_v1",
+      "text_chars": 0,
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "pos_18-061_fig05_v1.jpg"
+    },
+    "output": {
+      "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+      "route": "photo",
+      "layer": "probe",
+      "confidence": 0.9500674543997658,
+      "reason": "the probe gives photo 0.950",
+      "probabilities": {
+        "drawing": 0.047859797629636436,
+        "other": 0.002072747970597779,
+        "photo": 0.9500674543997658
+      },
+      "elapsed_ms": 21271.3
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.686+00:00",
+    "duration_ms": 21271.4
+  },
+  {
+    "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+    "step": "failure.find",
+    "called": "finder dinov2-base-v1 (nearest-figures)",
+    "input": {
+      "photo": {
+        "name": "pos_18-061_fig05_v1.jpg",
+        "media_type": "image/jpeg",
+        "bytes": 39810,
+        "sha256": "c5c779e0e5482e01e1d1e1fb57a12d8d8486e5fb316c5a5e29dca6a8ba4e4144"
+      }
+    },
+    "output": {
+      "figures": 5,
+      "top": "18-061/fig05"
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:07:01.968+00:00",
+    "duration_ms": 566.0
+  },
+  {
+    "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+    "step": "answer.photo",
+    "called": "answer photo-v2 (vlm): mlx-community/Qwen3-VL-8B-Instruct-4bit (snapshot defcdea7cc7a4b0858fea563cbbce171d328e457), one answer from the photo and the figures",
+    "input": {
+      "figures": [
+        "18-061/fig05",
+        "18-061/fig10",
+        "18-061/fig15"
+      ],
+      "images": 2,
+      "reports": [
+        "18-061"
+      ],
+      "question": "default"
+    },
+    "output": {
+      "image_type": "photo_of_damaged_part",
+      "kept_out": null,
+      "matched": true,
+      "findings": 1,
+      "actions": 1,
+      "stated": 0,
+      "dropped": [],
+      "text": "{\n  \"image_type\": \"photo_of_damaged_part\",\n  \"match\": true,\n  \"what_is_wrong\": \"The part has a fatigue crack that initiated at a hole and propagated through the spar cap and doubler structure.\",\n  \"findings\": [\n    {\n      \"statement\": \"The photo shows a fatigue failure on a spar cap and doubler, consistent with the failure mode in reference image 1 and reference image 2.\",\n      \"source\": \"The visual evidence in the photo matches the fracture surfaces shown in [18-061 fig05] and [18-061 fig10], which are labeled as fatigue failures.\",\n      \"source\": \"The photo shows a fatigue failure on a spar cap and doubler, consistent with the failure mode in reference image 1 and reference image 2.\",\n      \"source\": \"The visual evidence in the photo matches the fracture surfaces shown in [18-061 fig05] and [18-061 fig10], which are labeled as fatigue failures.\"\n    }\n  ],\n  \"actions\": [\n    {\n      \"action\": \"The part should be removed from service.\",\n      \"basis\": \"inferred\",\n      \"source\": \"\",\n      \"quote\": \"\"\n    }\n  ]\n}"
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:07:02.535+00:00",
+    "duration_ms": 37734.0
+  }
+]

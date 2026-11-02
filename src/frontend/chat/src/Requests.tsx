@@ -17,6 +17,7 @@ import { SheetView } from "./SheetView";
 import { TracePanel } from "./TracePanel";
 import {
   ROUTE_LABELS,
+  DEMO_NOTE,
   elapsed,
   firstItem,
   isActive,
@@ -155,6 +156,11 @@ export function Requests(props: Props) {
                 <span className="request-row-text">
                   {candidate.text || plural(candidate.items.length, "file")}
                 </span>
+                {candidate.demo && (
+                  <span className="demo-tag" title={DEMO_NOTE}>
+                    Demo
+                  </span>
+                )}
                 <span className="request-row-id">{shortId(candidate.request_id)}</span>
               </div>
               <ul>

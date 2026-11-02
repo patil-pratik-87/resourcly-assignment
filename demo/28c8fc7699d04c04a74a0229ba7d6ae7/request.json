@@ -1,0 +1,35 @@
+{
+  "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+  "text": "",
+  "created_at": "2026-11-02T10:06:40.462+00:00",
+  "items": [
+    {
+      "item_id": "nist_ctc_01_asme1_rd",
+      "kind": "file",
+      "name": "nist_ctc_01_asme1_rd.pdf",
+      "media_type": "application/pdf",
+      "size": 55077,
+      "pages": 1,
+      "route": {
+        "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+        "route": "drawing",
+        "layer": "structure",
+        "confidence": 1.0,
+        "reason": "vector PDF, 1797 paths on page 1",
+        "probabilities": {},
+        "elapsed_ms": 35.6
+      },
+      "status": "done",
+      "progress": null,
+      "reply": null,
+      "answer": null,
+      "values": 23,
+      "issues": 0,
+      "error": null,
+      "started_at": "2026-11-02T10:06:40.514+00:00",
+      "finished_at": "2026-11-02T10:07:44.514+00:00"
+    }
+  ],
+  "status": "done",
+  "demo": true
+}

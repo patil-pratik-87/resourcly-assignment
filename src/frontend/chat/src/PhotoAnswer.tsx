@@ -142,7 +142,10 @@ export function PhotoAnswerView({
                     <strong>{figureLabel(match.figure)}</strong>
                     <Score score={match.score} />
                   </div>
-                  <span className={`mode-tag ${modeClass(match.failure_mode)}`}>
+                  <span
+                    className={`mode-tag ${modeClass(match.failure_mode)}`}
+                    title={failureModeLabel(match.failure_mode)}
+                  >
                     {failureModeLabel(match.failure_mode)}
                   </span>
                   <span className="figure-section">{sectionLabel(match.section)}</span>

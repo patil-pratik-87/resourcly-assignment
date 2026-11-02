@@ -171,9 +171,11 @@ def _read_with_model(settings: Settings, model: str) -> str:
 
 
 def test_a_model_that_is_not_cached_says_how_to_download_it_or_fall_back(
-    versioned: Settings,
+    versioned: Settings, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     pytest.importorskip("huggingface_hub")
+    # the cache is looked in only once mlx-vlm is found, which the vlm extra installs
+    monkeypatch.setattr(bootstrap, "find_spec", lambda name: object())
 
     message = _read_with_model(versioned, "org/absent")
 

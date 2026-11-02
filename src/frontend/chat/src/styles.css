@@ -532,6 +532,20 @@ input {
   user-select: all;
 }
 
+/* A request answered before and loaded from demo/, not one the person sent */
+.demo-tag {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--slate-soft);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 17px;
+  cursor: help;
+}
+
 .tally {
   margin: 0;
   color: var(--muted);
@@ -2093,6 +2107,7 @@ button.cite:hover:not(:disabled) {
 
 .figure-strip li {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: 6px;
   min-width: 0;
@@ -2124,6 +2139,8 @@ button.figure-thumb:hover:not(:disabled) {
 
 .figure-caption {
   display: grid;
+  /* a column that may shrink, so a long tag is cut rather than widening the figure's column */
+  grid-template-columns: minmax(0, 1fr);
   justify-items: start;
   gap: 3px;
   min-width: 0;
@@ -2159,10 +2176,13 @@ button.figure-thumb:hover:not(:disabled) {
 }
 
 .mode-tag {
+  max-width: 100%;
   padding: 1px 7px;
+  overflow: hidden;
   border-radius: 9px;
   font-size: 12px;
   font-weight: 600;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
