@@ -109,11 +109,11 @@ def cut_report(pdf: Path) -> CutReport:
     )
 
 
-def render_figure(pdf: Path, figure: CutFigure, dpi: int) -> bytes:
-    """The figure's box on its page as a PNG."""
+def render_figure(pdf: Path, page: int, bbox: Box, dpi: int) -> bytes:
+    """A figure's box on its page, from 1, as a PNG."""
     with pymupdf.open(pdf) as document:
-        page = document[figure.page - 1]
-        return page.get_pixmap(clip=pymupdf.Rect(figure.bbox), dpi=dpi, alpha=False).tobytes("png")
+        pixmap = document[page - 1].get_pixmap(clip=pymupdf.Rect(bbox), dpi=dpi, alpha=False)
+        return pixmap.tobytes("png")
 
 
 def _page_layout(page: pymupdf.Page) -> tuple[list[tuple[int, Box, str]], list[str]]:

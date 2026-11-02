@@ -1,0 +1,18 @@
+description = "DINOv2-base image vectors, nearest report figures by cosine, no figure below 0.28 (research/failure)"
+impl = "nearest-figures"
+
+# The photo and every figure become a DINOv2 vector: the class token joined to the mean of the
+# patch tokens, from the centre 224 px square. The index holds the figures' vectors, made with the
+# same encoder by scripts/build_figure_index.py, and refuses to load with any other.
+encoder = "dinov2"
+encoder_model = "facebook/dinov2-base"
+encoder_recipe = "cls_patch_mean"
+encoder_input_size = 224
+index = "indexes/dinov2-base-v1.json"
+
+# The gate: when the best figure is below this similarity, no report shows the failure. Held out,
+# unrelated photos reached at most 0.271 and the worst report photo 0.294; drawings reach 0.421,
+# so it relies on the router keeping drawings out.
+threshold = 0.28
+# The figures returned, best first
+top = 5

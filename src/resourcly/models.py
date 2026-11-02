@@ -539,6 +539,33 @@ class Passage(BaseModel):
         return f"{self.report} p{self.page}"
 
 
+class FigureEvidence(BaseModel):
+    """What a report says about one of its figures, for an answer to cite."""
+
+    figure: str  # <report>/fig<nn>, such as 18-061/fig05
+    report: str
+    page: int
+    section: str
+    failure_mode: str
+    caption: str
+    citing: list[Passage]  # the paragraphs that name the figure
+
+    @property
+    def source(self) -> str:
+        """How an answer cites it, such as 18-061 fig05."""
+        return self.figure.replace("/", " ")
+
+
+class ReportEvidence(BaseModel):
+    """What a report is about, and its closing paragraphs, for an answer to cite."""
+
+    report: str
+    file: str  # the PDF in the reports folder
+    vehicle: str | None
+    components: str | None
+    closing: list[Passage]
+
+
 class FailureMatches(BaseModel):
     """The figures a finder matched to one photo, best first; none when no report shows it."""
 

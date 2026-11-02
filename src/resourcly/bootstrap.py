@@ -12,8 +12,10 @@ from pathlib import Path
 from typing import Any
 
 from resourcly.adapters.dinov2_encoder import Dinov2EncoderAdapter
+from resourcly.adapters.figure_index import FigureIndex
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
 from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter, cached_snapshot
+from resourcly.adapters.nearest_figures import NearestFiguresAdapter
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
 from resourcly.adapters.request_store import JsonRequestStoreAdapter
 from resourcly.adapters.route_probe import LinearProbe, ProbeRouteAdapter
@@ -188,10 +190,13 @@ READERS: dict[str, Implementation] = {
         required=("model", "prompt"),
     ),
 }
-# The image models a router probe can embed pictures with, by the name a version gives as
-# `encoder`. Each takes the model id and the long side of the picture it sees.
-ENCODERS: dict[str, Callable[[str, int], ImageEncoderPort]] = {
-    "dinov2": lambda model_id, max_side: Dinov2EncoderAdapter(model_id, max_side),
+# The image models a router probe or a failure finder can embed pictures with, by the name a
+# version gives as `encoder`. Each takes the model id and the long side of the picture it sees,
+# and may take a vector recipe and an input size.
+ENCODERS: dict[str, Callable[..., ImageEncoderPort]] = {
+    "dinov2": lambda model_id, max_side, **options: Dinov2EncoderAdapter(
+        model_id, max_side, **options
+    ),
 }
 
 
@@ -248,6 +253,20 @@ ROUTERS: dict[str, Implementation] = {
         check=_known_encoder,
     ),
 }
+
+
+def _nearest_figures(settings: Settings, params: dict[str, Any]) -> NearestFiguresAdapter:
+    """The finder of research/failure: the report figures nearest the photo in an image model."""
+    encoder = ENCODERS[params["encoder"]](
+        params["encoder_model"],
+        params.get("encoder_max_side", 1024),
+        recipe=params["encoder_recipe"],
+        input_size=params.get("encoder_input_size", 224),
+    )
+    index = FigureIndex.load(settings.versions_dir / "failure" / params["index"])
+    return NearestFiguresAdapter(encoder, index, params["threshold"], params.get("top", 5))
+
+
 FINDERS: dict[str, Implementation] = {
     # No model: a fixed random order of the report figures, the floor for the failure finders.
     "shuffled": Implementation(
@@ -255,6 +274,22 @@ FINDERS: dict[str, Implementation] = {
             settings.reports_dir / "sections.toml", **params
         ),
         settings=("seed",),
+    ),
+    "nearest-figures": Implementation(
+        _nearest_figures,
+        settings=(
+            "encoder",
+            "encoder_model",
+            "encoder_recipe",
+            "encoder_input_size",
+            "encoder_max_side",
+            "index",
+            "threshold",
+            "top",
+        ),
+        required=("encoder", "encoder_model", "encoder_recipe", "index", "threshold"),
+        files=("index",),
+        check=_known_encoder,
     ),
 }
 IMPLEMENTATIONS: dict[str, dict[str, Implementation]] = {

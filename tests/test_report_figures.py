@@ -70,7 +70,9 @@ def test_the_report_says_what_was_examined(spars) -> None:
 def test_a_figure_renders_as_a_png_of_its_box(spars) -> None:
     fig05 = next(figure for figure in spars.figures if figure.figure == "18-061/fig05")
 
-    image = Image.open(BytesIO(render_figure(REPORTS / "ntsb_18-061.pdf", fig05, dpi=72)))
+    image = Image.open(
+        BytesIO(render_figure(REPORTS / "ntsb_18-061.pdf", fig05.page, fig05.bbox, dpi=72))
+    )
 
     left, top, right, bottom = fig05.bbox
     assert image.format == "PNG"
