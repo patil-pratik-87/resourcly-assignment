@@ -18,7 +18,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from resourcly.errors import EmptyRequest, UnsupportedUpload
+from resourcly.errors import EmptyRequest, NotFound, UnsupportedUpload
 from resourcly.models import (
     ACTIVE,
     Attachment,
@@ -29,7 +29,14 @@ from resourcly.models import (
     Routing,
     TraceEvent,
 )
-from resourcly.ports import JobsPort, RequestStorePort, RouterPort, TracePort, UploadStorePort
+from resourcly.ports import (
+    DrawingPagePort,
+    JobsPort,
+    RequestStorePort,
+    RouterPort,
+    TracePort,
+    UploadStorePort,
+)
 from resourcly.services import DrawingService, now
 
 log = logging.getLogger(__name__)
@@ -66,6 +73,7 @@ class AgentService:
         router: RouterPort,
         router_name: str,
         drawings_in: Callable[[Path], DrawingService],
+        pages_in: Callable[[Path], DrawingPagePort],
         trace: TracePort,
         jobs: JobsPort,
     ):
@@ -74,6 +82,7 @@ class AgentService:
         self.router = router
         self.router_name = router_name
         self.drawings_in = drawings_in
+        self.pages_in = pages_in
         self.trace = trace
         self.jobs = jobs
         self._lock = threading.Lock()
@@ -104,6 +113,17 @@ class AgentService:
 
     def result(self, request_id: str, item_id: str) -> dict[str, Any]:
         return self.requests.load_result(request_id, item_id)
+
+    def page(self, request_id: str, item_id: str, page: int, dpi: int) -> bytes:
+        """One page of an uploaded file as a PNG; an image is kept as a one-page PDF too."""
+        record = self.requests.load(request_id)
+        if not any(item.item_id == item_id and item.kind == "file" for item in record.items):
+            raise NotFound(f"request {request_id} has no file {item_id}")
+        pages = self.pages_in(self.uploads.folder(request_id))
+        try:
+            return pages.render(item_id, page, dpi)
+        finally:
+            pages.close()
 
     def _keep(self, request_id: str, index: int, name: str, content: bytes) -> RequestItem:
         with self._step(request_id, "uploads.save", "upload store") as step:

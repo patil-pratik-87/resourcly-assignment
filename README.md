@@ -16,7 +16,8 @@ The router's two models run locally and are downloaded once. On a machine withou
 `RESOURCLY_ROUTER_VERSION=stub-v0`, a router that needs no model.
 
 How to chat, send many drawings at once, and look up a request, from the CLI or over HTTP:
-[docs/usage.md](docs/usage.md).
+[docs/usage.md](docs/usage.md). The same in a browser, with `uv run resourcly serve`:
+[docs/chat-ui.md](docs/chat-ui.md).
 
 ## Measure it
 

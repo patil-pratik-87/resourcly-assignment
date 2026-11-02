@@ -26,13 +26,14 @@ Out = Annotated[
 
 @app.command()
 def serve(host: str = "127.0.0.1", port: int = 8000) -> None:
-    """Serve the API: the chat requests, their traces and the gold endpoints."""
+    """Serve the chat screen and the API: the chat requests, their traces and the gold endpoints."""
     settings = Settings.from_env()
+    _warn_unbuilt(settings.chat_ui_dist, "chat")
     typer.echo(
-        f"Chat API on http://{host}:{port}/api/requests"
+        f"Chat on http://{host}:{port}"
         f" (reader {settings.versions['reader']}, router {settings.versions['router']})"
     )
-    uvicorn.run(create_app(settings), host=host, port=port)
+    uvicorn.run(create_app(settings, screen="chat"), host=host, port=port)
 
 
 @app.command("annotation-ui")
@@ -43,14 +44,9 @@ def annotation_ui(
     settings = Settings.from_env()
     if gold_dir is not None:
         settings = replace(settings, gold_dir=gold_dir)
-    if not settings.ui_dist.is_dir():
-        typer.echo(
-            f"No built UI at {settings.ui_dist}; serving the API only. "
-            "Run `npm run build` in src/frontend/annotation first.",
-            err=True,
-        )
+    _warn_unbuilt(settings.annotation_ui_dist, "annotation")
     typer.echo(f"Label screen on http://{host}:{port} (gold files in {settings.gold_dir})")
-    uvicorn.run(create_app(settings), host=host, port=port)
+    uvicorn.run(create_app(settings, screen="annotation"), host=host, port=port)
 
 
 @app.command()
@@ -114,6 +110,15 @@ def requests(limit: Annotated[int, typer.Option(min=1)] = 20) -> None:
         line = f"{record.request_id}  {record.status}  {len(record.items)} item(s)"
         line += f"  {record.created_at}"
         typer.echo(f'{line}  "{_shorten(record.text)}"' if record.text else line)
+
+
+def _warn_unbuilt(dist: Path, app_dir: str) -> None:
+    if not dist.is_dir():
+        typer.echo(
+            f"No built UI at {dist}; serving the API only. "
+            f"Run `npm run build` in src/frontend/{app_dir} first.",
+            err=True,
+        )
 
 
 def _expand(paths: list[Path]) -> list[Path]:

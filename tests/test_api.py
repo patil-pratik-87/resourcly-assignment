@@ -134,14 +134,48 @@ def test_a_page_limited_drawing_may_name_datums_from_other_pages(
     assert client.post(f"/api/drawings/{CTC01}/check", json=page_limited).json() == []
 
 
-def test_the_built_ui_is_served_at_the_root(settings: Settings, tmp_path: Path) -> None:
-    dist = tmp_path / "dist"
-    dist.mkdir()
-    (dist / "index.html").write_text("<html>screen</html>", encoding="utf-8")
+def built(folder: Path, page: str) -> Path:
+    """A built screen of one page, as `npm run build` leaves it."""
+    (folder / "assets").mkdir(parents=True)
+    (folder / "index.html").write_text(page, encoding="utf-8")
+    (folder / "assets" / "app.js").write_text("run()", encoding="utf-8")
+    return folder
 
-    with TestClient(create_app(replace(settings, ui_dist=dist))) as client:
+
+def test_the_built_chat_is_served_at_the_root_and_at_each_of_its_addresses(
+    settings: Settings, tmp_path: Path
+) -> None:
+    dist = built(tmp_path / "chat", "<html>chat</html>")
+
+    with TestClient(create_app(replace(settings, chat_ui_dist=dist))) as client:
+        pages = [client.get(path) for path in ("/", "/chat", "/requests", "/requests/r1/ctc")]
+        script = client.get("/assets/app.js")
+        agent = client.get("/api/agent")
+        missing = client.get("/api/requests/nope")
+
+    assert [(page.status_code, page.text) for page in pages] == [(200, "<html>chat</html>")] * 4
+    assert (script.status_code, script.text) == (200, "run()")
+    assert agent.json()["router"] == "stub-v0 (stub)"
+    assert missing.status_code == 404 and "detail" in missing.json()
+
+
+def test_the_label_screen_is_served_instead_when_asked_for(
+    settings: Settings, tmp_path: Path
+) -> None:
+    labels = built(tmp_path / "annotation", "<html>labels</html>")
+    chat = built(tmp_path / "chat", "<html>chat</html>")
+    both = replace(settings, annotation_ui_dist=labels, chat_ui_dist=chat)
+
+    with TestClient(create_app(both, screen="annotation")) as client:
         page = client.get("/")
+        chat_page = client.get("/chat")
         drawings = client.get("/api/drawings")
 
-    assert (page.status_code, page.text) == (200, "<html>screen</html>")
+    assert (page.status_code, page.text) == (200, "<html>labels</html>")
+    assert chat_page.status_code == 404
     assert drawings.status_code == 200
+
+
+def test_without_a_built_screen_only_the_api_is_served(client: TestClient) -> None:
+    assert client.get("/").status_code == 404
+    assert client.get("/api/agent").status_code == 200

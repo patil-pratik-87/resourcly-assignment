@@ -44,7 +44,9 @@ class Settings:
     splits_path: Path = PROJECT_ROOT / "evals" / "splits.toml"
     drawings_dir: Path = PROJECT_ROOT / "data" / "drawings"
     reports_dir: Path = PROJECT_ROOT / "data" / "reports"
-    ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "annotation" / "dist"
+    # The built screens: `resourcly serve` serves the chat, `resourcly annotation-ui` the labels
+    chat_ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "chat" / "dist"
+    annotation_ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "annotation" / "dist"
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
     uploads_dir: Path = PROJECT_ROOT / "var" / "uploads"
@@ -69,7 +71,10 @@ class Settings:
             splits_path=Path(os.environ.get("RESOURCLY_SPLITS", defaults.splits_path)),
             drawings_dir=Path(os.environ.get("RESOURCLY_DRAWINGS_DIR", defaults.drawings_dir)),
             reports_dir=Path(os.environ.get("RESOURCLY_REPORTS_DIR", defaults.reports_dir)),
-            ui_dist=Path(os.environ.get("RESOURCLY_UI_DIST", defaults.ui_dist)),
+            chat_ui_dist=Path(os.environ.get("RESOURCLY_CHAT_UI_DIST", defaults.chat_ui_dist)),
+            annotation_ui_dist=Path(
+                os.environ.get("RESOURCLY_ANNOTATION_UI_DIST", defaults.annotation_ui_dist)
+            ),
             versions_dir=Path(os.environ.get("RESOURCLY_VERSIONS_DIR", defaults.versions_dir)),
             trace_path=Path(os.environ.get("RESOURCLY_TRACE_DB", defaults.trace_path)),
             uploads_dir=Path(os.environ.get("RESOURCLY_UPLOADS_DIR", defaults.uploads_dir)),
@@ -289,6 +294,7 @@ class Services:
                     router=self.router,
                     router_name=self.router_name,
                     drawings_in=self._drawings_in,
+                    pages_in=PyMuPDFPageAdapter,
                     trace=trace,
                     jobs=jobs,
                 )
