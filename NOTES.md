@@ -124,7 +124,7 @@ run and a comparison. The model-free versions set the floors, on the dev split:
 
 | Version | Cases | Primary | Other |
 | --- | --- | --- | --- |
-| router `stub-v0` | 123 | accuracy 0.607 | drawing recall 0.120, other kept out 0.500 |
+| router `stub-v0` | 123 | accuracy 0.602 | drawing recall 0.120, other kept out 0.500 |
 | failure `shuffled-v0` | 86 | section@1 0.038 | mode@3 0.769, kept out 0.000 |
 
 - How: the router gold is the 244 requests of the routing research, moved to `evals/gold/routes`.
@@ -142,13 +142,13 @@ Details: `docs/evals.md`.
 
 | Version | Split | Accuracy | Drawing recall | Other kept out |
 | --- | --- | --- | --- | --- |
-| `stub-v0` | dev (123) | 0.607 | 0.120 | 0.500 |
-| `three-layer-v1` | dev (123) | 1.000 | 1.000 | 0.833 |
-| `stub-v0` | test (57) | 0.418 | 0.091 | 0.500 |
+| `stub-v0` | dev (123) | 0.602 | 0.120 | 0.500 |
+| `three-layer-v1` | dev (123) | 0.992 | 1.000 | 0.833 |
+| `stub-v0` | test (57) | 0.421 | 0.091 | 0.500 |
 | `three-layer-v1` | test (57) | 1.000 | 1.000 | 1.000 |
 
 - How: `evals run` on dev, once on test, then `evals compare` with `stub-v0`.
-- Honest reading: perfect scores mean the route set is easy, not that the router is perfect. Its
+- Honest reading: near-perfect scores mean the route set is easy, not that the router is perfect. Its
   phone photos and scans of drawings are made by code from clean renders; it has no real phone
   photos, no real scanned reports and no mixed pages.
 - Miss: a dimensioned physics diagram goes to drawing (probe 0.986).

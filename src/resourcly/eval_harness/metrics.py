@@ -169,19 +169,16 @@ def _counts(scores: dict[str, Any]) -> Counts:
     return Counts(scores["gold"], scores["predicted"], scores["matched"])
 
 
-LABELLED_ROUTES = ("drawing", "photo", "text")
-
-
 def summarise_routes(cases: Scored) -> dict[str, Any]:
     """How well a router picked the case; each case's stratum is the route it should get.
 
-    Accuracy covers the labelled requests: those whose case is drawing, photo or text. Drawing
-    recall is the share of drawings sent to the reader. The other files fit no case, and whether
-    they should is a product choice, so they are scored apart as the share the router kept out
-    (routed to other). A metric with nothing to measure is None.
+    Accuracy covers every request, the files that fit no case too, so a file let into the drawing
+    or photo case lowers it. Drawing recall is the share of drawings sent to the reader. Other
+    kept out is the share of the files that fit no case routed to other. A metric with nothing to
+    measure is None.
     """
     return {
-        "accuracy": _mean(cases, "correct", lambda stratum: stratum in LABELLED_ROUTES),
+        "accuracy": _mean(cases, "correct", lambda stratum: True),
         "drawing_recall": _mean(cases, "correct", lambda stratum: stratum == "drawing"),
         "other_kept_out": _mean(cases, "correct", lambda stratum: stratum == "other"),
     }

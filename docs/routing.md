@@ -21,13 +21,13 @@ models load from the local Hugging Face cache with `HF_HUB_OFFLINE=1` and never 
 
 | Split | Accuracy | Drawing recall | Other kept out |
 | --- | --- | --- | --- |
-| dev, 123 requests | 1.000 | 1.000 | 0.833 |
+| dev, 123 requests | 0.992 | 1.000 | 0.833 |
 | test, 57 requests | 1.000 | 1.000 | 1.000 |
 
 The one miss is a dimensioned physics diagram that the probe calls a drawing. The model-free
-`stub-v0` scores 0.607 accuracy and 0.120 drawing recall on dev.
+`stub-v0` scores 0.602 accuracy and 0.120 drawing recall on dev.
 
-These perfect scores mean the route set is easy, not that the router is perfect. Its phone photos
+These near-perfect scores mean the route set is easy, not that the router is perfect. Its phone photos
 and scans of drawings are made by code from clean renders. It has no real phone photos of
 drawings, no real scanned reports and no mixed pages, such as a drawing beside a photo.
 
