@@ -4,10 +4,11 @@ A failed check is a blocker when the app cannot run without it, such as a missin
 warning when only part of it is missing, such as the chat screen for someone using the CLI.
 """
 
+import os
 import platform
 import shutil
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from importlib.util import find_spec
 
@@ -42,6 +43,7 @@ class System:
     which: Callable[[str], str | None]
     installed: Callable[[str], bool]
     cached: Callable[[str], bool]
+    env: Mapping[str, str]
 
     @classmethod
     def current(cls) -> "System":
@@ -51,6 +53,7 @@ class System:
             which=shutil.which,
             installed=lambda module: find_spec(module) is not None,
             cached=model_cached,
+            env=os.environ,
         )
 
 
@@ -60,7 +63,7 @@ def run(settings: Settings, system: System) -> list[Check]:
     models = [version_models(version) for version in versions]
     return [
         _python(system),
-        _tool(system, "uv", "curl -LsSf https://astral.sh/uv/install.sh | sh", blocker=True),
+        _uv(system),
         _tool(system, "node", "brew install node", blocker=False),
         _mlx(system, needed=any("model" in named for named in models)),
         _torch(system, needed=any("encoder_model" in named for named in models)),
@@ -103,6 +106,15 @@ def _python(system: System) -> Check:
     if system.python == (3, 12):
         return Check("python", True, found)
     return Check("python", False, f"{found}, the project needs 3.12", "uv python install 3.12")
+
+
+def _uv(system: System) -> Check:
+    """uv on the PATH, or the one `uv run` names in UV when the PATH lacks it."""
+    if system.which("uv") or "UV" not in system.env:
+        return _tool(system, "uv", "curl -LsSf https://astral.sh/uv/install.sh | sh", True)
+    folder = os.path.dirname(system.env["UV"])
+    detail = f"{system.env['UV']} is not on PATH, so a shell cannot run uv"
+    return Check("uv", False, detail, f'export PATH="{folder}:$PATH"', blocker=False)
 
 
 def _tool(system: System, tool: str, fix: str, blocker: bool) -> Check:
