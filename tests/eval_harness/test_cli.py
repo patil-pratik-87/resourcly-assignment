@@ -42,6 +42,16 @@ def test_run_prints_the_selection_progress_and_summary_and_lists_the_run(evals) 
     assert "textlayer-v0" in listed.output
 
 
+def test_run_limit_runs_the_first_cases_of_the_split(evals) -> None:
+    result = evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--limit", "1")
+    refused = evals("run", "reader", "--version", "textlayer-v0", "--limit", "0")
+
+    assert result.exit_code == 0, result.output
+    assert "selected 1 of 2 all cases\n" in result.output
+    assert f"[1/1] {CTC01}" in result.output
+    assert refused.exit_code == 2
+
+
 def test_show_lists_the_cases_of_a_run_and_explains_one(evals) -> None:
     rid = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
 

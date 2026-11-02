@@ -56,6 +56,19 @@ def test_a_run_takes_every_case_of_the_split_or_only_the_named_ones(
     assert (whole.case_ids, named.case_ids) == ([], ["partial_a"])
 
 
+def test_a_limit_takes_the_first_cases_of_the_split(
+    eval_gold: Path, settings: Settings, store: SqliteResultStore
+) -> None:
+    every = {"settings": settings, "store": store, "split": "all"}
+    first = harness.run("reader", "textlayer-v0", limit=1, **every)
+    beyond = harness.run("reader", "textlayer-v0", limit=5, **every)
+
+    assert [c.case_id for c in store.cases(first.run_id)] == [CTC01]
+    assert first.case_ids == [CTC01]
+    assert [c.case_id for c in store.cases(beyond.run_id)] == [CTC01, "partial_a"]
+    assert beyond.case_ids == []
+
+
 def test_a_component_without_a_version_cannot_run(
     settings: Settings, store: SqliteResultStore
 ) -> None:
