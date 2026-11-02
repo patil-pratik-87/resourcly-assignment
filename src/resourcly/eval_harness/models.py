@@ -16,7 +16,6 @@ class Run:
     started_at: str
     git_sha: str
     git_dirty: bool
-    note: str | None = None
     finished_at: str | None = None
     n_cases: int = 0
     errors: int = 0

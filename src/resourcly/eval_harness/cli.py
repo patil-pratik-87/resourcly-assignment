@@ -68,7 +68,6 @@ def run(
         int | None,
         typer.Option(min=1, help="Run a sample of N cases, spread over the strata, seed 0."),
     ] = None,
-    note: Annotated[str | None, typer.Option(help="Free text stored with the run.")] = None,
 ) -> None:
     """Run a version of a component on the gold cases of a split."""
     suite = _suite(component)
@@ -98,7 +97,6 @@ def run(
             split=split,
             case_ids=tuple(case_id or ()),
             limit=limit,
-            note=note,
             on_start=started,
             on_case=finished,
         )
@@ -177,30 +175,16 @@ def compare(
 @_user_errors
 def show(
     ctx: typer.Context,
-    run_ids: Annotated[
-        list[str],
-        typer.Argument(help="A run id from `evals list runs`; with --out, any number of them."),
-    ],
+    run_id: Annotated[str, typer.Argument(help="A run id from `evals list runs`.")],
     case: Annotated[str | None, typer.Option(help="Explain one case against the gold.")] = None,
     failures: Annotated[
         bool, typer.Option(help="Only cases that failed or scored below 1.")
     ] = False,
-    out: Annotated[
-        Path | None, typer.Option(help="Write Markdown tables of the runs to this file.")
-    ] = None,
 ) -> None:
-    """A run's settings, summary and cases, or Markdown tables of runs.
+    """A run's settings, summary and cases.
 
     What a case did and called: `resourcly request <run id>:<case id>`.
     """
-    if out is not None:
-        if case or failures:
-            raise ValueError("--out takes no --case or --failures")
-        _report(ctx.obj, run_ids, out)
-        return
-    if len(run_ids) > 1:
-        raise ValueError("give one run id, or --out FILE for many")
-    run_id = run_ids[0]
     with SqliteResultStore.open(ctx.obj) as store:
         run = store.run(run_id)
         results = store.cases(run_id)
@@ -213,34 +197,22 @@ def show(
     typer.echo(f"split {run.split}, {chosen}, case set {run.case_set_hash}")
     finished = run.finished_at or "-"
     typer.echo(f"started {run.started_at}  finished {finished}  git {_git_label(run)}")
-    if run.note:
-        typer.echo(f"note {run.note}")
     typer.echo("")
     _summary(suite, run)
     typer.echo("")
     shown = [r for r in results if not failures or r.error or r.scores["case_score"] < 1]
+    columns = ["case_score", *suite.case_columns]
     rows = [
         [
             r.case_id,
             r.stratum,
-            _num(r.scores["case_score"]),
+            *(_num(r.scores.get(column)) for column in columns),
             f"{r.latency_ms:.0f} ms" if r.latency_ms is not None else "-",
             r.error or "",
         ]
         for r in shown
     ]
-    _table(["case", "stratum", "case_score", "latency", "error"], rows)
-
-
-def _report(path: Path, run_ids: list[str], out: Path) -> None:
-    """Markdown tables of runs, for results that go in the repository."""
-    with SqliteResultStore.open(path) as store:
-        runs = [store.run(run_id) for run_id in run_ids]
-        sections = [_markdown(run, store.cases(run.run_id)) for run in runs]
-    text = "# Eval results\n\nWritten by `uv run evals show --out`.\n" + "".join(sections)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(text, encoding="utf-8")
-    typer.echo(f"wrote {len(runs)} run(s) to {out}")
+    _table(["case", "stratum", *columns, "latency", "error"], rows)
 
 
 class Listing(StrEnum):
@@ -384,48 +356,13 @@ def _explain(run: Run, suite: Suite, result: CaseResult | None, case_id: str) ->
         typer.echo(line)
 
 
-def _markdown(run: Run, results: list[CaseResult]) -> str:
-    suite = SUITES[run.component]
-    selected = f" ({_selected(run)})" if _selected(run) else ""
-    columns = ["case_score", *suite.case_columns]
-    cases = [
-        [r.case_id, r.stratum, *(_num(r.scores.get(c)) for c in columns), r.error or ""]
-        for r in results
-    ]
-    lines = [
-        "",
-        f"## {run.component} {run.version} on {run.split}{selected}: {run.run_id}",
-        "",
-        f"Version hash {run.version_hash}, case set {run.case_set_hash}, git {_git_label(run)}, "
-        f"finished {run.finished_at}, {run.errors} error(s) in {run.n_cases} case(s).",
-        "",
-        *_lines(["metric", "value"], _metric_rows(suite, run), markdown=True),
-        "",
-        *_lines(["case", "stratum", *columns, "error"], cases, markdown=True),
-    ]
-    return "\n".join(lines) + "\n"
-
-
-def _selected(run: Run) -> str | None:
-    """How a run picked part of its split, as the run options; None for every case."""
-    if run.case_ids:
-        return f"--case-id {', '.join(run.case_ids)}"
-    return None
-
-
 def _summary(suite: Suite, run: Run) -> None:
-    _table(
-        ["metric", "value"],
-        [*_metric_rows(suite, run), ["errors", f"{run.errors} of {run.n_cases}"]],
-    )
-
-
-def _metric_rows(suite: Suite, run: Run) -> list[list[str]]:
     summary = run.summary or {}
-    return [
+    rows = [
         [f"{name} (primary)" if name == suite.primary else name, _num(summary.get(name))]
         for name in suite.metrics
     ]
+    _table(["metric", "value"], [*rows, ["errors", f"{run.errors} of {run.n_cases}"]])
 
 
 def _suite(component: str) -> Suite:
@@ -447,18 +384,7 @@ def _num(value: Any) -> str:
 
 
 def _table(headers: list[str], rows: list[list[str]]) -> None:
-    for line in _lines(headers, rows):
-        typer.echo(line)
-
-
-def _lines(headers: list[str], rows: list[list[str]], markdown: bool = False) -> list[str]:
-    """A table as aligned columns, or as a Markdown table."""
-    if markdown:
-        return [
-            f"| {' | '.join(map(str, row))} |" for row in [headers, ["---"] * len(headers), *rows]
-        ]
     widths = [max(len(str(cell)) for cell in column) for column in zip(headers, *rows, strict=True)]
-    return [
-        "  ".join(str(cell).ljust(width) for cell, width in zip(row, widths, strict=True)).rstrip()
-        for row in [headers, *rows]
-    ]
+    for row in [headers, *rows]:
+        cells = (str(cell).ljust(width) for cell, width in zip(row, widths, strict=True))
+        typer.echo("  ".join(cells).rstrip())

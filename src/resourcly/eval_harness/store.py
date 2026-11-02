@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS runs (
     started_at TEXT NOT NULL,
     git_sha TEXT NOT NULL,
     git_dirty INTEGER NOT NULL,
-    note TEXT,
     finished_at TEXT,
     n_cases INTEGER NOT NULL DEFAULT 0,
     errors INTEGER NOT NULL DEFAULT 0,

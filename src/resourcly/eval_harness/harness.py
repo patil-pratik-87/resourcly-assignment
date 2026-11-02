@@ -30,7 +30,6 @@ def run(
     split: str = "dev",
     case_ids: tuple[str, ...] = (),
     limit: int | None = None,
-    note: str | None = None,
     on_start: Callable[[Run, list[Case], int], None] | None = None,
     on_case: Callable[[CaseResult], None] | None = None,
 ) -> Run:
@@ -61,7 +60,6 @@ def run(
             case_ids=[] if len(chosen) == len(pool) else [case.case_id for case in chosen],
             case_set_hash=case_set_hash(chosen),
             started_at=_now(),
-            note=note,
             **_git(),
         )
         store.start_run(started)

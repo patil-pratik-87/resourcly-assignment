@@ -19,7 +19,7 @@ class Suite:
 
     component: str
     metrics: tuple[str, ...]
-    case_columns: tuple[str, ...]
+    case_columns: tuple[str, ...]  # scores `show` lists beside each case_score
     load: Callable[[Services, str], list[Case]]
     call: Callable[[Services, Case, str], Any]
     score: Callable[[Case, Any], dict[str, Any]]

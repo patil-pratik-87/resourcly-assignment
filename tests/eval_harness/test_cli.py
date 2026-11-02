@@ -205,24 +205,6 @@ def test_list_shows_versions_and_cases(evals) -> None:
     assert "partial_a             test   partial" in cases
 
 
-def test_show_out_writes_markdown_tables_of_the_named_runs(evals, tmp_path: Path) -> None:
-    dev = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-    named = run_id(
-        evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
-    )
-    out = tmp_path / "eval-results.md"
-
-    result = evals("show", dev, named, "--out", str(out))
-
-    text = out.read_text(encoding="utf-8")
-    assert result.exit_code == 0, result.output
-    assert text.count("\n## ") == 2
-    assert f"## reader textlayer-v0 on dev: {dev}" in text
-    assert f"## reader textlayer-v0 on all (--case-id {CTC01}): {named}" in text
-    assert "| metric | value |\n| --- | --- |\n| f1 (primary) | 0.160 |" in text
-    assert f"| {CTC01} | full | 0.160 | 19 | 6 | 2 |  |" in text
-
-
 def test_check_fails_on_a_case_in_two_splits_and_warns_about_missing_gold(
     evals, eval_gold: Path
 ) -> None:
@@ -308,13 +290,6 @@ def test_list_runs_says_unfinished_only_for_a_run_that_did_not_finish(
 
     assert "f1 -" in rows[partial_only]
     assert "unfinished" in rows["reader-cut"]
-
-
-def test_show_needs_one_run_id_without_out(evals) -> None:
-    result = evals("show", "a", "b")
-
-    assert result.exit_code == 1
-    assert result.output.strip() == "error: give one run id, or --out FILE for many"
 
 
 def gold_value(gold_dir: Path, raw: str, change) -> None:
