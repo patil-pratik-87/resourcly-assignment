@@ -4,7 +4,7 @@ import pytest
 from PIL import Image
 
 from resourcly.adapters.vlm_answer import VlmPhotoAnswerAdapter
-from resourcly.models import Attachment, PhotoEvidence
+from resourcly.models import Attachment, DraftAction, DraftFinding, PhotoEvidence
 from tests.conftest import png
 from tests.test_photo_answers import EVIDENCE
 
@@ -12,9 +12,10 @@ PROMPT = (
     "Answer from this.\n<evidence>\n{evidence}\n</evidence>\n<question>\n{question}\n</question>"
 )
 ANSWER = """```json
-{"match": true, "what_is_wrong": "Fatigue at the holes.",
+{"image_type": "fracture_surface_closeup", "match": true, "what_is_wrong": "Fatigue at the holes.",
  "findings": [{"statement": "Origins at the holes.", "source": "[18-061 fig05]"}],
- "actions": [{"action": "Check the bolts.", "basis": "stated", "source": "18-061 p3"},
+ "actions": [{"action": "Check the bolts.", "basis": "stated", "source": "18-061 p3",
+              "quote": "torque was measured"},
              {"action": "Inspect the other wing.", "basis": "inferred", "source": ""}]}
 ```"""
 
@@ -78,12 +79,12 @@ def test_the_json_answer_becomes_a_draft_with_its_sources_as_written() -> None:
 
     draft = VlmPhotoAnswerAdapter(model, PROMPT, max_tokens=500).answer(evidence())
 
-    assert draft.matched is True
+    assert (draft.matched, draft.image_type) == (True, "fracture_surface_closeup")
     assert draft.answer == "Fatigue at the holes."
-    assert draft.findings == [("Origins at the holes.", "[18-061 fig05]")]
+    assert draft.findings == [DraftFinding("Origins at the holes.", "[18-061 fig05]")]
     assert draft.actions == [
-        ("Check the bolts.", "stated", "18-061 p3"),
-        ("Inspect the other wing.", "inferred", ""),
+        DraftAction("Check the bolts.", "stated", "18-061 p3", "torque was measured"),
+        DraftAction("Inspect the other wing.", "inferred", "", ""),
     ]
     assert draft.text == ANSWER
 
@@ -103,12 +104,22 @@ def test_malformed_entries_are_skipped_and_a_missing_match_is_no_match() -> None
 
     draft = VlmPhotoAnswerAdapter(model, PROMPT, max_tokens=500).answer(evidence())
 
-    assert draft.matched is False
-    assert draft.findings == [("y", "")]
-    assert draft.actions == [("z", "inferred", "")]
+    assert (draft.matched, draft.image_type) == (False, "")
+    assert draft.findings == [DraftFinding("y", "")]
+    assert draft.actions == [DraftAction("z", "inferred", "", "")]
 
 
 def test_the_trace_names_the_model_and_its_snapshot() -> None:
     adapter = VlmPhotoAnswerAdapter(FakeModel(), PROMPT, max_tokens=500)
 
     assert adapter.called == "org/vlm (snapshot abc123), one answer from the photo and the figures"
+
+
+@pytest.mark.parametrize(
+    ("written", "matched"), [("true", True), ('"true"', True), ('"no"', False)]
+)
+def test_a_match_written_as_text_is_read(written: str, matched: bool) -> None:
+    model = FakeModel(f'{{"match": {written}, "what_is_wrong": "x"}}')
+    adapter = VlmPhotoAnswerAdapter(model, PROMPT, max_tokens=500)
+
+    assert adapter.answer(evidence()).matched is matched

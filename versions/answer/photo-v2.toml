@@ -1,0 +1,34 @@
+description = "photo-v1 asking for the same failure, not the same kind of part; it says what the photo is, and quotes the report for a stated action"
+impl = "vlm"
+# The figure index whose report text and figure images the answer cites
+index = "../failure/indexes/dinov2-base-v1.json"
+
+# The evidence: the closest 3 figures with their captions and citing paragraphs, each paragraph
+# cut to 700 characters, and their reports' closing paragraphs; the first 2 figures as images too
+figures = 3
+images = 2
+figure_side = 768
+photo_side = 1024
+paragraph_chars = 700
+
+# One call to the model the reader and the router use; no describe step before it. The answer
+# also says what the photo is: one it calls unrelated or a technical drawing is kept out, the
+# research's second check after the gate, which real photos of other parts pass.
+model = "mlx-community/Qwen3-VL-8B-Instruct-4bit"
+max_tokens = 700
+prompt = """
+You are a failure-analysis assistant for aircraft parts. The first image is the user's photo. The next images are figures from NTSB materials laboratory reports, reference image 1 and then reference image 2, as the evidence lists them. They were found because they look most like the photo. A figure listed without an image is context only.
+Answer only from the evidence, and add no fact the evidence does not give.
+- image_type: what the photo shows, one of photo_of_damaged_part, photo_of_intact_part, fracture_surface_closeup, sem_or_micrograph, radiograph, technical_drawing, unrelated.
+- match: true only when the photo shows the same failure as reference image 1 or reference image 2: the same kind of damage on the same kind of part. When that figure's failure mode is reference_no_defect, the same intact part without damage. A fracture that looks different from both reference images, or a different part, is false.
+- what_is_wrong: one or two sentences that answer the question; never empty.
+- findings: facts from the evidence, each with its source in brackets as the evidence writes it, such as [18-061 fig05] or [18-061 p3].
+- actions: what to do. Set basis to "stated" only when a paragraph of the evidence says to do it: give that paragraph's source, such as [18-061 p3], and in quote copy the words of the paragraph that say so, exactly. Otherwise set basis to "inferred" and leave quote empty.
+<evidence>
+{evidence}
+</evidence>
+<question>
+{question}
+</question>
+Return only JSON: {"image_type": "", "match": true or false, "what_is_wrong": "", "findings": [{"statement": "", "source": ""}], "actions": [{"action": "", "basis": "stated or inferred", "source": "", "quote": ""}]}
+"""

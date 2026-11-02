@@ -68,7 +68,7 @@ class Settings:
             "reader": "vector-crop-v2",
             "router": "three-layer-v1",
             "failure": "dinov2-base-v1",
-            "answer": "photo-v1",
+            "answer": "photo-v2",
         }
     )
 

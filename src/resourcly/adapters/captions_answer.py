@@ -1,4 +1,4 @@
-from resourcly.models import AnswerDraft, PhotoEvidence
+from resourcly.models import AnswerDraft, DraftFinding, PhotoEvidence
 
 
 class CaptionsAnswerAdapter:
@@ -14,6 +14,6 @@ class CaptionsAnswerAdapter:
         if not evidence.figures:
             return AnswerDraft(False, "No report figure to compare the photo with.", [], [], "")
         best = evidence.figures[0]
-        findings = [(figure.caption, figure.source) for figure in evidence.figures]
+        findings = [DraftFinding(figure.caption, figure.source) for figure in evidence.figures]
         answer = f"The closest report figure is {best.source}: {best.caption}"
         return AnswerDraft(True, answer, findings, [], answer)

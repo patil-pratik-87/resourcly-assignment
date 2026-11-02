@@ -4,9 +4,11 @@ The failure finder ranks the report figures by how close they are to the photo. 
 close enough, the gate says the reports do not show this failure and no model is asked.
 Otherwise the answerer is shown the closest figures, the paragraphs that cite them and their
 reports' closing paragraphs, and answers the user's text, or what is wrong and what to do when
-there is none. Code then keeps only what cites that evidence: a finding whose source was not shown
-is dropped, and an action is "stated" only when it cites shown report text. Both steps are traced
-under the request id.
+there is none. It also says what the photo is; one that shows no part is kept out, as the gate
+would. Code then keeps only what cites that evidence: a finding whose source was not shown is
+dropped, a match without a kept finding is given as no match, and an action is "stated" only
+when it quotes, word for word, a report paragraph it cites. Both steps are traced under the
+request id.
 """
 
 import hashlib
@@ -20,8 +22,10 @@ from resourcly.models import (
     AnswerDraft,
     Attachment,
     Citation,
+    DraftAction,
     FigureMatch,
     Finding,
+    Passage,
     PhotoAnswer,
     PhotoEvidence,
     TraceEvent,
@@ -36,8 +40,15 @@ NOT_IN_REPORTS = (
     "This failure is not in the three NTSB reports: no report figure is close enough to the"
     " photo, so they say nothing about it."
 )
+UNRELATED = "This photo does not show a part, so the three NTSB reports say nothing about it."
 NO_MATCH = "The closest report figures do not show the failure in this photo."
-NO_SUMMARY = "The closest report figures show this part, but the answer cited nothing in them."
+NO_CITED = (
+    "The answer cited nothing in the reports it was shown, so it is not given. The closest report"
+    " figures are listed."
+)
+# What an answerer may take a photo for that no report can be about
+NO_PART = ("unrelated", "technical_drawing")
+MIN_QUOTE_WORDS = 3  # a stated action's quote, so a word or two cannot pass as support
 # A source as an answer writes it: "18-061 fig05", "[18-061 Figure 5]", "18-061 p3", "18-061 page 3"
 SOURCE = re.compile(r"(\d{2}-\d{3})\W*(?:fig(?:ure)?\.?\s*0*(\d+)|p(?:age)?\.?\s*(\d+))", re.I)
 
@@ -73,6 +84,7 @@ class PhotoAnswerService:
                 step["output"] = {"not_in_reports": True}
                 return PhotoAnswer(
                     not_in_reports=True,
+                    kept_out="gate",
                     matched=False,
                     answer=NOT_IN_REPORTS,
                     findings=[],
@@ -89,6 +101,8 @@ class PhotoAnswerService:
             draft = self.answerer.answer(evidence)
             answer, dropped = _checked(draft, evidence, matches)
             step["output"] = {
+                "image_type": draft.image_type,
+                "kept_out": answer.kept_out,
                 "matched": answer.matched,
                 "findings": len(answer.findings),
                 "actions": len(answer.actions),
@@ -145,7 +159,7 @@ def render_reply(answer: PhotoAnswer) -> str:
         lines += ["", "What to do:"]
         for action in answer.actions:
             basis = (
-                f"stated in {action.citation.source}"
+                f'stated in {action.citation.source}: "{action.quote}"'
                 if action.basis == "stated" and action.citation
                 else "inferred"
             )
@@ -165,69 +179,100 @@ def _checked(
     draft: AnswerDraft, evidence: PhotoEvidence, matches: list[FigureMatch]
 ) -> tuple[PhotoAnswer, list[str]]:
     """The draft with only what cites the evidence, and the sources it gave that were not shown."""
-    if not draft.matched:
-        answer = draft.answer.strip() or NO_MATCH
+    if draft.image_type.strip().lower() in NO_PART:
         return PhotoAnswer(
-            not_in_reports=False,
+            not_in_reports=True,
+            kept_out="unrelated",
             matched=False,
-            answer=answer,
+            answer=UNRELATED,
             findings=[],
             actions=[],
-            figures=matches,
         ), []
+    if not draft.matched:
+        return _unmatched(draft.answer.strip() or NO_MATCH, matches), []
     shown = _shown(evidence)
     dropped = []
     findings = []
-    for statement, source in draft.findings:
-        citation = _citation(source, shown)
+    for finding in draft.findings:
+        citation = _citation(finding.source, shown)
         if citation is None:
-            dropped.append(source)
+            dropped.append(finding.source)
         else:
-            findings.append(Finding(statement=statement, citation=citation))
-    actions = []
-    for action, basis, source in draft.actions:
-        citation = _citation(source or "", shown)
-        stated = basis.strip().lower().startswith("stated") and citation is not None
-        actions.append(
-            Action(action=action, basis="stated" if stated else "inferred", citation=citation)
-        )
-    summary = draft.answer.strip() or (findings[0].statement if findings else NO_SUMMARY)
+            findings.append(Finding(statement=finding.statement, citation=citation))
+    if not findings:
+        return _unmatched(NO_CITED, matches), dropped
     return PhotoAnswer(
         not_in_reports=False,
         matched=True,
-        answer=summary,
+        answer=draft.answer.strip() or findings[0].statement,
         findings=findings,
-        actions=actions,
+        actions=[_action(action, shown) for action in draft.actions],
         figures=matches,
     ), dropped
 
 
-def _shown(evidence: PhotoEvidence) -> dict[str, Citation]:
-    """Every source the answerer was shown, by its canonical form, such as 18-061 fig05."""
-    shown = {}
+def _unmatched(answer: str, matches: list[FigureMatch]) -> PhotoAnswer:
+    return PhotoAnswer(
+        not_in_reports=False, matched=False, answer=answer, findings=[], actions=[], figures=matches
+    )
+
+
+def _action(draft: DraftAction, shown: dict[str, tuple[Citation, list[str]]]) -> Action:
+    """The action, stated only when it quotes a report paragraph it cites, word for word."""
+    citation = _citation(draft.source, shown)
+    quote = _flat(draft.quote).strip("\"'“”‘’ ")
+    stated = (
+        draft.basis.strip().lower().startswith("stated")
+        and citation is not None
+        and citation.figure is None
+        and len(quote.split()) >= MIN_QUOTE_WORDS
+        and any(quote.lower() in _flat(text).lower() for text in shown[citation.source][1])
+    )
+    return Action(
+        action=draft.action,
+        basis="stated" if stated else "inferred",
+        citation=citation,
+        quote=quote if stated else None,
+    )
+
+
+def _shown(evidence: PhotoEvidence) -> dict[str, tuple[Citation, list[str]]]:
+    """Every source the answerer was shown, by its canonical form, such as 18-061 fig05, with
+    the text of each paragraph cited by that source; a figure has none."""
+    shown: dict[str, tuple[Citation, list[str]]] = {}
+
+    def passage(found: Passage) -> None:
+        citation = Citation(source=found.source, report=found.report, page=found.page)
+        texts = shown.setdefault(found.source, (citation, []))[1]
+        if found.text not in texts:
+            texts.append(found.text)
+
     for figure in evidence.figures:
-        shown[figure.source] = Citation(
-            source=figure.source, report=figure.report, page=figure.page, figure=figure.figure
+        shown[figure.source] = (
+            Citation(
+                source=figure.source, report=figure.report, page=figure.page, figure=figure.figure
+            ),
+            [],
         )
-        for passage in figure.citing:
-            shown[passage.source] = Citation(
-                source=passage.source, report=passage.report, page=passage.page
-            )
+        for found in figure.citing:
+            passage(found)
     for report in evidence.reports:
-        for passage in report.closing:
-            shown[passage.source] = Citation(
-                source=passage.source, report=passage.report, page=passage.page
-            )
+        for found in report.closing:
+            passage(found)
     return shown
 
 
-def _citation(source: str, shown: dict[str, Citation]) -> Citation | None:
+def _citation(source: str, shown: dict[str, tuple[Citation, list[str]]]) -> Citation | None:
     found = SOURCE.search(source)
     if found is None:
         return None
     report, figure, page = found.groups()
     key = f"{report} fig{int(figure):02d}" if figure else f"{report} p{int(page)}"
-    return shown.get(key)
+    return shown[key][0] if key in shown else None
+
+
+def _flat(text: str) -> str:
+    return " ".join(text.split())
 
 
 def _traced_question(text: str) -> dict[str, Any]:

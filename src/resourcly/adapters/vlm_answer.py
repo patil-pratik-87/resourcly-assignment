@@ -2,7 +2,7 @@ from typing import Any
 
 from resourcly.adapters.route_pictures import png
 from resourcly.adapters.vlm_readers import first_json
-from resourcly.models import AnswerDraft, PhotoEvidence
+from resourcly.models import AnswerDraft, DraftAction, DraftFinding, PhotoEvidence
 from resourcly.ports import VisionModelPort
 
 
@@ -50,25 +50,27 @@ class VlmPhotoAnswerAdapter:
                 f" prompt asks for: {text[:200]!r}"
             )
         findings = [
-            (str(entry["statement"]), str(entry.get("source") or ""))
+            DraftFinding(str(entry["statement"]), str(entry.get("source") or ""))
             for entry in _entries(data.get("findings"))
             if entry.get("statement")
         ]
         actions = [
-            (
+            DraftAction(
                 str(entry["action"]),
                 str(entry.get("basis") or "inferred"),
                 str(entry.get("source") or ""),
+                str(entry.get("quote") or ""),
             )
             for entry in _entries(data.get("actions"))
             if entry.get("action")
         ]
         return AnswerDraft(
-            matched=data.get("match") is True,
+            matched=data.get("match") is True or str(data.get("match")).lower() == "true",
             answer=str(data.get("what_is_wrong") or ""),
             findings=findings,
             actions=actions,
             text=text,
+            image_type=str(data.get("image_type") or ""),
         )
 
     def _evidence(self, evidence: PhotoEvidence) -> str:

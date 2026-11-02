@@ -584,23 +584,31 @@ class Finding(BaseModel):
 
 
 class Action(BaseModel):
-    """What to do: stated in the cited report text, or inferred from the findings."""
+    """What to do: stated in the cited report paragraph, or inferred from the findings.
+
+    A stated action cites a report paragraph and quotes the words of it that say so.
+    """
 
     action: str
     basis: Literal["stated", "inferred"]
     citation: Citation | None = None
+    quote: str | None = None  # word for word from the cited paragraph, for a stated action
 
 
 class PhotoAnswer(BaseModel):
     """What the agent says about a photo of a part, from the NTSB reports.
 
-    `not_in_reports` is the gate: no report figure is close enough to the photo, so nothing is
-    said about it. Otherwise `figures` are the closest report figures, best first, and `matched`
-    says whether the model found that they show the same failure. Only the findings and actions
-    whose citations are in the evidence the model was given are kept.
+    `not_in_reports` says nothing is said about the photo, and `kept_out` says why: the gate found
+    no report figure close enough, or the model saw no part in the photo ("unrelated").
+    Otherwise `figures` are the closest report figures, best first, and `matched` says whether
+    the model found that they show the same failure as the photo: the same failure mode on the
+    same kind of part, or the same intact part for a figure of a part with no defect. Only the
+    findings and actions whose citations are in the evidence the model was given are kept, and
+    a match without one kept finding is given as no match.
     """
 
     not_in_reports: bool
+    kept_out: Literal["gate", "unrelated"] | None = None
     matched: bool
     answer: str
     findings: list[Finding]
@@ -623,18 +631,33 @@ class PhotoEvidence:
 
 
 @dataclass(frozen=True)
+class DraftFinding:
+    statement: str
+    source: str  # as written, such as "18-061 fig05" or "[18-061 p3]"
+
+
+@dataclass(frozen=True)
+class DraftAction:
+    action: str
+    basis: str  # as written; "stated" or "inferred" when the answerer follows its prompt
+    source: str
+    quote: str  # the words of the source that say to do it, for a stated action
+
+
+@dataclass(frozen=True)
 class AnswerDraft:
     """An answerer's answer as it gave it, before its citations are checked.
 
-    Each source is as written, such as "18-061 fig05" or "[18-061 p3]"; `text` is the whole
-    answer, for the trace.
+    `image_type` is what the answerer took the photo for, such as "unrelated" or
+    "technical_drawing", or "" when it does not say; `text` is the whole answer, for the trace.
     """
 
     matched: bool
     answer: str
-    findings: list[tuple[str, str]]  # statement, source
-    actions: list[tuple[str, str, str | None]]  # action, basis, source
+    findings: list[DraftFinding]
+    actions: list[DraftAction]
     text: str
+    image_type: str = ""
 
 
 class FailureMatches(BaseModel):

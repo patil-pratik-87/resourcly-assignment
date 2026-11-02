@@ -11,8 +11,10 @@ encoder_input_size = 224
 index = "indexes/dinov2-base-v1.json"
 
 # The gate: when the best figure is below this similarity, no report shows the failure. Held out,
-# unrelated photos reached at most 0.271 and the worst report photo 0.294; drawings reach 0.421,
-# so it relies on the router keeping drawings out.
+# the worst report photo scores 0.294, and the research's photos of scenes far from any part at
+# most 0.271. It does not hold on real photos of other parts: 10 of 12 score above it
+# (evals/photo-answers), so the answer's own check must keep them out. Drawings reach 0.421; the
+# router keeps them away.
 threshold = 0.28
 # The figures returned, best first
 top = 5

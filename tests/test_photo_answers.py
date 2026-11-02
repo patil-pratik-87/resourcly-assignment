@@ -6,7 +6,14 @@ from resourcly.adapters.figure_index import FigureIndex, IndexedEvidenceAdapter
 from resourcly.adapters.vlm_answer import VlmPhotoAnswerAdapter
 from resourcly.answers import DEFAULT_QUESTION, PhotoAnswerService, render_reply
 from resourcly.bootstrap import PROJECT_ROOT, Settings, open_services
-from resourcly.models import AnswerDraft, Attachment, FigureMatch, PhotoEvidence
+from resourcly.models import (
+    AnswerDraft,
+    Attachment,
+    DraftAction,
+    DraftFinding,
+    FigureMatch,
+    PhotoEvidence,
+)
 from resourcly.services import FailureService
 from tests.conftest import png
 from tests.test_failure_finder import FakeFinder, MemoryTrace
@@ -44,21 +51,25 @@ class FakeAnswerer:
         return self.draft
 
 
+# A phrase of the paragraph on 18-061 p3 that cites figure 5, copied word for word
+P3_QUOTE = "fatigue origins were noted on the lower sides of the doublers"
 FATIGUE = AnswerDraft(
     matched=True,
+    image_type="fracture_surface_closeup",
     answer="Fatigue cracks grew from the attachment holes of the lower spar cap.",
     findings=[
-        ("Fatigue origins were at the holes.", "[18-061 fig05]"),
-        ("Beach marks spread from the origin.", "18-061 Figure 6"),
-        ("The doublers had fatigue origins too.", "18-061 p3"),
-        ("A made-up fact.", "18-061 fig29"),
-        ("Another made-up fact.", ""),
+        DraftFinding("Fatigue origins were at the holes.", "[18-061 fig05]"),
+        DraftFinding("Beach marks spread from the origin.", "18-061 Figure 6"),
+        DraftFinding("The doublers had fatigue origins too.", "18-061 p3"),
+        DraftFinding("A made-up fact.", "18-061 fig29"),
+        DraftFinding("Another made-up fact.", ""),
     ],
     actions=[
-        ("Measure the torque of the attachment bolts.", "stated", "[18-061 p3]"),
-        ("Replace the spar.", "stated", "18-061 p30"),
-        ("Inspect the other wing.", "inferred", None),
-        ("Check the holes with eddy current.", "stated in the report", "18-061 fig05"),
+        DraftAction("Check the doublers for fatigue origins.", "stated", "[18-061 p3]", P3_QUOTE),
+        DraftAction("Replace the spar.", "stated", "18-061 p30", "replace the spar"),
+        DraftAction("Inspect the other wing.", "inferred", "", ""),
+        DraftAction("Check the holes with eddy current.", "stated", "18-061 fig05", "Figure 5"),
+        DraftAction("Torque the bolts to 20 foot-pounds.", "stated", "18-061 p3", "torque to 20"),
     ],
     text="{...}",
 )
@@ -137,24 +148,28 @@ def test_only_findings_citing_the_evidence_are_kept_each_with_its_page_or_figure
     assert answer.figures == SPAR
 
 
-def test_an_action_is_stated_only_when_it_cites_report_text_it_was_shown() -> None:
+def test_an_action_is_stated_only_with_a_phrase_quoted_from_a_report_paragraph_it_cites() -> None:
     answer = service(FakeFinder(SPAR), FakeAnswerer(FATIGUE)).answer(PHOTO, "", "r1")
 
-    assert [(a.action, a.basis, a.citation and a.citation.source) for a in answer.actions] == [
-        ("Measure the torque of the attachment bolts.", "stated", "18-061 p3"),
-        ("Replace the spar.", "inferred", None),
-        ("Inspect the other wing.", "inferred", None),
-        ("Check the holes with eddy current.", "stated", "18-061 fig05"),
+    assert [(a.basis, a.citation and a.citation.source, a.quote) for a in answer.actions] == [
+        ("stated", "18-061 p3", P3_QUOTE),
+        # a page it was not shown
+        ("inferred", None, None),
+        ("inferred", None, None),
+        # a figure's caption is not report text that says what to do
+        ("inferred", "18-061 fig05", None),
+        # a quote the cited paragraph does not hold
+        ("inferred", "18-061 p3", None),
     ]
 
 
 def test_figures_that_do_not_show_the_photos_failure_give_no_findings() -> None:
-    draft = AnswerDraft(False, "The figures show a different part.", [], [], "{}")
+    draft = AnswerDraft(False, "The figures show a different failure.", [], [], "{}")
 
     answer = service(FakeFinder(SPAR), FakeAnswerer(draft)).answer(PHOTO, "", "r1")
 
     assert (answer.not_in_reports, answer.matched) == (False, False)
-    assert answer.answer == "The figures show a different part."
+    assert answer.answer == "The figures show a different failure."
     assert answer.findings == answer.actions == []
     assert answer.figures == SPAR
 
@@ -172,7 +187,8 @@ def test_the_answer_step_is_traced_with_what_it_was_shown_and_what_was_kept() ->
     assert step.input["question_chars"] == 4
     assert "question" not in step.input
     assert step.output["matched"] is True
-    assert (step.output["findings"], step.output["actions"], step.output["stated"]) == (3, 4, 2)
+    assert (step.output["findings"], step.output["actions"], step.output["stated"]) == (3, 5, 1)
+    assert step.output["image_type"] == "fracture_surface_closeup"
     assert step.output["dropped"] == ["18-061 fig29", ""]
     assert step.output["text"] == "{...}"
 
@@ -195,7 +211,7 @@ def test_the_reply_gives_the_answer_its_cited_findings_marked_actions_and_figure
 
     assert reply.splitlines()[0].startswith("Fatigue cracks grew")
     assert "- Fatigue origins were at the holes. [18-061 fig05]" in reply
-    assert "- Measure the torque of the attachment bolts. (stated in 18-061 p3)" in reply
+    assert f'- Check the doublers for fatigue origins. (stated in 18-061 p3: "{P3_QUOTE}")' in reply
     assert "- Inspect the other wing. (inferred)" in reply
     assert "Closest report figures: 18-061 fig05 (0.83), 18-061 fig06 (0.80)" in reply
 
@@ -212,13 +228,53 @@ def test_the_default_answer_shares_the_readers_model_and_loads_nothing(settings:
     assert answers.answerer.prompt.lstrip().startswith("You are a failure-analysis assistant")
     assert (answers.figures, answers.images, answers.figure_side) == (3, 2, 768)
     assert services.failures.finder.encoder.revision == "not loaded"
-    assert services.answer_name == "photo-v1 (vlm)"
+    assert services.answer_name == "photo-v2 (vlm)"
 
 
 def test_a_match_without_a_summary_leads_with_its_first_finding() -> None:
-    draft = AnswerDraft(True, "", [("Fatigue origins were at the holes.", "18-061 fig05")], [], "")
+    draft = AnswerDraft(
+        True, "", [DraftFinding("Fatigue origins were at the holes.", "18-061 fig05")], [], ""
+    )
 
     answer = service(FakeFinder(SPAR), FakeAnswerer(draft)).answer(PHOTO, "", "r1")
 
     assert answer.matched is True
     assert answer.answer == "Fatigue origins were at the holes."
+
+
+def test_a_match_that_cites_nothing_it_was_shown_gives_no_answer() -> None:
+    draft = AnswerDraft(
+        True,
+        "Fatigue from corrosion pits.",
+        [DraftFinding("Corrosion pits started the cracks.", "18-061 fig29")],
+        [DraftAction("Replace the part.", "inferred", "", "")],
+        "{}",
+    )
+
+    answer = service(FakeFinder(SPAR), FakeAnswerer(draft)).answer(PHOTO, "", "r1")
+
+    assert (answer.not_in_reports, answer.matched) == (False, False)
+    assert answer.answer.startswith("The answer cited nothing in the reports it was shown")
+    assert answer.findings == answer.actions == []
+    assert answer.figures == SPAR
+
+
+@pytest.mark.parametrize("image_type", ["unrelated", "technical_drawing"])
+def test_a_photo_the_model_sees_no_part_in_is_kept_out(image_type: str) -> None:
+    draft = AnswerDraft(
+        True, "A logo.", [DraftFinding("A fact.", "18-061 fig05")], [], "{}", image_type=image_type
+    )
+    trace = MemoryTrace()
+
+    answer = service(FakeFinder(SPAR), FakeAnswerer(draft), trace).answer(PHOTO, "", "r1")
+
+    assert (answer.not_in_reports, answer.kept_out, answer.matched) == (True, "unrelated", False)
+    assert "does not show a part" in answer.answer
+    assert answer.findings == answer.actions == answer.figures == []
+    assert trace.find("r1")[1].output["image_type"] == image_type
+
+
+def test_the_gate_says_it_kept_the_photo_out() -> None:
+    answer = service(FakeFinder([]), FakeAnswerer(FATIGUE)).answer(PHOTO, "", "r1")
+
+    assert answer.kept_out == "gate"
