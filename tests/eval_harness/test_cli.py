@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -41,7 +42,7 @@ def test_run_prints_the_selection_progress_and_summary_and_lists_the_run(evals) 
     assert result.exit_code == 0, result.output
     assert f"selected 1 of 1 dev cases: {CTC01}" in result.output
     assert f"[1/1] {CTC01}  case_score 0.160" in result.output
-    assert "strict_f1 (primary)  0.160" in result.output
+    assert re.search(r"f1 +\(primary\) +0\.160", result.output)
     listed = evals("list", "runs")
     assert run_id(result) in listed.output
     assert "textlayer-v0" in listed.output
@@ -95,10 +96,10 @@ def test_compare_says_what_got_worse_and_can_fail_on_it(evals, blank_reader) -> 
     by_version = evals("compare", "reader", "textlayer-v0", "blank-v0")
 
     assert result.exit_code == 0, result.output
-    assert "strict_f1 (primary)  0.160  0.000      -0.160  worse" in result.output
+    assert re.search(r"f1 +\(primary\) +0\.160 +0\.000 +\-0\.160 +worse", result.output)
     assert f"{CTC01}  0.160 -> 0.000  -0.160" in result.output
     assert failing.exit_code == 1
-    assert "strict_f1 got worse" in failing.output
+    assert "f1 got worse" in failing.output
     assert f"base       {base}" in by_version.output
     assert f"candidate  {blank}" in by_version.output
     assert "split dev  1 case(s)" in by_version.output
@@ -114,11 +115,11 @@ def test_compare_gives_no_verdict_until_the_older_run_is_rescored(evals, eval_go
     fresh = evals("compare", "reader", rescored, candidate, "--fail-if-worse")
 
     assert stale.exit_code == 1
-    assert "strict_f1 (primary)  -     -          -      no verdict" in stale.output
+    assert re.search(r"f1 +\(primary\) +\- +\- +\- +no +verdict", stale.output)
     assert "rescore the older run first with `evals run --rescore RUN_ID`" in stale.output
     assert f"gold changed between the runs for {CTC01}" in stale.output
     assert fresh.exit_code == 0, fresh.output
-    assert "strict_f1 (primary)  0.083  0.083      +0.000  no change" in fresh.output
+    assert re.search(r"f1 +\(primary\) +0\.083 +0\.083 +\+0\.000 +no +change", fresh.output)
     assert "warning" not in fresh.output
 
 
@@ -143,10 +144,10 @@ def test_compare_refuses_a_verdict_it_cannot_give(evals, blank_reader, eval_gold
     failing = evals("compare", "reader", base, blank, "--fail-if-worse")
 
     assert result.exit_code == 0, result.output
-    assert "strict_f1 (primary)  -     -          -      no verdict" in result.output
+    assert re.search(r"f1 +\(primary\) +\- +\- +\- +no +verdict", result.output)
     assert "no verdict: the runs share no case" in result.output
     assert failing.exit_code == 1
-    assert "no verdict on strict_f1" in failing.output
+    assert "no verdict on f1" in failing.output
 
 
 def test_list_shows_components_versions_and_cases(evals) -> None:
@@ -156,7 +157,7 @@ def test_list_shows_components_versions_and_cases(evals) -> None:
     versions = evals("list", "versions", "reader").output
     cases = evals("list", "cases", "reader", "--split", "all").output
 
-    assert "reader     strict_f1  textlayer        1 version(s)" in components
+    assert re.search(r"reader +f1 +textlayer +1 +version\(s\)", components)
     textlayer = next(line for line in versions.splitlines() if "textlayer-v0" in line)
     assert textlayer.split()[1:3] == ["textlayer-v0", "textlayer"]
     assert "1 run(s)" in textlayer
@@ -178,9 +179,8 @@ def test_show_out_writes_markdown_for_the_latest_run_of_each_version_and_split(
     assert result.exit_code == 0, result.output
     assert text.count("\n## ") == 2
     assert f"## reader textlayer-v0 on dev: {latest}" in text
-    assert "| strict_f1 (primary) | 0.160 |" in text
+    assert "| f1 (primary) | 0.160 |" in text
     assert f"| {CTC01} | full | 0.160 | 19 | 6 | 2 |  |" in text
-    assert "| title_block | title_block | 2 |" in text
 
 
 def test_show_out_leaves_out_partial_runs_unless_they_are_named(evals, tmp_path: Path) -> None:
@@ -282,7 +282,7 @@ def test_list_runs_says_unfinished_only_for_a_run_that_did_not_finish(
 
     rows = {line.split()[0]: line for line in evals("list", "runs").output.splitlines()}
 
-    assert "strict_f1 -" in rows[partial_only]
+    assert "f1 -" in rows[partial_only]
     assert "unfinished" in rows["reader-cut"]
 
 
@@ -305,7 +305,7 @@ def test_run_rescore_scores_a_stored_run_against_the_current_gold(evals, eval_go
 
     assert result.exit_code == 0, result.output
     assert f"(rescore of {base}," in result.output
-    assert "strict_f1 (primary)  0.083" in result.output
+    assert re.search(r"f1 +\(primary\) +0\.083", result.output)
     assert f"rescore of {base}" in evals("list", "runs").output
 
 

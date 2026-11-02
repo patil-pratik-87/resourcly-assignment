@@ -17,13 +17,13 @@ uv run evals show --request REQUEST_ID               # what one call did
 
 | Component | Gold | Primary metric | Other metrics | Versions |
 | --- | --- | --- | --- | --- |
-| `reader`: drawing to JSON | `evals/gold/drawings/`, `partial/` | `strict_f1` | `loose_f1`, `partial_recall`, `kind_accuracy`, `feature_accuracy` | `textlayer-v0` |
-| `router`: which case a request is | `evals/gold/routes/` | `accuracy` | recall per route, `other_kept_out`, `escalation_rate`, `median_ms` | `stub-v0` |
-| `failure`: photo to report figure | `evals/gold/failure/` | `section@1` | `report@1`, `mode@3`, `kept_out` | `shuffled-v0` |
+| `reader`: drawing to JSON | `evals/gold/drawings/`, `partial/` | `f1` | `precision`, `recall`, `partial_recall` | `textlayer-v0` |
+| `router`: which case a request is | `evals/gold/routes/` | `accuracy` | `drawing_recall`, `other_kept_out` | `stub-v0` |
+| `failure`: photo to report figure | `evals/gold/failure/` | `section@1` | `mode@3`, `kept_out` | `shuffled-v0` |
 
 - Reader: a value matches on page, unit, kind and number. Partial gold gives recall only.
-- Router: accuracy covers drawing, photo and text requests. Files that fit no case are scored
-  apart, as the share kept out. Escalation is the share decided by a vision-language model.
+- Router: accuracy covers drawing, photo and text requests. Drawing recall is the share of
+  drawings sent to the reader. Files that fit no case are scored apart, as the share kept out.
 - Failure: section@1 asks whether the top figure is in the right report section, mode@3 whether
   one of the top three shows the right failure mode. Drawings and unrelated images should get no
   figure (`kept_out`).

@@ -160,7 +160,6 @@ def compare(
             store.cases(runs[1].run_id),
             metrics=suite.metrics,
             primary=suite.primary_metric,
-            lower_is_better=suite.lower_is_better,
         )
     for label, run in (("base", runs[0]), ("candidate", runs[1])):
         typer.echo(
@@ -526,11 +525,6 @@ def _markdown(run: Run, results: list[CaseResult]) -> str:
         lines.append(
             f"| {result.case_id} | {result.stratum} | {' | '.join(cells)} | {result.error or ''} |"
         )
-    for name, value in summary.items():
-        rows = _confusion_rows(value)
-        if rows:
-            lines += ["", f"{name}:", "", "| gold | predicted | n |", "| --- | --- | --- |"]
-            lines += [f"| {gold} | {predicted} | {n} |" for gold, predicted, n in rows]
     for name, listed in _listings(summary):
         lines += ["", f"{name} ({len(listed)}):", ""]
         lines += [f"- {_listed(row)}" for row in listed]
@@ -543,15 +537,6 @@ def _selected(run: Run) -> str | None:
     if selection.get("case_ids"):
         return f"--case-id {', '.join(selection['case_ids'])}"
     return None
-
-
-def _confusion_rows(value: Any) -> list[tuple[str, str, int]]:
-    """Rows of a confusion table stored as [[gold, predicted, n], ...] or {gold: {predicted: n}}."""
-    if isinstance(value, dict):
-        return [(g, p, n) for g, cells in value.items() for p, n in cells.items()]
-    if isinstance(value, list) and all(isinstance(row, list) and len(row) == 3 for row in value):
-        return [tuple(row) for row in value]
-    return []
 
 
 def _run(store: ResultStorePort, run_id: str) -> Run:

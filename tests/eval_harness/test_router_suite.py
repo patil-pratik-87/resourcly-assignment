@@ -116,7 +116,6 @@ def test_evals_run_router_prints_the_summary_and_the_mistakes(
 
     assert result.exit_code == 0, result.output
     assert re.search(r"accuracy \(primary\) +0\.600", result.output)
-    assert "escalation_rate" in result.output
     assert "mistakes (2)" in result.output
     assert "d_b  expected drawing  got photo  by probe: filed under photo" in result.output
-    assert "other_misrouted" not in result.output  # the logo was kept out
+    assert "o_logo  expected" not in result.output  # the logo was kept out

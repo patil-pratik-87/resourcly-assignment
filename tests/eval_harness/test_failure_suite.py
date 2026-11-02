@@ -118,7 +118,6 @@ def test_a_failure_run_stores_each_answer_and_scores_the_split(
     assert cases["pos_fig06_v0"].prediction["figures"][0]["figure"] == "18-061/fig06"
     assert cases["pos_fig06_v0"].scores == {
         "case_score": 1.0,
-        "report@1": 1.0,
         "section@1": 1.0,
         "mode@3": 1.0,
         "top": "18-061/fig06",
