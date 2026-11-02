@@ -12,7 +12,8 @@ raster_picture = 0.5
 pages = 10
 
 # Layer 2, a linear probe on a frozen image embedding of the picture, page 1 of a PDF or the image
-# at most this long. The probe file holds the trained weights (scripts/train_route_probe.py).
+# at most this long. It gives drawing, photo or other the probability of each and decides at the
+# threshold. The probe file holds the trained weights (scripts/train_route_probe.py).
 encoder = "dinov2"
 encoder_model = "facebook/dinov2-small"
 encoder_max_side = 1024

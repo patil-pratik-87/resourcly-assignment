@@ -11,7 +11,7 @@ Each layer either decides or passes the request on with its reason. The first to
 | Layer | Code | What it decides |
 | --- | --- | --- |
 | `structure` | `adapters/route_structure.py` | No file is text. A PDF of CAD sheets (300+ vector paths, little picture) is a drawing; a prose PDF or an unreadable file is `other`. Images and scans pass on. |
-| `probe` | `adapters/route_probe.py`, `adapters/dinov2_encoder.py` | A logistic regression on the DINOv2-small embedding of the picture (an image, or page 1 of a PDF). Decides drawing or photo when at least 0.9 sure. |
+| `probe` | `adapters/route_probe.py`, `adapters/dinov2_encoder.py` | A three-class logistic regression (drawing, photo, other) on the DINOv2-small embedding of the picture (an image, or page 1 of a PDF). Decides when one class reaches 0.9. |
 | `vlm` | `adapters/route_vlm.py`, `adapters/mlx_vlm_model.py` | Qwen3-VL 8B answers one multiple-choice question (drawing, photo, something else) about the picture. It never sees the user's text. |
 
 Every layer asked is traced as `route.<layer>` with its verdict, confidence and reason. Both
@@ -46,7 +46,7 @@ The app runs `stub-v0` by default, so it needs neither model.
 ## Retrain the probe
 
 The probe's weights are `versions/router/probes/dinov2-small-v1.json`, trained on the router
-train split only. The version hash covers the file, so a retrained probe goes in a new file and
+train split only: 37 drawings, 23 photos and 2 files that fit no case. The version hash covers the file, so a retrained probe goes in a new file and
 a new version:
 
 ```sh
@@ -56,7 +56,7 @@ uv run --extra router --group router-build python scripts/train_route_probe.py \
 
 ## Limits
 
-- The probe saw 60 files. It must be retrained on the customer's own drawings before these
+- The probe saw 62 files, only 2 of them `other`. It must be retrained on the customer's own drawings before these
   numbers apply.
 - The dev and test NIST drawings are from the same family as the train ones.
 - Bulk upload routes each file in turn; there is no batched routing yet.

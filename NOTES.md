@@ -138,7 +138,8 @@ Details: `docs/evals.md`.
 ## The router
 
 `three-layer-v1` runs structure rules, then a DINOv2-small probe deciding at 0.9, then Qwen3-VL
-8B for the rest. The probe trained on the train split only (37 drawings, 23 photos).
+8B for the rest. The probe has three classes and trained on the train split only (37 drawings,
+23 photos, 2 other).
 
 | Version | Split | Accuracy | Drawing recall | Other kept out |
 | --- | --- | --- | --- | --- |

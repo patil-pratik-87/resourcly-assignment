@@ -7,20 +7,23 @@ from resourcly.errors import InvalidVersion
 from resourcly.models import Attachment, LayerVerdict, Route
 from resourcly.ports import ImageEncoderPort
 
-PROBE_FIELDS = ("encoder_model", "weights", "bias")
+PROBE_FIELDS = ("encoder_model", "classes", "weights", "bias")
 
 
 @dataclass(frozen=True)
 class LinearProbe:
-    """A logistic regression over an image embedding: the probability that a picture is a drawing.
+    """A multinomial logistic regression over an image embedding: the probability of each route.
 
-    Only the regression is trained, by scripts/train_route_probe.py, and its file records the
-    encoder whose embeddings it was trained on.
+    It knows drawing, photo and other, the files that fit no case, so a page of text or a logo
+    pulls the drawing and photo probabilities down instead of being forced into one of them. Only
+    the regression is trained, by scripts/train_route_probe.py, and its file records the encoder
+    whose embeddings it was trained on.
     """
 
     encoder_model: str
-    weights: tuple[float, ...]
-    bias: float
+    classes: tuple[str, ...]
+    weights: tuple[tuple[float, ...], ...]  # one row per class
+    bias: tuple[float, ...]
 
     @classmethod
     def load(cls, path: Path) -> "LinearProbe":
@@ -31,21 +34,42 @@ class LinearProbe:
         missing = [name for name in PROBE_FIELDS if name not in data]
         if missing:
             raise InvalidVersion(f"{path.name} is not a probe: it lacks {', '.join(missing)}")
-        return cls(data["encoder_model"], tuple(data["weights"]), data["bias"])
+        routes = {route.value for route in Route}
+        for name in data["classes"]:
+            if name not in routes:
+                raise InvalidVersion(f"{path.name} names {name}, which is not a route")
+        classes, weights, bias = data["classes"], data["weights"], data["bias"]
+        if not len(classes) == len(weights) == len(bias):
+            raise InvalidVersion(
+                f"{path.name} has {len(classes)} classes, {len(weights)} weight rows"
+                f" and {len(bias)} biases"
+            )
+        return cls(
+            data["encoder_model"],
+            tuple(classes),
+            tuple(tuple(row) for row in weights),
+            tuple(bias),
+        )
 
-    def p_drawing(self, vector: list[float]) -> float:
-        score = self.bias + sum(w * x for w, x in zip(self.weights, vector, strict=True))
-        if score < 0:  # the two forms keep exp() from overflowing on a sure score
-            return math.exp(score) / (1 + math.exp(score))
-        return 1 / (1 + math.exp(-score))
+    @property
+    def size(self) -> int:
+        return len(self.weights[0])
+
+    def probabilities(self, vector: list[float]) -> dict[str, float]:
+        scores = [
+            b + sum(w * x for w, x in zip(row, vector, strict=True))
+            for row, b in zip(self.weights, self.bias, strict=True)
+        ]
+        top = max(scores)  # subtracted so exp() cannot overflow on a sure score
+        exps = [math.exp(score - top) for score in scores]
+        return {name: e / sum(exps) for name, e in zip(self.classes, exps, strict=True)}
 
 
 class ProbeRouteAdapter:
     """Layer 2 of the router: a linear probe on a frozen image embedding.
 
-    It decides drawing or photo when it is at least `threshold` sure, and otherwise passes the
-    request on with its guess. It knows only those two cases, so a file that fits no case relies on
-    the structure rules before it or the threshold.
+    It decides the route it gives the highest probability when that is at least `threshold`, and
+    otherwise passes the request on with its guess.
     """
 
     name = "probe"
@@ -68,15 +92,14 @@ class ProbeRouteAdapter:
         if attachment is None:
             return LayerVerdict(None, "no attachment for the probe")
         vector = self.encoder.encode(attachment)
-        if len(vector) != len(self.probe.weights):
+        if len(vector) != self.probe.size:
             raise ValueError(
-                f"the embedding has {len(vector)} numbers, the probe takes"
-                f" {len(self.probe.weights)}"
+                f"the embedding has {len(vector)} numbers, the probe takes {self.probe.size}"
             )
-        p = self.probe.p_drawing(vector)
-        route, confidence = (Route.DRAWING, p) if p >= 0.5 else (Route.PHOTO, 1 - p)
-        probabilities = {Route.DRAWING.value: p, Route.PHOTO.value: 1 - p}
-        reason = f"the probe gives {route.value} {confidence:.3f}"
+        probabilities = self.probe.probabilities(vector)
+        name = max(probabilities, key=probabilities.__getitem__)
+        confidence = probabilities[name]
+        reason = f"the probe gives {name} {confidence:.3f}"
         if confidence >= self.threshold:
-            return LayerVerdict(route, reason, confidence, probabilities)
+            return LayerVerdict(Route(name), reason, confidence, probabilities)
         return LayerVerdict(None, f"{reason}, below {self.threshold}", confidence, probabilities)
