@@ -9,6 +9,10 @@ exactly, so they differ only in how the model sees the callouts:
   upload, is read whole instead when the version gives a `page_prompt`.
 - `WholePageReaderAdapter` asks the model about the whole page at once.
 
+Each answer is checked against its shape (`callout_values.Answer`) as soon as it comes back. One
+with no JSON or of the wrong shape reads as nothing and is returned as an answer issue, so a person
+sees it in the reading rather than a value that is just missing.
+
 What each callout points at is not traced: each callout becomes one feature, typed by a fixed rule
 on what it says (`callout_values.feature_type`).
 """
@@ -43,7 +47,7 @@ from resourcly.callout_values import (
     value_fields,
 )
 from resourcly.errors import NotFound, UnreadableDrawing
-from resourcly.models import ReadProgress, drawing_short
+from resourcly.models import Issue, ReaderOutput, ReadProgress, drawing_short
 from resourcly.ports import Progress, VisionModelPort
 
 Box = tuple[float, float, float, float]
@@ -103,7 +107,7 @@ class VectorCropReaderAdapter:
         self.page_dpi = page_dpi
         self.page_max_tokens = page_max_tokens
 
-    def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
+    def read(self, drawing: str, progress: Progress | None = None) -> ReaderOutput:
         with _open(self.folder, drawing) as pdf:
             # Every page is located first, so the progress knows the drawing's step count: one
             # step per callout, and one per page read whole.
@@ -111,6 +115,7 @@ class VectorCropReaderAdapter:
             whole = [not callouts and self.page_prompt is not None for callouts in located]
             total = sum(map(len, located)) + sum(whole)
             groups: list[Group] = []
+            issues: list[Issue] = []
             done = 0
 
             def report(page: pymupdf.Page, fractions: list[Box], page_done: int) -> None:
@@ -131,7 +136,7 @@ class VectorCropReaderAdapter:
             for page, callouts, read_whole in zip(pdf, located, whole, strict=True):
                 if read_whole:
                     report(page, [], 0)
-                    groups += page_groups(
+                    found, problems = page_groups(
                         self.model,
                         self.page_prompt,
                         page,
@@ -139,6 +144,8 @@ class VectorCropReaderAdapter:
                         self.page_max_tokens,
                         RASTER_PAGE,
                     )
+                    groups += found
+                    issues += problems
                     done += 1
                     if done == total:
                         report(page, [], 0)
@@ -151,28 +158,38 @@ class VectorCropReaderAdapter:
                     report(page, fractions, index)
                     others = [c.box for c in callouts if c.box is not callout.box]
                     image = crop_png(pixmap, callout.box, others, self.crop_dpi, self.margin)
-                    found = self._read_crop(image, callout)
+                    found, problems = self._read_crop(image, callout)
                     groups.append(Group(page.number + 1, fractions[index], found))
+                    where = ["answers", "page", page.number + 1, "callout", index + 1]
+                    issues += [Issue(loc=where, message=problem) for problem in problems]
                     done += 1
                 if done == total:
                     report(page, fractions, len(callouts))
-            return build_document(drawing, pdf, _merge_repeats(groups))
+            document = build_document(drawing, pdf, _merge_repeats(groups))
+            return ReaderOutput(document=document, answer_issues=issues)
 
-    def _read_crop(self, image: bytes, callout: Callout) -> list[dict[str, Any]]:
-        answer = self.model.generate(self.prompt, [image], self.max_tokens)
-        transcription = parse_answer(Transcription, answer) or Transcription(lines=[])
+    def _read_crop(self, image: bytes, callout: Callout) -> tuple[list[dict[str, Any]], list[str]]:
+        """The readings of one crop, and why each answer that could not be used was not."""
+        problems: list[str] = []
+
+        def ask[A: Answer](model: type[A], name: str, prompt: str, max_tokens: int) -> A | None:
+            parsed, problem = parse_answer(model, self.model.generate(prompt, [image], max_tokens))
+            if problem:
+                problems.append(f"the {name} answer{problem}")
+            return parsed
+
+        transcription = ask(Transcription, "crop", self.prompt, self.max_tokens)
+        transcription = transcription or Transcription(lines=[])
         if self.symbol_prompt and needs_symbol(transcription):
-            answer = self.model.generate(self.symbol_prompt, [image], 40)
-            symbol = parse_answer(SymbolAnswer, answer)
+            symbol = ask(SymbolAnswer, "symbol", self.symbol_prompt, 40)
             if symbol:
                 transcription = name_symbols(transcription, symbol.symbol_name)
         found = readings(transcription, framed=callout.framed, letters=callout.letters)
         if not found and self.letter_prompt and callout.framed and callout.letters <= 3:
-            answer = self.model.generate(self.letter_prompt, [image], 30)
-            letter = parse_answer(LetterAnswer, answer)
+            letter = ask(LetterAnswer, "letter", self.letter_prompt, 30)
             if letter and (found_letter := datum_letter(letter)):
                 found = readings(Transcription(lines=[found_letter]), framed=True, letters=1)
-        return found
+        return found, problems
 
 
 class WholePageReaderAdapter:
@@ -197,9 +214,10 @@ class WholePageReaderAdapter:
         self.dpi = dpi
         self.max_tokens = max_tokens
 
-    def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
+    def read(self, drawing: str, progress: Progress | None = None) -> ReaderOutput:
         with _open(self.folder, drawing) as pdf:
-            groups = []
+            groups: list[Group] = []
+            issues: list[Issue] = []
             for page in pdf:
                 if progress:
                     progress(
@@ -210,8 +228,12 @@ class WholePageReaderAdapter:
                             total=pdf.page_count,
                         )
                     )
-                groups += page_groups(self.model, self.prompt, page, self.dpi, self.max_tokens)
-            return build_document(drawing, pdf, groups)
+                found, problems = page_groups(
+                    self.model, self.prompt, page, self.dpi, self.max_tokens
+                )
+                groups += found
+                issues += problems
+            return ReaderOutput(document=build_document(drawing, pdf, groups), answer_issues=issues)
 
 
 def page_groups(
@@ -221,15 +243,28 @@ def page_groups(
     dpi: int,
     max_tokens: int,
     description: str = CALLOUT,
-) -> list[Group]:
-    """The callouts of one page from one model call about the whole page at `dpi`."""
+) -> tuple[list[Group], list[Issue]]:
+    """The callouts of one page from one model call about the whole page at `dpi`.
+
+    Also returns an issue for an answer cut off before its end and for each callout in it of the
+    wrong shape; the callouts that could be used are kept.
+    """
     image = page.get_pixmap(dpi=dpi).tobytes("png")
-    callouts, datums = _page_answer(model.generate(prompt, [image], max_tokens))
+    callouts, datums, problem = _page_answer(model.generate(prompt, [image], max_tokens))
     number = page.number + 1
-    transcriptions = [parse_answer(Transcription, c) for c in _collapse(callouts)]
-    found = [readings(t) for t in transcriptions if t]
+    where: list[str | int] = ["answers", "page", number]
+    issues = [Issue(loc=where, message=f"the page answer{problem}")] if problem else []
+    found = []
+    for index, callout in enumerate(_collapse(callouts), start=1):
+        transcription, problem = parse_answer(Transcription, callout)
+        if transcription:
+            found.append(readings(transcription))
+        else:
+            issues.append(
+                Issue(loc=[*where, "callout", index], message=f"the page answer{problem}")
+            )
     found += [readings(Transcription(lines=[d]), framed=True, letters=1) for d in datums]
-    return [Group(number, WHOLE_PAGE, r, description) for r in found]
+    return [Group(number, WHOLE_PAGE, r, description) for r in found], issues
 
 
 def crop_png(
@@ -258,15 +293,24 @@ def crop_png(
     return crop.tobytes("png")
 
 
-def parse_answer[A: Answer](model: type[A], answer: str | dict[str, Any]) -> A | None:
-    """The first JSON object in a model answer as `model`, or None if there is none of its shape."""
+def parse_answer[A: Answer](
+    model: type[A], answer: str | dict[str, Any]
+) -> tuple[A | None, str | None]:
+    """(the first JSON object in a model answer as `model`, None), or (None, why it is not one).
+
+    The reason is worded to follow "the crop answer", such as " has no JSON object".
+    """
     found = first_json(answer) if isinstance(answer, str) else answer
     if found is None:
-        return None
+        return None, " has no JSON object"
     try:
-        return model.model_validate(found)
-    except ValidationError:
-        return None
+        return model.model_validate(found), None
+    except ValidationError as error:
+        details = [
+            f"{'.'.join(map(str, d['loc'])) or 'answer'}: {d['msg'].removeprefix('Value error, ')}"
+            for d in error.errors()
+        ]
+        return None, ": " + "; ".join(details)
 
 
 def first_json(text: str) -> Any:
@@ -397,13 +441,19 @@ def _meaning(fields: dict[str, Any]) -> str:
     return f"Printed on the sheet: {fields['raw']}"
 
 
-def _page_answer(text: str) -> tuple[list[dict[str, Any]], list[str]]:
-    """The callouts and datum letters of a whole-page answer, also from a cut-off answer."""
-    whole = parse_answer(PageAnswer, text)
+def _page_answer(text: str) -> tuple[list[dict[str, Any]], list[str], str | None]:
+    """The callouts and datum letters of a whole-page answer, also from a cut-off answer.
+
+    The third item says why the answer is not a whole page answer, or is None when it is one.
+    """
+    whole, problem = parse_answer(PageAnswer, text)
     if whole:
-        return whole.callouts, whole.datum_feature_symbols
+        return whole.callouts, whole.datum_feature_symbols, None
     start = text.find("[", text.find('"callouts"'))
-    return (json_objects(text[start + 1 :]) if start > 0 else []), []
+    callouts = json_objects(text[start + 1 :]) if start > 0 else []
+    if callouts:
+        problem = " is cut off; its complete callouts are kept"
+    return callouts, [], problem
 
 
 def _collapse(callouts: list[dict[str, Any]]) -> list[dict[str, Any]]:

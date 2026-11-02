@@ -419,6 +419,13 @@ class ReadProgress(BaseModel):
     latest: list[str] = []
 
 
+class ReaderOutput(BaseModel):
+    """What a reader returns: the document, and each model answer it could not use, and why."""
+
+    document: dict[str, Any]
+    answer_issues: list[Issue] = []
+
+
 class Reading(BaseModel):
     request_id: str
     drawing: str

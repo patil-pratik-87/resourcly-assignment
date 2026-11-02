@@ -178,7 +178,7 @@ class DrawingService:
         issues: list[Issue] = []
         error = None
         try:
-            document = self.reader.read(drawing, progress)
+            document = self.reader.read(drawing, progress).document
             _, issues = validate_document(document, gold=False)
         except Exception as exc:
             error = exc

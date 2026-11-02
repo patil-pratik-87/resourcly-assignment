@@ -8,6 +8,7 @@ from resourcly.models import (
     FigureMatch,
     GoldDocument,
     LayerVerdict,
+    ReaderOutput,
     ReadProgress,
     RequestRecord,
     Routing,
@@ -65,10 +66,11 @@ class TracePort(Protocol):
 
 
 class ReaderPort(Protocol):
-    def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
+    def read(self, drawing: str, progress: Progress | None = None) -> ReaderOutput:
         """The drawing's values as a document in the gold schema's shape, possibly invalid.
 
-        A reader that works in steps calls `progress` before each one.
+        A reader that works in steps calls `progress` before each one. A reader that asks a model
+        returns each answer it could not use as an answer issue beside the document.
         """
         ...
 

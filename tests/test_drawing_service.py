@@ -4,7 +4,7 @@ import pytest
 
 from resourcly.bootstrap import Settings, open_services
 from resourcly.errors import NotFound
-from resourcly.models import TraceEvent
+from resourcly.models import ReaderOutput, TraceEvent
 from resourcly.services import DrawingService
 from tests.conftest import CTC01
 
@@ -32,10 +32,12 @@ class FixedReader:
     def __init__(self, error: Exception | None = None):
         self.error = error
 
-    def read(self, drawing: str, progress=None) -> dict:
+    def read(self, drawing: str, progress=None) -> ReaderOutput:
         if self.error:
             raise self.error
-        return {"drawing": drawing, "page_count": 1, "title_block": {}, "values": []}
+        return ReaderOutput(
+            document={"drawing": drawing, "page_count": 1, "title_block": {}, "values": []}
+        )
 
 
 def test_a_trace_failure_does_not_lose_the_reading(caplog: pytest.LogCaptureFixture) -> None:

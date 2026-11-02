@@ -15,6 +15,7 @@ from resourcly.bootstrap import (
     open_services,
 )
 from resourcly.errors import InvalidVersion, ModelNotCached, NotFound
+from resourcly.models import ReaderOutput
 from tests.conftest import CTC01
 
 
@@ -45,8 +46,10 @@ class TunedReader:
     def __init__(self, dpi: int = 150):
         self.dpi = dpi
 
-    def read(self, drawing: str, progress=None) -> dict:
-        return {"drawing": drawing, "page_count": 1, "title_block": {}, "values": []}
+    def read(self, drawing: str, progress=None) -> ReaderOutput:
+        return ReaderOutput(
+            document={"drawing": drawing, "page_count": 1, "title_block": {}, "values": []}
+        )
 
 
 @pytest.fixture
