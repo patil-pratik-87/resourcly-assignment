@@ -192,3 +192,27 @@ other deciding at 0.9, then Qwen3-VL 8B. The probe trained on the train split on
 - Limits: one NIST drawing family in every split. `stub-v0` needs no model.
 
 Details: `docs/routing.md`.
+
+## Drawing reader
+
+Chose `vector-crop-v1`: find each callout from the PDF's vector paths with no model, then
+Qwen3-VL 8B reads one crop at a time. The baseline `whole-page-v1` shows the model each whole page.
+
+| Version | Split | F1 | Precision | Recall | Partial recall | Seconds per page |
+| --- | --- | --- | --- | --- | --- | --- |
+| `textlayer-v0` | all | 0.344 | 0.902 | 0.213 | 0.129 | 0 |
+| `whole-page-v1` | all | 0.650 | 0.629 | 0.672 | 0.543 | 36 |
+| `vector-crop-v1` | all | **0.725** | 0.625 | **0.862** | **0.743** | 64 |
+| `textlayer-v0` | dev | 0.373 | 1.000 | 0.229 | 0.167 | 0 |
+| `whole-page-v1` | dev | **0.757** | 0.709 | 0.812 | 0.633 | 33 |
+| `vector-crop-v1` | dev | 0.739 | 0.620 | **0.917** | **0.867** | 64 |
+
+- Why it wins: one crop per callout keeps every answer short, so dense sheets lose nothing
+  (FTC-06 recall 0.865 against 0.562), and the 300 dpi crop shows the GD&T symbol.
+- Where it does not: dev F1 rests on 2 full-gold drawings, and it loses FTC-07 page 2 and CTC-03.
+  Its precision is low: frame cells read again as bare numbers (".04"), a two-line note read as
+  two notes, and text of a neighbouring callout cut by the crop edge ("2X ⌀.562 ±."). All three
+  are plain-code fixes for a v2, to tune on dev.
+- Cost: about twice the time per page; its crops are independent, so a server can batch them.
+
+Notebooks and per-drawing tables: `experiments/drawing/README.md`.
