@@ -70,12 +70,21 @@ if ((no_models)); then
   skip "--no-models"
 else
   models=$(uv run resourcly models)
+  # hf hides its progress bars when it thinks an agent runs it; a person at a terminal sees them
+  if [[ -t 2 ]]; then
+    export HF_HUB_DISABLE_PROGRESS_BARS=0
+  fi
+  token_said=0
   for model in $models; do
     if HF_HUB_OFFLINE=1 uv run hf download "$model" --quiet >/dev/null 2>&1; then
       ok "$model already downloaded"
     else
+      if [[ -z ${HF_TOKEN:-} ]] && ((!token_said)); then
+        echo "  HF_TOKEN is optional; setting it only makes the downloads faster"
+        token_said=1
+      fi
       echo "  downloading $model"
-      uv run hf download "$model" >/dev/null || fail "$model did not download"
+      uv run hf download "$model" || fail "$model did not download"
       ok "$model downloaded"
     fi
   done
