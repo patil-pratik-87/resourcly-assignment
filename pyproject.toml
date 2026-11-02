@@ -80,4 +80,5 @@ known-first-party = [
     "limits",
     "overlay",
     "train_route_probe",
+    "check_photo_answers",
 ]
