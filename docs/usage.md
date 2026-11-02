@@ -78,6 +78,7 @@ curl http://127.0.0.1:8000/api/requests/<id>/trace
 | `GET /api/requests/<id>` | One request and the state of each item. |
 | `GET /api/requests/<id>/trace` | Every step the request took. |
 | `GET /api/requests/<id>/items/<item>/result` | A drawing's JSON; `download=true` saves it. |
+| `GET /api/requests/<id>/items/<item>/pages/<n>.png` | Page `n` of a file as an image, a photo too; `dpi` from 36 to 400. |
 | `GET /api/agent` | The reader and router versions in use, and the upload caps. |
 
 | Variable | Default |

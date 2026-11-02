@@ -145,6 +145,16 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
         headers = {"Content-Disposition": f'attachment; filename="{item_id}.json"'}
         return JSONResponse(document, headers=headers if download else None)
 
+    @app.get("/api/requests/{request_id}/items/{item_id}/pages/{page}.png")
+    def item_page(
+        request: Request, request_id: str, item_id: str, page: int, dpi: Dpi = 150
+    ) -> Response:
+        """One page of an uploaded file, a photo included, for a screen to place values on."""
+        png = services(request).agent.page(request_id, item_id, page, dpi)
+        return Response(
+            png, media_type="image/png", headers={"Cache-Control": "public, max-age=3600"}
+        )
+
     dist = settings.chat_ui_dist if screen == "chat" else settings.annotation_ui_dist
     if dist.is_dir():
         if screen == "chat":

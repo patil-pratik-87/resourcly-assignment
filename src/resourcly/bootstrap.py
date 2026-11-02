@@ -212,6 +212,7 @@ class Services:
                     router=self.router,
                     router_name=self.router_name,
                     drawings_in=self._drawings_in,
+                    pages_in=PyMuPDFPageAdapter,
                     trace=trace,
                     jobs=jobs,
                 )

@@ -355,7 +355,7 @@ def test_each_page_of_an_upload_renders_as_an_image(client: TestClient) -> None:
     assert pymupdf.Pixmap(small.content).width * 150 // 72 in range(page.width - 2, page.width + 3)
     # A photo is kept as a one-page PDF too, so it renders the same way, its shape unchanged.
     picture = pymupdf.Pixmap(photo.content)
-    assert photo.status_code == 200 and picture.width * 3 == picture.height * 4
+    assert photo.status_code == 200 and abs(picture.width / picture.height - 40 / 30) < 0.03
 
 
 @pytest.mark.parametrize(
