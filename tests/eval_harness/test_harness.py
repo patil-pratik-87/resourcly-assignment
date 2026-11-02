@@ -74,13 +74,12 @@ def test_a_sample_spreads_over_the_strata_and_is_the_same_each_time() -> None:
     pool = [Case(f"a{n}", "dev", "photo", {}) for n in range(6)]
     pool += [Case(f"b{n}", "dev", "drawing", {}) for n in range(2)]
 
-    picked = harness.sample(pool, 3)
+    picked = harness.sample(pool, 4)
 
-    assert [case.stratum for case in picked].count("drawing") >= 1
-    assert [case.stratum for case in picked].count("photo") >= 1
-    assert len(picked) == 3
+    # each stratum once, then in proportion to its size
+    assert sorted(case.stratum for case in picked) == ["drawing", "photo", "photo", "photo"]
     assert picked == sorted(picked, key=lambda case: case.case_id)
-    assert harness.sample(pool, 3) == picked
+    assert harness.sample(pool, 4) == picked
     assert harness.sample(pool, 20) == pool
 
 

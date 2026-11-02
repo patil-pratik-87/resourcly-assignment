@@ -2,6 +2,7 @@
 
 import hashlib
 import logging
+import random
 import secrets
 import subprocess
 import time
@@ -17,6 +18,8 @@ from resourcly.eval_harness.suites import SUITES
 
 log = logging.getLogger(__name__)
 
+SEED = 0  # the seed of the sample a --limit run takes
+
 
 def run(
     component: str,
@@ -31,9 +34,9 @@ def run(
     on_start: Callable[[Run, list[Case], int], None] | None = None,
     on_case: Callable[[CaseResult], None] | None = None,
 ) -> Run:
-    """Run one version of a component on every gold case of a split, only the named ones, or the
-    first `limit` of them, and store the result. `compare` scores the stored answers again on the
-    current gold.
+    """Run one version of a component on every gold case of a split, only the named ones, or a
+    sample of `limit` of them, and store the result. `compare` scores the stored answers again
+    on the current gold.
 
     A case whose call fails is stored with its error and scored as if it returned nothing.
     """
@@ -41,7 +44,9 @@ def run(
     resolved = load_version(settings, component, version)
     with open_services(settings.with_version(component, version)) as services:
         pool = suite.load(services, split)
-        chosen = _choose(pool, case_ids)[:limit]
+        chosen = _choose(pool, case_ids)
+        if limit is not None:
+            chosen = sample(chosen, limit)
         if not chosen:
             raise ValueError(
                 f"no {component} case of the {split} split was selected; nothing was stored"
@@ -107,6 +112,30 @@ def _choose(pool: list[Case], case_ids: tuple[str, ...]) -> list[Case]:
     for missing in sorted(set(case_ids) - known):
         log.warning("%s is not a case in this split; skipped", missing)
     return [case for case in pool if case.case_id in case_ids]
+
+
+def sample(cases: list[Case], limit: int) -> list[Case]:
+    """`limit` of the cases, spread over the strata in proportion to their size, in case id order.
+
+    Each stratum gives one case before any gives a second, so a small run sees every kind of
+    case. Each is shuffled with a fixed seed, so a run takes the same cases each time.
+    """
+    if limit >= len(cases):
+        return cases
+    rng = random.Random(SEED)
+    strata: dict[str, list[Case]] = {}
+    for case in cases:
+        strata.setdefault(case.stratum, []).append(case)
+    shuffled = {name: rng.sample(group, len(group)) for name, group in sorted(strata.items())}
+    taken = dict.fromkeys(shuffled, 0)
+    while sum(taken.values()) < limit:
+        name = min(
+            (name for name in shuffled if taken[name] < len(shuffled[name])),
+            key=lambda name: (taken[name] / len(shuffled[name]), name),
+        )
+        taken[name] += 1
+    picked = [case for name, group in shuffled.items() for case in group[: taken[name]]]
+    return sorted(picked, key=lambda case: case.case_id)
 
 
 def _new_run_id(component: str) -> str:

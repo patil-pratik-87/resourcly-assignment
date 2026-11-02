@@ -64,7 +64,8 @@ def run(
         list[str] | None, typer.Option(help="Run only these cases; every case by default.")
     ] = None,
     limit: Annotated[
-        int | None, typer.Option(min=1, help="Run only the first N cases, in case id order.")
+        int | None,
+        typer.Option(min=1, help="Run a sample of N cases, spread over the strata, seed 0."),
     ] = None,
     note: Annotated[str | None, typer.Option(help="Free text stored with the run.")] = None,
 ) -> None:
@@ -139,7 +140,7 @@ def compare(
     for label, run in (("base", runs[0]), ("candidate", runs[1])):
         typer.echo(
             f"{label.ljust(9)}  {run.run_id}  {run.version}  hash {run.version_hash}"
-            f"  split {run.split}  {run.n_cases} case(s)"
+            f"  split {run.split}  {run.n_cases} case(s){'  partial' if run.case_ids else ''}"
         )
     typer.echo("")
     rows = [
@@ -204,7 +205,7 @@ def show(
         _explain(run, suite, next((r for r in results if r.case_id == case), None), case)
         return
     typer.echo(f"run {run.run_id}  {run.component} {run.version} (hash {run.version_hash})")
-    chosen = f"{len(run.case_ids)} chosen case(s)" if run.case_ids else "every case"
+    chosen = f"partial: {len(run.case_ids)} chosen case(s)" if run.case_ids else "every case"
     typer.echo(f"split {run.split}, {chosen}, case set {run.case_set_hash}")
     finished = run.finished_at or "-"
     typer.echo(f"started {run.started_at}  finished {finished}  git {_git_label(run)}")
