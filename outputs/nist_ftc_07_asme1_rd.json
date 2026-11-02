@@ -1,0 +1,3721 @@
+{
+  "drawing": "nist_ftc_07_asme1_rd",
+  "page_count": 4,
+  "title_block": {
+    "revision": "D",
+    "units": "in",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_07_asme1_rd"
+  },
+  "features": [
+    {
+      "id": "callout_01",
+      "type": "hole",
+      "label": "⌖ ⌀.020 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_02",
+      "type": "hole",
+      "label": "⌖ ⌀.250",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_03",
+      "type": "pattern",
+      "label": "⌖ ⌀.023Ⓟ",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_04",
+      "type": "pattern",
+      "label": "⌖ ⌀.023 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_05",
+      "type": "plane",
+      "label": "C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_06",
+      "type": "hole",
+      "label": "⌖ ⌀.023 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_07",
+      "type": "pattern",
+      "label": "⌖ ⌀.023",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_08",
+      "type": "plane",
+      "label": "⌓ .015 | SⓊ",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_09",
+      "type": "slot",
+      "label": ".015",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_10",
+      "type": "plane",
+      "label": "A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_11",
+      "type": "hole",
+      "label": "⌖ ⌀.015 | A | B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_12",
+      "type": "plane",
+      "label": "⌓ .06 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_13",
+      "type": "plane",
+      "label": "B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_14",
+      "type": "pattern",
+      "label": "⌓ ±.010 | E | R",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_15",
+      "type": "plane",
+      "label": "⌓ .04 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_16",
+      "type": "hole",
+      "label": "⌖ ⌀.06Ⓜ | E | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_17",
+      "type": "slot",
+      "label": ".04",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_18",
+      "type": "hole",
+      "label": "∥ .03 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_19",
+      "type": "plane",
+      "label": "D",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_20",
+      "type": "plane",
+      "label": "∥ .01 | A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_21",
+      "type": "plane",
+      "label": "∥ .06 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_22",
+      "type": "pattern",
+      "label": "⌖ ⌀.040",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_23",
+      "type": "hole",
+      "label": "⌖ ⌀.040Ⓜ",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_24",
+      "type": "pattern",
+      "label": "⌖ ±.020 | A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_25",
+      "type": "pattern",
+      "label": "⌖ ⌀.060",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_26",
+      "type": "hole",
+      "label": "⌖ ⌀.050 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_27",
+      "type": "hole",
+      "label": "⌖ ⌀.060 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_28",
+      "type": "plane",
+      "label": "⌓ .070 | A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 3
+    },
+    {
+      "id": "callout_29",
+      "type": "pattern",
+      "label": "⌖ ⌀.040Ⓜ | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 3
+    },
+    {
+      "id": "callout_30",
+      "type": "pattern",
+      "label": "⌓ 0.045Ⓜ | A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 3
+    },
+    {
+      "id": "callout_31",
+      "type": "plane",
+      "label": "⌓ .070 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 3
+    },
+    {
+      "id": "callout_32",
+      "type": "other",
+      "label": "SIM REQT",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 3
+    },
+    {
+      "id": "callout_33",
+      "type": "slot",
+      "label": ".070",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 3
+    },
+    {
+      "id": "callout_34",
+      "type": "plane",
+      "label": "E",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 3
+    },
+    {
+      "id": "callout_35",
+      "type": "fillet",
+      "label": "R.012 - .022",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 4
+    },
+    {
+      "id": "callout_36",
+      "type": "plane",
+      "label": "⌓ .030 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 4
+    },
+    {
+      "id": "callout_37",
+      "type": "other",
+      "label": "INNER AND OUTER WALL",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 4
+    },
+    {
+      "id": "callout_38",
+      "type": "plane",
+      "label": "⌓ .006 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 4
+    },
+    {
+      "id": "part",
+      "type": "other",
+      "label": "the whole part",
+      "description": "General notes apply to the part as a whole.",
+      "page": 1
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc07-01",
+      "raw": "⌖ ⌀.020 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Position within a 0.02 in tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.475,
+        0.132,
+        0.622,
+        0.241
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-02",
+      "raw": "30 +.003/-.000",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "unilateral",
+      "value": 30,
+      "unit": "in",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 30,
+        "upper": 30.003
+      },
+      "meaning": "The linear must be between 30 and 30.003 in.",
+      "page": 1,
+      "bbox": [
+        0.475,
+        0.132,
+        0.622,
+        0.241
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-03",
+      "raw": "30 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 30,
+      "unit": "in",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 29.98,
+        "upper": 30.02
+      },
+      "meaning": "The linear must be between 29.98 and 30.02 in.",
+      "page": 1,
+      "bbox": [
+        0.475,
+        0.132,
+        0.622,
+        0.241
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-04",
+      "raw": "⌀.30",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.3 in.",
+      "page": 1,
+      "bbox": [
+        0.475,
+        0.132,
+        0.622,
+        0.241
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-05",
+      "raw": "425",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 425,
+      "unit": "in",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 425 in.",
+      "page": 1,
+      "bbox": [
+        0.475,
+        0.132,
+        0.622,
+        0.241
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-06",
+      "raw": "⌖ ⌀.250",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.25
+      },
+      "meaning": "Position within a 0.25 in tolerance zone.",
+      "page": 1,
+      "bbox": [
+        0.451,
+        0.137,
+        0.535,
+        0.227
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-07",
+      "raw": "⌀.250 +.003/-.000",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "unilateral",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.25,
+        "upper": 0.253
+      },
+      "meaning": "The diameter must be between 0.25 and 0.253 in.",
+      "page": 1,
+      "bbox": [
+        0.451,
+        0.137,
+        0.535,
+        0.227
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-08",
+      "raw": ".30 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.32
+      },
+      "meaning": "The linear must be between 0.28 and 0.32 in.",
+      "page": 1,
+      "bbox": [
+        0.451,
+        0.137,
+        0.535,
+        0.227
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-09",
+      "raw": "⌀.02C",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.02 in.",
+      "page": 1,
+      "bbox": [
+        0.451,
+        0.137,
+        0.535,
+        0.227
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-10",
+      "raw": "⌖ ⌀.023Ⓟ",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.023,
+      "unit": "in",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.023
+      },
+      "meaning": "Position within a 0.023 in tolerance zone.",
+      "page": 1,
+      "bbox": [
+        0.553,
+        0.174,
+        0.686,
+        0.325
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-11",
+      "raw": "4X ⌀.250 +.003/-.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.249,
+        "upper": 0.253
+      },
+      "meaning": "The diameter must be between 0.249 and 0.253 in.",
+      "page": 1,
+      "bbox": [
+        0.553,
+        0.174,
+        0.686,
+        0.325
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-12",
+      "raw": "√.30 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.32
+      },
+      "meaning": "The linear must be between 0.28 and 0.32 in.",
+      "page": 1,
+      "bbox": [
+        0.553,
+        0.174,
+        0.686,
+        0.325
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-13",
+      "raw": "⌀.023 (P).150",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.023,
+      "unit": "in",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.023 in.",
+      "page": 1,
+      "bbox": [
+        0.553,
+        0.174,
+        0.686,
+        0.325
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-14",
+      "raw": "F1.2",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 1.2,
+      "unit": "in",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 1.2 in.",
+      "page": 1,
+      "bbox": [
+        0.553,
+        0.174,
+        0.686,
+        0.325
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-15",
+      "raw": "⌖ ⌀.023 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.023,
+      "unit": "in",
+      "feature_id": "callout_04",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.023
+      },
+      "meaning": "Position within a 0.023 in tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.589,
+        0.183,
+        0.736,
+        0.318
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-16",
+      "raw": "4X ⌀.250 +.003",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "callout_04",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.25 in.",
+      "page": 1,
+      "bbox": [
+        0.589,
+        0.183,
+        0.736,
+        0.318
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-17",
+      "raw": "⌀.30 ±.02",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_04",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.32
+      },
+      "meaning": "The diameter must be between 0.28 and 0.32 in.",
+      "page": 1,
+      "bbox": [
+        0.589,
+        0.183,
+        0.736,
+        0.318
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-18",
+      "raw": "C",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_05",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature C.",
+      "page": 1,
+      "bbox": [
+        0.544,
+        0.214,
+        0.577,
+        0.239
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-19",
+      "raw": "⌖ ⌀.023 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.023,
+      "unit": "in",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.023
+      },
+      "meaning": "Position within a 0.023 in tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.325,
+        0.279,
+        0.489,
+        0.402
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-20",
+      "raw": "⌀ .250 +.003/-.000",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "unilateral",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.25,
+        "upper": 0.253
+      },
+      "meaning": "The diameter must be between 0.25 and 0.253 in.",
+      "page": 1,
+      "bbox": [
+        0.325,
+        0.279,
+        0.489,
+        0.402
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-21",
+      "raw": "⌀ .30 ±.02",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.32
+      },
+      "meaning": "The diameter must be between 0.28 and 0.32 in.",
+      "page": 1,
+      "bbox": [
+        0.325,
+        0.279,
+        0.489,
+        0.402
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-22",
+      "raw": "⌀ .023",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.023,
+      "unit": "in",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.023 in.",
+      "page": 1,
+      "bbox": [
+        0.325,
+        0.279,
+        0.489,
+        0.402
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-23",
+      "raw": "P .425",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.425,
+      "unit": "in",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.425 in.",
+      "page": 1,
+      "bbox": [
+        0.325,
+        0.279,
+        0.489,
+        0.402
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-24",
+      "raw": "⌖ ⌀.023",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.023,
+      "unit": "in",
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.023
+      },
+      "meaning": "Position within a 0.023 in tolerance zone.",
+      "page": 1,
+      "bbox": [
+        0.3,
+        0.285,
+        0.396,
+        0.389
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-25",
+      "raw": "2X ⌀.250 +.003/-.000",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "unilateral",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.25,
+        "upper": 0.253
+      },
+      "meaning": "The diameter must be between 0.25 and 0.253 in.",
+      "page": 1,
+      "bbox": [
+        0.3,
+        0.285,
+        0.396,
+        0.389
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-26",
+      "raw": "▼ .30 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.32
+      },
+      "meaning": "The linear must be between 0.28 and 0.32 in.",
+      "page": 1,
+      "bbox": [
+        0.3,
+        0.285,
+        0.396,
+        0.389
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-27",
+      "raw": "⌓ .015 | SⓊ",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "callout_08",
+      "applies_to": null,
+      "datums": [
+        "SⓊ"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Profile of a surface within a 0.015 in tolerance zone, relative to datum SⓊ.",
+      "page": 1,
+      "bbox": [
+        0.703,
+        0.288,
+        0.759,
+        0.354
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-28",
+      "raw": "SUR",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_08",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: SUR",
+      "page": 1,
+      "bbox": [
+        0.703,
+        0.288,
+        0.759,
+        0.354
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-29",
+      "raw": ".015",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.015 in.",
+      "page": 1,
+      "bbox": [
+        0.72,
+        0.294,
+        0.869,
+        0.459
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-30",
+      "raw": "2 SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 2 SURFACES",
+      "page": 1,
+      "bbox": [
+        0.72,
+        0.294,
+        0.869,
+        0.459
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-31",
+      "raw": "F1.1 AND F1.2",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 1.1,
+      "unit": "in",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 1.1 in.",
+      "page": 1,
+      "bbox": [
+        0.72,
+        0.294,
+        0.869,
+        0.459
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-32",
+      "raw": "F1.1",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 1.1,
+      "unit": "in",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 1.1 in.",
+      "page": 1,
+      "bbox": [
+        0.72,
+        0.294,
+        0.869,
+        0.459
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-33",
+      "raw": "Φ.250 +.003/-.000",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "unilateral",
+      "value": 0.25,
+      "unit": "in",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.25,
+        "upper": 0.253
+      },
+      "meaning": "The linear must be between 0.25 and 0.253 in.",
+      "page": 1,
+      "bbox": [
+        0.72,
+        0.294,
+        0.869,
+        0.459
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-34",
+      "raw": "√.30 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.28,
+        "upper": 0.32
+      },
+      "meaning": "The linear must be between 0.28 and 0.32 in.",
+      "page": 1,
+      "bbox": [
+        0.72,
+        0.294,
+        0.869,
+        0.459
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-35",
+      "raw": "Φ.014",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.014,
+      "unit": "in",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.014 in.",
+      "page": 1,
+      "bbox": [
+        0.72,
+        0.294,
+        0.869,
+        0.459
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-36",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_10",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A.",
+      "page": 1,
+      "bbox": [
+        0.703,
+        0.367,
+        0.721,
+        0.405
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-37",
+      "raw": "⌖ ⌀.015 | A | B",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "callout_11",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Position within a 0.015 in tolerance zone, relative to datum A, B.",
+      "page": 1,
+      "bbox": [
+        0.808,
+        0.373,
+        0.939,
+        0.471
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-38",
+      "raw": "50 +.003/-.000",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "unilateral",
+      "value": 50,
+      "unit": "in",
+      "feature_id": "callout_11",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 50,
+        "upper": 50.003
+      },
+      "meaning": "The linear must be between 50 and 50.003 in.",
+      "page": 1,
+      "bbox": [
+        0.808,
+        0.373,
+        0.939,
+        0.471
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-39",
+      "raw": "30 ±.02",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 30,
+      "unit": "in",
+      "feature_id": "callout_11",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 29.98,
+        "upper": 30.02
+      },
+      "meaning": "The linear must be between 29.98 and 30.02 in.",
+      "page": 1,
+      "bbox": [
+        0.808,
+        0.373,
+        0.939,
+        0.471
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-40",
+      "raw": ".425",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.425,
+      "unit": "in",
+      "feature_id": "callout_11",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.425 in.",
+      "page": 1,
+      "bbox": [
+        0.808,
+        0.373,
+        0.939,
+        0.471
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-41",
+      "raw": "⌓ .06 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_12",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Profile of a surface within a 0.06 in tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.064,
+        0.447,
+        0.157,
+        0.468
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-42",
+      "raw": "UNTOL ERANGED",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_12",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: UNTOL ERANGED",
+      "page": 1,
+      "bbox": [
+        0.064,
+        0.447,
+        0.157,
+        0.468
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-43",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_13",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B.",
+      "page": 1,
+      "bbox": [
+        0.869,
+        0.45,
+        0.901,
+        0.475
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-44",
+      "raw": "⌓ ±.010 | E | R",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: ⌓ ±.010 | E | R",
+      "page": 2,
+      "bbox": [
+        0.284,
+        0.083,
+        0.384,
+        0.213
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-45",
+      "raw": "⌓ ±.02",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: ⌓ ±.02",
+      "page": 2,
+      "bbox": [
+        0.284,
+        0.083,
+        0.384,
+        0.213
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-46",
+      "raw": "4X ⌀.281 +.006",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.281,
+      "unit": "in",
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.281 in.",
+      "page": 2,
+      "bbox": [
+        0.284,
+        0.083,
+        0.384,
+        0.213
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-47",
+      "raw": "LJ⌀.438 -.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.438,
+      "unit": "in",
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.438 in.",
+      "page": 2,
+      "bbox": [
+        0.284,
+        0.083,
+        0.384,
+        0.213
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-48",
+      "raw": "▼.30 ±.010",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 0.3,
+      "unit": "in",
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.29,
+        "upper": 0.31
+      },
+      "meaning": "The linear must be between 0.29 and 0.31 in.",
+      "page": 2,
+      "bbox": [
+        0.284,
+        0.083,
+        0.384,
+        0.213
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-49",
+      "raw": "⌀.06(M) E R",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.06 in.",
+      "page": 2,
+      "bbox": [
+        0.284,
+        0.083,
+        0.384,
+        0.213
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-50",
+      "raw": "⌀.02(M)",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.02 in.",
+      "page": 2,
+      "bbox": [
+        0.284,
+        0.083,
+        0.384,
+        0.213
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-51",
+      "raw": "⌓ .04 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "callout_15",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Profile of a surface within a 0.04 in tolerance zone, relative to datum A, B, C.",
+      "page": 2,
+      "bbox": [
+        0.55,
+        0.092,
+        0.657,
+        0.228
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-52",
+      "raw": "⌓ .01 | A",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "callout_15",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Profile of a surface within a 0.01 in tolerance zone, relative to datum A.",
+      "page": 2,
+      "bbox": [
+        0.55,
+        0.092,
+        0.657,
+        0.228
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-53",
+      "raw": "4 COPLANAR",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_15",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 4 COPLANAR",
+      "page": 2,
+      "bbox": [
+        0.55,
+        0.092,
+        0.657,
+        0.228
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-54",
+      "raw": "SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_15",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: SURFACES",
+      "page": 2,
+      "bbox": [
+        0.55,
+        0.092,
+        0.657,
+        0.228
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-55",
+      "raw": "⌖ ⌀.06Ⓜ | E | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_16",
+      "applies_to": null,
+      "datums": [
+        "E",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Position within a 0.06 in tolerance zone, relative to datum E, B, C.",
+      "page": 2,
+      "bbox": [
+        0.257,
+        0.131,
+        0.374,
+        0.266
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-56",
+      "raw": "⌖ ⌀.02Ⓜ | E | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "callout_16",
+      "applies_to": null,
+      "datums": [
+        "E",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.02
+      },
+      "meaning": "Position within a 0.02 in tolerance zone, relative to datum E, B, C.",
+      "page": 2,
+      "bbox": [
+        0.257,
+        0.131,
+        0.374,
+        0.266
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-57",
+      "raw": "⌀.438 ±.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.438,
+      "unit": "in",
+      "feature_id": "callout_16",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.437,
+        "upper": 0.439
+      },
+      "meaning": "The diameter must be between 0.437 and 0.439 in.",
+      "page": 2,
+      "bbox": [
+        0.257,
+        0.131,
+        0.374,
+        0.266
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-58",
+      "raw": "⌀.06 M",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_16",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.06 in.",
+      "page": 2,
+      "bbox": [
+        0.257,
+        0.131,
+        0.374,
+        0.266
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-59",
+      "raw": "⌀.02 M",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.02,
+      "unit": "in",
+      "feature_id": "callout_16",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.02 in.",
+      "page": 2,
+      "bbox": [
+        0.257,
+        0.131,
+        0.374,
+        0.266
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-60",
+      "raw": ".04",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "callout_17",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.04 in.",
+      "page": 2,
+      "bbox": [
+        0.581,
+        0.15,
+        0.671,
+        0.249
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-61",
+      "raw": ".01 A",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "callout_17",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.01 in.",
+      "page": 2,
+      "bbox": [
+        0.581,
+        0.15,
+        0.671,
+        0.249
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-62",
+      "raw": "∥ .03 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "parallelism",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "callout_18",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Parallelism within a 0.03 in tolerance zone, relative to datum A, B, C.",
+      "page": 2,
+      "bbox": [
+        0.641,
+        0.197,
+        0.737,
+        0.29
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-63",
+      "raw": ".01 / ⌀1.00",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "callout_18",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.01 in.",
+      "page": 2,
+      "bbox": [
+        0.641,
+        0.197,
+        0.737,
+        0.29
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-64",
+      "raw": "D",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_19",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature D.",
+      "page": 2,
+      "bbox": [
+        0.564,
+        0.231,
+        0.581,
+        0.268
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-65",
+      "raw": "∥ .01 | A",
+      "callout": "feature_control_frame",
+      "kind": "parallelism",
+      "tolerance_style": "geometric_zone",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "callout_20",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.01
+      },
+      "meaning": "Parallelism within a 0.01 in tolerance zone, relative to datum A.",
+      "page": 2,
+      "bbox": [
+        0.641,
+        0.24,
+        0.709,
+        0.319
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-66",
+      "raw": "∥ .03 | A",
+      "callout": "feature_control_frame",
+      "kind": "parallelism",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "callout_20",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Parallelism within a 0.03 in tolerance zone, relative to datum A.",
+      "page": 2,
+      "bbox": [
+        0.641,
+        0.24,
+        0.709,
+        0.319
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-67",
+      "raw": "∥ .06 | A",
+      "callout": "feature_control_frame",
+      "kind": "parallelism",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_20",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Parallelism within a 0.06 in tolerance zone, relative to datum A.",
+      "page": 2,
+      "bbox": [
+        0.641,
+        0.24,
+        0.709,
+        0.319
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-68",
+      "raw": "∥ .06 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "parallelism",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_21",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Parallelism within a 0.06 in tolerance zone, relative to datum A, B, C.",
+      "page": 2,
+      "bbox": [
+        0.641,
+        0.247,
+        0.737,
+        0.344
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-69",
+      "raw": "⌖ ⌀.040",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "callout_22",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Position within a 0.04 in tolerance zone.",
+      "page": 2,
+      "bbox": [
+        0.102,
+        0.573,
+        0.194,
+        0.659
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-70",
+      "raw": "2X ⌀.594 +.012/-.002",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.594,
+      "unit": "in",
+      "feature_id": "callout_22",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.592,
+        "upper": 0.606
+      },
+      "meaning": "The diameter must be between 0.592 and 0.606 in.",
+      "page": 2,
+      "bbox": [
+        0.102,
+        0.573,
+        0.194,
+        0.659
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-71",
+      "raw": "⌖ ⌀.040Ⓜ",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "callout_23",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Position within a 0.04 in tolerance zone.",
+      "page": 2,
+      "bbox": [
+        0.103,
+        0.602,
+        0.292,
+        0.771
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-72",
+      "raw": "⌓ ⌀.045MAX | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.045,
+      "unit": "in",
+      "feature_id": "callout_23",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.045
+      },
+      "meaning": "Profile of a surface within a 0.045 in tolerance zone, relative to datum A, B, C.",
+      "page": 2,
+      "bbox": [
+        0.103,
+        0.602,
+        0.292,
+        0.771
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-73",
+      "raw": "0.94 +0.012/-0.002",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.94,
+      "unit": "in",
+      "feature_id": "callout_23",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.938,
+        "upper": 0.952
+      },
+      "meaning": "The linear must be between 0.938 and 0.952 in.",
+      "page": 2,
+      "bbox": [
+        0.103,
+        0.602,
+        0.292,
+        0.771
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-74",
+      "raw": "⌀.040 M",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "callout_23",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.04 in.",
+      "page": 2,
+      "bbox": [
+        0.103,
+        0.602,
+        0.292,
+        0.771
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-75",
+      "raw": "⌀.045 MAX",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.045,
+      "unit": "in",
+      "feature_id": "callout_23",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.045 in.",
+      "page": 2,
+      "bbox": [
+        0.103,
+        0.602,
+        0.292,
+        0.771
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-76",
+      "raw": "⌖ ±.020 | A",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_24",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: ⌖ ±.020 | A",
+      "page": 2,
+      "bbox": [
+        0.71,
+        0.724,
+        0.818,
+        0.843
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-77",
+      "raw": "⌖ ±.010 | A",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_24",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: ⌖ ±.010 | A",
+      "page": 2,
+      "bbox": [
+        0.71,
+        0.724,
+        0.818,
+        0.843
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-78",
+      "raw": "3X ⌀.875 ±.020",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.875,
+      "unit": "in",
+      "feature_id": "callout_24",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.855,
+        "upper": 0.895
+      },
+      "meaning": "The diameter must be between 0.855 and 0.895 in.",
+      "page": 2,
+      "bbox": [
+        0.71,
+        0.724,
+        0.818,
+        0.843
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-79",
+      "raw": "3X ⌀.875 ±.010",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 0.875,
+      "unit": "in",
+      "feature_id": "callout_24",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.865,
+        "upper": 0.885
+      },
+      "meaning": "The diameter must be between 0.865 and 0.885 in.",
+      "page": 2,
+      "bbox": [
+        0.71,
+        0.724,
+        0.818,
+        0.843
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-80",
+      "raw": "⌀.050",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "callout_24",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.05 in.",
+      "page": 2,
+      "bbox": [
+        0.71,
+        0.724,
+        0.818,
+        0.843
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-81",
+      "raw": "⌖ ⌀.060",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_25",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Position within a 0.06 in tolerance zone.",
+      "page": 2,
+      "bbox": [
+        0.322,
+        0.739,
+        0.413,
+        0.826
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-82",
+      "raw": "4X ⌀.173 +.005/-.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.173,
+      "unit": "in",
+      "feature_id": "callout_25",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.172,
+        "upper": 0.178
+      },
+      "meaning": "The diameter must be between 0.172 and 0.178 in.",
+      "page": 2,
+      "bbox": [
+        0.322,
+        0.739,
+        0.413,
+        0.826
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-83",
+      "raw": "⌖ ⌀.050 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.05,
+      "unit": "in",
+      "feature_id": "callout_26",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.05
+      },
+      "meaning": "Position within a 0.05 in tolerance zone, relative to datum A, B, C.",
+      "page": 2,
+      "bbox": [
+        0.715,
+        0.753,
+        0.845,
+        0.875
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-84",
+      "raw": "⌖ ⌀.060 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.06,
+      "unit": "in",
+      "feature_id": "callout_27",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.06
+      },
+      "meaning": "Position within a 0.06 in tolerance zone, relative to datum A, B, C.",
+      "page": 2,
+      "bbox": [
+        0.322,
+        0.768,
+        0.432,
+        0.9
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-85",
+      "raw": "⌖ ⌀.015 | A",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "callout_27",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Position within a 0.015 in tolerance zone, relative to datum A.",
+      "page": 2,
+      "bbox": [
+        0.322,
+        0.768,
+        0.432,
+        0.9
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-86",
+      "raw": "-.173 +.005/-.001",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.173,
+      "unit": "in",
+      "feature_id": "callout_27",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.172,
+        "upper": 0.178
+      },
+      "meaning": "The linear must be between 0.172 and 0.178 in.",
+      "page": 2,
+      "bbox": [
+        0.322,
+        0.768,
+        0.432,
+        0.9
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-87",
+      "raw": "⌓ .070 | A",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.07,
+      "unit": "in",
+      "feature_id": "callout_28",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.07
+      },
+      "meaning": "Profile of a surface within a 0.07 in tolerance zone, relative to datum A.",
+      "page": 3,
+      "bbox": [
+        0.646,
+        0.143,
+        0.759,
+        0.283
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-88",
+      "raw": "⌓ .015 | A",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "callout_28",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Profile of a surface within a 0.015 in tolerance zone, relative to datum A.",
+      "page": 3,
+      "bbox": [
+        0.646,
+        0.143,
+        0.759,
+        0.283
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-89",
+      "raw": "REQT",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_28",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: REQT",
+      "page": 3,
+      "bbox": [
+        0.646,
+        0.143,
+        0.759,
+        0.283
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-90",
+      "raw": "⌖ ⌀.040Ⓜ | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "callout_29",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.04
+      },
+      "meaning": "Position within a 0.04 in tolerance zone, relative to datum A, B, C.",
+      "page": 3,
+      "bbox": [
+        0.065,
+        0.184,
+        0.252,
+        0.351
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-91",
+      "raw": "2X ⌀.594 +.012/-.002",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "bilateral_unequal",
+      "value": 0.594,
+      "unit": "in",
+      "feature_id": "callout_29",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.592,
+        "upper": 0.606
+      },
+      "meaning": "The diameter must be between 0.592 and 0.606 in.",
+      "page": 3,
+      "bbox": [
+        0.065,
+        0.184,
+        0.252,
+        0.351
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-92",
+      "raw": "⌀.040 M",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.04,
+      "unit": "in",
+      "feature_id": "callout_29",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.04 in.",
+      "page": 3,
+      "bbox": [
+        0.065,
+        0.184,
+        0.252,
+        0.351
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-93",
+      "raw": "⌀.045 MAX",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.045,
+      "unit": "in",
+      "feature_id": "callout_29",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.045 in.",
+      "page": 3,
+      "bbox": [
+        0.065,
+        0.184,
+        0.252,
+        0.351
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-94",
+      "raw": "⌓ 0.045Ⓜ | A",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.045,
+      "unit": "in",
+      "feature_id": "callout_30",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.045
+      },
+      "meaning": "Profile of a surface within a 0.045 in tolerance zone, relative to datum A.",
+      "page": 3,
+      "bbox": [
+        0.145,
+        0.217,
+        0.248,
+        0.313
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-95",
+      "raw": "2X ⌀.594 +.012",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 0.594,
+      "unit": "in",
+      "feature_id": "callout_30",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 0.594 in.",
+      "page": 3,
+      "bbox": [
+        0.145,
+        0.217,
+        0.248,
+        0.313
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-96",
+      "raw": "0.045 MAX | A |",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.045,
+      "unit": "in",
+      "feature_id": "callout_30",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.045 in.",
+      "page": 3,
+      "bbox": [
+        0.145,
+        0.217,
+        0.248,
+        0.313
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-97",
+      "raw": "⌓ .070 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.07,
+      "unit": "in",
+      "feature_id": "callout_31",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.07
+      },
+      "meaning": "Profile of a surface within a 0.07 in tolerance zone, relative to datum A, B, C.",
+      "page": 3,
+      "bbox": [
+        0.767,
+        0.234,
+        0.88,
+        0.375
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-98",
+      "raw": "4 COPLANAR SI",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_31",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 4 COPLANAR SI",
+      "page": 3,
+      "bbox": [
+        0.767,
+        0.234,
+        0.88,
+        0.375
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-99",
+      "raw": "4 REQT",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_31",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 4 REQT",
+      "page": 3,
+      "bbox": [
+        0.767,
+        0.234,
+        0.88,
+        0.375
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-100",
+      "raw": "SIM REQT",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_32",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: SIM REQT",
+      "page": 3,
+      "bbox": [
+        0.641,
+        0.244,
+        0.71,
+        0.306
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-101",
+      "raw": ".070",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.07,
+      "unit": "in",
+      "feature_id": "callout_33",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.07 in.",
+      "page": 3,
+      "bbox": [
+        0.794,
+        0.26,
+        0.933,
+        0.394
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-102",
+      "raw": ".015",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "callout_33",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.015 in.",
+      "page": 3,
+      "bbox": [
+        0.794,
+        0.26,
+        0.933,
+        0.394
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-103",
+      "raw": "4 COPLANAR SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_33",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 4 COPLANAR SURFACES",
+      "page": 3,
+      "bbox": [
+        0.794,
+        0.26,
+        0.933,
+        0.394
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-104",
+      "raw": "SIM REQT",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_33",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: SIM REQT",
+      "page": 3,
+      "bbox": [
+        0.794,
+        0.26,
+        0.933,
+        0.394
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-105",
+      "raw": "E",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_34",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature E.",
+      "page": 3,
+      "bbox": [
+        0.775,
+        0.384,
+        0.789,
+        0.42
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-106",
+      "raw": "R.012 - .022",
+      "callout": "dimension",
+      "kind": "radius",
+      "tolerance_style": "limits",
+      "value": [
+        0.012,
+        0.022
+      ],
+      "unit": "in",
+      "feature_id": "callout_35",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0.012,
+        "upper": 0.022
+      },
+      "meaning": "The radius must be between 0.012 and 0.022 in.",
+      "page": 4,
+      "bbox": [
+        0.329,
+        0.149,
+        0.462,
+        0.278
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-107",
+      "raw": "INNER AND OUTER RADI",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_35",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: INNER AND OUTER RADI",
+      "page": 4,
+      "bbox": [
+        0.329,
+        0.149,
+        0.462,
+        0.278
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-108",
+      "raw": "OF ENTIRE GROOVE",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_35",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: OF ENTIRE GROOVE",
+      "page": 4,
+      "bbox": [
+        0.329,
+        0.149,
+        0.462,
+        0.278
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-109",
+      "raw": "⌓ .030 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "callout_36",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Profile of a surface within a 0.03 in tolerance zone, relative to datum A, B, C.",
+      "page": 4,
+      "bbox": [
+        0.429,
+        0.212,
+        0.529,
+        0.336
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-110",
+      "raw": "⌓ .005 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.005,
+      "unit": "in",
+      "feature_id": "callout_36",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.005
+      },
+      "meaning": "Profile of a surface within a 0.005 in tolerance zone, relative to datum A, B, C.",
+      "page": 4,
+      "bbox": [
+        0.429,
+        0.212,
+        0.529,
+        0.336
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-111",
+      "raw": "INNER AND OUTE",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_36",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: INNER AND OUTE",
+      "page": 4,
+      "bbox": [
+        0.429,
+        0.212,
+        0.529,
+        0.336
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-112",
+      "raw": "TIRE GROC",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_36",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: TIRE GROC",
+      "page": 4,
+      "bbox": [
+        0.429,
+        0.212,
+        0.529,
+        0.336
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-113",
+      "raw": "INNER AND OUTER WALL",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_37",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: INNER AND OUTER WALL",
+      "page": 4,
+      "bbox": [
+        0.432,
+        0.24,
+        0.573,
+        0.374
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-114",
+      "raw": "⌓ .006 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.006,
+      "unit": "in",
+      "feature_id": "callout_38",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.006
+      },
+      "meaning": "Profile of a surface within a 0.006 in tolerance zone, relative to datum A, B, C.",
+      "page": 4,
+      "bbox": [
+        0.501,
+        0.335,
+        0.601,
+        0.435
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-115",
+      "raw": "1. CAD MODEL ___________ REV. __ IS REQUIRED TO COMPLETE PRODUCT DEFINITION.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 1. CAD MODEL ___________ REV. __ IS REQUIRED TO COMPLETE PRODUCT DEFINITION.",
+      "page": 1,
+      "bbox": [
+        0.046,
+        0.132,
+        0.328,
+        0.164
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-116",
+      "raw": "2. DIRECTLY-TOLERANCED DIMENSIONS AND BASIC DIMENSIONS DEFINED ON THE DRAWING TAKE PRECEDENCE OVER DIMENSIONAL DATA DEFINED BY THE MODEL. OBTAIN ALL OTHER DIMENSIONAL DATA FROM THE MODEL. THE MODEL REPRESENTS BASIC DIMENSIONAL DATA UNLESS OTHERWISE SPECIFIED.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 2. DIRECTLY-TOLERANCED DIMENSIONS AND BASIC DIMENSIONS DEFINED ON THE DRAWING TAKE PRECEDENCE OVER DIMENSIONAL DATA DEFINED BY THE MODEL. OBTAIN ALL OTHER DIMENSIONAL DATA FROM THE MODEL. THE MODEL REPRESENTS BASIC DIMENSIONAL DATA UNLESS OTHERWISE SPECIFIED.",
+      "page": 1,
+      "bbox": [
+        0.047,
+        0.186,
+        0.325,
+        0.324
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-117",
+      "raw": "3. APPLICABLE STANDARDS: ASME Y14.41-2003 APPLIES TO DATASET. ASME Y14.5M-1994 APPLIES TO DIMENSIONING AND TOLERANCING.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 3. APPLICABLE STANDARDS: ASME Y14.41-2003 APPLIES TO DATASET. ASME Y14.5M-1994 APPLIES TO DIMENSIONING AND TOLERANCING.",
+      "page": 1,
+      "bbox": [
+        0.047,
+        0.346,
+        0.264,
+        0.431
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-118",
+      "raw": "4. APPLIES TO ALL UNTOLERANCED SURFACES.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 4. APPLIES TO ALL UNTOLERANCED SURFACES.",
+      "page": 1,
+      "bbox": [
+        0.047,
+        0.453,
+        0.253,
+        0.484
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-119",
+      "raw": "5. FEATURES IDENTIFIED AS STATISTICALLY TOLERANCED ? SHALL BE PRODUCED WITH STATISTICAL PROCESS CONTROLS OR TO THE MORE RESTRICTIVE ARITHMETIC LIMITS SPECIFIED . DETAILED PROCESS PLAN NEEDED TO COMPLETELY DEFINE STATISTICAL PARAMETERS AND REQUIREMENTS.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 5. FEATURES IDENTIFIED AS STATISTICALLY TOLERANCED ? SHALL BE PRODUCED WITH STATISTICAL PROCESS CONTROLS OR TO THE MORE RESTRICTIVE ARITHMETIC LIMITS SPECIFIED . DETAILED PROCESS PLAN NEEDED TO COMPLETELY DEFINE STATISTICAL PARAMETERS AND REQUIREMENTS.",
+      "page": 1,
+      "bbox": [
+        0.047,
+        0.506,
+        0.303,
+        0.649
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-120",
+      "raw": "6. UNITS: INCHES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 6. UNITS: INCHES",
+      "page": 1,
+      "bbox": [
+        0.047,
+        0.671,
+        0.147,
+        0.685
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-121",
+      "raw": "Feature and Specification Index nist_ftc_07_asme1_rd_fsi .pdf",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Feature and Specification Index nist_ftc_07_asme1_rd_fsi .pdf",
+      "page": 1,
+      "bbox": [
+        0.757,
+        0.094,
+        0.936,
+        0.13
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-122",
+      "raw": "4 COPLANAR SURFACES SIM REQT E",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 4 COPLANAR SURFACES SIM REQT E",
+      "page": 3,
+      "bbox": [
+        0.773,
+        0.246,
+        0.951,
+        0.415
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-123",
+      "raw": "INNER AND OUTER WALL OF ENTIRE GROOVE",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: INNER AND OUTER WALL OF ENTIRE GROOVE",
+      "page": 4,
+      "bbox": [
+        0.425,
+        0.225,
+        0.591,
+        0.38
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-124",
+      "raw": "R.012 - .022 INNER AND OUTER RADII OF ENTIRE GROOVE",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: R.012 - .022 INNER AND OUTER RADII OF ENTIRE GROOVE",
+      "page": 4,
+      "bbox": [
+        0.322,
+        0.129,
+        0.488,
+        0.284
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-125",
+      "raw": "PMI Fully-Toleranced Test Case 7 - View A",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Fully-Toleranced Test Case 7 - View A",
+      "page": 1,
+      "bbox": [
+        0.346,
+        0.926,
+        0.638,
+        0.944
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-126",
+      "raw": "Includes Atomic Test Cases - 84, 85",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - 84, 85",
+      "page": 1,
+      "bbox": [
+        0.37,
+        0.95,
+        0.615,
+        0.968
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-127",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2014",
+      "page": 1,
+      "bbox": [
+        0.05,
+        0.051,
+        0.384,
+        0.082
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-128",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev D",
+      "page": 1,
+      "bbox": [
+        0.904,
+        0.958,
+        0.94,
+        0.974
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-129",
+      "raw": "nist_ftc_07_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ftc_07_asme1_rd",
+      "page": 1,
+      "bbox": [
+        0.955,
+        0.797,
+        0.967,
+        0.959
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-130",
+      "raw": "PMI Fully-Toleranced Test Case 7 - View B",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Fully-Toleranced Test Case 7 - View B",
+      "page": 2,
+      "bbox": [
+        0.355,
+        0.908,
+        0.648,
+        0.927
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-131",
+      "raw": "Includes Atomic Test Cases - 64, 67, 69, 71, 83",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - 64, 67, 69, 71, 83",
+      "page": 2,
+      "bbox": [
+        0.341,
+        0.932,
+        0.662,
+        0.951
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-132",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2014",
+      "page": 2,
+      "bbox": [
+        0.059,
+        0.034,
+        0.393,
+        0.065
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-133",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev D",
+      "page": 2,
+      "bbox": [
+        0.913,
+        0.94,
+        0.949,
+        0.956
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-134",
+      "raw": "nist_ftc_07_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ftc_07_asme1_rd",
+      "page": 2,
+      "bbox": [
+        0.964,
+        0.78,
+        0.976,
+        0.941
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-135",
+      "raw": "PMI Fully-Toleranced Test Case 7 - View C",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Fully-Toleranced Test Case 7 - View C",
+      "page": 3,
+      "bbox": [
+        0.355,
+        0.908,
+        0.648,
+        0.927
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-136",
+      "raw": "Includes Atomic Test Cases - 62, 67",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - 62, 67",
+      "page": 3,
+      "bbox": [
+        0.379,
+        0.932,
+        0.624,
+        0.951
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-137",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2014",
+      "page": 3,
+      "bbox": [
+        0.059,
+        0.034,
+        0.393,
+        0.065
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-138",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev D",
+      "page": 3,
+      "bbox": [
+        0.913,
+        0.94,
+        0.949,
+        0.956
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-139",
+      "raw": "nist_ftc_07_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ftc_07_asme1_rd",
+      "page": 3,
+      "bbox": [
+        0.964,
+        0.78,
+        0.976,
+        0.941
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-140",
+      "raw": "PMI Fully-Toleranced Test Case 7 - View D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Fully-Toleranced Test Case 7 - View D",
+      "page": 4,
+      "bbox": [
+        0.355,
+        0.91,
+        0.648,
+        0.928
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-141",
+      "raw": "No Atomic Test Cases Included in This View",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: No Atomic Test Cases Included in This View",
+      "page": 4,
+      "bbox": [
+        0.351,
+        0.933,
+        0.651,
+        0.952
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-142",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2014",
+      "page": 4,
+      "bbox": [
+        0.059,
+        0.034,
+        0.393,
+        0.065
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-143",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev D",
+      "page": 4,
+      "bbox": [
+        0.913,
+        0.94,
+        0.949,
+        0.956
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc07-144",
+      "raw": "nist_ftc_07_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ftc_07_asme1_rd",
+      "page": 4,
+      "bbox": [
+        0.964,
+        0.78,
+        0.976,
+        0.941
+      ],
+      "confidence": null
+    }
+  ]
+}

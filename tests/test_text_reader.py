@@ -1,4 +1,6 @@
-from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
+import pymupdf
+
+from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter, callout_lines
 from resourcly.bootstrap import PROJECT_ROOT
 from tests.conftest import CTC01
 
@@ -48,3 +50,15 @@ def test_skips_note_headings_also_in_the_sheet_border() -> None:
     values = PyMuPDFTextReaderAdapter(DRAWINGS).read("nist_ftc_07_asme1_rd")["values"]
 
     assert "NOTES (UNLESS OTHERWISE SPECIFIED):" not in [v["raw"] for v in values]
+
+
+def test_lists_the_short_text_it_skips_as_callout_lines() -> None:
+    with pymupdf.open(DRAWINGS / "nist_ftc_07_asme1_rd.pdf") as pdf:
+        lines = [text for text, _ in callout_lines(pdf[1])]
+    with pymupdf.open(DRAWINGS / f"{CTC01}.pdf") as pdf:
+        ctc01 = callout_lines(pdf[0])
+
+    assert "2X Ø.594 +.012" in lines
+    assert "3X Ø.875 ±.020" in lines
+    assert "Rev D" not in lines
+    assert ctc01 == []

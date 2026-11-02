@@ -3,6 +3,9 @@ from pathlib import Path
 
 import pytest
 
+from resourcly import bootstrap
+from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter
+from resourcly.adapters.vlm_readers import VectorCropReaderAdapter, WholePageReaderAdapter
 from resourcly.bootstrap import (
     READERS,
     Implementation,
@@ -11,7 +14,7 @@ from resourcly.bootstrap import (
     load_version,
     open_services,
 )
-from resourcly.errors import InvalidVersion, NotFound
+from resourcly.errors import InvalidVersion, ModelNotCached, NotFound
 from tests.conftest import CTC01
 
 
@@ -72,7 +75,7 @@ def test_unknown_versions_and_implementations_are_refused(versioned: Settings) -
         load_version(versioned, "reader", "absent")
     with pytest.raises(
         InvalidVersion,
-        match="'vlm' is not a reader implementation; use textlayer",
+        match="'vlm' is not a reader implementation; use textlayer, vector-crop, whole-page",
     ):
         load_version(versioned, "reader", "odd")
 
@@ -98,7 +101,7 @@ def test_a_setting_the_implementation_does_not_take_is_refused(versioned: Settin
 def test_the_committed_default_versions_exist() -> None:
     settings = Settings()
     for component, impl in (
-        ("reader", "textlayer"),
+        ("reader", "vector-crop"),
         ("router", "three-layer"),
         ("failure", "shuffled"),
     ):
@@ -115,3 +118,86 @@ def test_gold_work_needs_no_reader_version_or_trace_file(
         assert not bare.trace_path.exists()
         with pytest.raises(NotFound, match="no reader version 'textlayer-v0'"):
             services.drawings.read(CTC01)
+
+
+@pytest.mark.parametrize(
+    ("name", "reader"),
+    [
+        ("vector-crop-v1", VectorCropReaderAdapter),
+        ("vector-crop-v2", VectorCropReaderAdapter),
+        ("whole-page-v1", WholePageReaderAdapter),
+    ],
+)
+def test_the_vlm_versions_build_their_reader_without_loading_the_model(
+    settings: Settings, name: str, reader: type
+) -> None:
+    version = load_version(settings, "reader", name)
+    built = READERS[version.impl].build(settings, version.params)
+
+    assert isinstance(built, reader)
+    assert isinstance(built.model, MlxVlmModelAdapter)
+    assert built.model.model_id == "mlx-community/Qwen3-VL-8B-Instruct-4bit"
+    assert built.prompt.startswith("This ")
+    assert built.model.model_id not in MlxVlmModelAdapter._loaded
+
+
+@pytest.mark.parametrize(
+    ("text", "missing"),
+    [
+        ('impl = "vector-crop"\nprompt = "read"\n', "model"),
+        ('impl = "whole-page"\nmodel = "org/model"\n', "prompt"),
+    ],
+)
+def test_a_vlm_version_without_its_model_or_prompt_is_refused(
+    versioned: Settings, text: str, missing: str
+) -> None:
+    _write(versioned, "incomplete", text)
+
+    with pytest.raises(InvalidVersion, match=f"needs the setting {missing}"):
+        load_version(versioned, "reader", "incomplete")
+
+
+def _read_with_model(settings: Settings, model: str) -> str:
+    """The error a vision reader whose model is `model` gives when it reads CTC-01."""
+    _write(settings, "absent", f'impl = "vector-crop"\nmodel = "{model}"\nprompt = "p"\n')
+    with open_services(settings.with_version("reader", "absent")) as services:
+        with pytest.raises(ModelNotCached) as raised:
+            services.drawings.read(CTC01)
+    return str(raised.value)
+
+
+def test_a_model_that_is_not_cached_says_how_to_download_it_or_fall_back(
+    versioned: Settings,
+) -> None:
+    pytest.importorskip("huggingface_hub")
+
+    message = _read_with_model(versioned, "org/absent")
+
+    assert "org/absent is not in the local Hugging Face cache" in message
+    assert "hf download org/absent" in message
+    assert "RESOURCLY_READER_VERSION=textlayer-v0" in message
+
+
+def test_a_machine_without_the_vlm_extra_says_how_to_install_it_or_fall_back(
+    versioned: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(bootstrap, "find_spec", lambda name: None)
+
+    message = _read_with_model(versioned, "org/model")
+
+    assert "uv sync --extra vlm" in message
+    assert "RESOURCLY_READER_VERSION=textlayer-v0" in message
+
+
+def test_vector_crop_v2_is_v1_plus_the_whole_page_fallback(settings: Settings) -> None:
+    v1, v2, page = (
+        load_version(settings, "reader", name).params
+        for name in ("vector-crop-v1", "vector-crop-v2", "whole-page-v1")
+    )
+
+    assert {k: v for k, v in v2.items() if not k.startswith("page_")} == v1
+    assert (v2["page_prompt"], v2["page_dpi"], v2["page_max_tokens"]) == (
+        page["prompt"],
+        page["dpi"],
+        page["max_tokens"],
+    )

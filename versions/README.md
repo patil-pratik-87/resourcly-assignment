@@ -28,7 +28,10 @@ The file name, without `.toml`, is the version's name. Any key other than `descr
 
 | Version | What it is | When to use it |
 | --- | --- | --- |
-| `reader/textlayer-v0` | Title block and notes from the PDF text layer. No model. | The default reader, and the floor any reader must beat. |
+| `reader/textlayer-v0` | Title block and notes from the PDF text layer. No model. | For tests and machines without the model; the floor any reader must beat. |
+| `reader/whole-page-v1` | Qwen3-VL 8B reads each whole page at 150 dpi, one call per page. | The baseline for the vision readers. |
+| `reader/vector-crop-v1` | Each callout found from the PDF's vector paths, with no model; Qwen3-VL 8B reads one crop at a time. | Measured; reads nothing from a page with no vector paths. |
+| `reader/vector-crop-v2` | `vector-crop-v1`, and a page with no vector callouts (a scan or an image) read whole as `whole-page-v1` reads it. | The default reader. |
 | `router/stub-v0` | A PDF drawn in vector paths is a drawing, an image is a photo. No model. | For tests and machines without the models. |
 | `router/three-layer-v1` | Three layers; each decides what it can and passes on the rest. | The default router. |
 | | 1. Rules on the file's vector paths, text and pictures. | |
@@ -36,19 +39,20 @@ The file name, without `.toml`, is the version's name. Any key other than `descr
 | | 3. Qwen3-VL 8B answers one multiple-choice question. | |
 | `failure/shuffled-v0` | Every report figure in one seeded random order. No model. | The floor any failure finder must beat. |
 
-`router/three-layer-v1` needs `uv sync --extra router --extra vlm` and both models in the local
-Hugging Face cache ([docs/routing.md](../docs/routing.md#run-it)).
+The vision readers need `uv sync --extra vlm` and Qwen3-VL 8B in the local Hugging Face cache
+(`uv run hf download mlx-community/Qwen3-VL-8B-Instruct-4bit`). `router/three-layer-v1` needs
+`uv sync --extra router --extra vlm` and both models in the local Hugging Face cache ([docs/routing.md](../docs/routing.md#run-it)).
 
 ## Which version runs
 
 | Component | Default | Switch with |
 | --- | --- | --- |
-| reader | `textlayer-v0` | `RESOURCLY_READER_VERSION` |
+| reader | `vector-crop-v2` | `RESOURCLY_READER_VERSION` |
 | router | `three-layer-v1` | `RESOURCLY_ROUTER_VERSION` |
 | failure | `shuffled-v0` | `RESOURCLY_FAILURE_VERSION` |
 
-For example, `RESOURCLY_ROUTER_VERSION=stub-v0 uv run resourcly serve` runs without the router's
-models. The defaults are in `Settings` in `src/resourcly/bootstrap.py`. A file with an unknown
+For example, `RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 uv run
+resourcly serve` runs without any model. The defaults are in `Settings` in `src/resourcly/bootstrap.py`. A file with an unknown
 `impl` or setting, or a missing named file, refuses to load.
 
 ## How the app code uses a version

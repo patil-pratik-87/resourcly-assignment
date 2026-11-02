@@ -39,6 +39,14 @@ dev = [
 router-build = [
     "scikit-learn>=1.5",
 ]
+# Runs the drawing reader notebooks in experiments/drawing/.
+experiments = [
+    "ipykernel>=6.29",
+    "jupyterlab>=4.2",
+    "matplotlib>=3.9",
+    "nbconvert>=7.16",
+    "pandas>=2.2",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -63,4 +71,13 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.isort]
 # First party even before a new module exists, as in a test written before its code
-known-first-party = ["resourcly", "tests", "common", "gold_schema", "grid", "overlay", "train_route_probe"]
+known-first-party = [
+    "resourcly",
+    "tests",
+    "common",
+    "gold_schema",
+    "grid",
+    "limits",
+    "overlay",
+    "train_route_probe",
+]

@@ -1,0 +1,861 @@
+{
+  "drawing": "nist_ftc_11_asme1_rb",
+  "page_count": 2,
+  "title_block": {
+    "revision": "B",
+    "units": "mm",
+    "units_source": "stated",
+    "drawing_number": "nist_ftc_11_asme1_rb"
+  },
+  "features": [
+    {
+      "id": "callout_01",
+      "type": "hole",
+      "label": "⌀63 ±0.5 AVG (O.D.)",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_02",
+      "type": "plane",
+      "label": "B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_03",
+      "type": "hole",
+      "label": "○ 1.2",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_04",
+      "type": "slot",
+      "label": "±0.3 Av-",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_05",
+      "type": "slot",
+      "label": "○ 1.2 | A | B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_06",
+      "type": "pattern",
+      "label": "2X R1.5 ±0.04",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_07",
+      "type": "slot",
+      "label": "(197.9)",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_08",
+      "type": "plane",
+      "label": "⌓ 0.3 | A | B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_09",
+      "type": "pattern",
+      "label": "2X R0.1 MAX -",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_10",
+      "type": "slot",
+      "label": "1.93 ±0.08",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_11",
+      "type": "plane",
+      "label": "▱ 0.3",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_12",
+      "type": "plane",
+      "label": "A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "part",
+      "type": "other",
+      "label": "the whole part",
+      "description": "General notes apply to the part as a whole.",
+      "page": 1
+    }
+  ],
+  "values": [
+    {
+      "id": "ftc11-01",
+      "raw": "⌀63 ±0.5 AVG (O.D.)",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 63,
+      "unit": "mm",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 62.5,
+        "upper": 63.5
+      },
+      "meaning": "The diameter must be between 62.5 and 63.5 mm.",
+      "page": 1,
+      "bbox": [
+        0.501,
+        0.222,
+        0.6,
+        0.306
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-02",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B.",
+      "page": 1,
+      "bbox": [
+        0.645,
+        0.234,
+        0.658,
+        0.266
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-03",
+      "raw": "○ 1.2",
+      "callout": "feature_control_frame",
+      "kind": "circularity",
+      "tolerance_style": "geometric_zone",
+      "value": 1.2,
+      "unit": "mm",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 1.2
+      },
+      "meaning": "Circularity within a 1.2 mm tolerance zone.",
+      "page": 1,
+      "bbox": [
+        0.504,
+        0.286,
+        0.598,
+        0.366
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-04",
+      "raw": "⌀63 -",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 63,
+      "unit": "mm",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 63 mm.",
+      "page": 1,
+      "bbox": [
+        0.504,
+        0.286,
+        0.598,
+        0.366
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-05",
+      "raw": "⌀32 ±0.3 AVG (I.D.) -",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 32,
+      "unit": "mm",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 31.7,
+        "upper": 32.3
+      },
+      "meaning": "The diameter must be between 31.7 and 32.3 mm.",
+      "page": 1,
+      "bbox": [
+        0.504,
+        0.286,
+        0.598,
+        0.366
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-06",
+      "raw": "±0.3 Av-",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_04",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: ±0.3 Av-",
+      "page": 1,
+      "bbox": [
+        0.523,
+        0.319,
+        0.577,
+        0.382
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-07",
+      "raw": "○ 1.2 | A | B",
+      "callout": "feature_control_frame",
+      "kind": "circularity",
+      "tolerance_style": "geometric_zone",
+      "value": 1.2,
+      "unit": "mm",
+      "feature_id": "callout_05",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.2
+      },
+      "meaning": "Circularity within a 1.2 mm tolerance zone, relative to datum A, B.",
+      "page": 1,
+      "bbox": [
+        0.208,
+        0.635,
+        0.308,
+        0.709
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-08",
+      "raw": "1.2F",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 1.2,
+      "unit": "mm",
+      "feature_id": "callout_05",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 1.2 mm.",
+      "page": 1,
+      "bbox": [
+        0.208,
+        0.635,
+        0.308,
+        0.709
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-09",
+      "raw": "2X R1.5 ±0.04",
+      "callout": "dimension",
+      "kind": "radius",
+      "tolerance_style": "plus_minus",
+      "value": 1.5,
+      "unit": "mm",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 1.46,
+        "upper": 1.54
+      },
+      "meaning": "The radius must be between 1.46 and 1.54 mm.",
+      "page": 1,
+      "bbox": [
+        0.768,
+        0.703,
+        0.834,
+        0.761
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-10",
+      "raw": "(197.9)",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "reference",
+      "value": 197.9,
+      "unit": "mm",
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 197.9 mm.",
+      "page": 1,
+      "bbox": [
+        0.538,
+        0.827,
+        0.576,
+        0.856
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-11",
+      "raw": "⌓ 0.3 | A | B",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.3,
+      "unit": "mm",
+      "feature_id": "callout_08",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.3
+      },
+      "meaning": "Profile of a surface within a 0.3 mm tolerance zone, relative to datum A, B.",
+      "page": 2,
+      "bbox": [
+        0.474,
+        0.371,
+        0.594,
+        0.398
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-12",
+      "raw": "2X R0.1 MAX -",
+      "callout": "dimension",
+      "kind": "radius",
+      "tolerance_style": "basic",
+      "value": 0.1,
+      "unit": "mm",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A radius of 0.1 mm.",
+      "page": 2,
+      "bbox": [
+        0.178,
+        0.406,
+        0.267,
+        0.42
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-13",
+      "raw": "1.93 ±0.08",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 1.93,
+      "unit": "mm",
+      "feature_id": "callout_10",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 1.85,
+        "upper": 2.01
+      },
+      "meaning": "The linear must be between 1.85 and 2.01 mm.",
+      "page": 2,
+      "bbox": [
+        0.717,
+        0.441,
+        0.786,
+        0.457
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-14",
+      "raw": "▱ 0.3",
+      "callout": "feature_control_frame",
+      "kind": "flatness",
+      "tolerance_style": "geometric_zone",
+      "value": 0.3,
+      "unit": "mm",
+      "feature_id": "callout_11",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 0.3
+      },
+      "meaning": "Flatness within a 0.3 mm tolerance zone.",
+      "page": 2,
+      "bbox": [
+        0.415,
+        0.55,
+        0.491,
+        0.577
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-15",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_12",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A.",
+      "page": 2,
+      "bbox": [
+        0.421,
+        0.605,
+        0.442,
+        0.632
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-16",
+      "raw": "1. CAD MODEL ___________ REV. __ IS REQUIRED TO COMPLETE PRODUCT DEFINITION.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 1. CAD MODEL ___________ REV. __ IS REQUIRED TO COMPLETE PRODUCT DEFINITION.",
+      "page": 1,
+      "bbox": [
+        0.054,
+        0.118,
+        0.275,
+        0.171
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-17",
+      "raw": "2. DIRECTLY-TOLERANCED DIMENSIONS AND BASIC DIMENSIONS DEFINED ON THE DRAWING TAKE PRECEDENCE OVER DIMENSIONAL DATA DEFINED BY THE MODEL. OBTAIN ALL OTHER DIMENSIONAL DATA FROM THE MODEL. THE MODEL REPRESENTS BASIC DIMENSIONAL DATA UNLESS OTHERWISE SPECIFIED.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 2. DIRECTLY-TOLERANCED DIMENSIONS AND BASIC DIMENSIONS DEFINED ON THE DRAWING TAKE PRECEDENCE OVER DIMENSIONAL DATA DEFINED BY THE MODEL. OBTAIN ALL OTHER DIMENSIONAL DATA FROM THE MODEL. THE MODEL REPRESENTS BASIC DIMENSIONAL DATA UNLESS OTHERWISE SPECIFIED.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.19,
+        0.303,
+        0.349
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-18",
+      "raw": "3. APPLICABLE STANDARDS: ASME Y14.41-2003 APPLIES TO DATASET.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 3. APPLICABLE STANDARDS: ASME Y14.41-2003 APPLIES TO DATASET.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.368,
+        0.3,
+        0.402
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-19",
+      "raw": "ASME Y14.5M-1994 APPLIES TO DIMENSIONING AND TOLERANCING.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: ASME Y14.5M-1994 APPLIES TO DIMENSIONING AND TOLERANCING.",
+      "page": 1,
+      "bbox": [
+        0.071,
+        0.421,
+        0.271,
+        0.455
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-20",
+      "raw": "4. NON-RIGID PART. DIRECTLY- TOLERANCED DIMENSIONS AND TOLERANCES APPLY IN FREE STATE.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 4. NON-RIGID PART. DIRECTLY- TOLERANCED DIMENSIONS AND TOLERANCES APPLY IN FREE STATE.",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.474,
+        0.279,
+        0.526
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-21",
+      "raw": "5. UNITS: MILLIMETERS",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 5. UNITS: MILLIMETERS",
+      "page": 1,
+      "bbox": [
+        0.055,
+        0.546,
+        0.187,
+        0.562
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-22",
+      "raw": "PMI Fully-Toleranced Test Case 11 - View A",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Fully-Toleranced Test Case 11 - View A",
+      "page": 1,
+      "bbox": [
+        0.35,
+        0.911,
+        0.65,
+        0.933
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-23",
+      "raw": "Includes Atomic Test Cases - 55, 100",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - 55, 100",
+      "page": 1,
+      "bbox": [
+        0.374,
+        0.935,
+        0.627,
+        0.957
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-24",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2014",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-25",
+      "raw": "Rev B",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev B",
+      "page": 1,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-26",
+      "raw": "nist_ftc_11_asme1_rb",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ftc_11_asme1_rb",
+      "page": 1,
+      "bbox": [
+        0.961,
+        0.786,
+        0.975,
+        0.947
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-27",
+      "raw": "Feature and Specification Index",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Feature and Specification Index",
+      "page": 1,
+      "bbox": [
+        0.765,
+        0.08,
+        0.943,
+        0.098
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-28",
+      "raw": "nist_ftc_11_asme1_rb_fsi .pdf",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ftc_11_asme1_rb_fsi .pdf",
+      "page": 1,
+      "bbox": [
+        0.765,
+        0.1,
+        0.925,
+        0.119
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-29",
+      "raw": "PMI Fully-Toleranced Test Case 11 - View B",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Fully-Toleranced Test Case 11 - View B",
+      "page": 2,
+      "bbox": [
+        0.35,
+        0.912,
+        0.65,
+        0.934
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-30",
+      "raw": "Includes Atomic Test Cases - N/A",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - N/A",
+      "page": 2,
+      "bbox": [
+        0.386,
+        0.936,
+        0.613,
+        0.958
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-31",
+      "raw": "NIST PMI Test Models - 2014",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2014",
+      "page": 2,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-32",
+      "raw": "Rev B",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev B",
+      "page": 2,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ftc11-33",
+      "raw": "nist_ftc_11_asme1_rb",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ftc_11_asme1_rb",
+      "page": 2,
+      "bbox": [
+        0.961,
+        0.786,
+        0.975,
+        0.947
+      ],
+      "confidence": null
+    }
+  ]
+}

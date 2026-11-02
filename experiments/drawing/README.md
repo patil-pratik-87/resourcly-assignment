@@ -1,63 +1,57 @@
 # Drawing experiments
 
-`callout_boxes.ipynb` shows, step by step, how every annotation ("callout") on a NIST drawing is
-located from the PDF's own vector paths, before any model is involved. It is saved with its
-outputs, so it can be read on GitHub without running it.
+These notebooks chose how the agent reads a technical drawing into JSON. They are saved with their
+outputs. The research behind them: `research/drawing/README.md`.
 
-The results and the recommendation are in `research/drawing/README.md`, with pictures in
-`research/drawing/review.html`.
+| Notebook | Question |
+| --- | --- |
+| `callout_boxes.ipynb` | How are the callouts found from the PDF's vector paths, with no model? |
+| `other_options.ipynb` | First tests of OCR, Docling, and Qwen3-VL on a page or a crop. |
+| `01_vector_crop_reader.ipynb` | P1, `vector-crop-v1`: Qwen3-VL 8B reads one located crop at a time. |
+| `02_whole_page_reader.ipynb` | P2, `whole-page-v1`: it reads each whole page at 150 dpi. |
+| `03_compare.ipynb` | Which reader wins, on all gold and on dev? |
+| `04_winner_outputs.ipynb` | The winner on all 11 drawings; writes `outputs/`. |
 
-## What the notebook shows
+## Result
 
-On CTC-01, page 1:
+`vector-crop-v1` wins on all gold and wrote `outputs/`. Numbers from `uv run evals`:
 
-1. The page as a model would see it, and its text layer, which holds only the title block.
-2. Every drawing instruction on the page counted by colour. Pure blue `(0, 0, 1)` is every
-   annotation and nothing else.
-3. The blue paths split into letter shapes (filled, with a 0.06 pt outline) and line segments.
-4. Letters within two letter heights of each other joined into groups, one group per annotation.
-5. Frame walls added to each group, and groups that overlap and run in the same direction merged.
-   This gives the 22 callout boxes on the page.
-6. The padded 300 dpi crops that the vision-language models read.
+| Reader | Split | F1 | Precision | Recall | Partial recall | Seconds per page |
+| --- | --- | --- | --- | --- | --- | --- |
+| `textlayer-v0` (floor) | all | 0.344 | 0.902 | 0.213 | 0.129 | 0 |
+| `whole-page-v1` | all | 0.650 | 0.629 | 0.672 | 0.543 | 36 |
+| `vector-crop-v1` | all | **0.725** | 0.625 | **0.862** | **0.743** | 64 |
+| `whole-page-v1` | dev | **0.757** | 0.709 | 0.812 | 0.633 | 33 |
+| `vector-crop-v1` | dev | 0.739 | 0.620 | **0.917** | **0.867** | 64 |
 
-A last section does the same from the rendered image alone, with blue pixels instead of blue
-paths, and shows why the PDF route is more precise: leaders tie the pixel blobs together.
+- **Why it wins:** one short answer per callout, so dense sheets lose nothing (FTC-06 recall 0.865
+  against 0.562), and a 300 dpi crop shows the GD&T symbol, which the whole page often misses.
+- **Where it does not:** dev F1 (two full-gold drawings), CTC-03 and FTC-07 page 2. Its extra
+  predictions are frame cells read again as bare numbers, a two-line note read as two notes, and
+  text of a neighbouring callout cut by the crop edge: fixes for a `vector-crop-v2`, tuned on dev.
 
-Set `PDF` in the first cell to another file in `data/drawings/` to try a different drawing, for
-example `nist_ftc_06_asme1_rd.pdf`, where close callouts merge into one box.
+Times are on an M1 Pro with 16 GB. No prompt was tuned on the test drawings CTC-03 and FTC-06. The
+runs say "local changes": only the notebooks' dependency group was uncommitted.
 
-## Setup
+## Running them again
 
-Python 3.12 with PyMuPDF, NumPy, OpenCV, Matplotlib and Jupyter. No model and no network are
-needed.
+The model runs take 18 and 32 minutes, so they are made from the command line and the notebooks
+read them from the run store (`runs/`):
+
+```sh
+uv sync --extra vlm --group experiments
+uv run evals run reader --version textlayer-v0 --split all   # and --split dev
+uv run --extra vlm evals run reader --version whole-page-v1 --split all
+uv run --extra vlm evals run reader --version vector-crop-v1 --split all
+(cd experiments/drawing && uv run --extra vlm --group experiments jupyter lab)
+```
+
+The readers need `mlx-community/Qwen3-VL-8B-Instruct-4bit` in the local Hugging Face cache and
+never download it. `callout_boxes` and `other_options` use their own environment;
+`other_options` also needs `rapidocr onnxruntime docling mlx-vlm` and downloads its models:
 
 ```sh
 python3.12 -m venv experiments/drawing/.venv
 experiments/drawing/.venv/bin/pip install pymupdf numpy opencv-python-headless matplotlib jupyter
-```
-
-Open it from the repository root:
-
-```sh
 (cd experiments/drawing && .venv/bin/jupyter lab callout_boxes.ipynb)
 ```
-
-The notebook reads the drawings from `../../data/drawings`, so it must run from
-`experiments/drawing/`.
-
-## Other reading options
-
-`other_options.ipynb` repeats the first tests of the other ways to read a drawing: what the
-PDFs hold (text against vector paths, colours), RapidOCR on crops and pages, Docling on a page,
-and Qwen3-VL 8B on a whole page against one callout crop at a time, with the prompts in
-`prompts/`. It is saved with its outputs. It needs a few more packages, and downloads Qwen3-VL 8B
-(5.8 GB) and the OCR and Docling models on the first run; the model cells run only on Apple
-Silicon:
-
-```sh
-experiments/drawing/.venv/bin/pip install rapidocr onnxruntime docling mlx-vlm
-(cd experiments/drawing && .venv/bin/jupyter lab other_options.ipynb)
-```
-
-The wider comparison (Qwen3-VL 4B, MechVL-4B, scoring on 46 checks) is summarised in
-`research/drawing/README.md` and `research/drawing/review.html`.

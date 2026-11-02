@@ -7,12 +7,13 @@ from collections.abc import Callable, Iterator
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field, replace
 from functools import cached_property
+from importlib.util import find_spec
 from pathlib import Path
 from typing import Any
 
 from resourcly.adapters.dinov2_encoder import Dinov2EncoderAdapter
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
-from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter
+from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter, cached_snapshot
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
 from resourcly.adapters.request_store import JsonRequestStoreAdapter
 from resourcly.adapters.route_probe import LinearProbe, ProbeRouteAdapter
@@ -24,8 +25,9 @@ from resourcly.adapters.stub_router import StubRouteAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.adapters.thread_jobs import ThreadJobsAdapter
 from resourcly.adapters.upload_store import FileUploadStoreAdapter
+from resourcly.adapters.vlm_readers import VectorCropReaderAdapter, WholePageReaderAdapter
 from resourcly.agent import AgentService, recover
-from resourcly.errors import InvalidVersion, NotFound
+from resourcly.errors import InvalidVersion, ModelNotCached, NotFound
 from resourcly.ports import ImageEncoderPort, RouteLayerPort, RouterPort
 from resourcly.services import (
     DrawingService,
@@ -57,7 +59,7 @@ class Settings:
     # The version each component runs, a file in versions_dir; the app and the evals both read it
     versions: dict[str, str] = field(
         default_factory=lambda: {
-            "reader": "textlayer-v0",
+            "reader": "vector-crop-v2",
             "router": "three-layer-v1",
             "failure": "shuffled-v0",
         }
@@ -130,9 +132,60 @@ class Implementation:
     check: Callable[[dict[str, Any]], None] | None = None
 
 
+FALLBACK = "or set RESOURCLY_READER_VERSION=textlayer-v0 to read the text layer without a model"
+
+
+def _local_model(model_id: str) -> Path:
+    """The model's local folder, or ModelNotCached saying how to get it or read without it."""
+    if find_spec("mlx_vlm") is None:
+        raise ModelNotCached(
+            f"reading drawings with {model_id} needs mlx-vlm on Apple silicon: run"
+            f" `uv sync --extra vlm`, {FALLBACK}"
+        )
+    try:
+        return cached_snapshot(model_id)
+    except ModelNotCached as error:
+        raise ModelNotCached(
+            f"{model_id} is not in the local Hugging Face cache; download it once with"
+            f" `uv run hf download {model_id}`, {FALLBACK}"
+        ) from error
+
+
+def _with_model(reader: Callable[..., Any]) -> Callable[[Settings, dict[str, Any]], Any]:
+    """A reader factory whose `model` setting names the vision-language model to run."""
+
+    def build(settings: Settings, params: dict[str, Any]) -> Any:
+        rest = {key: value for key, value in params.items() if key != "model"}
+        model = MlxVlmModelAdapter(params["model"], locate=_local_model)
+        return reader(settings.drawings_dir, model, **rest)
+
+    return build
+
+
 READERS: dict[str, Implementation] = {
     "textlayer": Implementation(
         lambda settings, params: PyMuPDFTextReaderAdapter(settings.drawings_dir)
+    ),
+    "vector-crop": Implementation(
+        _with_model(VectorCropReaderAdapter),
+        settings=(
+            "model",
+            "prompt",
+            "letter_prompt",
+            "symbol_prompt",
+            "crop_dpi",
+            "margin",
+            "max_tokens",
+            "page_prompt",
+            "page_dpi",
+            "page_max_tokens",
+        ),
+        required=("model", "prompt"),
+    ),
+    "whole-page": Implementation(
+        _with_model(WholePageReaderAdapter),
+        settings=("model", "prompt", "dpi", "max_tokens"),
+        required=("model", "prompt"),
     ),
 }
 # The image models a router probe can embed pictures with, by the name a version gives as

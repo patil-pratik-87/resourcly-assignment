@@ -30,11 +30,14 @@ whole agent, are planned as further components.
 
 ## Current numbers
 
-The model-free version of each component sets its floor.
+The model-free version of each component sets its floor. The two vision readers need
+`--extra vlm`; the drawing notebooks compare them (`experiments/drawing/README.md`).
 
 | Version | Split | Primary | Other |
 | --- | --- | --- | --- |
 | reader `textlayer-v0` | all, 11 drawings | f1 0.344 | precision 0.902, recall 0.213, partial_recall 0.129 |
+| reader `whole-page-v1` | all, 11 drawings | f1 0.650 | precision 0.629, recall 0.672, partial_recall 0.543 |
+| reader `vector-crop-v1` | all, 11 drawings | f1 0.725 | precision 0.625, recall 0.862, partial_recall 0.743 |
 | router `stub-v0` | dev, 123 requests | accuracy 0.602 | drawing_recall 0.120, other_kept_out 0.500 |
 | failure `shuffled-v0` | dev, 86 photos | section@1 0.038 | mode@3 0.769, kept_out 0.000 |
 

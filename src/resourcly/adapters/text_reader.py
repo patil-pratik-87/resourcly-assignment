@@ -47,7 +47,21 @@ class PyMuPDFTextReaderAdapter:
 
 def text_records(page: pymupdf.Page) -> list[tuple[int, str, str, Box]]:
     """The title block entries and notes on the page: (page, callout, text, box) each."""
-    records = []
+    return _read_page(page)[0]
+
+
+def callout_lines(page: pymupdf.Page) -> list[tuple[str, Box]]:
+    """The short text lines that are neither title block nor note, such as "4X Ø.173 +.005".
+
+    Most drawings draw their callouts as paths and have none. FTC-07 writes them as text.
+    """
+    return _read_page(page)[1]
+
+
+def _read_page(
+    page: pymupdf.Page,
+) -> tuple[list[tuple[int, str, str, Box]], list[tuple[str, Box]]]:
+    records, short = [], []
     for block in page.get_text("dict")["blocks"]:
         lines = [found for line in block.get("lines", []) if (found := _line(page, line))[0]]
         if not lines or _heading(lines):
@@ -62,7 +76,9 @@ def text_records(page: pymupdf.Page) -> list[tuple[int, str, str, Box]]:
                 continue
             if (NUMBERED.match(text) and words) or words >= 4:
                 records.append((page.number + 1, "note", text, _union(box for _, box in item)))
-    return records
+            else:
+                short += item
+    return records, short
 
 
 def _heading(lines: list[tuple[str, Box]]) -> bool:

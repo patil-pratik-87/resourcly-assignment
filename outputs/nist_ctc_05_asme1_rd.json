@@ -1,0 +1,923 @@
+{
+  "drawing": "nist_ctc_05_asme1_rd",
+  "page_count": 2,
+  "title_block": {
+    "revision": "D",
+    "units": "in",
+    "units_source": "inferred",
+    "drawing_number": "nist_ctc_05_asme1_rd"
+  },
+  "features": [
+    {
+      "id": "callout_01",
+      "type": "slot",
+      "label": ".025",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_02",
+      "type": "plane",
+      "label": "○ ⌀.030 | A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_03",
+      "type": "slot",
+      "label": ".010",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_04",
+      "type": "slot",
+      "label": "5.000 ±.008",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_05",
+      "type": "slot",
+      "label": ".005",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_06",
+      "type": "slot",
+      "label": "2.000",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_07",
+      "type": "plane",
+      "label": "A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_08",
+      "type": "slot",
+      "label": "1.250",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_09",
+      "type": "slot",
+      "label": ".035",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_10",
+      "type": "slot",
+      "label": ".025",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_11",
+      "type": "slot",
+      "label": ".002",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_12",
+      "type": "slot",
+      "label": ".010",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_13",
+      "type": "plane",
+      "label": "A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_14",
+      "type": "plane",
+      "label": "⌓ .015 | B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_15",
+      "type": "plane",
+      "label": "B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_16",
+      "type": "plane",
+      "label": "∠ .002 | A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_17",
+      "type": "slot",
+      "label": "2.000",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_18",
+      "type": "slot",
+      "label": "1.250",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "callout_19",
+      "type": "hole",
+      "label": "⌀10.000 ±.001",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 2
+    },
+    {
+      "id": "part",
+      "type": "other",
+      "label": "the whole part",
+      "description": "General notes apply to the part as a whole.",
+      "page": 1
+    }
+  ],
+  "values": [
+    {
+      "id": "ctc05-01",
+      "raw": ".025",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.025 in.",
+      "page": 1,
+      "bbox": [
+        0.447,
+        0.13,
+        0.502,
+        0.188
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-02",
+      "raw": "○ ⌀.030 | A",
+      "callout": "feature_control_frame",
+      "kind": "circularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.03,
+      "unit": "in",
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.03
+      },
+      "meaning": "Circularity within a 0.03 in tolerance zone, relative to datum A.",
+      "page": 1,
+      "bbox": [
+        0.688,
+        0.291,
+        0.742,
+        0.349
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-03",
+      "raw": ".010",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.01 in.",
+      "page": 1,
+      "bbox": [
+        0.32,
+        0.363,
+        0.381,
+        0.409
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-04",
+      "raw": "5.000 ±.008",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 5,
+      "unit": "in",
+      "feature_id": "callout_04",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 4.992,
+        "upper": 5.008
+      },
+      "meaning": "The linear must be between 4.992 and 5.008 in.",
+      "page": 1,
+      "bbox": [
+        0.327,
+        0.407,
+        0.387,
+        0.46
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-05",
+      "raw": ".005",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.005,
+      "unit": "in",
+      "feature_id": "callout_05",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.005 in.",
+      "page": 1,
+      "bbox": [
+        0.34,
+        0.518,
+        0.379,
+        0.565
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-06",
+      "raw": "2.000",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 2,
+      "unit": "in",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 2 in.",
+      "page": 1,
+      "bbox": [
+        0.77,
+        0.577,
+        0.795,
+        0.613
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-07",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A.",
+      "page": 1,
+      "bbox": [
+        0.34,
+        0.618,
+        0.351,
+        0.644
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-08",
+      "raw": "1.250",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 1.25,
+      "unit": "in",
+      "feature_id": "callout_08",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 1.25 in.",
+      "page": 1,
+      "bbox": [
+        0.761,
+        0.632,
+        0.785,
+        0.667
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-09",
+      "raw": ".035",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.035,
+      "unit": "in",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.035 in.",
+      "page": 1,
+      "bbox": [
+        0.49,
+        0.738,
+        0.544,
+        0.796
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-10",
+      "raw": ".025",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.025,
+      "unit": "in",
+      "feature_id": "callout_10",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.025 in.",
+      "page": 1,
+      "bbox": [
+        0.77,
+        0.742,
+        0.825,
+        0.801
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-11",
+      "raw": ".002",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.002,
+      "unit": "in",
+      "feature_id": "callout_11",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.002 in.",
+      "page": 1,
+      "bbox": [
+        0.393,
+        0.744,
+        0.429,
+        0.788
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-12",
+      "raw": ".010",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.01,
+      "unit": "in",
+      "feature_id": "callout_12",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.01 in.",
+      "page": 1,
+      "bbox": [
+        0.737,
+        0.774,
+        0.798,
+        0.82
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-13",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_13",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A.",
+      "page": 2,
+      "bbox": [
+        0.744,
+        0.211,
+        0.756,
+        0.237
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-14",
+      "raw": "⌓ .015 | B",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.015,
+      "unit": "in",
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [
+        "B"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.015
+      },
+      "meaning": "Profile of a surface within a 0.015 in tolerance zone, relative to datum B.",
+      "page": 2,
+      "bbox": [
+        0.267,
+        0.397,
+        0.319,
+        0.454
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-15",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_15",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B.",
+      "page": 2,
+      "bbox": [
+        0.282,
+        0.481,
+        0.292,
+        0.506
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-16",
+      "raw": "∠ .002 | A",
+      "callout": "feature_control_frame",
+      "kind": "angularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.002,
+      "unit": "in",
+      "feature_id": "callout_16",
+      "applies_to": null,
+      "datums": [
+        "A"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.002
+      },
+      "meaning": "Angularity within a 0.002 in tolerance zone, relative to datum A.",
+      "page": 2,
+      "bbox": [
+        0.297,
+        0.522,
+        0.35,
+        0.58
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-17",
+      "raw": "2.000",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 2,
+      "unit": "in",
+      "feature_id": "callout_17",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 2 in.",
+      "page": 2,
+      "bbox": [
+        0.701,
+        0.524,
+        0.726,
+        0.56
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-18",
+      "raw": "1.250",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 1.25,
+      "unit": "in",
+      "feature_id": "callout_18",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 1.25 in.",
+      "page": 2,
+      "bbox": [
+        0.691,
+        0.579,
+        0.716,
+        0.614
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-19",
+      "raw": "⌀10.000 ±.001",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 10,
+      "unit": "in",
+      "feature_id": "callout_19",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 9.999,
+        "upper": 10.001
+      },
+      "meaning": "The diameter must be between 9.999 and 10.001 in.",
+      "page": 2,
+      "bbox": [
+        0.26,
+        0.608,
+        0.313,
+        0.656
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-20",
+      "raw": "Notes Datum feature B and Datum target D1 defined in View 2 (of 2).",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Notes Datum feature B and Datum target D1 defined in View 2 (of 2).",
+      "page": 1,
+      "bbox": [
+        0.069,
+        0.786,
+        0.207,
+        0.864
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-21",
+      "raw": "Notes Datum feature A defined in View 1 (of 2).",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Notes Datum feature A defined in View 1 (of 2).",
+      "page": 2,
+      "bbox": [
+        0.069,
+        0.757,
+        0.22,
+        0.815
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-22",
+      "raw": "Datum target D1 referenced in View 1 (of 2).",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Datum target D1 referenced in View 1 (of 2).",
+      "page": 2,
+      "bbox": [
+        0.069,
+        0.836,
+        0.226,
+        0.874
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-23",
+      "raw": "PMI Complex Test Case 5 - View 1 (of 2)",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Complex Test Case 5 - View 1 (of 2)",
+      "page": 1,
+      "bbox": [
+        0.362,
+        0.911,
+        0.639,
+        0.933
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-24",
+      "raw": "Includes Atomic Test Cases - 11, 18, 19, 23, 24, 37, 42, 44",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - 11, 18, 19, 23, 24, 37, 42, 44",
+      "page": 1,
+      "bbox": [
+        0.302,
+        0.935,
+        0.699,
+        0.957
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-25",
+      "raw": "NIST PMI Test Models - 2012",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2012",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-26",
+      "raw": "Test Model 5",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Test Model 5",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.083,
+        0.157,
+        0.108
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-27",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev D",
+      "page": 1,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-28",
+      "raw": "nist_ctc_05_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ctc_05_asme1_rd",
+      "page": 1,
+      "bbox": [
+        0.961,
+        0.783,
+        0.975,
+        0.947
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-29",
+      "raw": "PMI Complex Test Case 5 - View 2 (of 2)",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Complex Test Case 5 - View 2 (of 2)",
+      "page": 2,
+      "bbox": [
+        0.362,
+        0.911,
+        0.639,
+        0.933
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-30",
+      "raw": "Includes Atomic Test Cases - 25, 38, 42",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - 25, 38, 42",
+      "page": 2,
+      "bbox": [
+        0.365,
+        0.935,
+        0.635,
+        0.957
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-31",
+      "raw": "NIST PMI Test Models - 2012",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2012",
+      "page": 2,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-32",
+      "raw": "Test Model 5",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Test Model 5",
+      "page": 2,
+      "bbox": [
+        0.058,
+        0.083,
+        0.157,
+        0.108
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-33",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev D",
+      "page": 2,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc05-34",
+      "raw": "nist_ctc_05_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ctc_05_asme1_rd",
+      "page": 2,
+      "bbox": [
+        0.961,
+        0.783,
+        0.975,
+        0.947
+      ],
+      "confidence": null
+    }
+  ]
+}

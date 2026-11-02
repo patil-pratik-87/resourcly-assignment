@@ -1,0 +1,1116 @@
+{
+  "drawing": "nist_ctc_04_asme1_rd",
+  "page_count": 1,
+  "title_block": {
+    "revision": "D",
+    "units": "mm",
+    "units_source": "inferred",
+    "drawing_number": "nist_ctc_04_asme1_rd"
+  },
+  "features": [
+    {
+      "id": "callout_01",
+      "type": "slot",
+      "label": "⌓ 0.2 | D",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_02",
+      "type": "plane",
+      "label": "⌓ 0.2 | D | G",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_03",
+      "type": "plane",
+      "label": "C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_04",
+      "type": "hole",
+      "label": "⌀10",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_05",
+      "type": "hole",
+      "label": "○ 1.5 | D | E | F",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_06",
+      "type": "pattern",
+      "label": "○ 1.5 | D",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_07",
+      "type": "pattern",
+      "label": "⌖ 20.75 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_08",
+      "type": "pattern",
+      "label": "⌖ ⌀0.75(P)50 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_09",
+      "type": "pattern",
+      "label": "⊥ ⌀20",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_10",
+      "type": "plane",
+      "label": "H",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_11",
+      "type": "plane",
+      "label": "G",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_12",
+      "type": "pattern",
+      "label": "30X ⌀14 ±0.1",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_13",
+      "type": "plane",
+      "label": "D",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_14",
+      "type": "plane",
+      "label": "L",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_15",
+      "type": "plane",
+      "label": "E",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_16",
+      "type": "hole",
+      "label": "⌖ ⌀0.35 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_17",
+      "type": "plane",
+      "label": "-30X √⌀20 ±0.3 X 90° ±1°",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_18",
+      "type": "plane",
+      "label": "⌓ 0.5 | A | B | C",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_19",
+      "type": "hole",
+      "label": "⌖ 75",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_20",
+      "type": "plane",
+      "label": "A",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "callout_21",
+      "type": "plane",
+      "label": "B",
+      "description": "The feature this callout points at; the leader is not traced.",
+      "page": 1
+    },
+    {
+      "id": "part",
+      "type": "other",
+      "label": "the whole part",
+      "description": "General notes apply to the part as a whole.",
+      "page": 1
+    }
+  ],
+  "values": [
+    {
+      "id": "ctc04-01",
+      "raw": "⌓ 0.2 | D",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.2,
+      "unit": "mm",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.2
+      },
+      "meaning": "Profile of a surface within a 0.2 mm tolerance zone, relative to datum D.",
+      "page": 1,
+      "bbox": [
+        0.244,
+        0.151,
+        0.312,
+        0.241
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-02",
+      "raw": "2 D G H",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 2,
+      "unit": "mm",
+      "feature_id": "callout_01",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 2 mm.",
+      "page": 1,
+      "bbox": [
+        0.244,
+        0.151,
+        0.312,
+        0.241
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-03",
+      "raw": "⌓ 0.2 | D | G",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.2,
+      "unit": "mm",
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "G"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.2
+      },
+      "meaning": "Profile of a surface within a 0.2 mm tolerance zone, relative to datum D, G.",
+      "page": 1,
+      "bbox": [
+        0.241,
+        0.197,
+        0.298,
+        0.247
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-04",
+      "raw": "2 SURFACES",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_02",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: 2 SURFACES",
+      "page": 1,
+      "bbox": [
+        0.241,
+        0.197,
+        0.298,
+        0.247
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-05",
+      "raw": "C",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_03",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature C.",
+      "page": 1,
+      "bbox": [
+        0.383,
+        0.22,
+        0.408,
+        0.239
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-06",
+      "raw": "⌀10",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "basic",
+      "value": 10,
+      "unit": "mm",
+      "feature_id": "callout_04",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A diameter of 10 mm.",
+      "page": 1,
+      "bbox": [
+        0.245,
+        0.231,
+        0.267,
+        0.268
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-07",
+      "raw": "○ 1.5 | D | E | F",
+      "callout": "feature_control_frame",
+      "kind": "circularity",
+      "tolerance_style": "geometric_zone",
+      "value": 1.5,
+      "unit": "mm",
+      "feature_id": "callout_05",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "E",
+        "F"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.5
+      },
+      "meaning": "Circularity within a 1.5 mm tolerance zone, relative to datum D, E, F.",
+      "page": 1,
+      "bbox": [
+        0.573,
+        0.26,
+        0.677,
+        0.338
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-08",
+      "raw": "○ 0.3 | D | E",
+      "callout": "feature_control_frame",
+      "kind": "circularity",
+      "tolerance_style": "geometric_zone",
+      "value": 0.3,
+      "unit": "mm",
+      "feature_id": "callout_05",
+      "applies_to": null,
+      "datums": [
+        "D",
+        "E"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.3
+      },
+      "meaning": "Circularity within a 0.3 mm tolerance zone, relative to datum D, E.",
+      "page": 1,
+      "bbox": [
+        0.573,
+        0.26,
+        0.677,
+        0.338
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-09",
+      "raw": "X ⌀6.65 ±0.12",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 6.65,
+      "unit": "mm",
+      "feature_id": "callout_05",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 6.53,
+        "upper": 6.77
+      },
+      "meaning": "The diameter must be between 6.53 and 6.77 mm.",
+      "page": 1,
+      "bbox": [
+        0.573,
+        0.26,
+        0.677,
+        0.338
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-10",
+      "raw": "○ 1.5 | D",
+      "callout": "feature_control_frame",
+      "kind": "circularity",
+      "tolerance_style": "geometric_zone",
+      "value": 1.5,
+      "unit": "mm",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [
+        "D"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 1.5
+      },
+      "meaning": "Circularity within a 1.5 mm tolerance zone, relative to datum D.",
+      "page": 1,
+      "bbox": [
+        0.567,
+        0.262,
+        0.636,
+        0.314
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-11",
+      "raw": "6X ⌀6.65 ±0.12",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 6.65,
+      "unit": "mm",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 6.53,
+        "upper": 6.77
+      },
+      "meaning": "The diameter must be between 6.53 and 6.77 mm.",
+      "page": 1,
+      "bbox": [
+        0.567,
+        0.262,
+        0.636,
+        0.314
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-12",
+      "raw": "0.3",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 0.3,
+      "unit": "mm",
+      "feature_id": "callout_06",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 0.3 mm.",
+      "page": 1,
+      "bbox": [
+        0.567,
+        0.262,
+        0.636,
+        0.314
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-13",
+      "raw": "⌖ 20.75 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 20.75,
+      "unit": "mm",
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 20.75
+      },
+      "meaning": "Position within a 20.75 mm tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.738,
+        0.274,
+        0.864,
+        0.377
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-14",
+      "raw": "4X M12 x 1.75 - 6H √ 25 ±0.25",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 25,
+      "unit": "mm",
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 24.75,
+        "upper": 25.25
+      },
+      "meaning": "The linear must be between 24.75 and 25.25 mm.",
+      "page": 1,
+      "bbox": [
+        0.738,
+        0.274,
+        0.864,
+        0.377
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-15",
+      "raw": "20.75 P 50 A B C",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "basic",
+      "value": 20.75,
+      "unit": "mm",
+      "feature_id": "callout_07",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "A linear of 20.75 mm.",
+      "page": 1,
+      "bbox": [
+        0.738,
+        0.274,
+        0.864,
+        0.377
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-16",
+      "raw": "⌖ ⌀0.75(P)50 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.75,
+      "unit": "mm",
+      "feature_id": "callout_08",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.75
+      },
+      "meaning": "Position within a 0.75 mm tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.741,
+        0.302,
+        0.854,
+        0.406
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-17",
+      "raw": "4X M12 x 1.75 - 6H",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "limits",
+      "value": [
+        1.75,
+        6
+      ],
+      "unit": "mm",
+      "feature_id": "callout_08",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 1.75,
+        "upper": 6
+      },
+      "meaning": "The linear must be between 1.75 and 6 mm.",
+      "page": 1,
+      "bbox": [
+        0.741,
+        0.302,
+        0.854,
+        0.406
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-18",
+      "raw": "⊥ ⌀20",
+      "callout": "feature_control_frame",
+      "kind": "perpendicularity",
+      "tolerance_style": "geometric_zone",
+      "value": 20,
+      "unit": "mm",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 20
+      },
+      "meaning": "Perpendicularity within a 20 mm tolerance zone.",
+      "page": 1,
+      "bbox": [
+        0.779,
+        0.361,
+        0.884,
+        0.446
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-19",
+      "raw": "4X ⊥ ⌀20 ±0.2",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 20,
+      "unit": "mm",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 19.8,
+        "upper": 20.2
+      },
+      "meaning": "The diameter must be between 19.8 and 20.2 mm.",
+      "page": 1,
+      "bbox": [
+        0.779,
+        0.361,
+        0.884,
+        0.446
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-20",
+      "raw": "20 ±0.2",
+      "callout": "dimension",
+      "kind": "linear",
+      "tolerance_style": "plus_minus",
+      "value": 20,
+      "unit": "mm",
+      "feature_id": "callout_09",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 19.8,
+        "upper": 20.2
+      },
+      "meaning": "The linear must be between 19.8 and 20.2 mm.",
+      "page": 1,
+      "bbox": [
+        0.779,
+        0.361,
+        0.884,
+        0.446
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-21",
+      "raw": "H",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_10",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature H.",
+      "page": 1,
+      "bbox": [
+        0.431,
+        0.374,
+        0.455,
+        0.393
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-22",
+      "raw": "G",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_11",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature G.",
+      "page": 1,
+      "bbox": [
+        0.291,
+        0.386,
+        0.317,
+        0.406
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-23",
+      "raw": "30X ⌀14 ±0.1",
+      "callout": "dimension",
+      "kind": "diameter",
+      "tolerance_style": "plus_minus",
+      "value": 14,
+      "unit": "mm",
+      "feature_id": "callout_12",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 13.9,
+        "upper": 14.1
+      },
+      "meaning": "The diameter must be between 13.9 and 14.1 mm.",
+      "page": 1,
+      "bbox": [
+        0.876,
+        0.439,
+        0.931,
+        0.489
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-24",
+      "raw": "D",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_13",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature D.",
+      "page": 1,
+      "bbox": [
+        0.371,
+        0.451,
+        0.383,
+        0.479
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-25",
+      "raw": "L",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_14",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature L.",
+      "page": 1,
+      "bbox": [
+        0.568,
+        0.477,
+        0.593,
+        0.495
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-26",
+      "raw": "E",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_15",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature E.",
+      "page": 1,
+      "bbox": [
+        0.423,
+        0.485,
+        0.448,
+        0.504
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-27",
+      "raw": "⌖ ⌀0.35 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 0.35,
+      "unit": "mm",
+      "feature_id": "callout_16",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.35
+      },
+      "meaning": "Position within a 0.35 mm tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.1,
+        0.533,
+        0.198,
+        0.606
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-28",
+      "raw": "-30X √⌀20 ±0.3 X 90° ±1°",
+      "callout": "dimension",
+      "kind": "angular",
+      "tolerance_style": "plus_minus",
+      "value": 20,
+      "unit": "deg",
+      "feature_id": "callout_17",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 19.7,
+        "upper": 20.3
+      },
+      "meaning": "The angular must be between 19.7 and 20.3 degrees.",
+      "page": 1,
+      "bbox": [
+        0.822,
+        0.617,
+        0.93,
+        0.707
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-29",
+      "raw": "⌓ 0.5 | A | B | C",
+      "callout": "feature_control_frame",
+      "kind": "profile_of_a_surface",
+      "tolerance_style": "geometric_zone",
+      "value": 0.5,
+      "unit": "mm",
+      "feature_id": "callout_18",
+      "applies_to": null,
+      "datums": [
+        "A",
+        "B",
+        "C"
+      ],
+      "limits": {
+        "lower": 0,
+        "upper": 0.5
+      },
+      "meaning": "Profile of a surface within a 0.5 mm tolerance zone, relative to datum A, B, C.",
+      "page": 1,
+      "bbox": [
+        0.206,
+        0.625,
+        0.281,
+        0.701
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-30",
+      "raw": "⌖ 75",
+      "callout": "feature_control_frame",
+      "kind": "position",
+      "tolerance_style": "geometric_zone",
+      "value": 75,
+      "unit": "mm",
+      "feature_id": "callout_19",
+      "applies_to": null,
+      "datums": [],
+      "limits": {
+        "lower": 0,
+        "upper": 75
+      },
+      "meaning": "Position within a 75 mm tolerance zone.",
+      "page": 1,
+      "bbox": [
+        0.337,
+        0.743,
+        0.365,
+        0.764
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-31",
+      "raw": "A",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_20",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature A.",
+      "page": 1,
+      "bbox": [
+        0.745,
+        0.806,
+        0.758,
+        0.836
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-32",
+      "raw": "B",
+      "callout": "datum_feature_symbol",
+      "kind": "datum_feature",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "callout_21",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Datum feature B.",
+      "page": 1,
+      "bbox": [
+        0.446,
+        0.829,
+        0.471,
+        0.847
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-33",
+      "raw": "This tolerance applies to the top surfaces above datum features G and H. The string \"2 SURFACES\" does not clarify which surfaces. Associativity will.",
+      "callout": "note",
+      "kind": "note",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": "part",
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: This tolerance applies to the top surfaces above datum features G and H. The string \"2 SURFACES\" does not clarify which surfaces. Associativity will.",
+      "page": 1,
+      "bbox": [
+        0.069,
+        0.172,
+        0.198,
+        0.309
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-34",
+      "raw": "PMI Complex Test Case 4",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: PMI Complex Test Case 4",
+      "page": 1,
+      "bbox": [
+        0.411,
+        0.911,
+        0.589,
+        0.933
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-35",
+      "raw": "Includes Atomic Test Cases - 5, 9, 10, 12, 15, 16, 22, 30, 40, 49",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Includes Atomic Test Cases - 5, 9, 10, 12, 15, 16, 22, 30, 40, 49",
+      "page": 1,
+      "bbox": [
+        0.285,
+        0.935,
+        0.716,
+        0.957
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-36",
+      "raw": "NIST PMI Test Models - 2012",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: NIST PMI Test Models - 2012",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.034,
+        0.392,
+        0.071
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-37",
+      "raw": "Test Model 4",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Test Model 4",
+      "page": 1,
+      "bbox": [
+        0.058,
+        0.083,
+        0.157,
+        0.108
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-38",
+      "raw": "Rev D",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: Rev D",
+      "page": 1,
+      "bbox": [
+        0.912,
+        0.944,
+        0.947,
+        0.962
+      ],
+      "confidence": null
+    },
+    {
+      "id": "ctc04-39",
+      "raw": "nist_ctc_04_asme1_rd",
+      "callout": "title_block",
+      "kind": "title_block",
+      "tolerance_style": "none",
+      "value": null,
+      "unit": null,
+      "feature_id": null,
+      "applies_to": null,
+      "datums": [],
+      "limits": null,
+      "meaning": "Printed on the sheet: nist_ctc_04_asme1_rd",
+      "page": 1,
+      "bbox": [
+        0.961,
+        0.783,
+        0.975,
+        0.947
+      ],
+      "confidence": null
+    }
+  ]
+}
