@@ -1,35 +1,87 @@
 # Versions
 
-A version is one configuration of a component: which implementation it uses and its settings,
-such as the model, the prompt or the DPI. The app and the evals read the same files, so the
-version the evals measure is the version the app serves.
-`open_services(settings)` in `src/resourcly/bootstrap.py` loads them.
+Each file here is one named recipe for a component. `versions/<component>/<name>.toml` says which
+code to build (`impl`) and gives that code its settings, such as the model or the prompt. A
+setting that names a file, such as the router's `probe`, points to a file next to the version.
+The app and the evals read the same files, so the evals score what the app serves.
 
-| Path | What it is |
+## An example
+
+`router/stub-v0.toml`, the smallest version:
+
+```toml
+description = "Model-free router for tests and machines without the models: ..."
+impl = "stub"
+min_paths = 300
+```
+
+| Field | Meaning |
 | --- | --- |
-| `<component>/<name>.toml` | One version, such as `reader/textlayer-v0.toml`. |
-| `reader/textlayer-v0.toml` | Values from the PDF text layer, no model. |
-| `router/stub-v0.toml` | One structure rule per file type, no model. |
-| `router/three-layer-v1.toml` | Structure rules, a DINOv2 probe, then Qwen3-VL ([docs/routing.md](../docs/routing.md)). |
-| `router/probes/` | Probe weights a router version names; their hash is part of its hash. |
-| `failure/shuffled-v0.toml` | Every report figure in one seeded random order, no model. |
+| `description` | One line for `evals list versions`. Not part of the hash. |
+| `impl` | The code to build, a key of `ROUTERS` in `bootstrap.py`. Here `StubRouteAdapter`. |
+| `min_paths` | A setting of that code: a PDF whose first page has at least 300 vector paths is a drawing. |
 
-The `-v0` files are the model-free floor of their component. The app runs `textlayer-v0`,
-`three-layer-v1` and `shuffled-v0` unless told otherwise. `RESOURCLY_<COMPONENT>_VERSION`, such as
-`RESOURCLY_ROUTER_VERSION`, picks another, and `RESOURCLY_VERSIONS_DIR` points everything at
-another folder.
+The file name, without `.toml`, is the version's name. Any key other than `description` and
+`impl` is a setting, and each `impl` lists the settings it takes and the ones it needs.
+
+## The versions
+
+| Version | What it is | When to use it |
+| --- | --- | --- |
+| `reader/textlayer-v0` | Title block and notes from the PDF text layer. No model. | The default reader, and the floor any reader must beat. |
+| `router/stub-v0` | A PDF drawn in vector paths is a drawing, an image is a photo. No model. | For tests and machines without the models. |
+| `router/three-layer-v1` | Three layers; each decides what it can and passes on the rest. | The default router. |
+| | 1. Rules on the file's vector paths, text and pictures. | |
+| | 2. A DINOv2-small probe over drawing, photo and other, deciding at 0.9; weights in `router/probes/`. | |
+| | 3. Qwen3-VL 8B answers one multiple-choice question. | |
+| `failure/shuffled-v0` | Every report figure in one seeded random order. No model. | The floor any failure finder must beat. |
+
+`router/three-layer-v1` needs `uv sync --extra router --extra vlm` and both models in the local
+Hugging Face cache ([docs/routing.md](../docs/routing.md#run-it)).
+
+## Which version runs
+
+| Component | Default | Switch with |
+| --- | --- | --- |
+| reader | `textlayer-v0` | `RESOURCLY_READER_VERSION` |
+| router | `three-layer-v1` | `RESOURCLY_ROUTER_VERSION` |
+| failure | `shuffled-v0` | `RESOURCLY_FAILURE_VERSION` |
+
+For example, `RESOURCLY_ROUTER_VERSION=stub-v0 uv run resourcly serve` runs without the router's
+models. The defaults are in `Settings` in `src/resourcly/bootstrap.py`. A file with an unknown
+`impl` or setting, or a missing named file, refuses to load.
+
+## How the app code uses a version
+
+All of it is in `src/resourcly/bootstrap.py`.
+
+1. `Settings.versions` holds the version name of each component: the default, or the
+   environment variable.
+2. `load_version` reads `versions/<component>/<name>.toml` and checks it against the
+   `Implementation` registered for its `impl` in `READERS`, `ROUTERS` or `FINDERS`. It returns a
+   `Version` whose hash covers the settings and any file they name.
+3. `Services` builds the component on first use: the `Implementation`'s `build` turns the
+   settings into an adapter, such as `StubRouteAdapter(min_paths=300)`.
+4. The service writes the version, such as `router stub-v0 (stub)`, into each trace step.
+
+The evals take the same path: `evals run` swaps in the named version with
+`Settings.with_version` and calls the same `open_services`.
+
+## How versions fit the workflow
+
+1. Add a version file to try a change. Leave old files alone, so old runs keep their meaning.
+2. Score it on the dev split: `uv run evals run router --version my-router-v2`.
+3. Compare it with the current one: `uv run evals compare router three-layer-v1 my-router-v2`.
+   It compares each version's latest run, so the current one needs a run too.
+4. If it is better, make it the default in `Settings`.
 
 ## Add a version
 
-Copy an existing version file to a new name and edit it. Leave old files alone, so old runs still
-say which settings they used. A version's hash covers its settings, so `evals compare` warns about
-a version that was edited after its runs.
-
 ```sh
-cp versions/reader/textlayer-v0.toml versions/reader/my-reader-v1.toml
-uv run evals list versions reader
-uv run evals run reader --version my-reader-v1 --split dev
+cp versions/router/three-layer-v1.toml versions/router/my-router-v2.toml
+uv run evals list versions router
 ```
 
-The keys a version may set are in the
-[eval harness README](../src/resourcly/eval_harness/README.md#add-a-version).
+Edit the copy. `impl` must be in `READERS`, `ROUTERS` or `FINDERS` in `bootstrap.py`, and other
+keys must be settings it lists. `evals compare` warns about a version edited after its runs. More
+in the [eval harness README](../src/resourcly/eval_harness/README.md#add-a-version).
