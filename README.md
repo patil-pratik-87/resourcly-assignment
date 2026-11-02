@@ -9,7 +9,7 @@ On an Apple silicon Mac:
 
 ```sh
 make run          # set up once (downloads and builds), then serve the chat on http://127.0.0.1:8000
-make evals-quick  # score 10 dev cases of each component
+make evals-quick  # score 10 dev cases of every suite
 ```
 
 Setup is the only online step; after it everything runs offline. What it does, the other `make`

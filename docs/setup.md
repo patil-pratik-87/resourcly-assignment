@@ -30,14 +30,14 @@ failure finder's figure indexes are committed in `versions/`, so setup only chec
 
 ```sh
 make run          # sets up if needed, then serves the chat on http://127.0.0.1:8000
-make evals-quick  # 10 dev cases of each component
+make evals-quick  # 10 dev cases of every suite
 ```
 
 | Target | What it runs |
 | --- | --- |
 | `serve` | `resourcly serve`; `PORT=8123` picks another port |
 | `test` | ruff, pytest and the chat screen's tests |
-| `evals`, `evals-test` | each component's default version on the dev or test split |
+| `evals`, `evals-test` | every suite with the default version, on the dev or test split |
 | `compare COMPONENT= A= B=` | `evals compare` of two runs or versions |
 | `outputs` | reads the 11 drawings again and rewrites `outputs/` |
 | `index` | rebuilds the figure indexes |

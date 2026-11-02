@@ -9,8 +9,8 @@
 UV := $(shell command -v uv 2>/dev/null || echo $(HOME)/.local/bin/uv)
 
 PORT ?= 8000
-# The components the evals measure
-COMPONENTS := reader router failure
+# Every suite the evals have
+SUITES := reader router failure failure-copy answer
 CHAT := src/frontend/chat
 # The reader whose answers outputs/ holds
 OUTPUTS_READER := vector-crop-v1
@@ -42,13 +42,13 @@ test:
 
 # Each component's default version on the dev split, then its summary
 evals:
-	for component in $(COMPONENTS); do $(UV) run evals run $$component --split dev || exit 1; done
+	for suite in $(SUITES); do $(UV) run evals run $$suite --split dev || exit 1; done
 
 evals-quick:
-	for component in $(COMPONENTS); do $(UV) run evals run $$component --limit 10 || exit 1; done
+	for suite in $(SUITES); do $(UV) run evals run $$suite --limit 10 || exit 1; done
 
 evals-test:
-	for component in $(COMPONENTS); do $(UV) run evals run $$component --split test || exit 1; done
+	for suite in $(SUITES); do $(UV) run evals run $$suite --split test || exit 1; done
 
 compare:
 	@test -n "$(COMPONENT)" -a -n "$(A)" -a -n "$(B)" || \
