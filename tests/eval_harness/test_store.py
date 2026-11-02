@@ -55,5 +55,3 @@ def test_runs_list_newest_first_and_filter_by_version(tmp_path: Path) -> None:
 
         assert [r.run_id for r in store.runs()] == ["r4", "r3", "r2", "r1"]
         assert [r.run_id for r in store.runs(component="reader", version="a")] == ["r4", "r3", "r1"]
-        assert store.latest("reader", "a").run_id == "r3"
-        assert store.latest("reader", "absent") is None

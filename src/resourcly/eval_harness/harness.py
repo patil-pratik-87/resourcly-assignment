@@ -12,7 +12,7 @@ from typing import Any
 from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_services
 from resourcly.eval_harness.cases import Case
 from resourcly.eval_harness.models import CaseResult, Run
-from resourcly.eval_harness.ports import ResultStorePort
+from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def run(
     version: str,
     *,
     settings: Settings,
-    store: ResultStorePort,
+    store: SqliteResultStore,
     split: str = "dev",
     case_ids: tuple[str, ...] = (),
     note: str | None = None,
@@ -85,7 +85,7 @@ def run(
     return _finish(store, run_id, results)
 
 
-def _finish(store: ResultStorePort, run_id: str, results: list[tuple[Case, CaseResult]]) -> Run:
+def _finish(store: SqliteResultStore, run_id: str, results: list[tuple[Case, CaseResult]]) -> Run:
     suite = SUITES[store.run(run_id).component]
     summary = suite.summarise([(result.stratum, result.scores) for _, result in results])
     errors = sum(1 for _, result in results if result.error)

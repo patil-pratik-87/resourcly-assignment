@@ -44,7 +44,7 @@ JSON_COLUMNS = {"case_ids", "summary", "prediction", "scores"}
 
 
 class SqliteResultStore:
-    """The ResultStorePort in SQLite: one row per run and one per case, with the raw prediction.
+    """Runs and their cases in SQLite: one row per run and one per case, with the raw prediction.
 
     Keeping the prediction lets `compare` score a run again against new gold without calling the
     component again.
@@ -102,10 +102,6 @@ class SqliteResultStore:
             (component, version, limit),
         ).fetchall()
         return [_load(Run, row) for row in rows]
-
-    def latest(self, component: str, version: str) -> Run | None:
-        finished = [run for run in self.runs(component, version) if run.finished_at]
-        return finished[0] if finished else None
 
     def _insert(self, table: str, row: dict[str, Any]) -> None:
         values = {

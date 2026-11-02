@@ -21,7 +21,6 @@ from resourcly.eval_harness import harness
 from resourcly.eval_harness.cases import Case, check_gold
 from resourcly.eval_harness.compare import compare_runs
 from resourcly.eval_harness.models import CaseResult, Run
-from resourcly.eval_harness.ports import ResultStorePort
 from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES, Suite
 
@@ -487,7 +486,7 @@ def _selected(run: Run) -> str | None:
     return None
 
 
-def _run(store: ResultStorePort, run_id: str) -> Run:
+def _run(store: SqliteResultStore, run_id: str) -> Run:
     try:
         return store.run(run_id)
     except LookupError as error:
