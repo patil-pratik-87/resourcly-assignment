@@ -22,8 +22,6 @@ class Suite:
     score: Callable[[Case, Any], dict[str, Any]]
     summarise: Callable[[list[tuple[Case, Any]]], dict[str, Any]]
     explain: Callable[[Case, Any], list[str]]
-    # metrics that are better when they fall, such as a time; compare reads them that way
-    lower_is_better: tuple[str, ...] = ()
 
 
 def _read(services: Services, case: Case, request_id: str) -> Any:
@@ -59,53 +57,27 @@ def _predicted_document(prediction: Any) -> dict[str, Any]:
     return document if isinstance(document, dict) else {}
 
 
-def _feature_types(document: dict[str, Any]) -> dict[str, str]:
-    features = document.get("features")
-    return {
-        f["id"]: f["type"]
-        for f in (features if isinstance(features, list) else [])
-        if isinstance(f, dict) and isinstance(f.get("id"), str) and isinstance(f.get("type"), str)
-    }
-
-
-def _reading(case: Case, prediction: Any) -> metrics.ReadingScore:
-    return metrics.score_reading(
-        case.gold["values"],
-        scored_values(case, prediction),
-        _feature_types(case.gold),
-        _feature_types(_predicted_document(prediction)),
-    )
+def _reading(case: Case, prediction: Any) -> metrics.Counts:
+    return metrics.score_reading(case.gold["values"], scored_values(case, prediction))
 
 
 def _score_reading(case: Case, prediction: Any) -> dict[str, Any]:
-    score = _reading(case, prediction)
+    counts = _reading(case, prediction)
     return {
-        "case_score": score.strict.f1 if case.stratum == "full" else score.strict.recall,
-        "strict_f1": score.strict.f1,
-        "strict_precision": score.strict.precision,
-        "strict_recall": score.strict.recall,
-        "strict_matched": score.strict.matched,
-        "gold": score.strict.gold,
-        "predicted": score.strict.predicted,
-        "loose_matched": score.loose.matched,
-        "kind_accuracy": score.kind_accuracy,
-        "feature_accuracy": score.feature_accuracy,
-        "feature_pairs": sum(score.feature_confusion.values()),
-        "invalid_records": score.invalid,
-        "schema_issues": len(prediction.get("issues", [])) if isinstance(prediction, dict) else 0,
-        "pages": {
-            str(page): [counts.gold, counts.predicted, counts.matched]
-            for page, counts in score.pages.items()
-        },
+        "case_score": counts.f1 if case.stratum == "full" else counts.recall,
+        "f1": counts.f1,
+        "precision": counts.precision,
+        "recall": counts.recall,
+        "matched": counts.matched,
+        "gold": counts.gold,
+        "predicted": counts.predicted,
     }
 
 
 def _summarise_readings(results: list[tuple[Case, Any]]) -> dict[str, Any]:
-    summary = metrics.summarise_readings(
+    return metrics.summarise_readings(
         [(case.stratum, _reading(case, prediction)) for case, prediction in results]
     )
-    failures = sum(1 for _, prediction in results if not _schema_valid(prediction))
-    return {**summary, "schema_failures": failures}
 
 
 def _explain_reading(case: Case, prediction: Any) -> list[str]:
@@ -134,10 +106,6 @@ def _record(record: Any) -> str:
         f"page {record.get('page')}  {record.get('kind')}  {record.get('raw')!r}"
         f"  value {value}  unit {record.get('unit') or '-'}"
     )
-
-
-def _schema_valid(prediction: Any) -> bool:
-    return isinstance(prediction, dict) and not prediction.get("issues")
 
 
 def _route(services: Services, case: Case, request_id: str) -> Any:
@@ -182,8 +150,6 @@ def _summarise_routes(results: list[tuple[Case, Any]]) -> dict[str, Any]:
                 route=_field(prediction, "route"),
                 layer=_field(prediction, "layer"),
                 reason=_field(prediction, "reason"),
-                elapsed_ms=_field(prediction, "elapsed_ms"),
-                attached=bool(case.gold["input"]["file"]),
             )
             for case, prediction in results
         ]
@@ -244,17 +210,9 @@ def _explain_failure(case: Case, prediction: Any) -> list[str]:
 SUITES: dict[str, Suite] = {
     "reader": Suite(
         component="reader",
-        primary_metric="strict_f1",
-        metrics=(
-            "strict_f1",
-            "strict_precision",
-            "strict_recall",
-            "loose_f1",
-            "partial_recall",
-            "kind_accuracy",
-            "feature_accuracy",
-        ),
-        case_columns=("gold", "predicted", "strict_matched"),
+        primary_metric="f1",
+        metrics=("f1", "precision", "recall", "partial_recall"),
+        case_columns=("gold", "predicted", "matched"),
         load=reader_cases,
         call=_read,
         score=_score_reading,
@@ -264,27 +222,18 @@ SUITES: dict[str, Suite] = {
     "router": Suite(
         component="router",
         primary_metric="accuracy",
-        metrics=(
-            "accuracy",
-            "drawing_recall",
-            "photo_recall",
-            "text_recall",
-            "other_kept_out",
-            "escalation_rate",
-            "median_ms",
-        ),
+        metrics=("accuracy", "drawing_recall", "other_kept_out"),
         case_columns=("route", "layer", "confidence"),
         load=route_cases,
         call=_route,
         score=_score_route,
         summarise=_summarise_routes,
         explain=_explain_route,
-        lower_is_better=("escalation_rate", "median_ms"),
     ),
     "failure": Suite(
         component="failure",
         primary_metric="section@1",
-        metrics=("section@1", "report@1", "mode@3", "kept_out"),
+        metrics=("section@1", "mode@3", "kept_out"),
         case_columns=("top",),
         load=failure_cases,
         call=_find,

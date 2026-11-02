@@ -14,7 +14,7 @@ BASE = Run(
     started_at="2026-11-01T10:00:00Z",
     git_sha="1",
     git_dirty=False,
-    summary={"strict_f1": 0.5, "strict_recall": 0.2, "partial_recall": 0.4},
+    summary={"f1": 0.5, "recall": 0.2, "partial_recall": 0.4},
 )
 
 
@@ -29,7 +29,7 @@ def test_compare_gives_a_verdict_per_metric_with_the_primary_first() -> None:
         BASE,
         run_id="cand",
         version="b",
-        summary={"strict_f1": 0.4, "strict_recall": 0.3, "partial_recall": 0.4},
+        summary={"f1": 0.4, "recall": 0.3, "partial_recall": 0.4},
     )
 
     result = compare_runs(
@@ -37,13 +37,13 @@ def test_compare_gives_a_verdict_per_metric_with_the_primary_first() -> None:
         [case("a", 0.5)],
         candidate,
         [case("a", 0.4)],
-        metrics=("strict_recall", "strict_f1", "partial_recall"),
-        primary="strict_f1",
+        metrics=("recall", "f1", "partial_recall"),
+        primary="f1",
     )
 
     assert [(m.name, m.base, m.candidate, m.verdict) for m in result.metrics] == [
-        ("strict_f1", 0.5, 0.4, "worse"),
-        ("strict_recall", 0.2, 0.3, "better"),
+        ("f1", 0.5, 0.4, "worse"),
+        ("recall", 0.2, 0.3, "better"),
         ("partial_recall", 0.4, 0.4, "no change"),
     ]
     assert result.worse
@@ -56,7 +56,7 @@ def test_compare_pairs_cases_and_warns_about_unpaired_cases_and_changed_gold() -
     candidate_cases = [case("a", 0.9), case("b", 0.3, gold_hash="new"), case("d", 0.2)]
 
     result = compare_runs(
-        BASE, base_cases, candidate, candidate_cases, metrics=("strict_f1",), primary="strict_f1"
+        BASE, base_cases, candidate, candidate_cases, metrics=("f1",), primary="f1"
     )
 
     assert [(c.case_id, c.base, c.candidate) for c in result.cases] == [
@@ -80,7 +80,7 @@ def test_compare_pairs_cases_and_warns_about_unpaired_cases_and_changed_gold() -
 def test_a_metric_one_run_did_not_measure_gets_no_verdict() -> None:
     candidate = replace(BASE, run_id="cand", summary={**BASE.summary, "partial_recall": None})
 
-    result = compare_runs(BASE, [], candidate, [], metrics=("partial_recall",), primary="strict_f1")
+    result = compare_runs(BASE, [], candidate, [], metrics=("partial_recall",), primary="f1")
 
     assert [(m.name, m.base, m.candidate, m.verdict) for m in result.metrics][1] == (
         "partial_recall",
@@ -98,8 +98,8 @@ def test_runs_that_share_no_case_get_no_verdict() -> None:
         [case("a", 0.5)],
         candidate,
         [case("b", 0.5)],
-        metrics=("strict_f1",),
-        primary="strict_f1",
+        metrics=("f1",),
+        primary="f1",
     )
 
     assert result.metrics[0].verdict == "no verdict"
@@ -107,28 +107,8 @@ def test_runs_that_share_no_case_get_no_verdict() -> None:
 
 
 def test_any_change_at_all_is_better_or_worse() -> None:
-    candidate = replace(BASE, run_id="cand", summary={**BASE.summary, "strict_f1": 0.501})
+    candidate = replace(BASE, run_id="cand", summary={**BASE.summary, "f1": 0.501})
 
-    result = compare_runs(BASE, [], candidate, [], metrics=(), primary="strict_f1")
+    result = compare_runs(BASE, [], candidate, [], metrics=(), primary="f1")
 
     assert result.metrics[0].verdict == "better"
-
-
-def test_a_lower_is_better_metric_gets_better_when_it_falls() -> None:
-    base = replace(BASE, summary={"strict_f1": 0.5, "median_ms": 40.0})
-    candidate = replace(base, run_id="cand", summary={"strict_f1": 0.5, "median_ms": 20.0})
-
-    result = compare_runs(
-        base,
-        [case("a", 1.0)],
-        candidate,
-        [case("a", 1.0)],
-        metrics=("strict_f1", "median_ms"),
-        primary="strict_f1",
-        lower_is_better=("median_ms",),
-    )
-
-    assert [(m.name, m.verdict) for m in result.metrics] == [
-        ("strict_f1", "no change"),
-        ("median_ms", "better"),
-    ]

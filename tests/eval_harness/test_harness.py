@@ -21,13 +21,13 @@ def test_a_run_reads_each_selected_drawing_scores_it_and_stores_it(
         1,
         0,
     )
-    assert run.summary["strict_precision"] == 2 / 6
-    assert run.summary["strict_recall"] == 2 / 19
+    assert run.summary["precision"] == 2 / 6
+    assert run.summary["recall"] == 2 / 19
     [case] = store.cases(run.run_id)
     assert (case.case_id, case.stratum, case.request_id) == (CTC01, "full", f"{run.run_id}:{CTC01}")
     assert len(case.prediction["document"]["values"]) == 6
-    assert case.scores["strict_matched"] == 2
-    assert case.scores["case_score"] == case.scores["strict_f1"] == pytest.approx(4 / 25)
+    assert case.scores["matched"] == 2
+    assert case.scores["case_score"] == case.scores["f1"] == pytest.approx(4 / 25)
     assert store.run(run.run_id) == run
 
 
@@ -40,8 +40,8 @@ def test_a_failed_call_is_stored_with_its_error_and_scored_as_a_miss(
     assert run.errors == 1
     assert case.error == "NotFound: no drawing named partial_a"
     assert case.prediction is None
-    assert (case.scores["strict_matched"], case.scores["gold"]) == (0, 19)
-    assert case.scores["case_score"] == case.scores["strict_recall"] == 0.0
+    assert (case.scores["matched"], case.scores["gold"]) == (0, 19)
+    assert case.scores["case_score"] == case.scores["recall"] == 0.0
     assert run.summary["partial_recall"] == 0.0
 
 
@@ -92,7 +92,7 @@ def test_rescore_scores_the_stored_predictions_against_the_current_gold(
     )
     assert after.prediction == before.prediction
     assert after.request_id == before.request_id
-    assert (after.scores["strict_matched"], after.scores["gold"]) == (1, 18)
+    assert (after.scores["matched"], after.scores["gold"]) == (1, 18)
     assert after.gold_hash != before.gold_hash
     assert store.run(first.run_id) == first
 
@@ -108,7 +108,7 @@ def test_rescore_stores_the_stratum_the_case_has_now(
 
     [case] = store.cases(again.run_id)
     assert case.stratum == "partial"
-    assert case.scores["case_score"] == case.scores["strict_recall"]
+    assert case.scores["case_score"] == case.scores["recall"]
 
 
 def test_every_case_leaves_a_trace_under_its_request_id(

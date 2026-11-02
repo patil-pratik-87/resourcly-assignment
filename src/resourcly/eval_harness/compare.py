@@ -57,10 +57,8 @@ def compare_runs(
     candidate_cases: list[CaseResult],
     metrics: tuple[str, ...],
     primary: str,
-    lower_is_better: tuple[str, ...] = (),
 ) -> Comparison:
-    """A metric is better when it rises, or when it falls for one in lower_is_better, such as a
-    time; any change counts.
+    """A metric is better when it rises; any change counts.
 
     Only runs on the same case set, which includes the gold of each case, get a verdict: they
     compare their stored summaries. Otherwise no metric gets a verdict, and the warnings say to
@@ -93,7 +91,7 @@ def compare_runs(
     if changed:
         warnings.append(f"gold changed between the runs for {', '.join(changed)}")
     changes = [
-        _metric(name, base.summary or {}, candidate.summary or {}, name in lower_is_better)
+        _metric(name, base.summary or {}, candidate.summary or {})
         if same
         else MetricChange(name, None, None, "no verdict")
         for name in ordered
@@ -109,9 +107,9 @@ def compare_runs(
     return Comparison(base, candidate, changes, cases, warnings)
 
 
-def _metric(name: str, base: dict, candidate: dict, lower_is_better: bool) -> MetricChange:
+def _metric(name: str, base: dict, candidate: dict) -> MetricChange:
     old, new = base.get(name), candidate.get(name)
-    gain = None if old is None or new is None else (old - new if lower_is_better else new - old)
+    gain = None if old is None or new is None else new - old
     if gain is None:
         verdict = "not measured"
     elif gain > EPSILON:

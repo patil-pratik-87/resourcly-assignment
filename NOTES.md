@@ -66,9 +66,9 @@ floor:
 
 | Metric (all gold) | Value |
 | --- | --- |
-| Strict F1 | 0.344 |
-| Strict precision | 0.902 |
-| Strict recall | 0.213 |
+| F1 | 0.344 |
+| Precision | 0.902 |
+| Recall | 0.213 |
 | Partial-gold recall | 0.129 |
 
 - How: a value matches on page, unit, kind and number. Only 4 drawings are labelled in full
@@ -124,8 +124,8 @@ model-free versions set the floors, on the dev split:
 
 | Version | Cases | Primary | Other |
 | --- | --- | --- | --- |
-| router `stub-v0` | 123 | accuracy 0.607 | drawing recall 0.120, photo recall 0.965, other kept out 0.500 |
-| failure `shuffled-v0` | 86 | section@1 0.038 | report@1 0.269, mode@3 0.769, kept out 0.000 |
+| router `stub-v0` | 123 | accuracy 0.607 | drawing recall 0.120, other kept out 0.500 |
+| failure `shuffled-v0` | 86 | section@1 0.038 | mode@3 0.769, kept out 0.000 |
 
 - How: the router gold is the 244 requests of the routing research, moved to `evals/gold/routes`.
   The failure gold is 3 perturbed copies of each of the 46 report figures, plus 11 drawings and

@@ -29,18 +29,18 @@ def test_a_run_and_its_cases_read_back_after_reopening(tmp_path: Path) -> None:
         latency_ms=12.5,
         error=None,
         prediction={"document": {"values": [{"raw": "⌀20"}]}},
-        scores={"strict_f1": 0.5},
+        scores={"f1": 0.5},
     )
     with SqliteResultStore.open(path) as store:
         store.start_run(run("r1"))
         store.add_case("r1", case)
-        store.finish_run("r1", {"strict_f1": 0.5}, errors=0)
+        store.finish_run("r1", {"f1": 0.5}, errors=0)
 
     with SqliteResultStore.open(path) as store:
         saved = store.run("r1")
         cases = store.cases("r1")
 
-    assert saved.summary == {"strict_f1": 0.5}
+    assert saved.summary == {"f1": 0.5}
     assert (saved.n_cases, saved.errors, saved.git_dirty) == (1, 0, False)
     assert saved.finished_at is not None
     assert cases == [case]

@@ -23,19 +23,10 @@ JAM = figure("16-006/fig12", "mixture_control_jam", "jam_corrosion")
 
 
 def test_a_photo_scores_on_the_top_figure_and_the_modes_of_the_top_three() -> None:
-    assert score_failure(FATIGUE, [SAME_SECTION, HEAT]) == {
-        "report@1": 1.0,
-        "section@1": 1.0,
-        "mode@3": 1.0,
-    }
+    assert score_failure(FATIGUE, [SAME_SECTION, HEAT]) == {"section@1": 1.0, "mode@3": 1.0}
     # the right report but another spar: the section is wrong, the mode right
-    assert score_failure(FATIGUE, [OTHER_SPAR]) == {
-        "report@1": 1.0,
-        "section@1": 0.0,
-        "mode@3": 1.0,
-    }
+    assert score_failure(FATIGUE, [OTHER_SPAR]) == {"section@1": 0.0, "mode@3": 1.0}
     assert score_failure(FATIGUE, [HEAT, JAM, MICRO, SAME_SECTION]) == {
-        "report@1": 0.0,
         "section@1": 0.0,
         "mode@3": 0.0,
     }
@@ -67,10 +58,6 @@ def test_the_summary_averages_photos_and_negatives_apart() -> None:
     )
 
     assert summary == {
-        "cases": 5,
-        "photos": 2,
-        "negatives": 3,
-        "report@1": 1.0,
         "section@1": 0.5,
         "mode@3": 1.0,
         "kept_out": pytest.approx(2 / 3),
