@@ -65,7 +65,8 @@ def test_the_prompt_holds_the_question_and_every_source_with_its_labels() -> Non
     prompt = model.calls[0][0]
     assert prompt.startswith("Answer from this.")
     assert "<question>\nWhy did it crack?\n</question>" in prompt
-    assert "[18-061 fig05] reference image 1; section spar_fatigue_N106ER, failure mode" in prompt
+    assert "[18-061 fig05] shown as an image; section spar_fatigue_N106ER, failure mode" in prompt
+    assert "reference image" not in prompt
     assert "[24-013 fig03] not shown as an image;" in prompt
     assert "Caption: Figure 5. Closer views of the fracture surfaces" in prompt
     assert "[18-061 p2] " in prompt and "[18-061 p9] " in prompt

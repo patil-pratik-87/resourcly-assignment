@@ -101,7 +101,7 @@ uv run resourcly annotation-ui
 | Variable                                                | Default                            |
 | ------------------------------------------------------- | ---------------------------------- |
 | `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION`  | `vector-crop-v2`, `three-layer-v1` |
-| `RESOURCLY_FAILURE_VERSION`, `RESOURCLY_ANSWER_VERSION` | `dinov2-base-v1`, `photo-v2`       |
+| `RESOURCLY_FAILURE_VERSION`, `RESOURCLY_ANSWER_VERSION` | `dinov2-base-v1`, `photo-v3`       |
 | `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES`     | 50 MB, 50                          |
 
 Without the models, these run on any machine, with less: the text layer, routing by file type,
@@ -119,7 +119,7 @@ RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 \
 | Router         | `three-layer-v1`: rules, a DINOv2-small probe, then Qwen3-VL 8B                         | accuracy 0.992 on 123 dev files, 1.000 on 57 test                                       | [docs/routing.md](docs/routing.md)                   |
 | Drawing reader | `vector-crop-v2`: each callout from the vector paths read by Qwen3-VL 8B                | as `vector-crop-v1` on these PDFs: F1 0.725, recall 0.862 on the 11 drawings            | [experiments/drawing](experiments/drawing/README.md) |
 | Fault finder   | `dinov2-base-v1`: the report figures nearest the photo                                  | section@1 0.645, mode@3 0.942 on 154 held-out cases                                     | [research/failure](research/failure/README.md)       |
-| Photo answer   | `photo-v2`: Qwen3-VL 8B answers from the 3 closest figures, keeping only cited findings | hand check 4 of 6 right; `photo-v1` correct 0.625 on 8 dev cases; no real photos tested | [NOTES.md](NOTES.md#photo-answers)                   |
+| Photo answer   | `photo-v3`: Qwen3-VL 8B answers from the 3 closest figures, keeping only cited findings | correct 0.523 on 86 dev cases (`photo-v2` 0.500); no real photos tested                 | [NOTES.md](NOTES.md#photo-answers)                   |
 | Agent and API  | a request per message, traced                                                           | not scored as a whole                                                                   | [docs/chat-ui.md](docs/chat-ui.md#the-api)           |
 
 ## Out of scope

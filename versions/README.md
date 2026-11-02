@@ -43,7 +43,8 @@ The file name, without `.toml`, is the version's name. Any key other than `descr
 | `failure/dinov2-small-v1` | `dinov2-base-v1` with the router's DINOv2-small. | To compare the two models on the failure gold. |
 | `answer/captions-v0` | The closest figures' captions as the answer. No model. | For tests and machines without the model. |
 | `answer/photo-v1` | Qwen3-VL 8B answers from the photo and the closest figures, citing each fact. | Its hand check is stored; replaced by v2. |
-| `answer/photo-v2` | `photo-v1` asking for the same failure, saying what the photo is, and quoting the report for a stated action ([NOTES.md](../NOTES.md#photo-answers)). | The default photo answer. |
+| `answer/photo-v2` | `photo-v1` asking for the same failure, saying what the photo is, and quoting the report for a stated action ([NOTES.md](../NOTES.md#photo-answers)). | Measured; replaced by v3. |
+| `answer/photo-v3` | `photo-v2` naming each figure by its source, with an inferred action shown as a JSON example, not a rule the answer could copy. | The default photo answer. |
 
 The vision readers need `uv sync --extra vlm` and Qwen3-VL 8B in the local Hugging Face cache
 (`uv run hf download mlx-community/Qwen3-VL-8B-Instruct-4bit`). `router/three-layer-v1` needs
@@ -58,7 +59,7 @@ versions need Qwen3-VL 8B.
 | reader | `vector-crop-v2` | `RESOURCLY_READER_VERSION` |
 | router | `three-layer-v1` | `RESOURCLY_ROUTER_VERSION` |
 | failure | `dinov2-base-v1` | `RESOURCLY_FAILURE_VERSION` |
-| answer | `photo-v2` | `RESOURCLY_ANSWER_VERSION` |
+| answer | `photo-v3` | `RESOURCLY_ANSWER_VERSION` |
 
 For example, `RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0
 RESOURCLY_FAILURE_VERSION=shuffled-v0 RESOURCLY_ANSWER_VERSION=captions-v0 uv run resourcly serve`

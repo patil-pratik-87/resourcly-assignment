@@ -240,7 +240,7 @@ def test_the_default_answer_shares_the_readers_model_and_loads_nothing(settings:
     assert answers.answerer.prompt.lstrip().startswith("You are a failure-analysis assistant")
     assert (answers.figures, answers.images, answers.figure_side) == (3, 2, 768)
     assert services.failures.finder.encoder.revision == "not loaded"
-    assert services.answer_name == "photo-v2 (vlm)"
+    assert services.answer_name == "photo-v3 (vlm)"
 
 
 def test_a_match_without_a_summary_leads_with_its_first_finding() -> None:

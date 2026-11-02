@@ -79,10 +79,9 @@ class VlmPhotoAnswerAdapter:
     def _evidence(self, evidence: PhotoEvidence) -> str:
         lines = []
         for number, figure in enumerate(evidence.figures, start=1):
+            # Never a private name such as "image 2", which an answer would repeat to the user
             shown = (
-                f"reference image {number}"
-                if number <= len(evidence.images)
-                else "not shown as an image"
+                "shown as an image" if number <= len(evidence.images) else "not shown as an image"
             )
             lines.append(
                 f"[{figure.source}] {shown}; section {figure.section},"

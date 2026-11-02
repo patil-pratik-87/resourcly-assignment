@@ -23,7 +23,7 @@ Read each README, then open its `review.html` in a browser for the results and p
 message -> agent: one request, one item per file
   item -> router: structure rules -> DINOv2-small probe -> Qwen3-VL 8B
     drawing     -> reader (vector-crop-v2)       -> JSON of every value
-    photo       -> fault finder (dinov2-base-v1) -> photo answer (photo-v2)
+    photo       -> fault finder (dinov2-base-v1) -> photo answer (photo-v3)
     text, other -> a fixed reply
   every step -> trace store, under the request id
 ```
@@ -107,6 +107,5 @@ Setup details: [docs/setup.md](docs/setup.md). Terminal and no-model use:
 - Test photos and scans are made by code ([routing](docs/routing.md#limits),
   [photo answers](NOTES.md#photo-answers)).
 - The photo gate lets drawings and most real photos of other parts through.
-- The answer eval has 8 cases, and the `photo-v2` and `vector-crop-v2` runs are pending
-  ([docs/evals.md](docs/evals.md#current-numbers)).
+- The `vector-crop-v2` run is pending ([docs/evals.md](docs/evals.md#current-numbers)).
 - All drawings come from one NIST family.

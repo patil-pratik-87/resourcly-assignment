@@ -283,7 +283,7 @@ Write-up: `research/failure/README.md`.
 
 ## Photo answers
 
-`dinov2-base-v1` finds the report figures nearest a photo; `photo-v2` has Qwen3-VL 8B answer from
+`dinov2-base-v1` finds the report figures nearest a photo; `photo-v3` has Qwen3-VL 8B answer from
 the closest 3 in one call. Code keeps only findings citing what it was shown, a "stated" action
 must quote a report paragraph, and a photo the model calls unrelated is kept out. Both are the
 defaults; the answer shares the reader's Qwen adapter.
@@ -319,7 +319,9 @@ The eval harness now scores fault finding as the research measured it, and score
   match, a citation in the right report, a failure keyword and only valid citations; a negative
   must be kept out. On a stratified `--limit 8` dev sample, `photo-v1` (Qwen3-VL 8B) scores 0.625
   against 0.500 for the captions floor, at 18 to 35 s per photo. Both photo misses followed a top
-  figure from another report. Eight cases do not rank the two. The `photo-v2` run is pending.
+  figure from another report. Eight cases do not rank the two. On all 86 dev cases, `photo-v2`
+  scores 0.500 and `photo-v3` 0.523. `photo-v2` told users about "reference image 1" or copied
+  the prompt's action rule in 48 answers, which `prompt_free` now counts; `photo-v3` in none.
 
 Details: `docs/evals.md`.
 

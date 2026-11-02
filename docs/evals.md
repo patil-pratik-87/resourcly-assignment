@@ -58,6 +58,8 @@ The model-free version of each component sets its floor. The two vision readers 
 | answer `captions-v0` | dev, 86 cases | correct 0.535 | report_cited 0.987, mode_named 0.564, citations_valid 1.000, kept_out 0.375 |
 | answer `captions-v0` | dev, `--limit 8` | correct 0.500 | report_cited 1.000, mode_named 0.500, citations_valid 1.000, kept_out 0.500 |
 | answer `photo-v1` | dev, `--limit 8` | correct 0.625 | report_cited 0.667, mode_named 0.667, citations_valid 1.000, kept_out 0.500 |
+| answer `photo-v2` | dev, 86 cases | correct 0.500 | report_cited 0.526, mode_named 0.782, citations_valid 1.000, kept_out 0.500, prompt_free 0.442 |
+| answer `photo-v3` | dev, 86 cases | correct 0.523 | report_cited 0.551, mode_named 0.769, citations_valid 1.000, kept_out 0.500, prompt_free 1.000 |
 
 A failure split's cases are photos of report figures and negatives: 78 and 8 in dev, 60 and 8 in
 test. Held out, `dinov2-base-v1` repeats the research exactly (`research/failure/README.md`):
@@ -69,9 +71,10 @@ No finder keeps a drawing out: the 0.28 gate is below what drawings reach (0.42)
 must keep them out. `dinov2-base-v1` keeps all 5 unrelated images out, and `dinov2-small-v1`
 keeps 1.
 
-The answer numbers were measured on `photo-v1`. `photo-v2`, now the default, asks for the same
-failure and can keep out a photo it sees no part in; its run on the same 8 cases is pending. The
-`photo-v1` runs score the same under the current rules, since none of its actions is stated.
+`photo-v2` told users about "reference image 1" or copied the prompt's rule for an inferred
+action in 48 of 86 answers. `photo-v3`, now the default, names figures by their source and shows
+that rule as a JSON example; every answer is prompt free, and correct moves from 0.500 to 0.523.
+The `photo-v1` runs score the same under the current rules, since none of its actions is stated.
 
 On its 8 cases, `photo-v1` answers 4 of 6 photos correctly and the captions floor 3. Both photos
 it gets wrong had a top figure from another report, and the model followed it. It keeps the logo
