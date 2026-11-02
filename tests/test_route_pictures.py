@@ -38,3 +38,15 @@ def test_png_gives_the_picture_as_png_bytes() -> None:
 
     with Image.open(BytesIO(data)) as decoded:
         assert (decoded.format, decoded.size) == ("PNG", (768, 384))
+
+
+def test_a_phone_photo_is_turned_upright_from_its_exif_orientation() -> None:
+    exif = Image.Exif()
+    exif[0x0112] = 6  # stored sideways: turn 90 degrees clockwise to view
+    buffer = BytesIO()
+    Image.new("RGB", (200, 100), "white").save(buffer, "JPEG", exif=exif)
+    photo = Attachment("IMG_0001.jpg", "image/jpeg", buffer.getvalue())
+
+    assert picture(photo, 1024).size == (100, 200)
+    with Image.open(BytesIO(png(photo, 1024))) as decoded:
+        assert decoded.size == (100, 200)
