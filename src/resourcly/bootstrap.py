@@ -137,15 +137,17 @@ class Implementation:
     check: Callable[[dict[str, Any]], None] | None = None
 
 
-FALLBACK = "or set RESOURCLY_READER_VERSION=textlayer-v0 to read the text layer without a model"
+FALLBACK = (
+    "or run without it: RESOURCLY_READER_VERSION=textlayer-v0, RESOURCLY_ROUTER_VERSION=stub-v0"
+    " and RESOURCLY_ANSWER_VERSION=captions-v0 need no model"
+)
 
 
 def _local_model(model_id: str) -> Path:
-    """The model's local folder, or ModelNotCached saying how to get it or read without it."""
+    """The model's local folder, or ModelNotCached saying how to get it or run without it."""
     if find_spec("mlx_vlm") is None:
         raise ModelNotCached(
-            f"reading drawings with {model_id} needs mlx-vlm on Apple silicon: run"
-            f" `uv sync --extra vlm`, {FALLBACK}"
+            f"{model_id} needs mlx-vlm on Apple silicon: run `uv sync --extra vlm`, {FALLBACK}"
         )
     try:
         return cached_snapshot(model_id)
@@ -156,13 +158,25 @@ def _local_model(model_id: str) -> Path:
         ) from error
 
 
+_vision_models: dict[str, MlxVlmModelAdapter] = {}
+_vision_lock = threading.Lock()
+
+
+def vision_model(model_id: str) -> MlxVlmModelAdapter:
+    """The one adapter of a vision-language model, shared by the reader, the router and the
+    answer that name it. Building it loads nothing; the weights load on its first call."""
+    with _vision_lock:
+        if model_id not in _vision_models:
+            _vision_models[model_id] = MlxVlmModelAdapter(model_id, locate=_local_model)
+        return _vision_models[model_id]
+
+
 def _with_model(reader: Callable[..., Any]) -> Callable[[Settings, dict[str, Any]], Any]:
     """A reader factory whose `model` setting names the vision-language model to run."""
 
     def build(settings: Settings, params: dict[str, Any]) -> Any:
         rest = {key: value for key, value in params.items() if key != "model"}
-        model = MlxVlmModelAdapter(params["model"], locate=_local_model)
-        return reader(settings.drawings_dir, model, **rest)
+        return reader(settings.drawings_dir, vision_model(params["model"]), **rest)
 
     return build
 
@@ -213,7 +227,7 @@ def _three_layers(settings: Settings, params: dict[str, Any]) -> list[RouteLayer
     )
     probe = LinearProbe.load(settings.versions_dir / "router" / params["probe"])
     vlm = VlmRouteAdapter(
-        MlxVlmModelAdapter(params["model"]), params["prompt"], params.get("vlm_max_side", 768)
+        vision_model(params["model"]), params["prompt"], params.get("vlm_max_side", 768)
     )
     return [structure, ProbeRouteAdapter(encoder, probe, params["threshold"]), vlm]
 

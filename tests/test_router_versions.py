@@ -9,7 +9,13 @@ from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter
 from resourcly.adapters.route_probe import ProbeRouteAdapter
 from resourcly.adapters.route_structure import StructureRouteAdapter
 from resourcly.adapters.route_vlm import VlmRouteAdapter
-from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_services
+from resourcly.bootstrap import (
+    PROJECT_ROOT,
+    Settings,
+    load_version,
+    open_services,
+    vision_model,
+)
 from resourcly.errors import InvalidVersion
 from resourcly.models import Route
 from resourcly.services import RouterService
@@ -126,3 +132,18 @@ def test_a_truncated_photo_is_routed_to_other_instead_of_failing_the_request(
     assert (routing.route, routing.layer) == (Route.OTHER, "probe")
     assert routing.reason.startswith("not a readable image/jpeg image")
     assert Dinov2EncoderAdapter._loaded == {}
+
+
+def test_the_reader_and_the_router_share_one_adapter_of_their_vision_model(
+    layered: Settings,
+) -> None:
+    settings = layered.with_version("reader", "vector-crop-v2")
+    with open_services(settings) as services:
+        reader_model = services.drawings.reader.model
+        router_model = services.router.layers[2].model
+        again = services._drawings_in(settings.drawings_dir).reader.model
+
+    assert reader_model is router_model is again
+    assert vision_model("mlx-community/Qwen3-VL-8B-Instruct-4bit") is reader_model
+    assert reader_model.revision == "not loaded"
+    assert vision_model("org/other") is not reader_model
