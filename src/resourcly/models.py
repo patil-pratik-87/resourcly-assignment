@@ -732,12 +732,17 @@ class RequestItem(BaseModel):
 
 
 class RequestRecord(BaseModel):
-    """One chat message: its text, its items, and when it was sent."""
+    """One chat message: its text, its items, and when it was sent.
+
+    A demo request was answered before and is loaded from demo/ when the server starts, so the
+    chat opens with something to look at.
+    """
 
     request_id: str
     text: str
     created_at: str
     items: list[RequestItem]
+    demo: bool = False
 
     @computed_field
     @property

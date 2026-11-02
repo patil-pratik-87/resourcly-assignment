@@ -46,6 +46,7 @@ def settings(gold_dir: Path, tmp_path: Path) -> Settings:
         annotation_ui_dist=tmp_path / "no-annotation-ui",
         trace_path=tmp_path / "var" / "traces.sqlite",
         uploads_dir=tmp_path / "var" / "uploads",
+        demo_dir=None,
         # these versions need no model, so the tests can run them
         versions={
             "reader": "textlayer-v0",

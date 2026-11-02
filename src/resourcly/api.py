@@ -35,6 +35,7 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
         with open_services(settings) as services:
             app.state.services = services
             services.recover()
+            services.load_demos()
             yield
 
     app = FastAPI(title="Resourcly", lifespan=lifespan)

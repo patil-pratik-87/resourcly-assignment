@@ -1,0 +1,100 @@
+[
+  {
+    "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+    "step": "requests.receive",
+    "called": "agent",
+    "input": {
+      "text_chars": 0,
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": [
+        "nist_ctc_01_asme1_rd.pdf"
+      ]
+    },
+    "output": {
+      "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7"
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.462+00:00",
+    "duration_ms": 0.0
+  },
+  {
+    "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+    "step": "uploads.save",
+    "called": "upload store",
+    "input": {
+      "name": "nist_ctc_01_asme1_rd.pdf",
+      "bytes": 55077,
+      "item": "nist_ctc_01_asme1_rd"
+    },
+    "output": {
+      "media_type": "application/pdf",
+      "pages": 1
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.463+00:00",
+    "duration_ms": 11.7
+  },
+  {
+    "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+    "step": "route.structure",
+    "called": "router three-layer-v1 (three-layer): PyMuPDF structure rules (300 paths, first 10 pages)",
+    "input": {
+      "text_chars": 0,
+      "attachment": {
+        "name": "nist_ctc_01_asme1_rd.pdf",
+        "media_type": "application/pdf",
+        "bytes": 55077,
+        "sha256": "5f71e173eff4381afb5dc79d9ff44d213f436a59519bd2142746f378f7d70e93"
+      }
+    },
+    "output": {
+      "decided": true,
+      "route": "drawing",
+      "confidence": 1.0,
+      "reason": "vector PDF, 1797 paths on page 1",
+      "probabilities": {}
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.476+00:00",
+    "duration_ms": 34.6
+  },
+  {
+    "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+    "step": "router.route",
+    "called": "router three-layer-v1 (three-layer)",
+    "input": {
+      "item": "nist_ctc_01_asme1_rd",
+      "text_chars": 0,
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "nist_ctc_01_asme1_rd.pdf"
+    },
+    "output": {
+      "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+      "route": "drawing",
+      "layer": "structure",
+      "confidence": 1.0,
+      "reason": "vector PDF, 1797 paths on page 1",
+      "probabilities": {},
+      "elapsed_ms": 35.6
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.476+00:00",
+    "duration_ms": 35.6
+  },
+  {
+    "request_id": "28c8fc7699d04c04a74a0229ba7d6ae7",
+    "step": "drawings.read",
+    "called": "reader vector-crop-v2 (vector-crop)",
+    "input": {
+      "drawing": "nist_ctc_01_asme1_rd"
+    },
+    "output": {
+      "values": 23,
+      "schema_issues": 0,
+      "answer_issues": 0
+    },
+    "error": null,
+    "started_at": "2026-11-02T10:06:40.514+00:00",
+    "duration_ms": 64000.0
+  }
+]

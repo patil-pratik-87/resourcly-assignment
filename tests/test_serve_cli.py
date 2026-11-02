@@ -65,3 +65,21 @@ def test_annotation_ui_serves_the_label_screen(
     assert result.exit_code == 0, result.output
     with TestClient(served["app"]) as client:
         assert client.get("/").text == "<html>labels</html>"
+
+
+def test_serve_opens_the_chat_with_the_demo_chats(served: dict[str, Any]) -> None:
+    result = CliRunner().invoke(app, ["serve"])
+
+    assert result.exit_code == 0, result.output
+    with TestClient(served["app"]) as client:
+        records = client.get("/api/requests").json()
+    assert len(records) == 2
+    assert all(record["demo"] for record in records)
+
+
+def test_serve_no_demo_opens_the_chat_empty(served: dict[str, Any]) -> None:
+    result = CliRunner().invoke(app, ["serve", "--no-demo"])
+
+    assert result.exit_code == 0, result.output
+    with TestClient(served["app"]) as client:
+        assert client.get("/api/requests").json() == []

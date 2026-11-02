@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from resourcly.adapters.captions_answer import CaptionsAnswerAdapter
+from resourcly.adapters.demo_chats import load_demo_chats
 from resourcly.adapters.dinov2_encoder import Dinov2EncoderAdapter
 from resourcly.adapters.figure_index import FigureIndex, IndexedEvidenceAdapter
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
@@ -58,6 +59,8 @@ class Settings:
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
     uploads_dir: Path = PROJECT_ROOT / "var" / "uploads"
+    # The demo chats `resourcly serve` adds to the request store, or None for none
+    demo_dir: Path | None = PROJECT_ROOT / "demo"
     # A chat message's files are read into memory whole, so each file's size is capped, and so is
     # the number of files in one message.
     max_upload_bytes: int = 50 * 1024 * 1024
@@ -87,6 +90,7 @@ class Settings:
             versions_dir=Path(os.environ.get("RESOURCLY_VERSIONS_DIR", defaults.versions_dir)),
             trace_path=Path(os.environ.get("RESOURCLY_TRACE_DB", defaults.trace_path)),
             uploads_dir=Path(os.environ.get("RESOURCLY_UPLOADS_DIR", defaults.uploads_dir)),
+            demo_dir=None if _off(os.environ.get("RESOURCLY_DEMO_CHATS")) else defaults.demo_dir,
             max_upload_bytes=int(
                 os.environ.get("RESOURCLY_MAX_UPLOAD_BYTES", defaults.max_upload_bytes)
             ),
@@ -99,6 +103,10 @@ class Settings:
 
     def with_version(self, component: str, name: str) -> "Settings":
         return replace(self, versions={**self.versions, component: name})
+
+
+def _off(value: str | None) -> bool:
+    return value is not None and value.strip().lower() in ("0", "false", "off", "no")
 
 
 @dataclass(frozen=True)
@@ -443,6 +451,11 @@ class Services:
     def recover(self) -> None:
         """Mark the chat work a previous server left unfinished as failed."""
         recover(self._requests)
+
+    def load_demos(self) -> None:
+        """Add the demo chats the request store does not have yet, with their traces."""
+        if self._settings.demo_dir is not None:
+            load_demo_chats(self._settings.demo_dir, self._settings.uploads_dir, self._trace())
 
     @cached_property
     def _requests(self) -> JsonRequestStoreAdapter:

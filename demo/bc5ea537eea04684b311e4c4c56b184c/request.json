@@ -1,0 +1,100 @@
+{
+  "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+  "text": "",
+  "created_at": "2026-11-02T10:06:40.679+00:00",
+  "items": [
+    {
+      "item_id": "pos_18-061_fig05_v1",
+      "kind": "file",
+      "name": "pos_18-061_fig05_v1.jpg",
+      "media_type": "image/jpeg",
+      "size": 39810,
+      "pages": 1,
+      "route": {
+        "request_id": "bc5ea537eea04684b311e4c4c56b184c",
+        "route": "photo",
+        "layer": "probe",
+        "confidence": 0.9500674543997658,
+        "reason": "the probe gives photo 0.950",
+        "probabilities": {
+          "drawing": 0.047859797629636436,
+          "other": 0.002072747970597779,
+          "photo": 0.9500674543997658
+        },
+        "elapsed_ms": 21271.3
+      },
+      "status": "answered",
+      "progress": null,
+      "reply": "The part has a fatigue crack that initiated at a hole and propagated through the spar cap and doubler structure.\n\nFrom the reports:\n- The photo shows a fatigue failure on a spar cap and doubler, consistent with the failure mode in reference image 1 and reference image 2. [18-061 fig05]\n\nWhat to do:\n- The part should be removed from service. (inferred)\n\nClosest report figures: 18-061 fig05 (0.78), 18-061 fig10 (0.66), 18-061 fig15 (0.65)",
+      "answer": {
+        "not_in_reports": false,
+        "kept_out": null,
+        "matched": true,
+        "answer": "The part has a fatigue crack that initiated at a hole and propagated through the spar cap and doubler structure.",
+        "findings": [
+          {
+            "statement": "The photo shows a fatigue failure on a spar cap and doubler, consistent with the failure mode in reference image 1 and reference image 2.",
+            "citation": {
+              "source": "18-061 fig05",
+              "report": "18-061",
+              "page": 13,
+              "figure": "18-061/fig05"
+            }
+          }
+        ],
+        "actions": [
+          {
+            "action": "The part should be removed from service.",
+            "basis": "inferred",
+            "citation": null,
+            "quote": null
+          }
+        ],
+        "figures": [
+          {
+            "figure": "18-061/fig05",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.7845
+          },
+          {
+            "figure": "18-061/fig10",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.6647
+          },
+          {
+            "figure": "18-061/fig15",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.6535
+          },
+          {
+            "figure": "18-061/fig04",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.5994
+          },
+          {
+            "figure": "18-061/fig24",
+            "report": "18-061",
+            "section": "spar_N3986M",
+            "failure_mode": "reference_no_defect",
+            "score": 0.5084
+          }
+        ]
+      },
+      "values": null,
+      "issues": null,
+      "error": null,
+      "started_at": "2026-11-02T10:07:01.967+00:00",
+      "finished_at": "2026-11-02T10:07:40.269+00:00"
+    }
+  ],
+  "status": "done",
+  "demo": true
+}

@@ -144,6 +144,18 @@ def test_requests_lists_the_latest_first() -> None:
     assert lines[1].endswith('"first"')
 
 
+def test_requests_marks_the_demo_chats() -> None:
+    with open_services(Settings.from_env()) as services:
+        services.load_demos()
+
+    result = invoke("requests")
+
+    assert result.exit_code == 0, result.output
+    lines = result.output.splitlines()
+    assert len(lines) == 2
+    assert all(line.split()[1:5] == ["done", "1", "item(s)", "demo"] for line in lines)
+
+
 def test_serve_runs_the_api_on_the_given_port(monkeypatch: pytest.MonkeyPatch) -> None:
     served = {}
     monkeypatch.setattr("resourcly.cli.uvicorn.run", lambda app, **where: served.update(where))
