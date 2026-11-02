@@ -143,6 +143,8 @@ class Implementation:
     required: tuple[str, ...] = ()
     # settings that name a file, relative to the component's versions folder
     files: tuple[str, ...] = ()
+    # settings that name a model the build loads from the local Hugging Face cache
+    models: tuple[str, ...] = ()
     # raises InvalidVersion for settings the build would refuse, so a bad version fails to load
     check: Callable[[dict[str, Any]], None] | None = None
 
@@ -210,11 +212,13 @@ READERS: dict[str, Implementation] = {
             "page_max_tokens",
         ),
         required=("model", "prompt"),
+        models=("model",),
     ),
     "whole-page": Implementation(
         _with_model(WholePageReaderAdapter),
         settings=("model", "prompt", "dpi", "max_tokens"),
         required=("model", "prompt"),
+        models=("model",),
     ),
 }
 # The image models a router probe or a failure finder can embed pictures with, by the name a
@@ -277,6 +281,7 @@ ROUTERS: dict[str, Implementation] = {
         ),
         required=("encoder", "encoder_model", "probe", "threshold", "model", "prompt"),
         files=("probe",),
+        models=("encoder_model", "model"),
         check=_known_encoder,
     ),
 }
@@ -316,6 +321,7 @@ FINDERS: dict[str, Implementation] = {
         ),
         required=("encoder", "encoder_model", "encoder_recipe", "index", "threshold"),
         files=("index",),
+        models=("encoder_model",),
         check=_known_encoder,
     ),
 }
@@ -348,6 +354,7 @@ ANSWERERS: dict[str, Implementation] = {
         ),
         required=("index", "model", "prompt", "max_tokens"),
         files=("index",),
+        models=("model",),
     ),
 }
 IMPLEMENTATIONS: dict[str, dict[str, Implementation]] = {
@@ -397,6 +404,23 @@ def load_version(settings: Settings, component: str, name: str) -> Version:
                 )
             files[key] = hashlib.sha256(file.read_bytes()).hexdigest()[:12]
     return Version(component, name, impl, description, params, files)
+
+
+def version_models(version: Version) -> dict[str, str]:
+    """The models a version loads, by the setting that names each."""
+    implementation = IMPLEMENTATIONS[version.component][version.impl]
+    return {key: version.params[key] for key in implementation.models if key in version.params}
+
+
+def model_cached(model_id: str) -> bool:
+    """Whether the model is in the local Hugging Face cache, looked up without the network."""
+    if find_spec("huggingface_hub") is None:
+        return False
+    try:
+        cached_snapshot(model_id)
+    except ModelNotCached:
+        return False
+    return True
 
 
 def list_versions(settings: Settings, component: str) -> list[Version]:
