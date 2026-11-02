@@ -129,8 +129,14 @@ the label screen, and shares no code with it.
   drawing. The trace tab lists each router layer's verdict under the routing step.
 - The page comes from `GET /api/requests/<id>/items/<item>/pages/<n>.png`. Uploads are kept as
   PDFs, a photo as a one-page PDF, so the one endpoint serves both.
-- What comes next: a live trace stream in place of the polling, and real answers for photos and
-  text questions.
+- A photo's card shows its answer as data, not as the plain reply: findings with their sources,
+  actions marked stated or inferred, and the closest figures from
+  `GET /api/reports/<report>/figures/<n>.png`, each of which opens larger. When the gate finds no
+  close figure, the card only says the failure is not in the reports.
+- The screen follows the system's light or dark mode. Every colour is a token, and pages and
+  figures keep their white paper in both.
+- What comes next: a live trace stream in place of the polling, and real answers for text
+  questions.
 
 How to use it: `docs/chat-ui.md`.
 
