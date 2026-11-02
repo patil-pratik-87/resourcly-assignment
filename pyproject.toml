@@ -19,6 +19,11 @@ dependencies = [
 vlm = [
     "mlx-vlm==0.7.11; sys_platform == 'darwin' and platform_machine == 'arm64'",
 ]
+# The router's probe embeds pictures with a frozen image model (DINOv2) through PyTorch.
+router = [
+    "torch>=2.5",
+    "transformers>=4.46",
+]
 
 [project.scripts]
 resourcly = "resourcly.cli:app"
@@ -29,6 +34,10 @@ dev = [
     "httpx2>=2.16.0",
     "pytest>=8.3",
     "ruff>=0.7",
+]
+# Retrains the router's probe.
+router-build = [
+    "scikit-learn>=1.5",
 ]
 
 [build-system]

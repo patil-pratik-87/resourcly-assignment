@@ -91,6 +91,17 @@ class RouteLayerPort(Protocol):
         ...
 
 
+class ImageEncoderPort(Protocol):
+    """A frozen image model that turns an attachment's picture into an embedding."""
+
+    model_id: str
+    revision: str  # the snapshot of the weights in use, or "not loaded"
+
+    def encode(self, attachment: Attachment) -> list[float]:
+        """The embedding of the picture (an image, or page 1 of a PDF), of length 1."""
+        ...
+
+
 class FailureFinderPort(Protocol):
     """Finds the report figures that show the same failure as a photo of a part."""
 

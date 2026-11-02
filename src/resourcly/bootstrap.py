@@ -10,6 +10,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from resourcly.adapters.dinov2_encoder import Dinov2EncoderAdapter
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
 from resourcly.adapters.request_store import JsonRequestStoreAdapter
@@ -21,7 +22,7 @@ from resourcly.adapters.thread_jobs import ThreadJobsAdapter
 from resourcly.adapters.upload_store import FileUploadStoreAdapter
 from resourcly.agent import AgentService, recover
 from resourcly.errors import InvalidVersion, NotFound
-from resourcly.ports import RouterPort
+from resourcly.ports import ImageEncoderPort, RouterPort
 from resourcly.services import (
     DrawingService,
     FailureService,
@@ -113,6 +114,11 @@ READERS: dict[str, Implementation] = {
     "textlayer": Implementation(
         lambda settings, params: PyMuPDFTextReaderAdapter(settings.drawings_dir)
     ),
+}
+# The image models a router probe can embed pictures with, by the name a version gives as
+# `encoder`. Each takes the model id and the long side of the picture it sees.
+ENCODERS: dict[str, Callable[[str, int], ImageEncoderPort]] = {
+    "dinov2": lambda model_id, max_side: Dinov2EncoderAdapter(model_id, max_side),
 }
 ROUTERS: dict[str, Implementation] = {
     # A model-free stand-in, for tests and machines without the router's models.
