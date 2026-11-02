@@ -134,3 +134,26 @@ model-free versions set the floors, on the dev split:
   as pictures. The shuffled finder gives the same order for every photo and never keeps one out.
 
 Details: `docs/evals.md`.
+
+## The router
+
+`three-layer-v1` replaces the stub as the measured router. Three layers run in order of cost:
+structure rules on the file, a DINOv2-small probe that decides at 0.9, and Qwen3-VL 8B for the
+rest. The probe was trained on the train split only (37 drawings, 23 photos).
+
+| Version | Split | Accuracy | Drawing recall | Other kept out |
+| --- | --- | --- | --- | --- |
+| `stub-v0` | dev (123) | 0.607 | 0.120 | 0.500 |
+| `three-layer-v1` | dev (123) | 1.000 | 1.000 | 0.833 |
+| `stub-v0` | test (57) | 0.418 | 0.091 | 0.500 |
+| `three-layer-v1` | test (57) | 1.000 | 1.000 | 1.000 |
+
+- How: `evals run router --version three-layer-v1` on dev, then once on test, and
+  `evals compare` against `stub-v0`.
+- Miss: a dimensioned physics diagram (`o_commons_abmessungen`) goes to drawing; the probe is
+  0.986 sure.
+- Limits: the dev and test NIST drawings come from the same family as the train ones, so
+  drawing recall is measured within that family. The app still runs `stub-v0` by default, so it
+  needs no model; `RESOURCLY_ROUTER_VERSION=three-layer-v1` picks the layered router.
+
+Details: `docs/routing.md`.

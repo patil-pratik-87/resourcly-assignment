@@ -156,7 +156,8 @@ def test_list_shows_components_versions_and_cases(evals) -> None:
     versions = evals("list", "versions", "reader").output
     cases = evals("list", "cases", "reader", "--split", "all").output
 
-    assert "reader     strict_f1  textlayer        1 version(s)" in components
+    reader = next(line for line in components.splitlines() if line.startswith("reader"))
+    assert reader.split() == ["reader", "strict_f1", "textlayer", "1", "version(s)"]
     textlayer = next(line for line in versions.splitlines() if "textlayer-v0" in line)
     assert textlayer.split()[1:3] == ["textlayer-v0", "textlayer"]
     assert "1 run(s)" in textlayer

@@ -1,0 +1,33 @@
+description = "Structure rules, DINOv2-small probe deciding at 0.9, Qwen3-VL 8B for the rest (docs/routing.md)"
+impl = "three-layer"
+
+# Layer 1, rules on the file's structure. A page with this many vector paths and less than this
+# share under pictures is a CAD sheet; a page with this much text that is not one big picture is
+# prose. Page 1 at least this much under a picture leaves a PDF to the picture.
+vector_paths = 300
+cad_max_picture = 0.2
+prose_chars = 1000
+full_page_picture = 0.9
+raster_picture = 0.5
+pages = 10
+
+# Layer 2, a linear probe on a frozen image embedding of the picture, page 1 of a PDF or the image
+# at most this long. The probe file holds the trained weights (scripts/train_route_probe.py).
+encoder = "dinov2"
+encoder_model = "facebook/dinov2-small"
+encoder_max_side = 1024
+probe = "probes/dinov2-small-v1.json"
+threshold = 0.9
+
+# Layer 3, a vision-language model asked one multiple-choice question about the picture at most
+# this long. A is a drawing, B a photo of a part and C a file that fits no case. The user's text is
+# never shown to it.
+model = "mlx-community/Qwen3-VL-8B-Instruct-4bit"
+vlm_max_side = 768
+# The question of the routing experiments (experiments/routing/run_models.py), unchanged
+prompt = """
+Which one best describes this image?
+A) a technical or engineering drawing (a CAD drawing sheet or dimensioned diagram, or a photo or scan of one)
+B) a photograph of a physical part, material, fracture surface or micrograph
+C) something else, such as a page of text, a logo or a chart
+Answer with the letter only."""
