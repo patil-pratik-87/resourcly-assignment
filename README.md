@@ -1,4 +1,4 @@
-# Resourcly case study
+# Resourcly Document Agent
 
 New here? Start with [HOW_TO_READ.md](HOW_TO_READ.md), a 30 minute path through the project.
 
@@ -18,7 +18,7 @@ make setup   # the only online step: packages, models, the Agents UI, a check
 make run     # set up once (downloads and builds), then serve the Agents UI on http://127.0.0.1:8000
 ```
 
-Open http://127.0.0.1:8000 and drop a drawing from `data/drawings/` into it. After setup, nothing
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and drop a drawing from `data/drawings/` into it. After setup, nothing
 reaches the network. `make doctor` prints each problem and its fix. Details:
 [docs/setup.md](docs/setup.md).
 
@@ -95,11 +95,11 @@ uv run resourcly annotation-ui
 
 ## Settings
 
-| Variable | Default |
-| --- | --- |
-| `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION` | `vector-crop-v2`, `three-layer-v1` |
-| `RESOURCLY_FAILURE_VERSION`, `RESOURCLY_ANSWER_VERSION` | `dinov2-base-v1`, `photo-v2` |
-| `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES` | 50 MB, 50 |
+| Variable                                                | Default                            |
+| ------------------------------------------------------- | ---------------------------------- |
+| `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION`  | `vector-crop-v2`, `three-layer-v1` |
+| `RESOURCLY_FAILURE_VERSION`, `RESOURCLY_ANSWER_VERSION` | `dinov2-base-v1`, `photo-v2`       |
+| `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES`     | 50 MB, 50                          |
 
 Without the models, these run on any machine, with less: the text layer, routing by file type,
 and figure captions as a photo's answer.
@@ -111,27 +111,39 @@ RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 \
 
 ## The parts
 
-| Part | Default | Measured | Doc |
-| --- | --- | --- | --- |
-| Router | `three-layer-v1`: rules, a DINOv2-small probe, then Qwen3-VL 8B | accuracy 0.992 on 123 dev files, 1.000 on 57 test | [docs/routing.md](docs/routing.md) |
-| Drawing reader | `vector-crop-v2`: each callout from the vector paths read by Qwen3-VL 8B | as `vector-crop-v1` on these PDFs: F1 0.725, recall 0.862 on the 11 drawings | [experiments/drawing](experiments/drawing/README.md) |
-| Fault finder | `dinov2-base-v1`: the report figures nearest the photo | section@1 0.645, mode@3 0.942 on 154 held-out cases | [research/failure](research/failure/README.md) |
-| Photo answer | `photo-v2`: Qwen3-VL 8B answers from the 3 closest figures, keeping only cited findings | hand check 4 of 6 right; `photo-v1` correct 0.625 on 8 dev cases; no real photos tested | [NOTES.md](NOTES.md#photo-answers) |
-| Agent and API | a request per message, traced | not scored as a whole | [docs/chat-ui.md](docs/chat-ui.md#the-api) |
+| Part           | Default                                                                                 | Measured                                                                                | Doc                                                  |
+| -------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Router         | `three-layer-v1`: rules, a DINOv2-small probe, then Qwen3-VL 8B                         | accuracy 0.992 on 123 dev files, 1.000 on 57 test                                       | [docs/routing.md](docs/routing.md)                   |
+| Drawing reader | `vector-crop-v2`: each callout from the vector paths read by Qwen3-VL 8B                | as `vector-crop-v1` on these PDFs: F1 0.725, recall 0.862 on the 11 drawings            | [experiments/drawing](experiments/drawing/README.md) |
+| Fault finder   | `dinov2-base-v1`: the report figures nearest the photo                                  | section@1 0.645, mode@3 0.942 on 154 held-out cases                                     | [research/failure](research/failure/README.md)       |
+| Photo answer   | `photo-v2`: Qwen3-VL 8B answers from the 3 closest figures, keeping only cited findings | hand check 4 of 6 right; `photo-v1` correct 0.625 on 8 dev cases; no real photos tested | [NOTES.md](NOTES.md#photo-answers)                   |
+| Agent and API  | a request per message, traced                                                           | not scored as a whole                                                                   | [docs/chat-ui.md](docs/chat-ui.md#the-api)           |
+
+## Out of scope
+
+Left out because of the time limit:
+
+- **Text answering.** A text question alone gets a fixed reply, and text sent with a drawing does
+  not change its JSON; only a photo uses the text as its question. Answering from the reports with
+  citations may come later.
+- **The changes for scale.** The design for more than a million documents (a vLLM model server,
+  a job queue with workers, Postgres and object storage, a nearest neighbour index, a cache for
+  repeated files) is written up in [docs/privacy-and-scale.md](docs/privacy-and-scale.md), not
+  built. Today everything runs on one Mac, one request at a time.
 
 ## Where things are
 
-| Path | What it holds |
-| --- | --- |
-| `outputs/` | The JSON of the 11 drawings ([NOTES.md](NOTES.md#drawing-json-for-the-11-drawings)) |
-| `evals/` | The gold cases, their splits, and the photo answers' hand checks |
-| `versions/` | Every version of every part, with the probe and figure indexes |
-| `demo/` | The two demo chats ([demo/README.md](demo/README.md)) |
-| `research/`, `experiments/` | The research behind each part |
-| `src/` | The code; the two screens are in `src/frontend/` |
-| `docs/` | Setup, the Agents UI and API, the label screen, routing, evals |
-| [NOTES.md](NOTES.md) | What was tried, measured and chosen, and why |
+| Path                                                   | What it holds                                                                       |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `outputs/`                                             | The JSON of the 11 drawings ([NOTES.md](NOTES.md#drawing-json-for-the-11-drawings)) |
+| `evals/`                                               | The gold cases, their splits, and the photo answers' hand checks                    |
+| `versions/`                                            | Every version of every part, with the probe and figure indexes                      |
+| `demo/`                                                | The two demo chats ([demo/README.md](demo/README.md))                               |
+| `research/`, `experiments/`                            | The research behind each part                                                       |
+| `src/`                                                 | The code; the two screens are in `src/frontend/`                                    |
+| `docs/`                                                | Setup, the Agents UI and API, the label screen, routing, evals                      |
+| [NOTES.md](NOTES.md)                                   | What was tried, measured and chosen, and why                                        |
 | [HOW_TO_READ.md](HOW_TO_READ.md) | How to read the project, in 30 minutes |
-| [docs/privacy-and-scale.md](docs/privacy-and-scale.md) | How the design keeps data private and scales |
+| [docs/privacy-and-scale.md](docs/privacy-and-scale.md) | How the design keeps data private and scales                                        |
 
 `make test` runs ruff, pytest and the Agents UI tests.
