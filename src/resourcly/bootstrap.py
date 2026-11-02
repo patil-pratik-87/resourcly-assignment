@@ -24,6 +24,7 @@ from resourcly.adapters.stub_router import StubRouteAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.adapters.thread_jobs import ThreadJobsAdapter
 from resourcly.adapters.upload_store import FileUploadStoreAdapter
+from resourcly.adapters.vlm_readers import WholePageReaderAdapter
 from resourcly.agent import AgentService, recover
 from resourcly.errors import InvalidVersion, NotFound
 from resourcly.ports import ImageEncoderPort, RouteLayerPort, RouterPort
@@ -130,9 +131,24 @@ class Implementation:
     check: Callable[[dict[str, Any]], None] | None = None
 
 
+def _with_model(reader: Callable[..., Any]) -> Callable[[Settings, dict[str, Any]], Any]:
+    """A reader factory whose `model` setting names the vision-language model to run."""
+
+    def build(settings: Settings, params: dict[str, Any]) -> Any:
+        rest = {key: value for key, value in params.items() if key != "model"}
+        return reader(settings.drawings_dir, MlxVlmModelAdapter(params["model"]), **rest)
+
+    return build
+
+
 READERS: dict[str, Implementation] = {
     "textlayer": Implementation(
         lambda settings, params: PyMuPDFTextReaderAdapter(settings.drawings_dir)
+    ),
+    "whole-page": Implementation(
+        _with_model(WholePageReaderAdapter),
+        settings=("model", "prompt", "dpi", "max_tokens"),
+        required=("model", "prompt"),
     ),
 }
 # The image models a router probe can embed pictures with, by the name a version gives as

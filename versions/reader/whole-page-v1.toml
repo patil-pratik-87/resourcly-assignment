@@ -1,0 +1,11 @@
+description = "Baseline: each whole page at 150 dpi read by Qwen3-VL 8B with the same GD&T glossary"
+impl = "whole-page"
+model = "mlx-community/Qwen3-VL-8B-Instruct-4bit"
+dpi = 150
+max_tokens = 4000
+# The same GD&T symbol glossary as vector-crop-v1, asked about the whole sheet
+prompt = """
+This is a full sheet of an ASME Y14.5 engineering drawing. Its annotations are dimensions (lines of text such as a diameter with its tolerance), feature control frames and datum feature symbols. A feature control frame is a row of boxed cells. The first cell of a feature control frame holds a geometric characteristic symbol, for example position (circle with a cross), profile of a surface (half circle), profile of a line (arc), flatness (parallelogram), perpendicularity (inverted T), parallelism (two slanted lines), circularity (circle), cylindricity, runout (arrow), angularity (angle). The next cell holds the tolerance (maybe with Ø and a circled M or L), and the remaining cells hold datum letters. A datum feature symbol is a single capital letter in a small box joined to a triangle.
+Transcribe EVERY annotation on the sheet, one entry per annotation, with EVERY line of text and EVERY boxed cell. Do not skip anything. Do not include the title block, the notes block or the axis letters X, Y and Z. Return only JSON:
+{"callouts": [{"lines": ["<line 1 exactly as printed>", "..."], "feature_control_frames": [{"symbol_name": "<characteristic name>", "tolerance": "<as printed>", "modifiers": ["..."], "datums": ["..."]}]}], "datum_feature_symbols": ["<letter>", "..."]}
+"""
