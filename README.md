@@ -1,5 +1,7 @@
 # Resourcly case study
 
+New here? Start with [HOW_TO_READ.md](HOW_TO_READ.md), a 30 minute path through the project.
+
 A chat agent for technical documents that runs fully on one Mac. You send text, files or both, and
 the agent routes each file itself. A technical drawing comes back as JSON with every value on it,
 what it belongs to and what it means. A photo of a failed part gets what is wrong and what to do
@@ -129,7 +131,7 @@ RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 \
 | `src/` | The code; the two screens are in `src/frontend/` |
 | `docs/` | Setup, the Agents UI and API, the label screen, routing, evals |
 | [NOTES.md](NOTES.md) | What was tried, measured and chosen, and why |
-| [REVIEWING.md](REVIEWING.md) | A guide for reviewing this work |
+| [HOW_TO_READ.md](HOW_TO_READ.md) | How to read the project, in 30 minutes |
 | [docs/privacy-and-scale.md](docs/privacy-and-scale.md) | How the design keeps data private and scales |
 
 `make test` runs ruff, pytest and the Agents UI tests.
