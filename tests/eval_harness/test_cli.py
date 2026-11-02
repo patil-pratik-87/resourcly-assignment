@@ -47,6 +47,15 @@ def test_a_setting_of_a_component_says_which_of_its_versions_it_builds(evals) ->
     assert result.output.startswith("failure-copy shuffled-v0 (shuffled): building it")
 
 
+def test_run_without_a_version_runs_the_one_the_app_runs(evals) -> None:
+    result = evals("run", "reader")
+
+    assert result.exit_code == 0, result.output
+    assert result.output.startswith("reader textlayer-v0 (textlayer): ")
+    copy = evals("run", "failure-copy")
+    assert copy.output.startswith("failure-copy shuffled-v0 (shuffled): ")
+
+
 def test_run_limit_runs_a_partial_spread_of_the_split(evals) -> None:
     result = evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--limit", "1")
     refused = evals("run", "reader", "--version", "textlayer-v0", "--limit", "0")
