@@ -229,16 +229,19 @@ def _explain_answer(case: Case, prediction: Any) -> list[str]:
         lines = [f"a negative ({case.stratum.removeprefix('negative_')}): expected no match"]
     if not isinstance(prediction, dict):
         return [*lines, "no answer"]
-    said = "not in the reports" if prediction.get("not_in_reports") else "matched"
-    if not prediction.get("not_in_reports") and not prediction.get("matched"):
-        said = "no match"
+    if prediction.get("not_in_reports"):
+        unrelated = prediction.get("kept_out") == "unrelated"
+        said = "kept out, the model saw no part" if unrelated else "kept out at the gate"
+    else:
+        said = "matched" if prediction.get("matched") else "no match"
     lines.append(f"{said}: {prediction.get('answer')}")
     figures = [f for f in prediction.get("figures") or [] if isinstance(f, dict)]
     for kind in ("findings", "actions"):
         for item in prediction.get(kind) or []:
             citation = item.get("citation") if isinstance(item, dict) else None
             if isinstance(citation, dict):
-                valid = "valid" if metrics.valid_citation(citation, figures) else "invalid"
+                cited = {**citation, "basis": item.get("basis"), "quote": item.get("quote")}
+                valid = "valid" if metrics.valid_citation(cited, figures) else "invalid"
                 text = item.get("statement") or f"action: {item.get('action')}"
                 lines.append(f"  [{citation.get('source')}] {valid}  {text}")
     closest = ", ".join(str(f.get("figure")) for f in figures[:3]) or "none"

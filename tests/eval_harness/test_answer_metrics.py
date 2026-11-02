@@ -101,7 +101,12 @@ def test_a_citation_is_valid_only_for_a_figure_it_was_given_or_their_reports(
 
 
 def test_an_actions_citation_counts_and_can_cite_the_report() -> None:
-    action = {"action": "Inspect.", "basis": "stated", "citation": cite("18-061 p3", "18-061", 3)}
+    action = {
+        "action": "Inspect.",
+        "basis": "stated",
+        "citation": cite("18-061 p3", "18-061", 3),
+        "quote": "inspect the spar caps",
+    }
     found = answer("Fatigue.", actions=[action, {"action": "Look.", "basis": "inferred"}])
 
     scores = score_answer(PHOTO, found)
@@ -109,10 +114,42 @@ def test_an_actions_citation_counts_and_can_cite_the_report() -> None:
     assert (scores["citations"], scores["valid_citations"], scores["report_cited"]) == (1, 1, 1.0)
 
 
+@pytest.mark.parametrize(
+    ("citation", "quote"),
+    [
+        (cite("18-061 p3", "18-061", 3), None),  # no quote
+        (cite("18-061 p3", "18-061", 3), "inspect it"),  # too short to support it
+        (cite("18-061 fig05", "18-061", 13, "18-061/fig05"), "inspect the spar caps"),  # a figure
+    ],
+)
+def test_a_stated_action_must_quote_a_report_page_it_cites(citation: dict, quote) -> None:
+    action = {"action": "Inspect.", "basis": "stated", "citation": citation, "quote": quote}
+    found = answer("Fatigue.", cite("18-061 p3", "18-061", 3), actions=[action])
+
+    scores = score_answer(PHOTO, found)
+
+    assert (scores["citations"], scores["valid_citations"], scores["correct"]) == (2, 1, 0.0)
+
+
+def test_an_inferred_action_may_cite_a_figure_without_a_quote() -> None:
+    action = {
+        "action": "Inspect.",
+        "basis": "inferred",
+        "citation": cite("18-061 fig05", "18-061", 13, "18-061/fig05"),
+    }
+    found = answer("Fatigue.", cite("18-061 p3", "18-061", 3), actions=[action])
+
+    assert score_answer(PHOTO, found)["correct"] == 1.0
+
+
 def test_a_photo_the_model_says_does_not_match_is_wrong() -> None:
     refused = answer("The figures show a different part.", matched=False)
 
     assert score_answer(PHOTO, refused)["correct"] == 0.0
+
+
+def test_a_photo_answer_that_is_not_a_match_is_wrong_even_with_good_findings() -> None:
+    assert score_answer(PHOTO, {**GOOD, "matched": False})["correct"] == 0.0
 
 
 def test_a_failed_call_scores_nothing() -> None:
@@ -128,15 +165,22 @@ def test_a_failed_call_scores_nothing() -> None:
     assert score_answer(NEGATIVE, None)["kept_out"] == 0.0
 
 
+def kept(reason: str) -> dict:
+    found = answer("Not in the reports.", matched=False)
+    return {**found, "not_in_reports": True, "kept_out": reason, "figures": []}
+
+
 @pytest.mark.parametrize(
     ("given", "kept_out"),
     [
+        (kept("gate"), 1.0),
+        (kept("unrelated"), 1.0),
         ({**answer("Not in the reports."), "not_in_reports": True, "matched": False}, 1.0),
-        (answer("The closest figures do not show it.", matched=False), 1.0),
+        (answer("The closest figures do not show it.", matched=False), 0.0),
         (GOOD, 0.0),
     ],
 )
-def test_a_negative_is_kept_out_when_the_answer_matches_no_figure(
+def test_a_negative_is_kept_out_only_when_the_answer_says_it_is_not_in_the_reports(
     given: dict, kept_out: float
 ) -> None:
     scores = score_answer(NEGATIVE, given)
@@ -146,11 +190,10 @@ def test_a_negative_is_kept_out_when_the_answer_matches_no_figure(
 
 def test_the_summary_puts_correct_over_every_case_first() -> None:
     wrong = answer("Overstress.", cite("18-061 fig06", "18-061", 14, "18-061/fig06"))
-    kept = {**answer("Not in the reports."), "matched": False}
     cases = [
         ("positive", score_answer(PHOTO, GOOD)),
         ("positive", score_answer(PHOTO, wrong)),
-        ("negative_drawing", score_answer(NEGATIVE, kept)),
+        ("negative_drawing", score_answer(NEGATIVE, kept("unrelated"))),
         ("negative_unrelated", score_answer(NEGATIVE, GOOD)),
     ]
 

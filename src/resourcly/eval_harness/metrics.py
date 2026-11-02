@@ -224,10 +224,12 @@ def _mean(cases: Scored, name: str, keep: Callable[[str], bool]) -> float | None
 def score_answer(gold: dict[str, Any], answer: Any) -> dict[str, Any]:
     """How well one photo answer says what is wrong; answer is None when the call failed.
 
-    A photo of a report figure is answered correctly when a citation is in its report, a word of
-    the answer or its findings starts with one of its failure keywords, and every citation is
-    valid. A negative is answered correctly when the answer matches no figure: the gate said the
-    reports do not show it, or the model found that the closest figures do not.
+    A photo of a report figure is answered correctly when the answer is a match (the closest
+    figures show the same failure), a citation is in its report, a word of the answer or its
+    findings starts with one of its failure keywords, and every citation is valid. A negative is
+    answered correctly when the answer says the reports say nothing about it: the gate found no
+    figure close enough, or the model saw no part. An answer that only finds no match still
+    shows the closest figures, so it does not keep a negative out.
     """
     answer = answer if isinstance(answer, dict) else {}
     citations = _citations(answer)
@@ -238,7 +240,7 @@ def score_answer(gold: dict[str, Any], answer: Any) -> dict[str, Any]:
         "valid_citations": sum(valid_citation(c, figures) for c in citations),
     }
     if gold["kind"] != PHOTO:
-        kept_out = float(answer.get("matched") is False)
+        kept_out = float(answer.get("not_in_reports") is True)
         return {"case_score": kept_out, "correct": kept_out, "kept_out": kept_out, **counts}
     report_cited = float(any(c.get("report") == gold["expected_report"] for c in citations))
     text = " ".join(
@@ -248,7 +250,9 @@ def score_answer(gold: dict[str, Any], answer: Any) -> dict[str, Any]:
         any(re.search(rf"\b{re.escape(word)}", text, re.I) for word in gold["failure_keywords"])
     )
     correct = float(
-        bool(report_cited and mode_named) and counts["valid_citations"] == counts["citations"]
+        answer.get("matched") is True
+        and bool(report_cited and mode_named)
+        and counts["valid_citations"] == counts["citations"]
     )
     return {
         "case_score": correct,
@@ -266,16 +270,29 @@ def _findings(answer: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _citations(answer: dict[str, Any]) -> list[dict[str, Any]]:
-    """Every citation of the answer's findings and actions."""
-    actions = [a for a in answer.get("actions") or [] if isinstance(a, dict)]
-    cited = [item.get("citation") for item in [*_findings(answer), *actions]]
-    return [c for c in cited if isinstance(c, dict)]
+    """Every citation of the answer's findings and actions; a stated action's carries its basis
+    and quote, which `valid_citation` checks."""
+    findings = [f.get("citation") for f in _findings(answer)]
+    actions = [
+        {**a["citation"], "basis": a.get("basis"), "quote": a.get("quote")}
+        for a in answer.get("actions") or []
+        if isinstance(a, dict) and isinstance(a.get("citation"), dict)
+    ]
+    return [c for c in [*findings, *actions] if isinstance(c, dict)]
+
+
+MIN_QUOTE_WORDS = 3  # as the app requires of a stated action's quote
 
 
 def valid_citation(citation: dict[str, Any], figures: list[dict[str, Any]]) -> bool:
     """A citation names a figure the finder returned, or a page of one of their reports, and its
-    source says the same report and figure or page."""
+    source says the same report and figure or page. A stated action must cite a page and quote
+    at least three of its words; the page's text is not stored, so the words are not checked."""
     report, page, figure = citation.get("report"), citation.get("page"), citation.get("figure")
+    if citation.get("basis") == "stated" and (
+        figure is not None or len(str(citation.get("quote") or "").split()) < MIN_QUOTE_WORDS
+    ):
+        return False
     if figure is None:
         return (
             report in {f.get("report") for f in figures}

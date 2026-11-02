@@ -115,3 +115,28 @@ def test_explain_marks_the_actions_and_an_invalid_citation() -> None:
         "  [18-061 p3] invalid  action: Inspect the spar.",
         "closest figures: none",
     ]
+
+
+@pytest.mark.parametrize(
+    ("kept_out", "said"),
+    [
+        ("unrelated", "kept out, the model saw no part: "),
+        ("gate", "kept out at the gate: "),
+        (None, "kept out at the gate: "),  # an answer stored before kept_out was given
+    ],
+)
+def test_explain_says_why_an_answer_was_kept_out(kept_out, said) -> None:
+    case = Case("neg_logo", "dev", "negative_unrelated", {"kind": "negative_unrelated"})
+    prediction = {
+        "not_in_reports": True,
+        "kept_out": kept_out,
+        "matched": False,
+        "answer": "Not in the reports.",
+        "findings": [],
+        "actions": [],
+        "figures": [],
+    }
+
+    lines = SUITES["answer"].explain(case, prediction)
+
+    assert lines[1] == f"{said}Not in the reports."
