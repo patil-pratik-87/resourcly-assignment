@@ -5,6 +5,7 @@ import pytest
 
 from resourcly.bootstrap import Settings, open_services
 from resourcly.eval_harness.cases import check_gold, route_cases
+from resourcly.eval_harness.suites import SUITES
 
 
 def row(item_id: str, label: str, unit: str, **fields) -> dict:
@@ -95,7 +96,7 @@ def test_the_gold_check_accepts_the_labelled_set(gold_dir: Path, settings: Setti
     write_routes(gold_dir, ROWS, SPLITS)
 
     with open_services(settings) as services:
-        found = check_gold(services)
+        found = check_gold(services, SUITES)
 
     router = [(level, message) for level, message in found if "router" in message]
     assert ("ok", "router 6 case(s) in 3 unit(s)") in router
@@ -116,7 +117,7 @@ def test_the_gold_check_refuses_a_unit_on_two_sides_and_broken_rows(
     write_routes(gold_dir, rows, splits)
 
     with open_services(settings) as services:
-        found = check_gold(services)
+        found = check_gold(services, SUITES)
 
     errors = [message for level, message in found if level == "error"]
     warnings = [message for level, message in found if level == "warning"]
@@ -140,11 +141,11 @@ def test_the_gold_check_warns_once_when_the_files_are_not_built(
     (gold_dir / "routes" / "items" / "drawing" / "ctc01.pdf").write_bytes(b"%PDF-1.7")
 
     with open_services(settings) as services:
-        found = check_gold(services)
+        found = check_gold(services, SUITES)
 
     assert (
         "warning",
-        "router 3 of 4 file(s) are not in routes/; they are committed, so restore them from git",
+        "router 3 of 4 file(s) are missing; they are committed, so restore them from git",
     ) in found
 
 
@@ -168,7 +169,18 @@ def test_the_gold_check_refuses_a_group_split_across_units_and_a_message_apart_f
     write_routes(gold_dir, [*ROWS, copy, stray], SPLITS)
 
     with open_services(settings) as services:
-        errors = [message for level, message in check_gold(services) if level == "error"]
+        errors = [message for level, message in check_gold(services, SUITES) if level == "error"]
 
     assert "router group ctc01 spans units ctc01, ctc01_copy" in errors
     assert "router tp_02 is in unit text_01 but its file d_ctc01_pdf is in ctc01" in errors
+
+
+def test_the_gold_check_warns_about_a_split_for_a_component_without_a_suite(
+    gold_dir: Path, settings: Settings
+) -> None:
+    write_routes(gold_dir, ROWS, SPLITS + '[answerer]\ndev = ["q1"]\n')
+
+    with open_services(settings) as services:
+        found = check_gold(services, SUITES)
+
+    assert ("warning", "splits.toml names an unknown component 'answerer'") in found

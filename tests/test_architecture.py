@@ -69,17 +69,16 @@ def test_only_bootstrap_builds_adapters(path: Path) -> None:
     assert [name for name in imports(path) if inside(name, "resourcly.adapters")] == []
 
 
-RESULT_STORE_USERS = [
-    path
-    for path in EVALS
-    if module_name(path) not in ("resourcly.eval_harness.cli", "resourcly.eval_harness.store")
-]
+PURE = ("models", "metrics", "compare", "store")
 
 
-@pytest.mark.parametrize("path", RESULT_STORE_USERS, ids=module_name)
-def test_only_the_evals_cli_builds_the_result_store(path: Path) -> None:
-    """The harness and compare take a ResultStorePort; store.py is its SQLite adapter."""
-    assert [name for name in imports(path) if inside(name, "resourcly.eval_harness.store")] == []
+@pytest.mark.parametrize("name", PURE)
+def test_the_scoring_and_storing_modules_stay_pure(name: str) -> None:
+    """They take data in and give data out; the app, its services and the suites stay out."""
+    allowed = ("resourcly.eval_harness.models", "resourcly.eval_harness.metrics")
+    imported = imports(PACKAGE / "eval_harness" / f"{name}.py")
+
+    assert [n for n in imported if not any(inside(n, a) for a in allowed)] == []
 
 
 def test_relative_imports_are_resolved_against_the_module() -> None:

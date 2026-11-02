@@ -1,7 +1,25 @@
-"""What a run stores: the run's settings and summary, and one result per case."""
+"""A gold case, and what a run stores: the run's settings and summary, and one result per case."""
 
+import hashlib
+import json
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any
+
+
+@dataclass(frozen=True)
+class Case:
+    """One gold case: its id, its split, its stratum (the kind of case) and its known answer."""
+
+    case_id: str
+    split: str
+    stratum: str
+    gold: Any
+
+    @property
+    def gold_hash(self) -> str:
+        text = json.dumps(self.gold, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(text.encode()).hexdigest()[:12]
 
 
 @dataclass(frozen=True)
@@ -11,13 +29,11 @@ class Run:
     version: str
     version_hash: str
     split: str
-    selection: dict[str, Any]
+    case_ids: list[str]  # the cases run when not every case of the split ran
     case_set_hash: str
     started_at: str
     git_sha: str
     git_dirty: bool
-    rescored_from: str | None = None
-    note: str | None = None
     finished_at: str | None = None
     n_cases: int = 0
     errors: int = 0
@@ -34,3 +50,8 @@ class CaseResult:
     error: str | None
     prediction: Any
     scores: dict[str, Any]
+
+
+def now() -> str:
+    """The time now, in UTC, as runs store it."""
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

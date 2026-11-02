@@ -1,4 +1,4 @@
-from resourcly.eval_harness.cases import Case
+from resourcly.eval_harness.models import Case
 from resourcly.eval_harness.suites import SUITES
 
 GOLD = {"values": [{"page": 1, "value": 5, "unit": "mm", "kind": "linear", "raw": "5"}]}
@@ -29,7 +29,7 @@ def test_a_gold_with_page_coverage_is_scored_on_its_covered_pages_only() -> None
     scores = suite.score(case, prediction)
 
     assert (scores["precision"], scores["recall"]) == (1.0, 1.0)
-    assert suite.summarise([(case, prediction)])["precision"] == 1.0
+    assert suite.summarise([(case.stratum, scores)])["precision"] == 1.0
     assert "extra predictions (0)" in suite.explain(case, prediction)
 
 

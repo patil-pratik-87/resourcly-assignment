@@ -79,9 +79,11 @@ def test_a_router_run_stores_each_routing_and_scores_the_split(
     )
     summary = run.summary
     assert (run.n_cases, run.errors) == (6, 1)
-    assert summary["accuracy"] == pytest.approx(3 / 5)
-    assert summary["other_kept_out"] == 1.0
-    assert [m["case"] for m in summary["mistakes"]] == ["d_b", "d_missing"]
+    assert summary == {
+        "accuracy": pytest.approx(3 / 5),
+        "drawing_recall": 1 / 3,
+        "other_kept_out": 1.0,
+    }
 
 
 def test_every_routed_case_can_be_looked_up(routed: Settings, store: SqliteResultStore) -> None:
@@ -93,20 +95,16 @@ def test_every_routed_case_can_be_looked_up(routed: Settings, store: SqliteResul
     assert (event.step, event.output["route"]) == ("route.probe", "photo")
 
 
-def test_evals_run_router_prints_the_summary_and_the_mistakes(
-    routed: Settings, tmp_path: Path, monkeypatch
-) -> None:
+def test_evals_run_router_prints_the_summary(routed: Settings, tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("RESOURCLY_VERSIONS_DIR", str(routed.versions_dir))
     monkeypatch.setenv("RESOURCLY_TRACE_DB", str(routed.trace_path))
+    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(routed.gold_dir))
+    monkeypatch.setenv("RESOURCLY_SPLITS", str(routed.splits_path))
     result = CliRunner().invoke(
         app,
         [
             "--store",
             str(tmp_path / "e.sqlite"),
-            "--gold-dir",
-            str(routed.gold_dir),
-            "--splits",
-            str(routed.splits_path),
             "run",
             "router",
             "--version",
@@ -116,6 +114,4 @@ def test_evals_run_router_prints_the_summary_and_the_mistakes(
 
     assert result.exit_code == 0, result.output
     assert re.search(r"accuracy \(primary\) +0\.600", result.output)
-    assert "mistakes (2)" in result.output
-    assert "d_b  expected drawing  got photo  by probe: filed under photo" in result.output
-    assert "o_logo  expected" not in result.output  # the logo was kept out
+    assert re.search(r"other_kept_out +1\.000", result.output)

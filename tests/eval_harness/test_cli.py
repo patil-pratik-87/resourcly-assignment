@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner, Result
 
-from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation, open_services
+from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation
 from resourcly.eval_harness.cli import app
 from resourcly.eval_harness.models import Run
 from resourcly.eval_harness.store import SqliteResultStore
@@ -17,17 +17,11 @@ from tests.conftest import CTC01
 @pytest.fixture
 def evals(eval_gold: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("RESOURCLY_TRACE_DB", str(tmp_path / "traces.sqlite"))
+    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(eval_gold))
+    monkeypatch.setenv("RESOURCLY_SPLITS", str(eval_gold / "splits.toml"))
 
     def invoke(*args: str) -> Result:
-        options = [
-            "--gold-dir",
-            str(eval_gold),
-            "--splits",
-            str(eval_gold / "splits.toml"),
-            "--store",
-            str(tmp_path / "evals.sqlite"),
-        ]
-        return CliRunner().invoke(app, [*options, *args])
+        return CliRunner().invoke(app, ["--store", str(tmp_path / "evals.sqlite"), *args])
 
     return invoke
 
@@ -40,12 +34,31 @@ def test_run_prints_the_selection_progress_and_summary_and_lists_the_run(evals) 
     result = evals("run", "reader", "--version", "textlayer-v0")
 
     assert result.exit_code == 0, result.output
-    assert f"selected 1 of 1 dev cases: {CTC01}" in result.output
+    assert "selected 1 of 1 dev cases\n" in result.output
     assert f"[1/1] {CTC01}  case_score 0.160" in result.output
     assert re.search(r"f1 +\(primary\) +0\.160", result.output)
     listed = evals("list", "runs")
     assert run_id(result) in listed.output
     assert "textlayer-v0" in listed.output
+
+
+def test_run_limit_runs_a_partial_spread_of_the_split(evals) -> None:
+    result = evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--limit", "1")
+    refused = evals("run", "reader", "--version", "textlayer-v0", "--limit", "0")
+
+    shown = evals("show", run_id(result))
+    again = run_id(
+        evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--limit", "1")
+    )
+    compared = evals("compare", "reader", run_id(result), again)
+
+    assert result.exit_code == 0, result.output
+    assert "selected 1 of 2 all cases\n" in result.output
+    assert f"[1/1] {CTC01}" in result.output
+    assert "split all, partial: 1 chosen case(s)" in shown.output
+    assert compared.exit_code == 0, compared.output
+    assert "split all  1 case(s)  partial" in compared.output
+    assert refused.exit_code == 2
 
 
 def test_show_lists_the_cases_of_a_run_and_explains_one(evals) -> None:
@@ -57,7 +70,7 @@ def test_show_lists_the_cases_of_a_run_and_explains_one(evals) -> None:
 
     assert shown.exit_code == 0, shown.output
     assert "NotFound: no drawing named partial_a" in shown.output
-    assert f"uv run evals show --request {rid}:{CTC01}" in shown.output
+    assert "--request" not in shown.output
     assert "partial_a" in failures.output
     assert "missed gold records (17)" in detail.output
     assert "page 1  diameter  '⌀35.2 / ⌀34.8'  value [34.8, 35.2]  unit mm" in detail.output
@@ -105,98 +118,91 @@ def test_compare_says_what_got_worse_and_can_fail_on_it(evals, blank_reader) -> 
     assert "split dev  1 case(s)" in by_version.output
 
 
-def test_compare_gives_no_verdict_until_the_older_run_is_rescored(evals, eval_gold: Path) -> None:
+def test_compare_scores_both_runs_on_the_current_gold(evals, eval_gold: Path) -> None:
     base = run_id(evals("run", "reader", "--version", "textlayer-v0"))
     drop_rev_d(eval_gold)
     candidate = run_id(evals("run", "reader", "--version", "textlayer-v0"))
 
-    stale = evals("compare", "reader", base, candidate, "--fail-if-worse")
-    rescored = run_id(evals("run", "--rescore", base))
-    fresh = evals("compare", "reader", rescored, candidate, "--fail-if-worse")
+    result = evals("compare", "reader", base, candidate, "--fail-if-worse")
 
-    assert stale.exit_code == 1
-    assert re.search(r"f1 +\(primary\) +\- +\- +\- +no +verdict", stale.output)
-    assert "rescore the older run first with `evals run --rescore RUN_ID`" in stale.output
-    assert f"gold changed between the runs for {CTC01}" in stale.output
-    assert fresh.exit_code == 0, fresh.output
-    assert re.search(r"f1 +\(primary\) +0\.083 +0\.083 +\+0\.000 +no +change", fresh.output)
-    assert "warning" not in fresh.output
+    assert result.exit_code == 0, result.output
+    assert re.search(r"f1 +\(primary\) +0\.083 +0\.083 +\+0\.000 +no +change", result.output)
+    assert "0 of 1 case(s) changed case_score" in result.output
+    assert CTC01 not in result.output
+    assert "warning" not in result.output
 
 
-def test_compare_prefers_runs_on_the_same_cases(evals, blank_reader) -> None:
-    base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
-    evals("run", "reader", "--version", "textlayer-v0", "--case-id", CTC01)
+def test_a_version_stands_for_its_latest_run_on_every_case_of_a_split(evals, blank_reader) -> None:
+    full = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
+    evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
     blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "all"))
+    evals("run", "reader", "--version", "blank-v0", "--split", "all", "--limit", "1")
 
     result = evals("compare", "reader", "textlayer-v0", "blank-v0")
 
     assert result.exit_code == 0, result.output
-    assert f"base       {base}" in result.output
+    assert f"base       {full}" in result.output
     assert f"candidate  {blank}" in result.output
     assert "warning" not in result.output
 
 
-def test_compare_refuses_a_verdict_it_cannot_give(evals, blank_reader, eval_gold: Path) -> None:
+def test_a_version_with_only_partial_runs_cannot_stand_for_a_run(evals) -> None:
+    evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
+
+    result = evals("compare", "reader", "textlayer-v0", "textlayer-v0")
+
+    assert result.exit_code == 1
+    assert (
+        "error: 'textlayer-v0' is neither a run id nor a version with a full run" in result.output
+    )
+
+
+def test_compare_refuses_runs_on_other_cases_unless_forced(evals, blank_reader) -> None:
+    base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
+    blank = run_id(evals("run", "reader", "--version", "blank-v0"))
+
+    refused = evals("compare", "reader", base, blank)
+    forced = evals("compare", "reader", base, blank, "--force")
+
+    assert refused.exit_code == 1
+    assert "error: the runs ran on different cases: 2 all and 1 dev" in refused.output
+    assert forced.exit_code == 0, forced.output
+    assert "warning: only in base: partial_a" in forced.output
+
+
+def test_fail_if_worse_fails_when_the_primary_was_not_measured(evals, blank_reader) -> None:
     base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "test"))
-    blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "dev"))
+    blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "test"))
 
     result = evals("compare", "reader", base, blank)
     failing = evals("compare", "reader", base, blank, "--fail-if-worse")
 
     assert result.exit_code == 0, result.output
-    assert re.search(r"f1 +\(primary\) +\- +\- +\- +no +verdict", result.output)
-    assert "no verdict: the runs share no case" in result.output
     assert failing.exit_code == 1
-    assert "no verdict on f1" in failing.output
+    assert "f1 was not measured, so there is no verdict" in failing.output
 
 
-def test_list_shows_components_versions_and_cases(evals) -> None:
+def test_runs_that_share_no_case_are_not_compared(evals, blank_reader) -> None:
+    base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "test"))
+    blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "dev"))
+
+    result = evals("compare", "reader", base, blank, "--force")
+
+    assert result.exit_code == 1
+    assert "error: the runs share no case that has gold now" in result.output
+
+
+def test_list_shows_versions_and_cases(evals) -> None:
     evals("run", "reader", "--version", "textlayer-v0")
 
-    components = evals("list", "components").output
     versions = evals("list", "versions", "reader").output
     cases = evals("list", "cases", "reader", "--split", "all").output
 
-    assert re.search(r"reader +f1 +textlayer +1 +version\(s\)", components)
     textlayer = next(line for line in versions.splitlines() if "textlayer-v0" in line)
     assert textlayer.split()[1:3] == ["textlayer-v0", "textlayer"]
     assert "1 run(s)" in textlayer
     assert f"{CTC01}  dev    full" in cases
     assert "partial_a             test   partial" in cases
-
-
-def test_show_out_writes_markdown_for_the_latest_run_of_each_version_and_split(
-    evals, tmp_path: Path
-) -> None:
-    evals("run", "reader", "--version", "textlayer-v0")
-    evals("run", "reader", "--version", "textlayer-v0", "--split", "test")
-    latest = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-    out = tmp_path / "eval-results.md"
-
-    result = evals("show", "--out", str(out))
-
-    text = out.read_text(encoding="utf-8")
-    assert result.exit_code == 0, result.output
-    assert text.count("\n## ") == 2
-    assert f"## reader textlayer-v0 on dev: {latest}" in text
-    assert "| f1 (primary) | 0.160 |" in text
-    assert f"| {CTC01} | full | 0.160 | 19 | 6 | 2 |  |" in text
-
-
-def test_show_out_leaves_out_partial_runs_unless_they_are_named(evals, tmp_path: Path) -> None:
-    full = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
-    named = run_id(
-        evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
-    )
-
-    evals("show", "--out", str(tmp_path / "default.md"))
-    evals("show", named, "--out", str(tmp_path / "chosen.md"))
-    default = (tmp_path / "default.md").read_text(encoding="utf-8")
-    chosen = (tmp_path / "chosen.md").read_text(encoding="utf-8")
-
-    assert f"## reader textlayer-v0 on all: {full}" in default
-    assert named not in default
-    assert f"## reader textlayer-v0 on all (--case-id {CTC01}): {named}" in chosen
 
 
 def test_check_fails_on_a_case_in_two_splits_and_warns_about_missing_gold(
@@ -286,74 +292,6 @@ def test_list_runs_says_unfinished_only_for_a_run_that_did_not_finish(
     assert "unfinished" in rows["reader-cut"]
 
 
-def test_compare_warns_when_both_sides_are_the_same_run(evals) -> None:
-    only = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-
-    by_version = evals("compare", "reader", "textlayer-v0", "textlayer-v0")
-    by_id = evals("compare", "reader", only, only)
-
-    for result in (by_version, by_id):
-        assert result.exit_code == 0, result.output
-        assert f"warning: the base and the candidate are the same run, {only}" in result.output
-
-
-def test_run_rescore_scores_a_stored_run_against_the_current_gold(evals, eval_gold: Path) -> None:
-    base = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-    drop_rev_d(eval_gold)
-
-    result = evals("run", "--rescore", base)
-
-    assert result.exit_code == 0, result.output
-    assert f"(rescore of {base}," in result.output
-    assert re.search(r"f1 +\(primary\) +0\.083", result.output)
-    assert f"rescore of {base}" in evals("list", "runs").output
-
-
-def test_run_needs_a_component_and_version_or_a_rescore_but_not_both(evals) -> None:
-    neither = evals("run", "reader")
-    both = evals("run", "reader", "--version", "textlayer-v0", "--rescore", "reader-x")
-
-    assert neither.exit_code == 2
-    assert "give a component and --version, or --rescore RUN_ID" in neither.output
-    assert both.exit_code == 2
-    assert "--rescore takes no component or --version" in both.output
-
-
-def test_show_request_prints_what_a_request_did_and_called(
-    evals, settings, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setenv("RESOURCLY_TRACE_DB", str(settings.trace_path))
-    with open_services(settings) as services:
-        services.drawings.read(CTC01, request_id="req-1")
-
-    result = evals("show", "--request", "req-1")
-    unknown = evals("show", "--request", "nope")
-
-    assert result.exit_code == 0, result.output
-    assert "request req-1: 1 step(s)" in result.output
-    assert "drawings.read  called reader textlayer-v0 (textlayer)" in result.output
-    assert f'input   {{"drawing": "{CTC01}"}}' in result.output
-    assert 'output  {"values": 6, "schema_issues": 0}' in result.output
-    assert unknown.exit_code == 1
-    assert "no request 'nope'" in unknown.output
-
-
-def test_show_reaches_the_trace_of_each_case_of_a_run(evals) -> None:
-    rid = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-
-    result = evals("show", "--request", f"{rid}:{CTC01}")
-
-    assert result.exit_code == 0, result.output
-    assert "called reader textlayer-v0 (textlayer)" in result.output
-
-
-def test_show_needs_one_run_id_without_out(evals) -> None:
-    result = evals("show")
-
-    assert result.exit_code == 2
-    assert "give one run id, --request REQUEST_ID or --out FILE" in result.output
-
-
 def gold_value(gold_dir: Path, raw: str, change) -> None:
     path = gold_dir / "drawings" / f"{CTC01}.json"
     document = json.loads(path.read_text(encoding="utf-8"))
@@ -402,13 +340,3 @@ def test_check_counts_the_values_below_the_review_confidence(evals, eval_gold: P
         f"ok    reader {CTC01} (full, dev): 1 page(s), 15 features, 19 values,"
         " 1 below confidence 0.7"
     ) in result.output
-
-
-def test_show_out_with_no_full_run_writes_nothing_and_fails(evals, tmp_path: Path) -> None:
-    out = tmp_path / "eval-results.md"
-
-    result = evals("show", "--out", str(out))
-
-    assert result.exit_code == 1
-    assert "error: no finished full run to write; name run ids" in result.output
-    assert not out.exists()

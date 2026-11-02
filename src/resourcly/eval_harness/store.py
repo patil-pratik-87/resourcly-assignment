@@ -3,11 +3,10 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from dataclasses import asdict, fields
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.models import CaseResult, Run, now
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
@@ -16,13 +15,11 @@ CREATE TABLE IF NOT EXISTS runs (
     version TEXT NOT NULL,
     version_hash TEXT NOT NULL,
     split TEXT NOT NULL,
-    selection TEXT NOT NULL,
+    case_ids TEXT NOT NULL,
     case_set_hash TEXT NOT NULL,
     started_at TEXT NOT NULL,
     git_sha TEXT NOT NULL,
     git_dirty INTEGER NOT NULL,
-    rescored_from TEXT,
-    note TEXT,
     finished_at TEXT,
     n_cases INTEGER NOT NULL DEFAULT 0,
     errors INTEGER NOT NULL DEFAULT 0,
@@ -41,13 +38,13 @@ CREATE TABLE IF NOT EXISTS cases (
     PRIMARY KEY (run_id, case_id)
 );
 """
-JSON_COLUMNS = {"selection", "summary", "prediction", "scores"}
+JSON_COLUMNS = {"case_ids", "summary", "prediction", "scores"}
 
 
 class SqliteResultStore:
-    """The ResultStorePort in SQLite: one row per run and one per case, with the raw prediction.
+    """Runs and their cases in SQLite: one row per run and one per case, with the raw prediction.
 
-    Keeping the prediction lets a run be scored again against new gold without calling the
+    Keeping the prediction lets `compare` score a run again against new gold without calling the
     component again.
     """
 
@@ -61,6 +58,11 @@ class SqliteResultStore:
         with closing(sqlite3.connect(path)) as db:
             db.row_factory = sqlite3.Row
             db.executescript(SCHEMA)
+            columns = {row["name"] for row in db.execute("PRAGMA table_info(runs)")}
+            if columns != {field.name for field in fields(Run)}:
+                raise ValueError(
+                    f"{path} was written by an older harness; move it away to start anew"
+                )
             yield cls(db)
 
     def start_run(self, run: Run) -> None:
@@ -74,7 +76,7 @@ class SqliteResultStore:
             self.db.execute(
                 "UPDATE runs SET finished_at = ?, summary = ?, errors = ?,"
                 " n_cases = (SELECT count(*) FROM cases WHERE run_id = ?) WHERE run_id = ?",
-                (_now(), json.dumps(summary, ensure_ascii=False), errors, run_id, run_id),
+                (now(), json.dumps(summary, ensure_ascii=False), errors, run_id, run_id),
             )
 
     def run(self, run_id: str) -> Run:
@@ -99,10 +101,6 @@ class SqliteResultStore:
         ).fetchall()
         return [_load(Run, row) for row in rows]
 
-    def latest(self, component: str, version: str) -> Run | None:
-        finished = [run for run in self.runs(component, version) if run.finished_at]
-        return finished[0] if finished else None
-
     def _insert(self, table: str, row: dict[str, Any]) -> None:
         values = {
             key: json.dumps(value, ensure_ascii=False) if key in JSON_COLUMNS else value
@@ -126,7 +124,3 @@ def _load(kind: type, row: sqlite3.Row) -> Any:
             value = bool(value)
         values[field.name] = value
     return kind(**values)
-
-
-def _now() -> str:
-    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

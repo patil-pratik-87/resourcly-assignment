@@ -1,114 +1,114 @@
 from dataclasses import replace
 
-from resourcly.eval_harness.compare import compare_runs
-from resourcly.eval_harness.models import CaseResult, Run
+import pytest
 
+from resourcly.eval_harness.compare import compare_runs
+from resourcly.eval_harness.models import Case, CaseResult, Run
+from resourcly.eval_harness.suites import SUITES
+
+READER = SUITES["reader"]
 BASE = Run(
     run_id="base",
     component="reader",
     version="a",
     version_hash="h1",
     split="dev",
-    selection={},
+    case_ids=[],
     case_set_hash="same",
     started_at="2026-11-01T10:00:00Z",
     git_sha="1",
     git_dirty=False,
-    summary={"f1": 0.5, "recall": 0.2, "partial_recall": 0.4},
 )
+CANDIDATE = replace(BASE, run_id="cand", version="b")
 
 
-def case(case_id: str, score: float, gold_hash: str = "g") -> CaseResult:
-    return CaseResult(
-        case_id, "full", gold_hash, f"r:{case_id}", 1.0, None, {}, {"case_score": score}
-    )
+def value(number: float) -> dict:
+    return {"page": 1, "value": number, "unit": "mm", "kind": "linear", "raw": str(number)}
 
 
-def test_compare_gives_a_verdict_per_metric_with_the_primary_first() -> None:
-    candidate = replace(
-        BASE,
-        run_id="cand",
-        version="b",
-        summary={"f1": 0.4, "recall": 0.3, "partial_recall": 0.4},
-    )
+GOLD = {
+    "a": Case("a", "dev", "full", {"values": [value(1), value(2)]}),
+    "b": Case("b", "dev", "partial", {"values": [value(3), value(4)]}),
+}
 
+
+def answer(case_id: str, *numbers: float) -> CaseResult:
+    """A stored reading of the case with these values; its stored scores are stale on purpose."""
+    reading = {"document": {"values": [value(n) for n in numbers]}, "issues": []}
+    return CaseResult(case_id, "full", "old", f"r:{case_id}", 1.0, None, reading, {})
+
+
+def test_both_runs_are_scored_again_on_the_current_gold_with_the_primary_first() -> None:
     result = compare_runs(
+        READER,
+        GOLD,
         BASE,
-        [case("a", 0.5)],
-        candidate,
-        [case("a", 0.4)],
-        metrics=("recall", "f1", "partial_recall"),
-        primary="f1",
+        [answer("a", 1, 2), answer("b", 3)],
+        CANDIDATE,
+        [answer("a", 1, 9), answer("b", 3, 4)],
     )
 
     assert [(m.name, m.base, m.candidate, m.verdict) for m in result.metrics] == [
-        ("f1", 0.5, 0.4, "worse"),
-        ("recall", 0.2, 0.3, "better"),
-        ("partial_recall", 0.4, 0.4, "no change"),
+        ("f1", 1.0, 0.5, "worse"),
+        ("precision", 1.0, 0.5, "worse"),
+        ("recall", 1.0, 0.5, "worse"),
+        ("partial_recall", 0.5, 1.0, "better"),
+    ]
+    assert [(c.case_id, c.base, c.candidate) for c in result.cases] == [
+        ("a", 1.0, 0.5),
+        ("b", 0.5, 1.0),
     ]
     assert result.worse
     assert result.warnings == []
 
 
-def test_compare_pairs_cases_and_warns_about_unpaired_cases_and_changed_gold() -> None:
-    candidate = replace(BASE, run_id="cand", version="b", case_set_hash="other")
-    base_cases = [case("a", 0.5), case("b", 0.3), case("c", 0.1)]
-    candidate_cases = [case("a", 0.9), case("b", 0.3, gold_hash="new"), case("d", 0.2)]
+def test_runs_on_different_cases_or_splits_are_refused_without_force() -> None:
+    fewer = [answer("a", 1, 2)]
+    both = [answer("a", 1, 2), answer("b", 3)]
+    test = replace(CANDIDATE, split="test")
 
+    with pytest.raises(ValueError, match="the runs ran on different cases: 2 dev and 1 dev"):
+        compare_runs(READER, GOLD, BASE, both, CANDIDATE, fewer)
+    with pytest.raises(ValueError, match="the runs ran on different cases: 2 dev and 2 test"):
+        compare_runs(READER, GOLD, BASE, both, test, both)
+    forced = compare_runs(READER, GOLD, BASE, both, test, fewer, force=True)
+
+    assert [c.case_id for c in forced.cases] == ["a"]
+    assert forced.warnings == ["only in base: b"]
+
+
+def test_with_force_the_cases_one_run_lacks_or_with_no_gold_now_are_left_out() -> None:
     result = compare_runs(
-        BASE, base_cases, candidate, candidate_cases, metrics=("f1",), primary="f1"
-    )
-
-    assert [(c.case_id, c.base, c.candidate) for c in result.cases] == [
-        ("a", 0.5, 0.9),
-        ("b", 0.3, 0.3),
-    ]
-    assert [(m.base, m.candidate, m.verdict) for m in result.metrics] == [
-        (None, None, "no verdict")
-    ]
-    assert result.warnings == [
-        "no verdict: the runs ran on different cases or gold; rescore the older run first with"
-        " `evals run --rescore RUN_ID`",
-        "only in base: c",
-        "only in candidate: d",
-        "gold changed between the runs for b",
-    ]
-    assert not result.worse
-    assert not result.comparable
-
-
-def test_a_metric_one_run_did_not_measure_gets_no_verdict() -> None:
-    candidate = replace(BASE, run_id="cand", summary={**BASE.summary, "partial_recall": None})
-
-    result = compare_runs(BASE, [], candidate, [], metrics=("partial_recall",), primary="f1")
-
-    assert [(m.name, m.base, m.candidate, m.verdict) for m in result.metrics][1] == (
-        "partial_recall",
-        0.4,
-        None,
-        "not measured",
-    )
-
-
-def test_runs_that_share_no_case_get_no_verdict() -> None:
-    candidate = replace(BASE, run_id="cand", case_set_hash="other")
-
-    result = compare_runs(
+        READER,
+        GOLD,
         BASE,
-        [case("a", 0.5)],
-        candidate,
-        [case("b", 0.5)],
-        metrics=("f1",),
-        primary="f1",
+        [answer("a", 1, 2), answer("b", 3), answer("gone", 5)],
+        CANDIDATE,
+        [answer("a", 1, 2), answer("gone", 5), answer("new", 6)],
+        force=True,
     )
 
-    assert result.metrics[0].verdict == "no verdict"
-    assert "no verdict: the runs share no case" in result.warnings
+    assert [c.case_id for c in result.cases] == ["a"]
+    assert result.metrics[0].verdict == "no change"
+    assert result.metrics[3].verdict == "not measured"
+    assert result.warnings == ["only in base: b", "only in candidate: new", "no gold now for gone"]
 
 
-def test_any_change_at_all_is_better_or_worse() -> None:
-    candidate = replace(BASE, run_id="cand", summary={**BASE.summary, "f1": 0.501})
+def test_a_failed_call_is_scored_as_an_empty_answer() -> None:
+    failed = replace(answer("a"), prediction=None, error="RuntimeError: no GPU")
 
-    result = compare_runs(BASE, [], candidate, [], metrics=(), primary="f1")
+    result = compare_runs(READER, GOLD, BASE, [answer("a", 1, 2)], CANDIDATE, [failed])
 
-    assert result.metrics[0].verdict == "better"
+    assert result.metrics[0].candidate == 0.0
+
+
+def test_runs_that_share_no_case_with_gold_are_refused() -> None:
+    with pytest.raises(ValueError, match="the runs share no case that has gold now"):
+        compare_runs(READER, GOLD, BASE, [answer("a", 1)], CANDIDATE, [answer("b", 3)], force=True)
+
+
+def test_runs_of_two_components_are_refused() -> None:
+    router = replace(CANDIDATE, component="router")
+
+    with pytest.raises(ValueError, match="cannot compare a reader run with a router run"):
+        compare_runs(READER, GOLD, BASE, [], router, [])

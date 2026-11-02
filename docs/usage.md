@@ -60,8 +60,7 @@ length and hash.
 
 ```sh
 uv run resourcly requests                 # the latest requests, newest first
-uv run resourcly request <id>             # each item, then every step
-uv run evals show --request <id>          # the steps only
+uv run resourcly request <id>             # each item, then every step; an eval case's steps too
 ```
 
 ```sh

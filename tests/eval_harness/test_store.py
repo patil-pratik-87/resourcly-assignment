@@ -11,7 +11,7 @@ def run(run_id: str, version: str = "textlayer-v0") -> Run:
         version=version,
         version_hash="abc123",
         split="dev",
-        selection={"case_ids": []},
+        case_ids=[],
         case_set_hash="c0ffee",
         started_at="2026-11-01T10:00:00Z",
         git_sha="1234567",
@@ -55,5 +55,3 @@ def test_runs_list_newest_first_and_filter_by_version(tmp_path: Path) -> None:
 
         assert [r.run_id for r in store.runs()] == ["r4", "r3", "r2", "r1"]
         assert [r.run_id for r in store.runs(component="reader", version="a")] == ["r4", "r3", "r1"]
-        assert store.latest("reader", "a").run_id == "r3"
-        assert store.latest("reader", "absent") is None

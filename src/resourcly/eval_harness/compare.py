@@ -1,10 +1,21 @@
 """Compare two runs of one component: metric deltas with a verdict, and per-case changes."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any, Protocol
 
-from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.metrics import Scored
+from resourcly.eval_harness.models import Case, CaseResult, Run
 
 EPSILON = 1e-9
+
+
+class Scoring(Protocol):
+    """What compare needs of a suite: its metrics, primary first, and how it scores."""
+
+    metrics: tuple[str, ...]
+    score: Callable[[Case, Any], dict[str, Any]]
+    summarise: Callable[[Scored], dict[str, Any]]
 
 
 @dataclass(frozen=True)
@@ -34,8 +45,6 @@ class CaseChange:
 
 @dataclass(frozen=True)
 class Comparison:
-    base: Run
-    candidate: Run
     metrics: list[MetricChange]
     cases: list[CaseChange]
     warnings: list[str]
@@ -45,66 +54,57 @@ class Comparison:
         """The primary metric, listed first, went down."""
         return bool(self.metrics) and self.metrics[0].verdict == "worse"
 
-    @property
-    def comparable(self) -> bool:
-        return bool(self.metrics) and self.metrics[0].verdict != "no verdict"
-
 
 def compare_runs(
+    suite: Scoring,
+    gold: dict[str, Case],
     base: Run,
     base_cases: list[CaseResult],
     candidate: Run,
     candidate_cases: list[CaseResult],
-    metrics: tuple[str, ...],
-    primary: str,
+    force: bool = False,
 ) -> Comparison:
-    """A metric is better when it rises; any change counts.
+    """Score both runs' stored answers against the current gold, on the cases both ran.
 
-    Only runs on the same case set, which includes the gold of each case, get a verdict: they
-    compare their stored summaries. Otherwise no metric gets a verdict, and the warnings say to
-    rescore the older run on the current gold first.
+    Both sides are scored the same way on the same cases, so the verdict holds even when the gold
+    changed after a run. Runs on other splits or other cases are refused, since their numbers do
+    not measure the same thing; with `force`, a case only one run has, or one with no gold now, is
+    left out with a warning. A metric is better when it rises; any change counts. The first is
+    the primary one.
     """
     if base.component != candidate.component:
         raise ValueError(f"cannot compare a {base.component} run with a {candidate.component} run")
-    ordered = [primary, *(name for name in metrics if name != primary)]
     before = {case.case_id: case for case in base_cases}
     after = {case.case_id: case for case in candidate_cases}
+    if not force and (base.split != candidate.split or before.keys() != after.keys()):
+        raise ValueError(
+            f"the runs ran on different cases: {len(before)} {base.split} and"
+            f" {len(after)} {candidate.split}; --force compares the cases both ran"
+        )
+    warnings = [
+        f"only in {side}: {', '.join(sorted(only))}"
+        for side, only in (
+            ("base", before.keys() - after.keys()),
+            ("candidate", after.keys() - before.keys()),
+        )
+        if only
+    ]
     shared = sorted(before.keys() & after.keys())
-    changed = [
-        case_id for case_id in shared if before[case_id].gold_hash != after[case_id].gold_hash
-    ]
-    warnings = []
-    same = base.case_set_hash == candidate.case_set_hash
-    if not same and not shared:
-        warnings.append("no verdict: the runs share no case")
-    elif not same:
-        warnings.append(
-            "no verdict: the runs ran on different cases or gold; rescore the older run first"
-            " with `evals run --rescore RUN_ID`"
-        )
-    for side, only in (
-        ("base", before.keys() - after.keys()),
-        ("candidate", after.keys() - before.keys()),
-    ):
-        if only:
-            warnings.append(f"only in {side}: {', '.join(sorted(only))}")
-    if changed:
-        warnings.append(f"gold changed between the runs for {', '.join(changed)}")
-    changes = [
-        _metric(name, base.summary or {}, candidate.summary or {})
-        if same
-        else MetricChange(name, None, None, "no verdict")
-        for name in ordered
-    ]
-    cases = [
-        CaseChange(
-            case_id,
-            before[case_id].scores.get("case_score", 0.0),
-            after[case_id].scores.get("case_score", 0.0),
-        )
-        for case_id in shared
-    ]
-    return Comparison(base, candidate, changes, cases, warnings)
+    gone = [case_id for case_id in shared if case_id not in gold]
+    if gone:
+        warnings.append(f"no gold now for {', '.join(gone)}")
+    scored = [case_id for case_id in shared if case_id in gold]
+    if not scored:
+        raise ValueError("the runs share no case that has gold now")
+    old = {c: suite.score(gold[c], before[c].prediction) for c in scored}
+    new = {c: suite.score(gold[c], after[c].prediction) for c in scored}
+    old_summary = suite.summarise([(gold[c].stratum, old[c]) for c in scored])
+    new_summary = suite.summarise([(gold[c].stratum, new[c]) for c in scored])
+    return Comparison(
+        metrics=[_metric(name, old_summary, new_summary) for name in suite.metrics],
+        cases=[CaseChange(c, old[c]["case_score"], new[c]["case_score"]) for c in scored],
+        warnings=warnings,
+    )
 
 
 def _metric(name: str, base: dict, candidate: dict) -> MetricChange:

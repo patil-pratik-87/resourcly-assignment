@@ -4,6 +4,7 @@ import math
 import re
 import unicodedata
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -25,7 +26,7 @@ UNITS = {
     "°": "deg",
 }
 UNIT_MARKS = str.maketrans({"º": "°", "˚": "°", "″": '"'})
-SYMBOLS = str.maketrans({"ø": "⌀", "∅": "⌀", "−": "-", "–": "-", "—": "-", "‐": "-"})
+SYMBOLS = str.maketrans({"ø": "⌀", "∅": "⌀", "−": "-", "–": "-", "\u2014": "-", "‐": "-"})
 
 
 @dataclass(frozen=True)
@@ -144,71 +145,45 @@ def _key(record: Record) -> tuple:
     return record["page"], normalise_unit(record["unit"]), _kind(record["kind"]), content
 
 
-def summarise_readings(cases: list[tuple[str, Counts]]) -> dict[str, Any]:
+Scored = list[tuple[str, dict[str, Any]]]  # each case's stratum and its stored scores
+
+
+def summarise_readings(cases: Scored) -> dict[str, Any]:
     """Micro averages: F1, precision and recall over full drawings, recall only over partial gold.
 
     Partial gold lists a few values per drawing, so a prediction missing from it may still be right.
     A metric with no case to measure it on is None, not zero.
     """
-    full = sum((counts for stratum, counts in cases if stratum == "full"), Counts())
-    partial = [counts for stratum, counts in cases if stratum == "partial"]
-    measured = any(stratum == "full" for stratum, _ in cases)
+    full = [_counts(scores) for stratum, scores in cases if stratum == "full"]
+    partial = [_counts(scores) for stratum, scores in cases if stratum == "partial"]
+    total = sum(full, Counts())
     return {
-        "f1": full.f1 if measured else None,
-        "precision": full.precision if measured else None,
-        "recall": full.recall if measured else None,
+        "f1": total.f1 if full else None,
+        "precision": total.precision if full else None,
+        "recall": total.recall if full else None,
         "partial_recall": sum(partial, Counts()).recall if partial else None,
     }
 
 
+def _counts(scores: dict[str, Any]) -> Counts:
+    return Counts(scores["gold"], scores["predicted"], scores["matched"])
+
+
 LABELLED_ROUTES = ("drawing", "photo", "text")
-OTHER = "other"
-FAILED = "(error)"
 
 
-@dataclass(frozen=True)
-class RouteOutcome:
-    """One routed case; route is None when the call failed."""
-
-    case_id: str
-    expected: str
-    route: str | None
-    layer: str | None
-    reason: str | None
-
-
-def summarise_routes(outcomes: list[RouteOutcome]) -> dict[str, Any]:
-    """How well a router picked the case, and every case it got wrong.
+def summarise_routes(cases: Scored) -> dict[str, Any]:
+    """How well a router picked the case; each case's stratum is the route it should get.
 
     Accuracy covers the labelled requests: those whose case is drawing, photo or text. Drawing
     recall is the share of drawings sent to the reader. The other files fit no case, and whether
     they should is a product choice, so they are scored apart as the share the router kept out
     (routed to other). A metric with nothing to measure is None.
     """
-    labelled = [o for o in outcomes if o.expected in LABELLED_ROUTES]
-    drawings = [o for o in labelled if o.expected == "drawing"]
-    other = [o for o in outcomes if o.expected == OTHER]
     return {
-        "accuracy": _share(labelled, lambda o: o.route == o.expected),
-        "drawing_recall": _share(drawings, lambda o: o.route == "drawing"),
-        "other_kept_out": _share(other, lambda o: o.route == OTHER),
-        "mistakes": [
-            _row(o) for o in sorted(outcomes, key=lambda o: o.case_id) if o.route != o.expected
-        ],
-    }
-
-
-def _share(items: list[RouteOutcome], keep: Any) -> float | None:
-    return sum(1 for item in items if keep(item)) / len(items) if items else None
-
-
-def _row(outcome: RouteOutcome) -> dict[str, Any]:
-    return {
-        "case": outcome.case_id,
-        "expected": outcome.expected,
-        "got": outcome.route or FAILED,
-        "layer": outcome.layer or "-",
-        "reason": outcome.reason,
+        "accuracy": _mean(cases, "correct", lambda stratum: stratum in LABELLED_ROUTES),
+        "drawing_recall": _mean(cases, "correct", lambda stratum: stratum == "drawing"),
+        "other_kept_out": _mean(cases, "correct", lambda stratum: stratum == "other"),
     }
 
 
@@ -234,16 +209,16 @@ def score_failure(gold: dict[str, Any], figures: list[Any] | None) -> dict[str, 
     }
 
 
-def summarise_failures(scores: list[tuple[str, dict[str, float]]]) -> dict[str, Any]:
+def summarise_failures(cases: Scored) -> dict[str, Any]:
     """Means over the photos of report figures, and the share of negatives kept out."""
-    photos = [score for kind, score in scores if kind == PHOTO]
-    negatives = [score for kind, score in scores if kind != PHOTO]
-
-    def mean(rows: list[dict[str, float]], name: str) -> float | None:
-        return sum(row[name] for row in rows) / len(rows) if rows else None
-
     return {
-        "section@1": mean(photos, "section@1"),
-        "mode@3": mean(photos, "mode@3"),
-        "kept_out": mean(negatives, "kept_out"),
+        "section@1": _mean(cases, "section@1", lambda stratum: stratum == PHOTO),
+        "mode@3": _mean(cases, "mode@3", lambda stratum: stratum == PHOTO),
+        "kept_out": _mean(cases, "kept_out", lambda stratum: stratum != PHOTO),
     }
+
+
+def _mean(cases: Scored, name: str, keep: Callable[[str], bool]) -> float | None:
+    """The mean of one score over the cases whose stratum `keep` accepts; None for no case."""
+    values = [scores[name] for stratum, scores in cases if keep(stratum)]
+    return sum(values) / len(values) if values else None

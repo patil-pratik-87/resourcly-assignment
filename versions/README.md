@@ -30,4 +30,5 @@ uv run evals list versions reader
 uv run evals run reader --version my-reader-v1 --split dev
 ```
 
-The keys a version may set are in [docs/evals.md](../docs/evals.md#adding-a-version).
+The keys a version may set are in the
+[eval harness README](../src/resourcly/eval_harness/README.md#add-a-version).

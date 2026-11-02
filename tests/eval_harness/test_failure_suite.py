@@ -13,6 +13,7 @@ from resourcly.eval_harness import harness
 from resourcly.eval_harness.cases import check_gold, failure_cases
 from resourcly.eval_harness.cli import app
 from resourcly.eval_harness.store import SqliteResultStore
+from resourcly.eval_harness.suites import SUITES
 from resourcly.models import FigureMatch
 from tests.conftest import png
 
@@ -147,11 +148,12 @@ def test_evals_run_failure_prints_the_summary(
 ) -> None:
     monkeypatch.setenv("RESOURCLY_VERSIONS_DIR", str(failing.versions_dir))
     monkeypatch.setenv("RESOURCLY_TRACE_DB", str(failing.trace_path))
+    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(failing.gold_dir))
+    monkeypatch.setenv("RESOURCLY_SPLITS", str(failing.splits_path))
     store = tmp_path / "e.sqlite"
-    gold = ["--gold-dir", str(failing.gold_dir), "--splits", str(failing.splits_path)]
 
     result = CliRunner().invoke(
-        app, ["--store", str(store), *gold, "run", "failure", "--version", "fake-v1"]
+        app, ["--store", str(store), "run", "failure", "--version", "fake-v1"]
     )
     shown = CliRunner().invoke(app, ["--store", str(store), "list", "runs", "failure"])
 
@@ -165,13 +167,13 @@ def test_the_gold_check_accepts_the_cases_and_warns_about_a_missing_image(
     failing: Settings,
 ) -> None:
     with open_services(failing) as services:
-        found = check_gold(services)
+        found = check_gold(services, SUITES)
 
     failure = [(level, message) for level, message in found if message.startswith("failure")]
     assert ("ok", "failure 7 case(s): 4 photo(s), 3 negative(s)") in failure
     assert (
         "warning",
-        "failure 1 of 7 image(s) are missing; they are committed, so restore them from git",
+        "failure 1 of 7 file(s) are missing; they are committed, so restore them from git",
     ) in failure
     assert [level for level, _ in failure if level == "error"] == []
 
@@ -188,7 +190,7 @@ def test_the_gold_check_refuses_broken_rows(gold_dir: Path, settings: Settings) 
     write_failures(gold_dir, rows, SPLITS + 'train = ["18-061/fig06"]\n')
 
     with open_services(settings) as services:
-        found = check_gold(services)
+        found = check_gold(services, SUITES)
 
     errors = [message for level, message in found if level == "error"]
     warnings = [message for level, message in found if level == "warning"]

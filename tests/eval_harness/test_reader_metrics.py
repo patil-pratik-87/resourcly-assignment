@@ -10,6 +10,11 @@ from resourcly.eval_harness.metrics import (
 )
 
 
+def scored(stratum: str, counts) -> tuple[str, dict]:
+    """A case's stratum and the scores the reader suite stores for it."""
+    return stratum, {"gold": counts.gold, "predicted": counts.predicted, "matched": counts.matched}
+
+
 def v(page: int, value: Any, unit: str | None, kind: str, raw: str | None = None) -> dict:
     return {"page": page, "value": value, "unit": unit, "kind": kind, "raw": raw or str(value)}
 
@@ -97,7 +102,9 @@ def test_summary_pools_full_drawings_and_takes_only_recall_from_partial_gold() -
     full_b = score_reading([v(2, 5, "mm", "linear")], [v(2, 5, "mm", "radius")])
     partial = score_reading([hole, slot], [hole, *[v(1, n, "mm", "linear") for n in range(30, 40)]])
 
-    summary = summarise_readings([("full", full_a), ("full", full_b), ("partial", partial)])
+    summary = summarise_readings(
+        [scored("full", full_a), scored("full", full_b), scored("partial", partial)]
+    )
 
     assert summary == {
         "f1": pytest.approx(2 / 7),
@@ -120,8 +127,8 @@ def test_unmatched_lists_missed_gold_and_extra_predictions() -> None:
 def test_a_summary_without_full_or_partial_cases_has_no_number_for_them() -> None:
     full = score_reading([v(1, 20, "mm", "diameter")], [v(1, 20, "mm", "diameter")])
 
-    only_full = summarise_readings([("full", full)])
-    only_partial = summarise_readings([("partial", full)])
+    only_full = summarise_readings([scored("full", full)])
+    only_partial = summarise_readings([scored("partial", full)])
 
     assert only_full["partial_recall"] is None
     assert only_full["f1"] == 1.0

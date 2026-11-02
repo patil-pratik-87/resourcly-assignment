@@ -2,21 +2,22 @@
 
 import hashlib
 import logging
+import random
 import secrets
 import subprocess
 import time
 from collections.abc import Callable
-from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Any
 
 from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_services
-from resourcly.eval_harness.cases import Case
-from resourcly.eval_harness.models import CaseResult, Run
-from resourcly.eval_harness.ports import ResultStorePort
-from resourcly.eval_harness.suites import SUITES, Suite
+from resourcly.eval_harness.models import Case, CaseResult, Run, now
+from resourcly.eval_harness.store import SqliteResultStore
+from resourcly.eval_harness.suites import SUITES
 
 log = logging.getLogger(__name__)
+
+SEED = 0  # the seed of the sample a --limit run takes
 
 
 def run(
@@ -24,15 +25,16 @@ def run(
     version: str,
     *,
     settings: Settings,
-    store: ResultStorePort,
+    store: SqliteResultStore,
     split: str = "dev",
     case_ids: tuple[str, ...] = (),
-    note: str | None = None,
+    limit: int | None = None,
     on_start: Callable[[Run, list[Case], int], None] | None = None,
     on_case: Callable[[CaseResult], None] | None = None,
 ) -> Run:
-    """Run one version of a component on every gold case of a split, or only the named ones, and
-    store the result.
+    """Run one version of a component on every gold case of a split, only the named ones, or a
+    sample of `limit` of them, and store the result. `compare` scores the stored answers again
+    on the current gold.
 
     A case whose call fails is stored with its error and scored as if it returned nothing.
     """
@@ -41,6 +43,8 @@ def run(
     with open_services(settings.with_version(component, version)) as services:
         pool = suite.load(services, split)
         chosen = _choose(pool, case_ids)
+        if limit is not None:
+            chosen = sample(chosen, limit)
         if not chosen:
             raise ValueError(
                 f"no {component} case of the {split} split was selected; nothing was stored"
@@ -52,10 +56,9 @@ def run(
             version=version,
             version_hash=resolved.hash,
             split=split,
-            selection={"case_ids": list(case_ids)},
+            case_ids=[] if len(chosen) == len(pool) else [case.case_id for case in chosen],
             case_set_hash=case_set_hash(chosen),
-            started_at=_now(),
-            note=note,
+            started_at=now(),
             **_git(),
         )
         store.start_run(started)
@@ -86,54 +89,9 @@ def run(
     return _finish(store, run_id, results)
 
 
-def rescore(run_id: str, *, settings: Settings, store: ResultStorePort) -> Run:
-    """Score a run's stored predictions against the current gold as a new run; nothing is called."""
-    old = store.run(run_id)
-    suite = SUITES[old.component]
-    current = _current_cases(suite, settings)
-    results = []
-    for stored in store.cases(run_id):
-        case = current.get(stored.case_id)
-        if case is None:
-            log.warning("%s has no gold now; left out of the rescore", stored.case_id)
-            continue
-        results.append((case, _score_again(suite, case, stored)))
-    if not results:
-        raise ValueError(f"no case of run {run_id} has gold now; nothing was stored")
-    new_id = _new_run_id(old.component)
-    store.start_run(
-        replace(
-            old,
-            run_id=new_id,
-            case_set_hash=case_set_hash([case for case, _ in results]),
-            started_at=_now(),
-            rescored_from=old.run_id,
-            note=f"rescore of {old.run_id}",
-            finished_at=None,
-            summary=None,
-            n_cases=0,
-            errors=0,
-            **_git(),
-        )
-    )
-    for _, result in results:
-        store.add_case(new_id, result)
-    return _finish(store, new_id, results)
-
-
-def _current_cases(suite: Suite, settings: Settings) -> dict[str, Case]:
-    with open_services(settings) as services:
-        return {case.case_id: case for case in suite.load(services, "all")}
-
-
-def _score_again(suite: Suite, case: Case, stored: CaseResult) -> CaseResult:
-    scores = suite.score(case, stored.prediction)
-    return replace(stored, stratum=case.stratum, gold_hash=case.gold_hash, scores=scores)
-
-
-def _finish(store: ResultStorePort, run_id: str, results: list[tuple[Case, CaseResult]]) -> Run:
+def _finish(store: SqliteResultStore, run_id: str, results: list[tuple[Case, CaseResult]]) -> Run:
     suite = SUITES[store.run(run_id).component]
-    summary = suite.summarise([(case, result.prediction) for case, result in results])
+    summary = suite.summarise([(result.stratum, result.scores) for _, result in results])
     errors = sum(1 for _, result in results if result.error)
     store.finish_run(run_id, summary, errors)
     return store.run(run_id)
@@ -153,6 +111,30 @@ def _choose(pool: list[Case], case_ids: tuple[str, ...]) -> list[Case]:
     return [case for case in pool if case.case_id in case_ids]
 
 
+def sample(cases: list[Case], limit: int) -> list[Case]:
+    """`limit` of the cases, spread over the strata in proportion to their size, in case id order.
+
+    Each stratum gives one case before any gives a second, so a small run sees every kind of
+    case. Each is shuffled with a fixed seed, so a run takes the same cases each time.
+    """
+    if limit >= len(cases):
+        return cases
+    rng = random.Random(SEED)
+    strata: dict[str, list[Case]] = {}
+    for case in cases:
+        strata.setdefault(case.stratum, []).append(case)
+    shuffled = {name: rng.sample(group, len(group)) for name, group in sorted(strata.items())}
+    taken = dict.fromkeys(shuffled, 0)
+    while sum(taken.values()) < limit:
+        name = min(
+            (name for name in shuffled if taken[name] < len(shuffled[name])),
+            key=lambda name: (taken[name] / len(shuffled[name]), name),
+        )
+        taken[name] += 1
+    picked = [case for name, group in shuffled.items() for case in group[: taken[name]]]
+    return sorted(picked, key=lambda case: case.case_id)
+
+
 def _new_run_id(component: str) -> str:
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     return f"{component}-{stamp}-{secrets.token_hex(2)}"
@@ -169,7 +151,3 @@ def _git() -> dict[str, Any]:
         "git_sha": git("rev-parse", "--short", "HEAD") or "unknown",
         "git_dirty": bool(git("status", "--porcelain")),
     }
-
-
-def _now() -> str:
-    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

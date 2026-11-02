@@ -6,22 +6,30 @@ from typing import Any
 
 from resourcly.bootstrap import Services
 from resourcly.eval_harness import metrics
-from resourcly.eval_harness.cases import Case, failure_cases, reader_cases, route_cases
+from resourcly.eval_harness.cases import failure_cases, reader_cases, route_cases
+from resourcly.eval_harness.models import Case
 
 
 @dataclass(frozen=True)
 class Suite:
-    """A component's eval. Each case's scores carry a "case_score" that compare pairs by case."""
+    """A component's eval. Each case's scores carry a "case_score" that compare pairs by case.
+
+    The first metric is the primary one, the number that says better or worse. A run's summary
+    is made from its cases' stored scores, with each case's stratum.
+    """
 
     component: str
-    primary_metric: str
     metrics: tuple[str, ...]
-    case_columns: tuple[str, ...]
+    case_columns: tuple[str, ...]  # scores `show` lists beside each case_score
     load: Callable[[Services, str], list[Case]]
     call: Callable[[Services, Case, str], Any]
     score: Callable[[Case, Any], dict[str, Any]]
-    summarise: Callable[[list[tuple[Case, Any]]], dict[str, Any]]
+    summarise: Callable[[metrics.Scored], dict[str, Any]]
     explain: Callable[[Case, Any], list[str]]
+
+    @property
+    def primary(self) -> str:
+        return self.metrics[0]
 
 
 def _read(services: Services, case: Case, request_id: str) -> Any:
@@ -72,12 +80,6 @@ def _score_reading(case: Case, prediction: Any) -> dict[str, Any]:
         "gold": counts.gold,
         "predicted": counts.predicted,
     }
-
-
-def _summarise_readings(results: list[tuple[Case, Any]]) -> dict[str, Any]:
-    return metrics.summarise_readings(
-        [(case.stratum, _reading(case, prediction)) for case, prediction in results]
-    )
 
 
 def _explain_reading(case: Case, prediction: Any) -> list[str]:
@@ -141,21 +143,6 @@ def _explain_route(case: Case, prediction: Any) -> list[str]:
     return lines
 
 
-def _summarise_routes(results: list[tuple[Case, Any]]) -> dict[str, Any]:
-    return metrics.summarise_routes(
-        [
-            metrics.RouteOutcome(
-                case_id=case.case_id,
-                expected=case.gold["expected_route"],
-                route=_field(prediction, "route"),
-                layer=_field(prediction, "layer"),
-                reason=_field(prediction, "reason"),
-            )
-            for case, prediction in results
-        ]
-    )
-
-
 def _find(services: Services, case: Case, request_id: str) -> Any:
     """Send the case's image to the failure finder of the version under test."""
     photo = services.gold.failure_photo(case.gold["image"])
@@ -176,15 +163,6 @@ def _score_failure(case: Case, prediction: Any) -> dict[str, Any]:
         **scores,
         "top": top.get("figure") if isinstance(top, dict) else None,
     }
-
-
-def _summarise_failures(results: list[tuple[Case, Any]]) -> dict[str, Any]:
-    return metrics.summarise_failures(
-        [
-            (case.stratum, metrics.score_failure(case.gold, _figures(prediction)))
-            for case, prediction in results
-        ]
-    )
 
 
 def _explain_failure(case: Case, prediction: Any) -> list[str]:
@@ -210,35 +188,32 @@ def _explain_failure(case: Case, prediction: Any) -> list[str]:
 SUITES: dict[str, Suite] = {
     "reader": Suite(
         component="reader",
-        primary_metric="f1",
         metrics=("f1", "precision", "recall", "partial_recall"),
         case_columns=("gold", "predicted", "matched"),
         load=reader_cases,
         call=_read,
         score=_score_reading,
-        summarise=_summarise_readings,
+        summarise=metrics.summarise_readings,
         explain=_explain_reading,
     ),
     "router": Suite(
         component="router",
-        primary_metric="accuracy",
         metrics=("accuracy", "drawing_recall", "other_kept_out"),
         case_columns=("route", "layer", "confidence"),
         load=route_cases,
         call=_route,
         score=_score_route,
-        summarise=_summarise_routes,
+        summarise=metrics.summarise_routes,
         explain=_explain_route,
     ),
     "failure": Suite(
         component="failure",
-        primary_metric="section@1",
         metrics=("section@1", "mode@3", "kept_out"),
         case_columns=("top",),
         load=failure_cases,
         call=_find,
         score=_score_failure,
-        summarise=_summarise_failures,
+        summarise=metrics.summarise_failures,
         explain=_explain_failure,
     ),
 }
