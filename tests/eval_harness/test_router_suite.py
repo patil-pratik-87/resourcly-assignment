@@ -80,7 +80,7 @@ def test_a_router_run_stores_each_routing_and_scores_the_split(
     summary = run.summary
     assert (run.n_cases, run.errors) == (6, 1)
     assert summary == {
-        "accuracy": pytest.approx(3 / 5),
+        "accuracy": pytest.approx(4 / 6),
         "drawing_recall": 1 / 3,
         "other_kept_out": 1.0,
     }
@@ -113,5 +113,5 @@ def test_evals_run_router_prints_the_summary(routed: Settings, tmp_path: Path, m
     )
 
     assert result.exit_code == 0, result.output
-    assert re.search(r"accuracy \(primary\) +0\.600", result.output)
+    assert re.search(r"accuracy \(primary\) +0\.667", result.output)
     assert re.search(r"other_kept_out +1\.000", result.output)

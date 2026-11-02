@@ -1,4 +1,5 @@
 from resourcly.adapters.route_pictures import png
+from resourcly.errors import UnreadableAttachment
 from resourcly.models import Attachment, LayerVerdict, Route
 from resourcly.ports import VisionModelPort
 
@@ -11,7 +12,8 @@ class VlmRouteAdapter:
 
     The model sees the picture (page 1 of a PDF, or the image, at most `max_side` pixels on its
     long side) and never the user's text. It always decides: A is a drawing, B a photo of a part,
-    and C something else, a file that fits no case.
+    and C something else, a file that fits no case. A file that cannot be decoded fits no case
+    without asking the model.
     """
 
     name = "vlm"
@@ -30,7 +32,11 @@ class VlmRouteAdapter:
     def decide(self, attachment: Attachment | None) -> LayerVerdict:
         if attachment is None:
             return LayerVerdict(None, "no attachment for the model")
-        choice = self.model.choose(self.prompt, [png(attachment, self.max_side)], list(OPTIONS))
+        try:
+            picture = png(attachment, self.max_side)
+        except UnreadableAttachment as error:
+            return LayerVerdict(Route.OTHER, str(error), 1.0)
+        choice = self.model.choose(self.prompt, [picture], list(OPTIONS))
         answer = choice.probabilities
         letter = max(answer, key=answer.__getitem__)
         route = OPTIONS[letter]

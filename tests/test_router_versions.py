@@ -13,6 +13,7 @@ from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_servi
 from resourcly.errors import InvalidVersion
 from resourcly.models import Route
 from resourcly.services import RouterService
+from tests.test_route_pictures import truncated_jpeg
 
 COMMITTED = PROJECT_ROOT / "versions" / "router"
 
@@ -114,3 +115,14 @@ def test_an_encoder_the_registry_does_not_know_is_refused(versioned: Settings) -
 
     with pytest.raises(InvalidVersion, match="'clip' is not an image encoder; use dinov2"):
         load_version(versioned, "router", "three-layer-v1")
+
+
+def test_a_truncated_photo_is_routed_to_other_instead_of_failing_the_request(
+    layered: Settings,
+) -> None:
+    with open_services(layered) as services:
+        routing = services.router.route(None, truncated_jpeg(), request_id="cut-1")
+
+    assert (routing.route, routing.layer) == (Route.OTHER, "probe")
+    assert routing.reason.startswith("not a readable image/jpeg image")
+    assert Dinov2EncoderAdapter._loaded == {}

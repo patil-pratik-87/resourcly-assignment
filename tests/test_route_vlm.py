@@ -14,7 +14,7 @@ from resourcly.adapters.mlx_vlm_model import (
 from resourcly.adapters.route_vlm import VlmRouteAdapter
 from resourcly.errors import ModelNotCached
 from resourcly.models import Choice, Route
-from tests.test_route_pictures import image
+from tests.test_route_pictures import image, truncated_jpeg
 
 
 class FakeVisionModel:
@@ -116,3 +116,13 @@ def test_the_adapter_loads_offline_and_records_the_snapshot(
         MlxVlmModelAdapter._revisions.clear()
 
     assert offline == ["1"]
+
+
+def test_a_file_that_cannot_be_decoded_fits_no_case_without_asking_the_model() -> None:
+    model = FakeVisionModel({"A": 1.0, "B": 0.0, "C": 0.0})
+
+    verdict = VlmRouteAdapter(model, "q").decide(truncated_jpeg())
+
+    assert (verdict.route, verdict.confidence) == (Route.OTHER, 1.0)
+    assert verdict.reason.startswith("not a readable image/jpeg image: image file is truncated")
+    assert model.calls == []

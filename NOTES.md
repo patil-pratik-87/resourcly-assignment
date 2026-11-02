@@ -110,8 +110,8 @@ The chat is one HTTP API, made for a later chat screen; the CLI calls the same s
   and the drawing JSON beside it.
 - Each step is written to the trace store when it ends, not when the request ends, so a live
   trace stream can be added without changing the agent.
-- The router is the model-free `stub-v0`. Photos and text questions get a "not available yet"
-  reply, so an answerer can be swapped in later without changing the shape.
+- The router is `three-layer-v1` (see "The router"). Photos and text questions get a "not
+  available yet" reply, so an answerer can be swapped in later without changing the shape.
 - The request store and the worker sit behind ports: at scale they become a database and a queue.
 
 How to use it: `docs/usage.md`.
@@ -124,7 +124,7 @@ run and a comparison. The model-free versions set the floors, on the dev split:
 
 | Version | Cases | Primary | Other |
 | --- | --- | --- | --- |
-| router `stub-v0` | 123 | accuracy 0.607 | drawing recall 0.120, other kept out 0.500 |
+| router `stub-v0` | 123 | accuracy 0.602 | drawing recall 0.120, other kept out 0.500 |
 | failure `shuffled-v0` | 86 | section@1 0.038 | mode@3 0.769, kept out 0.000 |
 
 - How: the router gold is the 244 requests of the routing research, moved to `evals/gold/routes`.
@@ -137,22 +137,22 @@ Details: `docs/evals.md`.
 
 ## The router
 
-`three-layer-v1` runs structure rules, then a DINOv2-small probe deciding at 0.9, then Qwen3-VL
-8B for the rest. The probe trained on the train split only (37 drawings, 23 photos).
+`three-layer-v1`, the default: structure rules, a DINOv2-small probe over drawing, photo and
+other deciding at 0.9, then Qwen3-VL 8B. The probe trained on the train split only (37 drawings,
+23 photos, 2 other).
 
 | Version | Split | Accuracy | Drawing recall | Other kept out |
 | --- | --- | --- | --- | --- |
-| `stub-v0` | dev (123) | 0.607 | 0.120 | 0.500 |
-| `three-layer-v1` | dev (123) | 1.000 | 1.000 | 0.833 |
-| `stub-v0` | test (57) | 0.418 | 0.091 | 0.500 |
+| `stub-v0` | dev (123) | 0.602 | 0.120 | 0.500 |
+| `three-layer-v1` | dev (123) | 0.992 | 1.000 | 0.833 |
+| `stub-v0` | test (57) | 0.421 | 0.091 | 0.500 |
 | `three-layer-v1` | test (57) | 1.000 | 1.000 | 1.000 |
 
-- How: `evals run` on dev, once on test, then `evals compare` with `stub-v0`.
-- Honest reading: perfect scores mean the route set is easy, not that the router is perfect. Its
-  phone photos and scans of drawings are made by code from clean renders; it has no real phone
-  photos, no real scanned reports and no mixed pages.
-- Miss: a dimensioned physics diagram goes to drawing (probe 0.986).
-- Limits: the NIST drawings in every split share one family. The app still runs `stub-v0` by
-  default; `RESOURCLY_ROUTER_VERSION=three-layer-v1` picks the layered router.
+- How: `evals run`, then `evals compare` with `stub-v0`. Accuracy counts other files too.
+- Other class: the probe now keeps 3 dev report pages out itself, so 18 dev files reach Qwen3-VL,
+  not 23. A dimensioned physics diagram still goes to drawing (probe 0.989).
+- Honest reading: near-perfect scores mean the route set is easy. Its phone photos and scans are
+  made by code; it has no real ones and no mixed pages.
+- Limits: one NIST drawing family in every split. `stub-v0` needs no model.
 
 Details: `docs/routing.md`.

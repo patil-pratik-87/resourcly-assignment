@@ -26,12 +26,12 @@ SPLITS = '[router]\ntrain = ["ctc01", "ftc06", "ntsb_16-006", "text_01"]\ndev = 
 
 
 class FakeEncoder:
-    """Drawings embed to [1, 0] and photos to [0, 1], read from the file name."""
+    """Each route embeds to its own axis, read from the folder in the file name."""
 
     model_id = "org/encoder"
 
     def encode(self, attachment) -> list[float]:
-        return [1.0, 0.0] if "/drawing/" in attachment.name else [0.0, 1.0]
+        return [float(f"/{route}/" in attachment.name) for route in ("drawing", "other", "photo")]
 
 
 @pytest.fixture
@@ -45,11 +45,13 @@ def routed(gold_dir: Path, settings: Settings) -> Settings:
     return settings
 
 
-def test_the_probe_trains_on_the_split_files_of_drawings_and_photos_only(routed: Settings) -> None:
+def test_the_probe_trains_on_every_file_of_the_split_that_fits_or_fits_no_case(
+    routed: Settings,
+) -> None:
     with open_services(routed) as services:
         cases = training_cases(services, "train")
 
-    assert [case.case_id for case in cases] == ["d_a", "d_b", "d_c", "p_a", "p_b"]
+    assert [case.case_id for case in cases] == ["d_a", "d_b", "d_c", "o_logo", "p_a", "p_b"]
 
 
 def test_a_trained_probe_records_what_it_was_trained_on_and_separates_the_cases(
@@ -59,12 +61,22 @@ def test_a_trained_probe_records_what_it_was_trained_on_and_separates_the_cases(
         document = train(services, FakeEncoder(), "train", c=100.0)
 
     assert document["encoder_model"] == "org/encoder"
+    assert document["classes"] == ["drawing", "other", "photo"]
     assert document["regression"] == {"C": 100.0, "class_weight": "balanced"}
     assert document["trained_on"]["split"] == "train"
-    assert document["trained_on"]["cases"] == {"drawing": 3, "photo": 2}
+    assert document["trained_on"]["cases"] == {"drawing": 3, "other": 1, "photo": 2}
     assert document["trained_on"]["units"] == ["ctc01", "ftc06", "ntsb_16-006"]
     path = tmp_path / "probe.json"
     path.write_text(json.dumps(document), encoding="utf-8")
     probe = LinearProbe.load(path)
-    assert probe.p_drawing([1.0, 0.0]) > 0.95
-    assert probe.p_drawing([0.0, 1.0]) < 0.05
+    for axis, route in enumerate(("drawing", "other", "photo")):
+        vector = [float(i == axis) for i in range(3)]
+        assert probe.probabilities(vector)[route] > 0.9
+
+
+def test_a_split_without_a_file_of_every_route_cannot_train(routed: Settings) -> None:
+    with (
+        open_services(routed) as services,
+        pytest.raises(SystemExit, match="no other or photo file in the dev split"),
+    ):
+        train(services, FakeEncoder(), "dev", c=100.0)
