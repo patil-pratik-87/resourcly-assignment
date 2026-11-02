@@ -8,6 +8,7 @@ import {
   middleCut,
   overCap,
   pageOf,
+  percent,
   progressLine,
   sentAt,
   sentence,
@@ -64,6 +65,14 @@ describe("status lines", () => {
     expect(layerLabel("probe")).toBe("image probe");
     expect(layerLabel("none")).toBe("no layer, none was sure");
     expect(layerLabel("something-new")).toBe("something-new");
+  });
+
+  it("gives a confidence in percent, never rounding a doubt up to 100", () => {
+    expect(percent(0.7)).toBe("70");
+    expect(percent(0.9038)).toBe("90");
+    expect(percent(0.998)).toBe("99.8");
+    expect(percent(0.9999)).toBe("99.9");
+    expect(percent(1)).toBe("100");
   });
 
   it("turns a router reason into a sentence", () => {
