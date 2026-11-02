@@ -19,7 +19,7 @@ from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.api import create_app
 from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation, Settings
 from resourcly.errors import ModelNotCached
-from resourcly.models import ReadProgress, RequestItem, RequestRecord
+from resourcly.models import ReaderOutput, ReadProgress, RequestItem, RequestRecord
 from resourcly.ports import Progress
 from tests.conftest import CTC01, png
 
@@ -36,7 +36,7 @@ class GatedReader:
     def __init__(self, folder: Path):
         self.text = PyMuPDFTextReaderAdapter(folder)
 
-    def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
+    def read(self, drawing: str, progress: Progress | None = None) -> ReaderOutput:
         if progress:
             progress(ReadProgress(page=1, pages=1, done=0, total=1, latest=["title block"]))
         self.gate.wait(timeout=10)

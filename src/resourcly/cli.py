@@ -148,7 +148,7 @@ def _show(record: RequestRecord) -> None:
         label = f"{item.item_id} ({item.name})" if renamed else item.item_id
         typer.echo(f"  {label}: {case}{item.status}")
         if item.values is not None:
-            typer.echo(f"    {item.values} values, {item.issues} schema issues")
+            typer.echo(f"    {item.values} values, {item.issues} issues")
         if item.reply:
             typer.echo(f"    {item.reply}")
         if item.error:

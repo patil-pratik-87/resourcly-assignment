@@ -419,6 +419,13 @@ class ReadProgress(BaseModel):
     latest: list[str] = []
 
 
+class ReaderOutput(BaseModel):
+    """What a reader returns: the document, and each model answer it could not use, and why."""
+
+    document: dict[str, Any]
+    answer_issues: list[Issue] = []
+
+
 class Reading(BaseModel):
     request_id: str
     drawing: str
@@ -567,7 +574,8 @@ class RequestItem(BaseModel):
     """One file of a chat request, or its text when it has no file, and what the agent did.
 
     An item is routed, then a drawing is queued and read, and the other cases are answered at
-    once. `values` and `issues` count the read document's values and schema issues.
+    once. `values` counts the read document's values, and `issues` its schema issues and the
+    model answers the reader could not use.
     """
 
     item_id: str

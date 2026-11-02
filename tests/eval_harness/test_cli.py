@@ -11,6 +11,7 @@ from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation
 from resourcly.eval_harness.cli import app
 from resourcly.eval_harness.models import Run
 from resourcly.eval_harness.store import SqliteResultStore
+from resourcly.models import ReaderOutput
 from tests.conftest import CTC01
 
 
@@ -86,8 +87,10 @@ def drop_rev_d(gold_dir: Path) -> None:
 
 
 class BlankReader:
-    def read(self, drawing: str, progress=None) -> dict:
-        return {"drawing": drawing, "page_count": 1, "title_block": {}, "values": []}
+    def read(self, drawing: str, progress=None) -> ReaderOutput:
+        return ReaderOutput(
+            document={"drawing": drawing, "page_count": 1, "title_block": {}, "values": []}
+        )
 
 
 @pytest.fixture

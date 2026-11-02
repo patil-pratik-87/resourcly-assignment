@@ -1,6 +1,11 @@
 import pytest
+from pydantic import ValidationError
 
 from resourcly.callout_values import (
+    LetterAnswer,
+    PageAnswer,
+    SymbolAnswer,
+    Transcription,
     datum_letter,
     feature_type,
     needs_symbol,
@@ -10,8 +15,12 @@ from resourcly.callout_values import (
 )
 
 
+def _t(answer: dict) -> Transcription:
+    return Transcription.model_validate(answer)
+
+
 def _one(transcription, framed=False, letters=10):
-    found = readings(transcription, framed=framed, letters=letters)
+    found = readings(_t(transcription), framed=framed, letters=letters)
     assert len(found) == 1, found
     return found[0]
 
@@ -49,7 +58,7 @@ def test_the_characteristic_comes_from_the_symbol_name(symbol_name, kind) -> Non
 
 def test_a_frame_with_no_named_characteristic_is_dropped() -> None:
     frame = {"symbol_name": "", "tolerance": "0.2", "datums": ["A"]}
-    assert readings({"lines": [], "feature_control_frames": [frame]}) == []
+    assert readings(_t({"lines": [], "feature_control_frames": [frame]})) == []
 
 
 @pytest.mark.parametrize(
@@ -79,7 +88,7 @@ def test_dimension_lines_are_joined_and_classified(lines, raw, kind, style) -> N
 
 def test_lines_that_repeat_a_frame_are_not_read_twice() -> None:
     frame = {"symbol_name": "position", "tolerance": "0.75", "datums": ["A", "B", "C"]}
-    found = readings({"lines": ["0.75 A B C"], "feature_control_frames": [frame]})
+    found = readings(_t({"lines": ["0.75 A B C"], "feature_control_frames": [frame]}))
 
     assert [r["callout"] for r in found] == ["feature_control_frame"]
 
@@ -114,12 +123,56 @@ def test_a_letter_and_number_outside_a_frame_is_a_datum_target() -> None:
 
 
 def test_a_lone_letter_outside_a_frame_is_dropped() -> None:
-    assert readings({"lines": ["X"], "feature_control_frames": []}) == []
+    assert readings(_t({"lines": ["X"], "feature_control_frames": []})) == []
 
 
-def test_a_malformed_transcription_reads_as_nothing() -> None:
-    assert readings(None) == []
-    assert readings({"lines": "Ø20", "feature_control_frames": [None, "x"]}) == []
+def test_a_transcription_takes_what_the_model_may_write_for_the_same_thing() -> None:
+    answer = {
+        "lines": [0.5, "Ø8 ±0.1"],
+        "feature_control_frames": [
+            {"symbol_name": None, "tolerance": 0.01, "datums": None, "unknown": 1},
+            {"symbol_name": "flatness", "tolerance": ".2"},
+        ],
+        "notes": "ignored",
+    }
+
+    transcription = _t(answer)
+
+    assert transcription.lines == ["0.5", "Ø8 ±0.1"]
+    unnamed, flat = transcription.feature_control_frames
+    assert (unnamed.symbol_name, unnamed.tolerance, unnamed.datums) == ("", "0.01", [])
+    assert (flat.modifiers, flat.datums) == ([], [])
+    assert _t({"lines": None}) == _t({"feature_control_frames": []}) == Transcription(lines=[])
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        {"lines": "Ø20", "feature_control_frames": []},
+        {"lines": [], "feature_control_frames": [None, "x"]},
+        {"lines": [None]},
+        {"lines": [], "feature_control_frames": [{"datums": "A B"}]},
+        {"text": "Ø20"},
+    ],
+)
+def test_a_transcription_of_the_wrong_shape_is_refused(answer) -> None:
+    with pytest.raises(ValidationError):
+        _t(answer)
+
+
+def test_the_follow_up_and_page_answers_are_typed_too() -> None:
+    assert SymbolAnswer.model_validate({"symbol_name": None}).symbol_name == ""
+    assert LetterAnswer.model_validate({"letter": "B", "why": "boxed"}).letter == "B"
+    page = PageAnswer.model_validate({"callouts": [{"lines": ["A"]}], "datum_feature_symbols": [1]})
+    assert (page.callouts, page.datum_feature_symbols) == ([{"lines": ["A"]}], ["1"])
+    for model, answer in [
+        (SymbolAnswer, {"symbol": "flatness"}),
+        (LetterAnswer, {"letter": ["A"]}),
+        (PageAnswer, {"callouts": ["Ø20"]}),
+        (PageAnswer, {"symbols": []}),
+    ]:
+        with pytest.raises(ValidationError):
+            model.model_validate(answer)
 
 
 def _numbers(fields: dict) -> dict:
@@ -237,14 +290,18 @@ def test_a_frame_whose_symbol_was_not_named_needs_a_symbol() -> None:
     unnamed = {"symbol_name": "", "tolerance": "1.5", "datums": ["A"]}
     named = {"symbol_name": "flatness", "tolerance": "0.2"}
 
-    assert needs_symbol({"lines": [], "feature_control_frames": [unnamed, named]})
-    assert not needs_symbol({"lines": [], "feature_control_frames": [named]})
-    assert not needs_symbol(None)
+    assert needs_symbol(_t({"lines": [], "feature_control_frames": [unnamed, named]}))
+    assert not needs_symbol(_t({"lines": [], "feature_control_frames": [named]}))
 
 
 @pytest.mark.parametrize(
     ("answer", "letter"),
-    [({"letter": "B"}, "B"), ({"letter": " c "}, None), ({"letter": "AB"}, None), (None, None)],
+    [
+        ({"letter": "B"}, "B"),
+        ({"letter": " c "}, None),
+        ({"letter": "AB"}, None),
+        ({"letter": None}, None),
+    ],
 )
 def test_a_datum_letter_is_one_capital_letter(answer, letter) -> None:
-    assert datum_letter(answer) == letter
+    assert datum_letter(LetterAnswer.model_validate(answer)) == letter

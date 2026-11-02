@@ -5,7 +5,7 @@ from typing import Any
 import pymupdf
 
 from resourcly.errors import NotFound, UnreadableDrawing
-from resourcly.models import drawing_short
+from resourcly.models import ReaderOutput, drawing_short
 from resourcly.ports import Progress
 
 Box = tuple[float, float, float, float]
@@ -26,7 +26,7 @@ class PyMuPDFTextReaderAdapter:
     def __init__(self, folder: Path):
         self.folder = folder
 
-    def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
+    def read(self, drawing: str, progress: Progress | None = None) -> ReaderOutput:
         """The text layer is read in one step, so there is no progress to report."""
         path = self.folder / f"{drawing}.pdf"
         if not path.is_file():
@@ -42,7 +42,13 @@ class PyMuPDFTextReaderAdapter:
         values = [
             _value(f"{prefix}-{index:02d}", *record) for index, record in enumerate(found, start=1)
         ]
-        return {"drawing": drawing, "page_count": page_count, "title_block": {}, "values": values}
+        document = {
+            "drawing": drawing,
+            "page_count": page_count,
+            "title_block": {},
+            "values": values,
+        }
+        return ReaderOutput(document=document)
 
 
 def text_records(page: pymupdf.Page) -> list[tuple[int, str, str, Box]]:

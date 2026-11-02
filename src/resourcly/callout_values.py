@@ -6,6 +6,8 @@ A model is asked only to copy what it sees, in this shape:
      "feature_control_frames": [{"symbol_name": "position", "tolerance": "0.75",
                                  "modifiers": [], "datums": ["A", "B", "C"]}]}
 
+The answer is checked against that shape once, as a `Transcription`, before any of it is used;
+an answer of another shape is refused there, so the code below only ever sees the typed fields.
 Everything else is decided here: which lines are a frame's cells read again, which lines form one
 stacked dimension, how `raw` is spelled, the callout and kind, the tolerance style, and the value,
 limits and unit, which come from the printed numbers by the same arithmetic the gold check uses.
@@ -14,6 +16,8 @@ limits and unit, which come from the printed numbers by the same arithmetic the 
 import re
 from decimal import Decimal
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict, model_validator
 
 NUM = r"(\d*\.?\d+)"
 SIGNED = r"([+-]?\d*\.?\d+)"
@@ -61,15 +65,70 @@ RANGE_END = re.compile(r"-\s+⌀?(\d*\.?\d+)")
 WORDS_THAT_ARE_NOT_NOTES = {"MAX", "MIN", "THRU", "TYP", "REF", "DEEP", "EQ", "SP", "ST"}
 
 
-def readings(transcription: Any, framed: bool = False, letters: int = 0) -> list[dict[str, Any]]:
+class Answer(BaseModel):
+    """A model's JSON answer, checked for its shape only: what the text means is decided later.
+
+    An answer must give at least one of its fields. Keys it does not know are ignored, a null is a
+    field left empty, and a number stands for its text, so 0.01 reads as "0.01".
+    """
+
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _given(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        if not data.keys() & cls.model_fields.keys():
+            raise ValueError(f"gives none of {', '.join(cls.model_fields)}")
+        return {key: value for key, value in data.items() if value is not None}
+
+
+class Frame(Answer):
+    """One feature control frame, cell by cell, as printed."""
+
+    symbol_name: str = ""
+    tolerance: str = ""
+    modifiers: list[str] = []
+    datums: list[str] = []
+
+
+class Transcription(Answer):
+    """What the model copied from one callout: its lines of text and its frames."""
+
+    lines: list[str] = []
+    feature_control_frames: list[Frame] = []
+
+
+class SymbolAnswer(Answer):
+    """The answer to the follow-up question: which characteristic a frame's first cell holds."""
+
+    symbol_name: str = ""
+
+
+class LetterAnswer(Answer):
+    """The answer to the follow-up question: which letter a datum feature box holds."""
+
+    letter: str = ""
+
+
+class PageAnswer(Answer):
+    """Every callout on a whole page, each checked as a `Transcription` on its own."""
+
+    callouts: list[dict[str, Any]] = []
+    datum_feature_symbols: list[str] = []
+
+
+def readings(
+    transcription: Transcription, framed: bool = False, letters: int = 0
+) -> list[dict[str, Any]]:
     """The readings in one callout: raw, callout, kind, tolerance_style and datums each.
 
     `framed` and `letters` describe the callout box, so a single letter in a small frame is known
     to be a datum feature symbol.
     """
-    data = transcription if isinstance(transcription, dict) else {}
-    frames = [f for f in _list(data.get("feature_control_frames")) if isinstance(f, dict)]
-    lines = [str(x).strip() for x in _list(data.get("lines")) if str(x).strip()]
+    frames = transcription.feature_control_frames
+    lines = [line.strip() for line in transcription.lines if line.strip()]
     found = [r for r in map(_frame, frames) if r]
     for raw in _dimension_raws(lines, frames):
         reading = _line_reading(raw, framed and letters <= 3)
@@ -78,30 +137,26 @@ def readings(transcription: Any, framed: bool = False, letters: int = 0) -> list
     return found
 
 
-def needs_symbol(transcription: Any) -> bool:
+def needs_symbol(transcription: Transcription) -> bool:
     """Whether a frame in the transcription has a tolerance but no characteristic named."""
-    data = transcription if isinstance(transcription, dict) else {}
-    frames = [f for f in _list(data.get("feature_control_frames")) if isinstance(f, dict)]
     return any(
-        _characteristic(f) is None and NUMBER.search(str(f.get("tolerance") or "")) for f in frames
+        _characteristic(f) is None and NUMBER.search(f.tolerance)
+        for f in transcription.feature_control_frames
     )
 
 
-def name_symbols(transcription: dict[str, Any], symbol_name: str) -> dict[str, Any]:
+def name_symbols(transcription: Transcription, symbol_name: str) -> Transcription:
     """The transcription with `symbol_name` given to each frame that named no characteristic."""
     frames = [
-        {**f, "symbol_name": symbol_name}
-        if isinstance(f, dict) and _characteristic(f) is None
-        else f
-        for f in _list(transcription.get("feature_control_frames"))
+        f.model_copy(update={"symbol_name": symbol_name}) if _characteristic(f) is None else f
+        for f in transcription.feature_control_frames
     ]
-    return {**transcription, "feature_control_frames": frames}
+    return transcription.model_copy(update={"feature_control_frames": frames})
 
 
-def datum_letter(answer: Any) -> str | None:
+def datum_letter(answer: LetterAnswer) -> str | None:
     """The letter of a datum feature symbol from {"letter": "B"}, or None."""
-    letter = answer.get("letter") if isinstance(answer, dict) else None
-    return letter if isinstance(letter, str) and re.fullmatch(r"[A-Z]", letter) else None
+    return answer.letter if re.fullmatch(r"[A-Z]", answer.letter) else None
 
 
 def value_fields(reading: dict[str, Any], units: str | None) -> dict[str, Any]:
@@ -204,26 +259,26 @@ def feature_type(group: list[dict[str, Any]]) -> str:
     return "other"
 
 
-def _characteristic(frame: dict[str, Any]) -> tuple[str, str] | None:
+def _characteristic(frame: Frame) -> tuple[str, str] | None:
     """(symbol, kind) named by the frame's symbol_name, or None."""
-    name = str(frame.get("symbol_name") or "").lower()
+    name = frame.symbol_name.lower()
     return next((found for key, found in SYMBOLS.items() if key in name), None)
 
 
-def _frame(frame: dict[str, Any]) -> dict[str, Any] | None:
+def _frame(frame: Frame) -> dict[str, Any] | None:
     match = _characteristic(frame)
-    tolerance = _diameter(str(frame.get("tolerance") or "")).replace(" ", "")
+    tolerance = _diameter(frame.tolerance).replace(" ", "")
     tolerance = re.sub(r"\(?([MLPU])\)?$", lambda m: MODIFIERS[m.group(1)], tolerance)
     if match is None or not NUMBER.search(tolerance):
         return None
     symbol, kind = match
-    for modifier in _list(frame.get("modifiers")):
-        mark = MODIFIERS.get(str(modifier).strip("() ").upper()[:1], "")
+    for modifier in frame.modifiers:
+        mark = MODIFIERS.get(modifier.strip("() ").upper()[:1], "")
         if mark and mark not in tolerance:
             tolerance += mark
     datums = []
-    for datum in _list(frame.get("datums")):
-        text = str(datum).strip()
+    for datum in frame.datums:
+        text = datum.strip()
         if re.match(r"[A-Z]", text):
             marks = "".join(MODIFIERS[m] for m in re.findall(r"\(?\s*([MLPU])\s*\)?", text[1:]))
             datums.append(text[0] + marks)
@@ -236,7 +291,7 @@ def _frame(frame: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def _dimension_raws(lines: list[str], frames: list[dict[str, Any]]) -> list[str]:
+def _dimension_raws(lines: list[str], frames: list[Frame]) -> list[str]:
     """Join the lines that are not frame cells into dimensions, spelled the gold way.
 
     "Ø20 +0.05" + "-0.10"   -> "⌀20 +0.05/-0.10"   (unequal tolerance stacked on two lines)
@@ -329,11 +384,11 @@ def _is_note(raw: str) -> bool:
     return bool(real) and not any("." in n for n in numbers)
 
 
-def _frame_cells(frames: list[dict[str, Any]]) -> set[str]:
+def _frame_cells(frames: list[Frame]) -> set[str]:
     cells = set()
     for frame in frames:
-        cells.add(_cell(_diameter(str(frame.get("tolerance") or ""))))
-        cells |= {str(d).strip()[:1] for d in _list(frame.get("datums"))}
+        cells.add(_cell(_diameter(frame.tolerance)))
+        cells |= {d.strip()[:1] for d in frame.datums}
     return {c for c in cells if c}
 
 
@@ -343,10 +398,6 @@ def _cell(text: str) -> str:
 
 def _diameter(text: str) -> str:
     return re.sub(r"[Øø∅]", "⌀", text.strip())
-
-
-def _list(value: Any) -> list[Any]:
-    return value if isinstance(value, list) else []
 
 
 def _number(value: Decimal | None) -> int | float | None:

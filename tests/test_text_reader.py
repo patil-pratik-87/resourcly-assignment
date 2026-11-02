@@ -8,7 +8,7 @@ DRAWINGS = PROJECT_ROOT / "data" / "drawings"
 
 
 def test_reads_the_title_block_entries_as_records() -> None:
-    document = PyMuPDFTextReaderAdapter(DRAWINGS).read(CTC01)
+    document = PyMuPDFTextReaderAdapter(DRAWINGS).read(CTC01).document
 
     assert document["drawing"] == CTC01
     assert document["page_count"] == 1
@@ -25,8 +25,8 @@ def test_reads_the_title_block_entries_as_records() -> None:
 def test_reads_numbered_and_free_notes_as_one_record_each() -> None:
     reader = PyMuPDFTextReaderAdapter(DRAWINGS)
 
-    ftc06 = reader.read("nist_ftc_06_asme1_rd")["values"]
-    ctc03 = reader.read("nist_ctc_03_asme1_rc")["values"]
+    ftc06 = reader.read("nist_ftc_06_asme1_rd").document["values"]
+    ctc03 = reader.read("nist_ctc_03_asme1_rc").document["values"]
 
     notes = [v["raw"] for v in ftc06 if v["callout"] == "note"]
     assert notes[0] == (
@@ -41,13 +41,13 @@ def test_reads_numbered_and_free_notes_as_one_record_each() -> None:
 
 
 def test_leaves_callouts_in_the_text_layer_alone() -> None:
-    values = PyMuPDFTextReaderAdapter(DRAWINGS).read("nist_ftc_07_asme1_rd")["values"]
+    values = PyMuPDFTextReaderAdapter(DRAWINGS).read("nist_ftc_07_asme1_rd").document["values"]
 
     assert not [v["raw"] for v in values if "Ø" in v["raw"] or "+.00" in v["raw"]]
 
 
 def test_skips_note_headings_also_in_the_sheet_border() -> None:
-    values = PyMuPDFTextReaderAdapter(DRAWINGS).read("nist_ftc_07_asme1_rd")["values"]
+    values = PyMuPDFTextReaderAdapter(DRAWINGS).read("nist_ftc_07_asme1_rd").document["values"]
 
     assert "NOTES (UNLESS OTHERWISE SPECIFIED):" not in [v["raw"] for v in values]
 

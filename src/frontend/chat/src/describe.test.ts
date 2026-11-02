@@ -39,7 +39,7 @@ describe("status lines", () => {
 
   it("says what came back, and why a file failed", () => {
     expect(statusLine(item({ values: 1, issues: 0 }))).toBe("1 value read");
-    expect(statusLine(item({ values: 23, issues: 2 }))).toBe("23 values read, 2 schema issues");
+    expect(statusLine(item({ values: 23, issues: 2 }))).toBe("23 values read, 2 issues");
     expect(statusLine(item({ status: "failed", error: "notes.txt is not a PDF" }))).toBe(
       "notes.txt is not a PDF",
     );

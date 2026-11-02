@@ -52,7 +52,7 @@ export function statusLine(item: RequestItem): string {
       return item.progress ? progressLine(item.progress) : "Opening the drawing";
     case "done": {
       const values = plural(item.values ?? 0, "value");
-      const issues = item.issues ? `, ${plural(item.issues, "schema issue")}` : "";
+      const issues = item.issues ? `, ${plural(item.issues, "issue")}` : "";
       return `${values} read${issues}`;
     }
     case "answered":

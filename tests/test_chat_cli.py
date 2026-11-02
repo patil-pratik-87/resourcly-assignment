@@ -35,7 +35,7 @@ def test_ask_reads_a_drawing_and_writes_its_json(tmp_path: Path) -> None:
 
     assert result.exit_code == 0, result.output
     assert f"{CTC01}: drawing (stub, 0.7), done" in result.output
-    assert "6 values, 0 schema issues" in result.output
+    assert "6 values, 0 issues" in result.output
     saved = json.loads((tmp_path / "out" / f"{CTC01}.json").read_text(encoding="utf-8"))
     assert saved["drawing"] == CTC01 and len(saved["values"]) == 6
 
@@ -121,7 +121,7 @@ def test_a_request_with_steps_but_no_record_shows_its_steps() -> None:
     assert "trace: 1 step(s)" in result.output
     assert "drawings.read  called reader textlayer-v0 (textlayer)" in result.output
     assert f'input   {{"drawing": "{CTC01}"}}' in result.output
-    assert 'output  {"values": 6, "schema_issues": 0}' in result.output
+    assert 'output  {"values": 6, "schema_issues": 0, "answer_issues": 0}' in result.output
 
 
 def test_an_unknown_request_is_a_short_error() -> None:
