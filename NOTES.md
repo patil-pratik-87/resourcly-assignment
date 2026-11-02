@@ -145,11 +145,11 @@ How to use it: `docs/chat-ui.md`.
 A reviewer who opens the chat would wait a minute for a drawing and 20 to 35 s for a photo before
 seeing anything. So `serve` opens the chat with two answered requests, each marked Demo.
 
-- What: CTC-01 as read by `vector-crop-v2` (its JSON in `outputs/`), and the spar cap photo of the
-  `photo-v2` spot check, judged right. Both are real outputs, not written by hand.
-- How they were made: the stored outputs were replayed through the agent itself, so the records
-  and traces have the shape a live request has. Routing, the figure search and the citation check
-  ran for real; only the reader's JSON and the answer model's text were replayed.
+- What: CTC-01 as read by `vector-crop-v2` (its JSON in `outputs/`), and a spar cap photo
+  answered by `photo-v3`. Both are real outputs, not written by hand.
+- How they were made: the drawing's stored JSON was replayed through the agent itself, so its
+  record and trace have the shape a live request has. The photo was a live request; every step
+  ran for real.
 - Loading: `demo/<request id>/` is in the request store's own layout. On start, `serve` copies in
   each demo the store does not have, and its trace when the trace has none. A request already in
   the store is never replaced. `--no-demo` or `RESOURCLY_DEMO_CHATS=0` turns it off.

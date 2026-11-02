@@ -20,7 +20,7 @@ It routes with the default `three-layer-v1` router, which needs the extras and m
 points it at another build. The label screen stays on `uv run resourcly annotation-ui`.
 
 The chat opens with two demo chats, each marked Demo: the NIST drawing CTC-01 read by
-`vector-crop-v2`, and a photo of a cracked spar cap answered by `photo-v2`. They were answered
+`vector-crop-v2`, and a photo of a cracked spar cap answered by `photo-v3`. They were answered
 before, so their page, values, figures and trace show at once, with or without the models. `serve`
 adds them from `demo/` to the request store when it starts, unless the store has them already; a
 request you send is never replaced. `uv run resourcly serve --no-demo` or `RESOURCLY_DEMO_CHATS=0`

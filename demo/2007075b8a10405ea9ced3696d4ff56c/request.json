@@ -1,0 +1,118 @@
+{
+  "request_id": "2007075b8a10405ea9ced3696d4ff56c",
+  "text": "",
+  "created_at": "2026-11-02T18:11:37.891+00:00",
+  "items": [
+    {
+      "item_id": "pos_18-061_fig05_v1",
+      "kind": "file",
+      "name": "pos_18-061_fig05_v1.jpg",
+      "media_type": "image/jpeg",
+      "size": 39810,
+      "pages": 1,
+      "route": {
+        "request_id": "2007075b8a10405ea9ced3696d4ff56c",
+        "route": "photo",
+        "layer": "probe",
+        "confidence": 0.9500674543997658,
+        "reason": "the probe gives photo 0.950",
+        "probabilities": {
+          "drawing": 0.047859797629636436,
+          "other": 0.002072747970597779,
+          "photo": 0.9500674543997658
+        },
+        "elapsed_ms": 3622.2
+      },
+      "status": "answered",
+      "progress": null,
+      "reply": "The part has a fatigue crack that initiated at the lower side of a doubler or spar cap near a rivet hole and propagated through the structure.\n\nFrom the reports:\n- The photo shows a fatigue failure on a spar component, with damage near a rivet hole labeled LC-1 and LD-1, matching the fracture surfaces shown in figures 5 and 10. [18-061 fig05]\n- Fatigue origins were located at the lower surface of the spar cap both forward and aft of hole LC-1 and at the aft side of hole LD-1. [18-061 p2]\n- In the doublers, fatigue origins were noted on the lower sides of the doublers both forward and aft of the attachment holes. [18-061 p3]\n\nWhat to do:\n- Do not use this part; it is unsafe due to fatigue cracking. (inferred)\n\nClosest report figures: 18-061 fig05 (0.78), 18-061 fig10 (0.66), 18-061 fig15 (0.65)",
+      "answer": {
+        "not_in_reports": false,
+        "kept_out": null,
+        "matched": true,
+        "answer": "The part has a fatigue crack that initiated at the lower side of a doubler or spar cap near a rivet hole and propagated through the structure.",
+        "findings": [
+          {
+            "statement": "The photo shows a fatigue failure on a spar component, with damage near a rivet hole labeled LC-1 and LD-1, matching the fracture surfaces shown in figures 5 and 10.",
+            "citation": {
+              "source": "18-061 fig05",
+              "report": "18-061",
+              "page": 13,
+              "figure": "18-061/fig05"
+            }
+          },
+          {
+            "statement": "Fatigue origins were located at the lower surface of the spar cap both forward and aft of hole LC-1 and at the aft side of hole LD-1.",
+            "citation": {
+              "source": "18-061 p2",
+              "report": "18-061",
+              "page": 2,
+              "figure": null
+            }
+          },
+          {
+            "statement": "In the doublers, fatigue origins were noted on the lower sides of the doublers both forward and aft of the attachment holes.",
+            "citation": {
+              "source": "18-061 p3",
+              "report": "18-061",
+              "page": 3,
+              "figure": null
+            }
+          }
+        ],
+        "actions": [
+          {
+            "action": "Do not use this part; it is unsafe due to fatigue cracking.",
+            "basis": "inferred",
+            "citation": null,
+            "quote": null
+          }
+        ],
+        "figures": [
+          {
+            "figure": "18-061/fig05",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.7845
+          },
+          {
+            "figure": "18-061/fig10",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.6647
+          },
+          {
+            "figure": "18-061/fig15",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.6535
+          },
+          {
+            "figure": "18-061/fig04",
+            "report": "18-061",
+            "section": "spar_fatigue_N106ER",
+            "failure_mode": "fatigue",
+            "score": 0.5994
+          },
+          {
+            "figure": "18-061/fig24",
+            "report": "18-061",
+            "section": "spar_N3986M",
+            "failure_mode": "reference_no_defect",
+            "score": 0.5084
+          }
+        ]
+      },
+      "values": null,
+      "issues": null,
+      "error": null,
+      "started_at": "2026-11-02T18:11:41.520+00:00",
+      "finished_at": "2026-11-02T18:12:16.792+00:00"
+    }
+  ],
+  "demo": true,
+  "status": "done"
+}
