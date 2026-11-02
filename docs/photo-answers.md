@@ -31,7 +31,33 @@ using only the three NTSB reports in `data/reports/`. The design comes from
 The photo's item goes from `queued` to `answering` to `answered`. Its `answer` holds the answer
 text, the findings and actions with their citations, the closest figures with their scores,
 `matched`, and `not_in_reports` with `kept_out`, which says whether the gate or the unrelated
-check kept the photo out. `reply` is the same answer as text. `GET /api/reports/<report>/figures/<n>.png` serves a cited figure ([usage.md](usage.md)).
+check kept the photo out. `reply` is the same answer as text. `GET /api/reports/<report>/figures/<n>.png` serves a cited figure
+([chat-ui.md](chat-ui.md#the-api)).
+
+```json
+{
+  "not_in_reports": false,
+  "kept_out": null,
+  "matched": true,
+  "answer": "Fatigue cracks grew from the attachment holes of the lower spar cap.",
+  "findings": [
+    {"statement": "Fatigue origins were at the lower surface near hole LC-1.",
+     "citation": {"source": "18-061 p2", "report": "18-061", "page": 2, "figure": null}}
+  ],
+  "actions": [
+    {"action": "Inspect the spar cap at the attachment holes.", "basis": "inferred",
+     "citation": null, "quote": null}
+  ],
+  "figures": [
+    {"figure": "18-061/fig05", "report": "18-061", "section": "spar_fatigue_N106ER",
+     "failure_mode": "fatigue", "score": 0.78}
+  ]
+}
+```
+
+`kept_out` is `gate` when no report figure is close enough and `unrelated` when the model sees no
+part; the answer then says so and has no findings, actions or figures. A `stated` action's `quote`
+holds the words of the cited page that say to do it.
 
 The trace has two steps for a photo: `failure.find`, the figures found, and `answer.photo`,
 what the model was shown, what it answered and the sources that were dropped. The user's text is

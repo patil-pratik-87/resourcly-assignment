@@ -114,7 +114,7 @@ The chat is one HTTP API, made for a later chat screen; the CLI calls the same s
   available yet" reply, so an answerer can be swapped in later without changing the shape.
 - The request store and the worker sit behind ports: at scale they become a database and a queue.
 
-How to use it: `docs/usage.md`.
+How to use it: `README.md`, and the API in `docs/chat-ui.md`.
 
 ## Chat screen
 

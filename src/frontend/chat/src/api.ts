@@ -1,4 +1,4 @@
-// The chat agent's HTTP API; see docs/usage.md.
+// The chat agent's HTTP API; see the API section of docs/chat-ui.md.
 import { figureNumber } from "./describe";
 import type { AgentInfo, ReadDocument, RequestRecord, RequestTrace } from "./types";
 

@@ -14,8 +14,8 @@ uv run resourcly serve   # http://127.0.0.1:8000
 ```
 
 `serve` serves the built screen and the API on one port, or the API alone until it is built.
-It routes with the default `three-layer-v1` router, which needs the extras and models in
-[usage.md](usage.md); `RESOURCLY_ROUTER_VERSION=stub-v0` needs none, and
+It routes with the default `three-layer-v1` router, which needs the extras and models that
+`make setup` installs ([setup.md](setup.md)); `RESOURCLY_ROUTER_VERSION=stub-v0` needs none, and
 `RESOURCLY_ANSWER_VERSION=captions-v0` answers a photo without a model. `RESOURCLY_CHAT_UI_DIST`
 points it at another build. The label screen stays on `uv run resourcly annotation-ui`.
 
@@ -84,3 +84,35 @@ The request list folds away while a file is open; the arrow on the left brings i
 finds a request by its id or the start of it, even one too old for the list. Both screens poll
 about once a second while a request works. Nothing streams yet. Both screens follow the system's
 light or dark mode.
+
+## The API
+
+The screen and any other client use the same HTTP API. `POST /api/requests` answers `202` at once
+with the request record and does the work in the background; poll `GET /api/requests/<id>` until
+`status` is `done` or `failed`.
+
+```sh
+curl -F text="read this" -F files=@data/drawings/nist_ctc_01_asme1_rd.pdf \
+  http://127.0.0.1:8000/api/requests
+args=(); for f in data/drawings/*.pdf; do args+=(-F "files=@$f"); done   # a bulk upload
+curl "${args[@]}" http://127.0.0.1:8000/api/requests
+curl http://127.0.0.1:8000/api/requests/<id>/trace
+curl -OJ "http://127.0.0.1:8000/api/requests/<id>/items/nist_ctc_01_asme1_rd/result?download=true"
+```
+
+Each file is one item, and its `route` is the case the router picked: `drawing`, `photo`, `text`,
+or `other` for a file that fits no case. A drawing goes from `routing` to `queued`, `reading` and
+`done`; a photo from `routing` to `queued`, `answering` and `answered`; the other cases straight to
+`answered`. Any step can end in `failed`, with the reason in `error`. A photo's `answer` is
+described in [photo-answers.md](photo-answers.md).
+
+| Endpoint | What it does |
+| --- | --- |
+| `POST /api/requests` | Send a message: form fields `text` and `files` (repeat for many). |
+| `GET /api/requests` | The latest requests; `limit` from 1 to 1000. |
+| `GET /api/requests/<id>` | One request and the state of each item. |
+| `GET /api/requests/<id>/trace` | Every step the request took. |
+| `GET /api/requests/<id>/items/<item>/result` | A drawing's JSON; `download=true` saves it. |
+| `GET /api/requests/<id>/items/<item>/pages/<n>.png` | Page `n` of a file as an image, a photo too; `dpi` from 36 to 400. |
+| `GET /api/reports/<report>/figures/<n>.png` | Figure `n` of a report, such as `18-061/figures/5.png`; `max_side` from 32 to 2048 pixels, 1024 by default. |
+| `GET /api/agent` | The reader, router, failure finder and answer versions in use, and the upload caps. |
