@@ -42,13 +42,14 @@ The file name, without `.toml`, is the version's name. Any key other than `descr
 | `failure/dinov2-base-v1` | The report figures nearest the photo in DINOv2-base, none below 0.28; vectors in `failure/indexes/`. | The default failure finder. |
 | `failure/dinov2-small-v1` | `dinov2-base-v1` with the router's DINOv2-small. | To compare the two models on the failure gold. |
 | `answer/captions-v0` | The closest figures' captions as the answer. No model. | For tests and machines without the model. |
-| `answer/photo-v1` | Qwen3-VL 8B answers from the photo and the closest figures, citing each fact ([docs/photo-answers.md](../docs/photo-answers.md)). | The default photo answer. |
+| `answer/photo-v1` | Qwen3-VL 8B answers from the photo and the closest figures, citing each fact. | Its hand check is stored; replaced by v2. |
+| `answer/photo-v2` | `photo-v1` asking for the same failure, saying what the photo is, and quoting the report for a stated action ([docs/photo-answers.md](../docs/photo-answers.md)). | The default photo answer. |
 
 The vision readers need `uv sync --extra vlm` and Qwen3-VL 8B in the local Hugging Face cache
 (`uv run hf download mlx-community/Qwen3-VL-8B-Instruct-4bit`). `router/three-layer-v1` needs
 `uv sync --extra router --extra vlm` and both models in the local Hugging Face cache ([docs/routing.md](../docs/routing.md#run-it)).
-`failure/dinov2-base-v1` needs `--extra router` and `facebook/dinov2-base`, and `answer/photo-v1`
-needs Qwen3-VL 8B.
+`failure/dinov2-base-v1` needs `--extra router` and `facebook/dinov2-base`, and the `answer/photo-*`
+versions need Qwen3-VL 8B.
 
 ## Which version runs
 
@@ -57,7 +58,7 @@ needs Qwen3-VL 8B.
 | reader | `vector-crop-v2` | `RESOURCLY_READER_VERSION` |
 | router | `three-layer-v1` | `RESOURCLY_ROUTER_VERSION` |
 | failure | `dinov2-base-v1` | `RESOURCLY_FAILURE_VERSION` |
-| answer | `photo-v1` | `RESOURCLY_ANSWER_VERSION` |
+| answer | `photo-v2` | `RESOURCLY_ANSWER_VERSION` |
 
 For example, `RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0
 RESOURCLY_FAILURE_VERSION=shuffled-v0 RESOURCLY_ANSWER_VERSION=captions-v0 uv run resourcly serve`

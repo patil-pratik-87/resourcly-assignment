@@ -1,0 +1,6 @@
+{"case_id": "pos_18-061_fig05_v1", "verdict": "right", "why": "fatigue from a hole in the spar cap, cited to 18-061"}
+{"case_id": "pos_24-013_fig04_v0", "verdict": "right", "why": "bending overstress of the throttle arm, cited to 24-013 p3"}
+{"case_id": "pos_16-006_fig05_v2", "verdict": "wrong", "why": "rejects the intact lock mechanism it shows; photo-v1 said no defect"}
+{"case_id": "commons_ductilefracturesurface60", "verdict": "wrong", "why": "a ductile fracture not in the reports, answered as the 18-061 spar fatigue"}
+{"case_id": "commons_ourbrokenvcrpart3detail7", "verdict": "right", "why": "kept out by the gate"}
+{"case_id": "commons_romanlockboltfindid10037", "verdict": "right", "why": "no match: the model says the figures show a different failure"}

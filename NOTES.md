@@ -259,23 +259,19 @@ Write-up: `research/failure/README.md`.
 
 ## Photo answers
 
-`dinov2-base-v1` finds the report figures nearest a photo, and `photo-v1` has Qwen3-VL 8B answer
-from the closest 3 in one call, citing each fact. Code drops findings that cite anything it was
-not shown, and an action is stated only when it cites report text. Both are the defaults. The
-answer shares the reader's Qwen adapter; DINOv2-base loads beside the router's DINOv2-small.
+`dinov2-base-v1` finds the report figures nearest a photo; `photo-v2` has Qwen3-VL 8B answer from
+the closest 3 in one call. Code keeps only findings citing what it was shown, a "stated" action
+must quote a report paragraph, and a photo the model calls unrelated is kept out. Both are the
+defaults; the answer shares the reader's Qwen adapter.
 
 | Version | Split | Section@1 | Mode@3 | Kept out |
 | --- | --- | --- | --- | --- |
-| `dinov2-base-v1` | dev (86) | 1.000 | 1.000 | 0.375 |
-| `dinov2-base-v1` | test (68) | 1.000 | 1.000 | 0.250 |
-| `dinov2-small-v1` | dev (86) | 1.000 | 1.000 | 0.000 |
-| `dinov2-small-v1` | test (68) | 1.000 | 1.000 | 0.125 |
+| `dinov2-base-v1` | dev / test | 1.000 / 1.000 | 1.000 / 1.000 | 0.375 / 0.250 |
+| `dinov2-small-v1` | dev / test | 1.000 / 1.000 | 1.000 / 1.000 | 0.000 / 0.125 |
 
-- Honest reading: the gold's photos are copies of indexed figures. Held out, base finds the right
-  report first for 95.7%, small for 89.9% with the same recipe. Kept out counts drawings, which
-  the router stops; base keeps out all 5 unrelated images, small 1.
-- Answers, by hand: 4 of 6 report photos right, 19 to 34 s each.
-- Gate: 10 of 12 real photos of other broken parts pass 0.28. The model then rejected a Roman lock
-  bolt, but answered a ductile fracture as spar fatigue.
+- Honest reading: gold photos are copies of indexed figures. Held out, base gets the report first
+  for 95.7%, small 89.9%.
+- Gate: it does not hold on real photos of other parts; 10 of 12 pass 0.28.
+- Answers: a stored 6-photo spot check, 4 right; the 18-photo before and after is pending.
 
-Details: `docs/photo-answers.md`.
+Details: `docs/photo-answers.md`, `evals/photo-answers/`.

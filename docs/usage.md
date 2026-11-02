@@ -43,7 +43,8 @@ uv run resourcly ask "why did the bracket crack?"
 
 `ask` waits until every file is handled, prints the result for each one, and exits with 1 if any
 file failed. For a photo it prints the answer, each finding with its source, each action as
-stated in a report page or inferred, and the closest report figures with their scores.
+stated in a report page, with the words it quotes, or inferred, and the closest report figures
+with their scores.
 
 ```sh
 curl -F text="read this" -F files=@data/drawings/nist_ctc_01_asme1_rd.pdf \
@@ -62,6 +63,7 @@ A photo's item carries its `answer`, and `reply` holds the same answer as text:
 ```json
 {
   "not_in_reports": false,
+  "kept_out": null,
   "matched": true,
   "answer": "Fatigue cracks grew from the attachment holes of the lower spar cap.",
   "findings": [
@@ -70,7 +72,7 @@ A photo's item carries its `answer`, and `reply` holds the same answer as text:
   ],
   "actions": [
     {"action": "Inspect the spar cap at the attachment holes.", "basis": "inferred",
-     "citation": null}
+     "citation": null, "quote": null}
   ],
   "figures": [
     {"figure": "18-061/fig05", "report": "18-061", "section": "spar_fatigue_N106ER",
@@ -79,10 +81,15 @@ A photo's item carries its `answer`, and `reply` holds the same answer as text:
 }
 ```
 
-`not_in_reports` is true when no report figure is close enough to the photo; the answer then
-says so and has no findings, actions or figures. `matched` is false when the model found that the
-closest figures show a different part. A citation with a `figure` names a report figure, whose
-image is `GET /api/reports/<report>/figures/<n>.png`.
+`not_in_reports` is true when nothing is said about the photo, and `kept_out` says why: `gate`
+when no report figure is close enough, `unrelated` when the model sees no part in it. The answer
+then says so and has no findings, actions or figures. `matched` is true when the model found
+that the closest figures show the same failure as the photo: the same kind of damage on the same
+kind of part, or the same intact part for a figure of a part with no defect. A match that cites
+nothing the model was shown is given as no match. A `stated` action cites a report page and
+`quote` holds the words of that page that say to do it; every other action is `inferred`. A
+citation with a `figure` names a report figure, whose image is
+`GET /api/reports/<report>/figures/<n>.png`.
 
 ## Bulk upload
 
@@ -135,7 +142,7 @@ curl http://127.0.0.1:8000/api/requests/<id>/trace
 | Variable | Default |
 | --- | --- |
 | `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION` | `vector-crop-v2`, `three-layer-v1` |
-| `RESOURCLY_FAILURE_VERSION`, `RESOURCLY_ANSWER_VERSION` | `dinov2-base-v1`, `photo-v1` |
+| `RESOURCLY_FAILURE_VERSION`, `RESOURCLY_ANSWER_VERSION` | `dinov2-base-v1`, `photo-v2` |
 | `RESOURCLY_UPLOADS_DIR` | `var/uploads` |
 | `RESOURCLY_TRACE_DB` | `var/traces.sqlite` |
 | `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES` | 50 MB, 50 |
