@@ -42,13 +42,22 @@ def test_run_prints_the_selection_progress_and_summary_and_lists_the_run(evals) 
     assert "textlayer-v0" in listed.output
 
 
-def test_run_limit_runs_the_first_cases_of_the_split(evals) -> None:
+def test_run_limit_runs_a_partial_spread_of_the_split(evals) -> None:
     result = evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--limit", "1")
     refused = evals("run", "reader", "--version", "textlayer-v0", "--limit", "0")
+
+    shown = evals("show", run_id(result))
+    again = run_id(
+        evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--limit", "1")
+    )
+    compared = evals("compare", "reader", run_id(result), again)
 
     assert result.exit_code == 0, result.output
     assert "selected 1 of 2 all cases\n" in result.output
     assert f"[1/1] {CTC01}" in result.output
+    assert "split all, partial: 1 chosen case(s)" in shown.output
+    assert compared.exit_code == 0, compared.output
+    assert "split all  1 case(s)  partial" in compared.output
     assert refused.exit_code == 2
 
 

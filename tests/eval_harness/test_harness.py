@@ -4,6 +4,7 @@ import pytest
 
 from resourcly.bootstrap import Settings, open_services
 from resourcly.eval_harness import harness
+from resourcly.eval_harness.cases import Case
 from resourcly.eval_harness.store import SqliteResultStore
 from tests.conftest import CTC01
 
@@ -67,6 +68,20 @@ def test_a_limit_takes_the_first_cases_of_the_split(
     assert first.case_ids == [CTC01]
     assert [c.case_id for c in store.cases(beyond.run_id)] == [CTC01, "partial_a"]
     assert beyond.case_ids == []
+
+
+def test_a_sample_spreads_over_the_strata_and_is_the_same_each_time() -> None:
+    pool = [Case(f"a{n}", "dev", "photo", {}) for n in range(6)]
+    pool += [Case(f"b{n}", "dev", "drawing", {}) for n in range(2)]
+
+    picked = harness.sample(pool, 3)
+
+    assert [case.stratum for case in picked].count("drawing") >= 1
+    assert [case.stratum for case in picked].count("photo") >= 1
+    assert len(picked) == 3
+    assert picked == sorted(picked, key=lambda case: case.case_id)
+    assert harness.sample(pool, 3) == picked
+    assert harness.sample(pool, 20) == pool
 
 
 def test_a_component_without_a_version_cannot_run(
