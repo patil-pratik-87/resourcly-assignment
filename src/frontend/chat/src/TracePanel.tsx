@@ -40,6 +40,12 @@ export function TracePanel({ api, requestId, itemId, version }: Props) {
   }, [api, requestId, version]);
 
   const steps = useMemo(() => (trace ? traceSteps(trace.events) : []), [trace]);
+  // A request of many files has steps for each; until the person asks for them all, show the
+  // steps of the open item and of the request as a whole.
+  const [whole, setWhole] = useState(false);
+  const several = new Set(steps.map((step) => step.item).filter(Boolean)).size > 1;
+  const shown =
+    several && !whole ? steps.filter((step) => step.item === null || step.item === itemId) : steps;
 
   return (
     <div className="trace">
@@ -47,10 +53,20 @@ export function TracePanel({ api, requestId, itemId, version }: Props) {
         The same trace in a terminal:
         <code>uv run resourcly request {requestId}</code>
       </p>
+      {several && (
+        <div className="trace-scope" role="group" aria-label="Steps shown">
+          <button type="button" aria-pressed={!whole} onClick={() => setWhole(false)}>
+            This item
+          </button>
+          <button type="button" aria-pressed={whole} onClick={() => setWhole(true)}>
+            Whole request
+          </button>
+        </div>
+      )}
       {error && <p className="item-error">{error}</p>}
       {trace && (
         <ol className="trace-steps">
-          {steps.map(({ event, item, layers }, index) => (
+          {shown.map(({ event, item, layers }, index) => (
             <li
               key={index}
               className={`trace-step${event.error ? " failed" : ""}${item === itemId ? " this" : ""}`}

@@ -165,7 +165,7 @@ export function Requests(props: Props) {
                       >
                         <span className={`route-dot ${entry.route?.route ?? "pending"}`} />
                         <span className="request-item-name" title={entry.name}>
-                          {middleCut(entry.kind === "file" ? entry.name : "Your message", 24)}
+                          {middleCut(entry.kind === "file" ? entry.name : "Your message", 26)}
                         </span>
                         <span className={`request-item-state ${entry.status}`}>
                           {listState(entry)}
@@ -380,7 +380,7 @@ function ItemViewer({
         />
         <div className="side-head">
           <h2>Trace</h2>
-          <span className="muted">every step of request {shortId(record.request_id)}</span>
+          <span className="muted">what the agent did for request {shortId(record.request_id)}</span>
         </div>
         <div className="side-body">
           <TracePanel

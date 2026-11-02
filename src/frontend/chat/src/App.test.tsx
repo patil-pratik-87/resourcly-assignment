@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
 import { createAgentApi } from "./api";
-import { fakeAgentApi, item, record, routing } from "./test/fakeAgentApi";
+import { event, fakeAgentApi, item, record, routing } from "./test/fakeAgentApi";
 
 afterEach(() => {
   window.history.replaceState(null, "", "/");
@@ -248,6 +248,26 @@ describe("the agent's answer for each item", () => {
     );
     expect(within(request).getAllByRole("region")).toHaveLength(3);
   });
+
+  it.each([
+    [8, ["d0.pdf", "d1.pdf", "d2.pdf", "d3.pdf", "d4.pdf", "d5.pdf", "and 2 more files"]],
+    [7, ["d0.pdf", "d1.pdf", "d2.pdf", "d3.pdf", "d4.pdf", "d5.pdf", "d6.pdf"]],
+  ])("names the first files of an upload of %i and counts the rest", async (count, shown) => {
+    open("/chat");
+    const items = Array.from({ length: count }, (_, n) =>
+      item({ item_id: `d${n}`, name: `d${n}.pdf` }),
+    );
+    const { api } = fakeAgentApi([record({ items })]);
+    render(<App api={api} />);
+
+    const request = await screen.findByRole("article", { name: "Request r1" });
+    const sent = within(request).getAllByRole("list")[0]!;
+    expect(
+      within(sent)
+        .getAllByRole("listitem")
+        .map((li) => li.textContent),
+    ).toEqual(shown);
+  });
 });
 
 describe("the requests screen", () => {
@@ -277,6 +297,35 @@ describe("the requests screen", () => {
     const side = screen.getByRole("complementary", { name: "Trace" });
     expect(await within(side).findByText("router.route")).toBeInTheDocument();
     expect(within(side).getByText("uv run resourcly request r1")).toBeInTheDocument();
+  });
+
+  it("shows the open item's steps of a bulk request until asked for them all", async () => {
+    const items = [item({ item_id: "a", name: "a.pdf" }), item({ item_id: "b", name: "b.pdf" })];
+    const { user, api } = await viewer("/requests/r1/b", [record({ items })]);
+    const steps = (...names: [string, string | null][]) =>
+      names.map(([step, about]) => event({ step, input: about ? { item: about } : {} }));
+    api.trace = async (id) => ({
+      request_id: id,
+      events: steps(
+        ["requests.receive", null],
+        ["uploads.save", "a"],
+        ["uploads.save", "b"],
+        ["router.route", "a"],
+        ["router.route", "b"],
+      ),
+    });
+    cleanup();
+    render(<App api={api} />);
+
+    const side = await screen.findByRole("complementary", { name: "Trace" });
+    await within(side).findByText("requests.receive");
+    expect(within(side).getAllByRole("listitem")).toHaveLength(3);
+    expect(within(side).getAllByText("b")).toHaveLength(2);
+    expect(within(side).queryByText("a")).toBeNull();
+
+    await user.click(within(side).getByRole("button", { name: "Whole request" }));
+    expect(within(side).getAllByRole("listitem")).toHaveLength(5);
+    expect(within(side).getAllByText("a")).toHaveLength(2);
   });
 
   it("lists each router layer's verdict in the trace", async () => {

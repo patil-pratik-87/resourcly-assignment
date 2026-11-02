@@ -40,6 +40,9 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
             </span>
           )}
         </div>
+        <button type="button" className="quiet open" onClick={onOpen}>
+          Open in requests
+        </button>
         <StatusPill item={item} />
       </header>
 
@@ -56,27 +59,21 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
         </p>
       )}
       {item.status === "failed" && <p className="item-error">{item.error}</p>}
-      {read && <p className="read-line">{statusLine(item)}</p>}
-
-      <div className="item-actions">
-        {read && (
-          <>
-            <button
-              type="button"
-              aria-expanded={showJson}
-              onClick={() => setShowJson((shown) => !shown)}
-            >
-              {showJson ? "Hide JSON" : "Show JSON"}
-            </button>
-            <a className="button" href={api.downloadUrl(requestId, item.item_id)} download>
-              Download JSON
-            </a>
-          </>
-        )}
-        <button type="button" className="quiet" onClick={onOpen}>
-          Open in requests
-        </button>
-      </div>
+      {read && (
+        <div className="item-result">
+          <p className="read-line">{statusLine(item)}</p>
+          <button
+            type="button"
+            aria-expanded={showJson}
+            onClick={() => setShowJson((shown) => !shown)}
+          >
+            {showJson ? "Hide JSON" : "Show JSON"}
+          </button>
+          <a className="button" href={api.downloadUrl(requestId, item.item_id)} download>
+            Download JSON
+          </a>
+        </div>
+      )}
       {read && showJson && (
         <InlineJson api={api} requestId={requestId} itemId={item.item_id} name={title} />
       )}

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { fileKind, fileSize, overCap } from "./describe";
+import { fileKind, fileSize, middleCut, overCap } from "./describe";
 import type { AgentInfo, RequestRecord } from "./types";
 
 const ACCEPT = ".pdf,.png,.jpg,.jpeg,.tif,.tiff,application/pdf,image/png,image/jpeg,image/tiff";
@@ -59,8 +59,9 @@ export function Composer({ onSend, files, onFiles: setFiles, dragging, caps }: P
             {files.map((file, index) => (
               <li key={`${file.name}-${index}`} className="file-chip">
                 <FileGlyph type={file.type} name={file.name} />
-                <span className="file-chip-name">{file.name}</span>
-                <span className="file-chip-size">{fileSize(file.size)}</span>
+                <span className="file-chip-name" title={`${file.name}, ${fileSize(file.size)}`}>
+                  {middleCut(file.name, 26)}
+                </span>
                 <button
                   type="button"
                   aria-label={`Remove ${file.name}`}

@@ -2,11 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AgentApi } from "./api";
 import { Composer } from "./Composer";
 import { ItemCard } from "./ItemCard";
-import { sentAt, shortId, tally } from "./describe";
+import { plural, sentAt, shortId, tally } from "./describe";
 import type { AgentInfo, RequestRecord } from "./types";
 
 /** The chat shows this many of the latest requests; the requests screen has them all. */
 const SHOWN = 30;
+/** A message names this many of its files and counts the rest, when there are two or more. */
+const NAMED_FILES = 6;
 
 interface Props {
   api: AgentApi;
@@ -120,6 +122,7 @@ function Exchange({
   onOpen: (requestId: string, itemId: string) => void;
 }) {
   const files = record.items.filter((item) => item.kind === "file");
+  const named = files.length > NAMED_FILES + 1 ? NAMED_FILES : files.length;
   return (
     <article className="exchange" aria-label={`Request ${record.request_id}`}>
       <div className="said">
@@ -130,9 +133,12 @@ function Exchange({
         {record.text && <p className="said-text">{record.text}</p>}
         {files.length > 0 && (
           <ul className="said-files">
-            {files.map((item) => (
+            {files.slice(0, named).map((item) => (
               <li key={item.item_id}>{item.name}</li>
             ))}
+            {files.length > named && (
+              <li className="said-more">and {plural(files.length - named, "more file")}</li>
+            )}
           </ul>
         )}
       </div>
