@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import logging
 import threading
 import time
 from collections.abc import Callable, Iterator
@@ -17,6 +18,7 @@ from resourcly.adapters.request_store import JsonRequestStoreAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.api import create_app
 from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation, Settings
+from resourcly.errors import ModelNotCached
 from resourcly.models import ReadProgress, RequestItem, RequestRecord
 from resourcly.ports import Progress
 from tests.conftest import CTC01, png
@@ -255,6 +257,24 @@ def test_a_failed_read_keeps_its_error(gated_client: TestClient, gated: type[Gat
     assert (item["status"], item["error"]) == ("failed", "the model ran out of memory")
     response = gated_client.get(f"/api/requests/{sent['request_id']}/items/ctc/result")
     assert response.status_code == 404
+
+
+def test_a_missing_model_fails_the_read_with_one_log_line_and_no_traceback(
+    gated_client: TestClient, gated: type[GatedReader], caplog: pytest.LogCaptureFixture
+) -> None:
+    gated.fail = ModelNotCached("org/model is not in the local Hugging Face cache")
+    gated.gate.set()
+
+    with caplog.at_level(logging.WARNING, logger="resourcly.agent"):
+        sent = send(gated_client, "", ("ctc.pdf", CTC01_PDF))
+        [item] = finished(gated_client, sent["request_id"])["items"]
+
+    assert (item["status"], item["error"]) == (
+        "failed",
+        "org/model is not in the local Hugging Face cache",
+    )
+    logged = [record for record in caplog.records if record.name == "resourcly.agent"]
+    assert [record.exc_info for record in logged] == [None]
 
 
 def test_every_step_is_traced_under_the_request_id(client: TestClient) -> None:
