@@ -123,11 +123,12 @@ the label screen, and shares no code with it.
 
 - How: `uv run resourcly serve` serves the built screen and the API on one port. One message is
   one request, and the screen polls the requests while any of them works. Each file's card shows
-  the route, the layer that chose it, how sure it was and why. The Requests screen shows a file's
-  JSON beside its request's trace, with each router layer's verdict under the routing step.
-- Why there is no page image: the API has no endpoint that renders an uploaded page, so a
-  drawing's result is its JSON. A page with a numbered box per value, as on the label screen,
-  needs one more endpoint.
+  the route, the layer that chose it, how sure it was and why, and the page with its values.
+- The viewer: a file opens with its page beside its JSON. Each value has a numbered box, and the
+  box and the JSON entry are linked both ways, so a person can check every value against the
+  drawing. The trace tab lists each router layer's verdict under the routing step.
+- The page comes from `GET /api/requests/<id>/items/<item>/pages/<n>.png`. Uploads are kept as
+  PDFs, a photo as a one-page PDF, so the one endpoint serves both.
 - What comes next: a live trace stream in place of the polling, and real answers for photos and
   text questions.
 
