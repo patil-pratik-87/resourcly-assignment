@@ -33,6 +33,10 @@ RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 \
   RESOURCLY_FAILURE_VERSION=shuffled-v0 RESOURCLY_ANSWER_VERSION=captions-v0 uv run resourcly serve
 ```
 
+`serve` adds two demo chats from `demo/`, a drawing and a photo answered before by the default
+versions, so the chat has something to open before any model runs. `uv run resourcly requests`
+marks them `demo`, and `serve --no-demo` or `RESOURCLY_DEMO_CHATS=0` leaves them out.
+
 ## Chat
 
 ```sh
@@ -147,3 +151,4 @@ curl http://127.0.0.1:8000/api/requests/<id>/trace
 | `RESOURCLY_TRACE_DB` | `var/traces.sqlite` |
 | `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES` | 50 MB, 50 |
 | `RESOURCLY_CHAT_UI_DIST` | `src/frontend/chat/dist` |
+| `RESOURCLY_DEMO_CHATS` | on; `0` leaves out the demo chats in `demo/` |
