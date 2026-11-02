@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from resourcly import doctor
-from resourcly.bootstrap import PROJECT_ROOT, Settings
+from resourcly import bootstrap, doctor
+from resourcly.bootstrap import PROJECT_ROOT, Settings, model_cached
 from resourcly.cli import app
 from resourcly.doctor import Check, System
 
@@ -165,3 +165,48 @@ def test_models_lists_what_the_running_versions_need(monkeypatch: pytest.MonkeyP
 
     assert result.exit_code == 0, result.output
     assert result.output.splitlines() == [QWEN, "facebook/dinov2-small", "facebook/dinov2-base"]
+
+
+def _hub_cache(root: Path, model_id: str) -> None:
+    """A Hugging Face cache holding one snapshot of the model, as a download leaves it."""
+    folder = root / f"models--{model_id.replace('/', '--')}"
+    (folder / "snapshots" / "abc123").mkdir(parents=True)
+    (folder / "snapshots" / "abc123" / "config.json").write_text("{}")
+    (folder / "refs").mkdir()
+    (folder / "refs" / "main").write_text("abc123")
+
+
+def test_a_cached_model_reads_ok_before_its_packages_are_installed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _hub_cache(tmp_path, QWEN)
+    (tmp_path / "models--org--empty" / "snapshots").mkdir(parents=True)
+    monkeypatch.setenv("HF_HUB_CACHE", str(tmp_path))
+    monkeypatch.setattr(bootstrap, "find_spec", lambda module: None)
+
+    assert model_cached(QWEN)
+    assert not model_cached("org/empty")
+    assert not model_cached("org/absent")
+
+
+def test_the_cache_is_found_under_hf_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _hub_cache(tmp_path / "hub", QWEN)
+    monkeypatch.delenv("HF_HUB_CACHE", raising=False)
+    monkeypatch.setenv("HF_HOME", str(tmp_path))
+
+    assert model_cached(QWEN)
+
+
+def test_missing_packages_are_the_first_fix(monkeypatch: pytest.MonkeyPatch) -> None:
+    no_extras = mac(installed=lambda module: False)
+    monkeypatch.setattr(System, "current", classmethod(lambda cls: no_extras))
+    monkeypatch.delenv("RESOURCLY_READER_VERSION")
+
+    result = CliRunner().invoke(app, ["doctor"])
+
+    assert result.exit_code == 1, result.output
+    assert f"ok    model {QWEN}" in result.output
+    assert result.output.splitlines()[-1] == (
+        "not ready: 2 problem(s) to fix; start with `uv sync --extra vlm --extra router`"
+        " (or make setup)"
+    )
