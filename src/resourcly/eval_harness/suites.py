@@ -234,13 +234,15 @@ def _explain_answer(case: Case, prediction: Any) -> list[str]:
         said = "no match"
     lines.append(f"{said}: {prediction.get('answer')}")
     figures = [f for f in prediction.get("figures") or [] if isinstance(f, dict)]
-    for item in [*(prediction.get("findings") or []), *(prediction.get("actions") or [])]:
-        citation = item.get("citation") if isinstance(item, dict) else None
-        if isinstance(citation, dict):
-            valid = "valid" if metrics.valid_citation(citation, figures) else "invalid"
-            text = item.get("statement") or item.get("action")
-            lines.append(f"  [{citation.get('source')}] {valid}  {text}")
-    lines.append(f"closest figures: {', '.join(str(f.get('figure')) for f in figures[:3])}")
+    for kind in ("findings", "actions"):
+        for item in prediction.get(kind) or []:
+            citation = item.get("citation") if isinstance(item, dict) else None
+            if isinstance(citation, dict):
+                valid = "valid" if metrics.valid_citation(citation, figures) else "invalid"
+                text = item.get("statement") or f"action: {item.get('action')}"
+                lines.append(f"  [{citation.get('source')}] {valid}  {text}")
+    closest = ", ".join(str(f.get("figure")) for f in figures[:3]) or "none"
+    lines.append(f"closest figures: {closest}")
     return lines
 
 

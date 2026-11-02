@@ -7,6 +7,7 @@ import pytest
 
 from resourcly.bootstrap import FINDERS, PROJECT_ROOT, Implementation, Settings, open_services
 from resourcly.eval_harness import harness
+from resourcly.eval_harness.models import Case
 from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES
 from tests.conftest import png
@@ -91,3 +92,26 @@ def test_explain_shows_the_answer_its_sources_and_what_was_expected(
     assert lines[1].startswith("matched: The closest report figure is 18-061 fig05")
     assert "  [18-061 fig05] valid  Figure 5. Closer views" in "\n".join(lines)
     assert lines[-1] == "closest figures: 18-061/fig05"
+
+
+def test_explain_marks_the_actions_and_an_invalid_citation() -> None:
+    case = Case("neg_logo", "dev", "negative_unrelated", {"kind": "negative_unrelated"})
+    page = {"source": "18-061 p3", "report": "18-061", "page": 3, "figure": None}
+    prediction = {
+        "not_in_reports": False,
+        "matched": True,
+        "answer": "Fatigue.",
+        "findings": [{"statement": "Beach marks.", "citation": page}],
+        "actions": [{"action": "Inspect the spar.", "basis": "stated", "citation": page}],
+        "figures": [],
+    }
+
+    lines = SUITES["answer"].explain(case, prediction)
+
+    assert lines == [
+        "a negative (unrelated): expected no match",
+        "matched: Fatigue.",
+        "  [18-061 p3] invalid  Beach marks.",
+        "  [18-061 p3] invalid  action: Inspect the spar.",
+        "closest figures: none",
+    ]
