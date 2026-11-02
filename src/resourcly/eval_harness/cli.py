@@ -1,7 +1,6 @@
+import functools
 import logging
-from collections.abc import Iterator
-from contextlib import contextmanager
-from dataclasses import dataclass, replace
+from collections.abc import Callable
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any
@@ -27,43 +26,35 @@ app = typer.Typer(help="Measure each part of the agent on its gold cases.", no_a
 DEFAULT_STORE = PROJECT_ROOT / "runs" / "evals.sqlite"
 
 
-@dataclass(frozen=True)
-class Context:
-    settings: Settings
-    store: Path
-
-
 StorePath = Annotated[
     Path, typer.Option("--store", envvar="RESOURCLY_EVALS_DB", help="SQLite file of the results.")
-]
-GoldDir = Annotated[
-    Path | None,
-    typer.Option("--gold-dir", help="Folder holding drawings/ and partial/."),
-]
-SplitsPath = Annotated[
-    Path | None,
-    typer.Option("--splits", help="TOML file naming each component's dev and test cases."),
 ]
 Component = Annotated[str, typer.Argument(help="reader, router or failure")]
 
 
 @app.callback()
-def main(
-    ctx: typer.Context,
-    store: StorePath = DEFAULT_STORE,
-    gold_dir: GoldDir = None,
-    splits: SplitsPath = None,
-) -> None:
+def main(ctx: typer.Context, store: StorePath = DEFAULT_STORE) -> None:
+    """The gold and the versions come from the RESOURCLY_* settings, as for the app."""
     logging.basicConfig(format="warning: %(message)s", level=logging.WARNING, force=True)
-    settings = Settings.from_env()
-    if gold_dir is not None:
-        settings = replace(settings, gold_dir=gold_dir)
-    if splits is not None:
-        settings = replace(settings, splits_path=splits)
-    ctx.obj = Context(settings, store)
+    ctx.obj = store
+
+
+def _user_errors(command: Callable[..., None]) -> Callable[..., None]:
+    """A missing or invalid version, case, run or file is the user's to fix: one line, exit 1."""
+
+    @functools.wraps(command)
+    def wrapped(*args: Any, **kwargs: Any) -> None:
+        try:
+            command(*args, **kwargs)
+        except (LookupError, ValueError) as error:
+            typer.echo(f"error: {error}", err=True)
+            raise typer.Exit(1) from error
+
+    return wrapped
 
 
 @app.command()
+@_user_errors
 def run(
     ctx: typer.Context,
     component: Component,
@@ -75,7 +66,6 @@ def run(
     note: Annotated[str | None, typer.Option(help="Free text stored with the run.")] = None,
 ) -> None:
     """Run a version of a component on the gold cases of a split."""
-    context: Context = ctx.obj
     suite = _suite(component)
     progress = {"done": 0, "total": 0}
 
@@ -95,11 +85,11 @@ def run(
         counter = f"[{progress['done']}/{progress['total']}]"
         typer.echo(f"{counter} {result.case_id}  {outcome}  {result.latency_ms:.0f} ms")
 
-    with SqliteResultStore.open(context.store) as store, _short_errors():
+    with SqliteResultStore.open(ctx.obj) as store:
         result = harness.run(
             component,
             version,
-            settings=context.settings,
+            settings=Settings.from_env(),
             store=store,
             split=split,
             case_ids=tuple(case_id or ()),
@@ -107,12 +97,13 @@ def run(
             on_start=started,
             on_case=finished,
         )
-    typer.echo(f"run {result.run_id}  (case set {result.case_set_hash}, store {context.store})")
+    typer.echo(f"run {result.run_id}  (case set {result.case_set_hash}, store {ctx.obj})")
     typer.echo("")
     _summary(suite, result)
 
 
 @app.command()
+@_user_errors
 def compare(
     ctx: typer.Context,
     component: Component,
@@ -124,11 +115,11 @@ def compare(
 
     Both runs' stored answers are scored again on the current gold, on the cases both ran.
     """
-    context: Context = ctx.obj
     suite = _suite(component)
-    with SqliteResultStore.open(context.store) as store, _short_errors():
-        runs = [_resolve(store, context.settings, component, ref) for ref in (base, candidate)]
-        with open_services(context.settings) as services:
+    settings = Settings.from_env()
+    with SqliteResultStore.open(ctx.obj) as store:
+        runs = [_resolve(store, settings, component, ref) for ref in (base, candidate)]
+        with open_services(settings) as services:
             gold = {case.case_id: case for case in suite.load(services, "all")}
         comparison = compare_runs(
             suite,
@@ -170,6 +161,7 @@ def compare(
 
 
 @app.command()
+@_user_errors
 def show(
     ctx: typer.Context,
     run_ids: Annotated[
@@ -188,21 +180,20 @@ def show(
 
     What a case did and called: `resourcly request <run id>:<case id>`.
     """
-    context: Context = ctx.obj
     if out is not None:
         if case or failures:
-            raise typer.BadParameter("--out takes no --case or --failures")
-        _report(context, run_ids, out)
+            raise ValueError("--out takes no --case or --failures")
+        _report(ctx.obj, run_ids, out)
         return
     if len(run_ids) > 1:
-        raise typer.BadParameter("give one run id, or --out FILE for many")
+        raise ValueError("give one run id, or --out FILE for many")
     run_id = run_ids[0]
-    with SqliteResultStore.open(context.store) as store:
-        run = _run(store, run_id)
+    with SqliteResultStore.open(ctx.obj) as store:
+        run = store.run(run_id)
         results = store.cases(run_id)
     suite = SUITES[run.component]
     if case is not None:
-        _explain(context, run, suite, next((r for r in results if r.case_id == case), None), case)
+        _explain(run, suite, next((r for r in results if r.case_id == case), None), case)
         return
     typer.echo(f"run {run.run_id}  {run.component} {run.version} (hash {run.version_hash})")
     chosen = f"{len(run.case_ids)} chosen case(s)" if run.case_ids else "every case"
@@ -228,10 +219,10 @@ def show(
     _table(["case", "stratum", "case_score", "latency", "error"], rows)
 
 
-def _report(context: Context, run_ids: list[str], out: Path) -> None:
+def _report(path: Path, run_ids: list[str], out: Path) -> None:
     """Markdown tables of runs, for results that go in the repository."""
-    with SqliteResultStore.open(context.store) as store:
-        runs = [_run(store, run_id) for run_id in run_ids]
+    with SqliteResultStore.open(path) as store:
+        runs = [store.run(run_id) for run_id in run_ids]
         sections = [_markdown(run, store.cases(run.run_id)) for run in runs]
     text = "# Eval results\n\nWritten by `uv run evals show --out`.\n" + "".join(sections)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -246,6 +237,7 @@ class Listing(StrEnum):
 
 
 @app.command("list")
+@_user_errors
 def list_(
     ctx: typer.Context,
     what: Annotated[Listing, typer.Argument(help="What to list.")],
@@ -257,19 +249,19 @@ def list_(
     limit: Annotated[int, typer.Option(help="How many runs.")] = 20,
 ) -> None:
     """Version files, a component's cases, or runs."""
-    context: Context = ctx.obj
     if what is Listing.versions:
-        _list_versions(context, component)
+        _list_versions(ctx.obj, component)
     elif what is Listing.cases:
         if component is None:
-            raise typer.BadParameter("cases need a component: reader, router or failure")
-        _list_cases(context, component, split)
+            raise ValueError("cases need a component: reader, router or failure")
+        _list_cases(component, split)
     else:
-        _list_runs(context, component, version, limit)
+        _list_runs(ctx.obj, component, version, limit)
 
 
-def _list_versions(context: Context, component: str | None) -> None:
-    with SqliteResultStore.open(context.store) as store, _short_errors():
+def _list_versions(path: Path, component: str | None) -> None:
+    settings = Settings.from_env()
+    with SqliteResultStore.open(path) as store:
         rows = [
             [
                 version.component,
@@ -280,13 +272,13 @@ def _list_versions(context: Context, component: str | None) -> None:
                 version.description,
             ]
             for name in ([_suite(component).component] if component else list(SUITES))
-            for version in list_versions(context.settings, name)
+            for version in list_versions(settings, name)
         ]
     _table(["component", "version", "impl", "hash", "runs", "description"], rows)
 
 
-def _list_cases(context: Context, component: str, split: str) -> None:
-    with _short_errors(), open_services(context.settings) as services:
+def _list_cases(component: str, split: str) -> None:
+    with open_services(Settings.from_env()) as services:
         cases = _suite(component).load(services, split)
     _table(
         ["case", "split", "stratum", "gold hash"],
@@ -294,8 +286,8 @@ def _list_cases(context: Context, component: str, split: str) -> None:
     )
 
 
-def _list_runs(context: Context, component: str | None, version: str | None, limit: int) -> None:
-    with SqliteResultStore.open(context.store) as store:
+def _list_runs(path: Path, component: str | None, version: str | None, limit: int) -> None:
+    with SqliteResultStore.open(path) as store:
         runs = store.runs(component, version, limit)
     rows = []
     for run in runs:
@@ -315,14 +307,14 @@ def _list_runs(context: Context, component: str | None, version: str | None, lim
 
 
 @app.command()
+@_user_errors
 def check(ctx: typer.Context) -> None:
     """Check every gold file and the splits; exit 1 on an error, warn about gaps.
 
     Drawing gold goes through the package models and the rules beyond them; router and failure gold
     through their row checks; and every split for leaks and gaps.
     """
-    context: Context = ctx.obj
-    with _short_errors(), open_services(context.settings) as services:
+    with open_services(Settings.from_env()) as services:
         found = check_gold(services)
     for level, message in found:
         typer.echo(f"{'ok   ' if level == 'ok' else level + ':'} {message}")
@@ -333,16 +325,6 @@ def check(ctx: typer.Context) -> None:
         raise typer.Exit(1)
 
 
-@contextmanager
-def _short_errors() -> Iterator[None]:
-    """A missing or invalid version, case or file is the user's to fix: one line, exit 1."""
-    try:
-        yield
-    except (LookupError, ValueError) as error:
-        typer.echo(f"error: {error}", err=True)
-        raise typer.Exit(1) from error
-
-
 def _resolve(store: SqliteResultStore, settings: Settings, component: str, ref: str) -> Run:
     """The run a ref names: a run id, or a version for its latest finished run."""
     try:
@@ -350,13 +332,11 @@ def _resolve(store: SqliteResultStore, settings: Settings, component: str, ref: 
     except LookupError:
         runs = [run for run in store.runs(component, ref) if run.finished_at]
         if not runs:
-            raise typer.BadParameter(
-                f"'{ref}' is neither a run id nor a version with runs"
-            ) from None
+            raise LookupError(f"'{ref}' is neither a run id nor a version with runs") from None
         run = runs[0]
         _warn_if_edited(settings, component, ref, run)
     if run.component != component:
-        raise typer.BadParameter(f"run {run.run_id} is a {run.component} run")
+        raise ValueError(f"run {run.run_id} is a {run.component} run")
     return run
 
 
@@ -370,16 +350,14 @@ def _warn_if_edited(settings: Settings, component: str, version: str, run: Run) 
         typer.echo(f"warning: {version} changed since run {run.run_id}", err=True)
 
 
-def _explain(
-    context: Context, run: Run, suite: Suite, result: CaseResult | None, case_id: str
-) -> None:
+def _explain(run: Run, suite: Suite, result: CaseResult | None, case_id: str) -> None:
     if result is None:
-        raise typer.BadParameter(f"run {run.run_id} has no case '{case_id}'")
-    with _short_errors(), open_services(context.settings) as services:
+        raise LookupError(f"run {run.run_id} has no case '{case_id}'")
+    with open_services(Settings.from_env()) as services:
         current = {case.case_id: case for case in suite.load(services, "all")}
     case = current.get(case_id)
     if case is None:
-        raise typer.BadParameter(f"'{case_id}' has no gold now")
+        raise LookupError(f"'{case_id}' has no gold now")
     typer.echo(f"{case_id}  case_score {_num(result.scores['case_score'])}")
     typer.echo(f"request {result.request_id}  (resourcly request {result.request_id})")
     if case.gold_hash != result.gold_hash:
@@ -419,13 +397,6 @@ def _selected(run: Run) -> str | None:
     return None
 
 
-def _run(store: SqliteResultStore, run_id: str) -> Run:
-    try:
-        return store.run(run_id)
-    except LookupError as error:
-        raise typer.BadParameter(str(error)) from error
-
-
 def _summary(suite: Suite, run: Run) -> None:
     _table(
         ["metric", "value"],
@@ -443,7 +414,7 @@ def _metric_rows(suite: Suite, run: Run) -> list[list[str]]:
 
 def _suite(component: str) -> Suite:
     if component not in SUITES:
-        raise typer.BadParameter(f"'{component}' is not a component; use {', '.join(SUITES)}")
+        raise LookupError(f"'{component}' is not a component; use {', '.join(SUITES)}")
     return SUITES[component]
 
 

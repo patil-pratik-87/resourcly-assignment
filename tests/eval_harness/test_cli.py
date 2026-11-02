@@ -17,17 +17,11 @@ from tests.conftest import CTC01
 @pytest.fixture
 def evals(eval_gold: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("RESOURCLY_TRACE_DB", str(tmp_path / "traces.sqlite"))
+    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(eval_gold))
+    monkeypatch.setenv("RESOURCLY_SPLITS", str(eval_gold / "splits.toml"))
 
     def invoke(*args: str) -> Result:
-        options = [
-            "--gold-dir",
-            str(eval_gold),
-            "--splits",
-            str(eval_gold / "splits.toml"),
-            "--store",
-            str(tmp_path / "evals.sqlite"),
-        ]
-        return CliRunner().invoke(app, [*options, *args])
+        return CliRunner().invoke(app, ["--store", str(tmp_path / "evals.sqlite"), *args])
 
     return invoke
 
@@ -263,8 +257,8 @@ def test_list_runs_says_unfinished_only_for_a_run_that_did_not_finish(
 def test_show_needs_one_run_id_without_out(evals) -> None:
     result = evals("show", "a", "b")
 
-    assert result.exit_code == 2
-    assert "give one run id, or --out FILE for many" in result.output
+    assert result.exit_code == 1
+    assert result.output.strip() == "error: give one run id, or --out FILE for many"
 
 
 def gold_value(gold_dir: Path, raw: str, change) -> None:

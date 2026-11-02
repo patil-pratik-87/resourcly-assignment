@@ -98,15 +98,13 @@ def test_every_routed_case_can_be_looked_up(routed: Settings, store: SqliteResul
 def test_evals_run_router_prints_the_summary(routed: Settings, tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("RESOURCLY_VERSIONS_DIR", str(routed.versions_dir))
     monkeypatch.setenv("RESOURCLY_TRACE_DB", str(routed.trace_path))
+    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(routed.gold_dir))
+    monkeypatch.setenv("RESOURCLY_SPLITS", str(routed.splits_path))
     result = CliRunner().invoke(
         app,
         [
             "--store",
             str(tmp_path / "e.sqlite"),
-            "--gold-dir",
-            str(routed.gold_dir),
-            "--splits",
-            str(routed.splits_path),
             "run",
             "router",
             "--version",

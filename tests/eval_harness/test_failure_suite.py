@@ -147,11 +147,12 @@ def test_evals_run_failure_prints_the_summary(
 ) -> None:
     monkeypatch.setenv("RESOURCLY_VERSIONS_DIR", str(failing.versions_dir))
     monkeypatch.setenv("RESOURCLY_TRACE_DB", str(failing.trace_path))
+    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(failing.gold_dir))
+    monkeypatch.setenv("RESOURCLY_SPLITS", str(failing.splits_path))
     store = tmp_path / "e.sqlite"
-    gold = ["--gold-dir", str(failing.gold_dir), "--splits", str(failing.splits_path)]
 
     result = CliRunner().invoke(
-        app, ["--store", str(store), *gold, "run", "failure", "--version", "fake-v1"]
+        app, ["--store", str(store), "run", "failure", "--version", "fake-v1"]
     )
     shown = CliRunner().invoke(app, ["--store", str(store), "list", "runs", "failure"])
 
