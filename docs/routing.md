@@ -41,10 +41,10 @@ uv sync --extra router --extra vlm
 hf download facebook/dinov2-small
 hf download mlx-community/Qwen3-VL-8B-Instruct-4bit
 uv run evals run router --version three-layer-v1 --split dev
-RESOURCLY_ROUTER_VERSION=three-layer-v1 uv run resourcly serve
+uv run resourcly serve
 ```
 
-The app runs `stub-v0` by default, so it needs neither model.
+The app runs `three-layer-v1` by default. `RESOURCLY_ROUTER_VERSION=stub-v0` needs neither model.
 
 ## Retrain the probe
 

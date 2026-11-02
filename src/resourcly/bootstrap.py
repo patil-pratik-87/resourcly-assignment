@@ -56,7 +56,7 @@ class Settings:
     versions: dict[str, str] = field(
         default_factory=lambda: {
             "reader": "textlayer-v0",
-            "router": "stub-v0",
+            "router": "three-layer-v1",
             "failure": "shuffled-v0",
         }
     )

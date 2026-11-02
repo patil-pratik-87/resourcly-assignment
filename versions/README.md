@@ -14,9 +14,10 @@ version the evals measure is the version the app serves.
 | `router/probes/` | Probe weights a router version names; their hash is part of its hash. |
 | `failure/shuffled-v0.toml` | Every report figure in one seeded random order, no model. |
 
-The `-v0` files are the model-free floor of their component, and the versions the app runs unless
-told otherwise. `RESOURCLY_<COMPONENT>_VERSION`, such as `RESOURCLY_ROUTER_VERSION`, picks another,
-and `RESOURCLY_VERSIONS_DIR` points everything at another folder.
+The `-v0` files are the model-free floor of their component. The app runs `textlayer-v0`,
+`three-layer-v1` and `shuffled-v0` unless told otherwise. `RESOURCLY_<COMPONENT>_VERSION`, such as
+`RESOURCLY_ROUTER_VERSION`, picks another, and `RESOURCLY_VERSIONS_DIR` points everything at
+another folder.
 
 ## Add a version
 

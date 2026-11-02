@@ -110,8 +110,8 @@ The chat is one HTTP API, made for a later chat screen; the CLI calls the same s
   and the drawing JSON beside it.
 - Each step is written to the trace store when it ends, not when the request ends, so a live
   trace stream can be added without changing the agent.
-- The router is the model-free `stub-v0`. Photos and text questions get a "not available yet"
-  reply, so an answerer can be swapped in later without changing the shape.
+- The router is `three-layer-v1` (see "The router"). Photos and text questions get a "not
+  available yet" reply, so an answerer can be swapped in later without changing the shape.
 - The request store and the worker sit behind ports: at scale they become a database and a queue.
 
 How to use it: `docs/usage.md`.
@@ -153,7 +153,7 @@ Details: `docs/evals.md`.
   phone photos and scans of drawings are made by code from clean renders; it has no real phone
   photos, no real scanned reports and no mixed pages.
 - Miss: a dimensioned physics diagram goes to drawing (probe 0.986).
-- Limits: the NIST drawings in every split share one family. The app still runs `stub-v0` by
-  default; `RESOURCLY_ROUTER_VERSION=three-layer-v1` picks the layered router.
+- Limits: the NIST drawings in every split share one family. The app runs this router by
+  default; `RESOURCLY_ROUTER_VERSION=stub-v0` needs no model.
 
 Details: `docs/routing.md`.
