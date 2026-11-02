@@ -18,7 +18,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from resourcly.errors import EmptyRequest, NotFound, UnsupportedUpload
+from resourcly.errors import EmptyRequest, ModelNotCached, NotFound, UnsupportedUpload
 from resourcly.models import (
     ACTIVE,
     Attachment,
@@ -211,7 +211,10 @@ class AgentService:
             reading = drawings.read(item_id, request_id=request_id, progress=report)
             self.requests.save_result(request_id, item_id, reading.document)
         except Exception as error:
-            log.exception("reading %s of request %s failed", item_id, request_id)
+            if isinstance(error, ModelNotCached):  # its message says how to fix it; no traceback
+                log.warning("reading %s of request %s failed: %s", item_id, request_id, error)
+            else:
+                log.exception("reading %s of request %s failed", item_id, request_id)
             with self._update(request_id, item_id) as item:
                 _fail(item, str(error) or type(error).__name__)
             return
