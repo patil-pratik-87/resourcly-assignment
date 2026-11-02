@@ -1,5 +1,7 @@
 # Resourcly case study
 
+New here? Start with [HOW_TO_READ.md](HOW_TO_READ.md), a 30 minute path through the project.
+
 A chat agent for technical documents: it decides the case for each file, reads technical drawings
 into JSON, and stores what it did for every request.
 
