@@ -20,11 +20,11 @@ CASES = [
 ]
 
 
-def test_accuracy_counts_the_labelled_requests_and_leaves_the_other_files_apart() -> None:
+def test_accuracy_counts_every_request_so_a_file_let_in_shows_in_it() -> None:
     summary = summarise_routes(CASES)
 
     assert summary == {
-        "accuracy": pytest.approx(4 / 6),
+        "accuracy": pytest.approx(5 / 8),
         "drawing_recall": pytest.approx(2 / 3),
         "other_kept_out": 0.5,
     }
