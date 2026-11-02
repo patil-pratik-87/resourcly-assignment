@@ -444,14 +444,16 @@ def _meaning(fields: dict[str, Any]) -> str:
 def _page_answer(text: str) -> tuple[list[dict[str, Any]], list[str], str | None]:
     """The callouts and datum letters of a whole-page answer, also from a cut-off answer.
 
-    The third item says why the answer is not a whole page answer, or is None when it is one.
+    The third item says why the answer is not a whole page answer, or is None when it is one. An
+    answer with no complete page object (the first object found is a callout) was cut off.
     """
     whole, problem = parse_answer(PageAnswer, text)
     if whole:
         return whole.callouts, whole.datum_feature_symbols, None
     start = text.find("[", text.find('"callouts"'))
     callouts = json_objects(text[start + 1 :]) if start > 0 else []
-    if callouts:
+    first = first_json(text)
+    if callouts and not (first and "callouts" in first):
         problem = " is cut off; its complete callouts are kept"
     return callouts, [], problem
 

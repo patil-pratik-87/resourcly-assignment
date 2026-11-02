@@ -162,6 +162,18 @@ def test_a_cut_off_page_answer_and_a_callout_of_the_wrong_shape_are_issues() -> 
     ]
 
 
+def test_a_whole_page_answer_of_the_wrong_shape_keeps_its_callouts_and_says_why() -> None:
+    model = FakeModel(json.dumps({"callouts": ["Ø20", {"lines": ["Ø8 ±0.1"]}]}))
+
+    output = WholePageReaderAdapter(DRAWINGS, model, prompt="page", dpi=72).read(CTC01)
+
+    raws = [v["raw"] for v in output.document["values"] if v["callout"] != "title_block"]
+    assert raws == ["⌀8 ±0.1"]
+    assert [i.message for i in output.answer_issues] == [
+        "the page answer: callouts.0: Input should be a valid dictionary"
+    ]
+
+
 def test_an_empty_answer_for_a_datum_box_asks_for_its_letter() -> None:
     model = FakeModel(_answer(), '{"letter": "A"}')
     reader = VectorCropReaderAdapter(DRAWINGS, model, "read", letter_prompt="letter?")
