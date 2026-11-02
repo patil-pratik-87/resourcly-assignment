@@ -39,6 +39,14 @@ dev = [
 router-build = [
     "scikit-learn>=1.5",
 ]
+# Runs the drawing reader notebooks in experiments/drawing/.
+experiments = [
+    "ipykernel>=6.29",
+    "jupyterlab>=4.2",
+    "matplotlib>=3.9",
+    "nbconvert>=7.16",
+    "pandas>=2.2",
+]
 
 [build-system]
 requires = ["hatchling"]
