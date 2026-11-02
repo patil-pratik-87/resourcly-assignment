@@ -170,6 +170,18 @@ def test_compare_refuses_runs_on_other_cases_unless_forced(evals, blank_reader) 
     assert "warning: only in base: partial_a" in forced.output
 
 
+def test_fail_if_worse_fails_when_the_primary_was_not_measured(evals, blank_reader) -> None:
+    base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "test"))
+    blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "test"))
+
+    result = evals("compare", "reader", base, blank)
+    failing = evals("compare", "reader", base, blank, "--fail-if-worse")
+
+    assert result.exit_code == 0, result.output
+    assert failing.exit_code == 1
+    assert "f1 was not measured, so there is no verdict" in failing.output
+
+
 def test_runs_that_share_no_case_are_not_compared(evals, blank_reader) -> None:
     base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "test"))
     blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "dev"))
