@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter
+from resourcly.adapters.vlm_readers import WholePageReaderAdapter
 from resourcly.bootstrap import (
     READERS,
     Implementation,
@@ -72,7 +74,7 @@ def test_unknown_versions_and_implementations_are_refused(versioned: Settings) -
         load_version(versioned, "reader", "absent")
     with pytest.raises(
         InvalidVersion,
-        match="'vlm' is not a reader implementation; use textlayer",
+        match="'vlm' is not a reader implementation; use textlayer, whole-page",
     ):
         load_version(versioned, "reader", "odd")
 
@@ -115,3 +117,33 @@ def test_gold_work_needs_no_reader_version_or_trace_file(
         assert not bare.trace_path.exists()
         with pytest.raises(NotFound, match="no reader version 'textlayer-v0'"):
             services.drawings.read(CTC01)
+
+
+@pytest.mark.parametrize(("name", "reader"), [("whole-page-v1", WholePageReaderAdapter)])
+def test_the_vlm_versions_build_their_reader_without_loading_the_model(
+    settings: Settings, name: str, reader: type
+) -> None:
+    version = load_version(settings, "reader", name)
+    built = READERS[version.impl].build(settings, version.params)
+
+    assert isinstance(built, reader)
+    assert isinstance(built.model, MlxVlmModelAdapter)
+    assert built.model.model_id == "mlx-community/Qwen3-VL-8B-Instruct-4bit"
+    assert built.prompt.startswith("This ")
+    assert built.model.model_id not in MlxVlmModelAdapter._loaded
+
+
+@pytest.mark.parametrize(
+    ("text", "missing"),
+    [
+        ('impl = "whole-page"\nmodel = "org/model"\n', "prompt"),
+        ('impl = "whole-page"\nprompt = "read"\n', "model"),
+    ],
+)
+def test_a_vlm_version_without_its_model_or_prompt_is_refused(
+    versioned: Settings, text: str, missing: str
+) -> None:
+    _write(versioned, "incomplete", text)
+
+    with pytest.raises(InvalidVersion, match=f"needs the setting {missing}"):
+        load_version(versioned, "reader", "incomplete")
