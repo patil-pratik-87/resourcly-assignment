@@ -57,8 +57,9 @@ the findings from the reports with the figure or page each one cites. Each actio
 stated in a report, with its page and the words of the report that say to do it, or as inferred from
 the findings. Under them are the report figures closest to the photo, with their section, failure
 mode and how close the finder found them, from 0 to 1. Click a figure, or a cited figure, to see it
-larger. When no report figure is close enough, the card says the failure is not in the reports, with
-no findings or figures, and when the photo shows no part, it says that in the same way. How the
+larger. A cited page is the same chip, but it does not open, as the app cannot show a report page.
+When no report figure is close enough, the card says the failure is not in the reports, with no
+findings or figures, and when the photo shows no part, it says that in the same way. How the
 answer is made: the "Photo answers" entry of [NOTES.md](../NOTES.md#photo-answers).
 
 ![A photo of a spar cap answered from the reports](img/chat-ui/photo-answer.png)

@@ -2029,17 +2029,18 @@ button.j-fold {
   min-width: 0;
 }
 
-/* A source the answer cites; a figure is a button that opens it larger. */
+/* A source the answer cites, one chip for a figure or a page; a figure is a button that opens
+   it larger, and a page, which the app cannot show, is the same chip without a link. */
 .cite,
 button.cite {
   display: inline-flex;
   align-items: center;
   height: 20px;
   padding: 0 6px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line-strong));
   border-radius: 4px;
   background: var(--panel);
-  color: var(--muted);
+  color: var(--accent);
   font-family: var(--mono);
   font-size: 11.5px;
   font-weight: 400;
@@ -2047,8 +2048,6 @@ button.cite {
 }
 
 button.cite {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--line-strong));
-  color: var(--accent);
   cursor: zoom-in;
 }
 
