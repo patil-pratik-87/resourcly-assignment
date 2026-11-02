@@ -123,19 +123,29 @@ def test_compare_scores_both_runs_on_the_current_gold(evals, eval_gold: Path) ->
     assert "warning" not in result.output
 
 
-def test_compare_takes_the_latest_run_of_a_version_on_the_cases_both_ran(
-    evals, blank_reader
-) -> None:
-    evals("run", "reader", "--version", "textlayer-v0", "--split", "all")
-    latest = run_id(evals("run", "reader", "--version", "textlayer-v0", "--case-id", CTC01))
+def test_a_version_stands_for_its_latest_run_on_every_case_of_a_split(evals, blank_reader) -> None:
+    full = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
+    evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
     blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "all"))
+    evals("run", "reader", "--version", "blank-v0", "--split", "all", "--limit", "1")
 
-    result = evals("compare", "reader", "textlayer-v0", "blank-v0", "--force")
+    result = evals("compare", "reader", "textlayer-v0", "blank-v0")
 
     assert result.exit_code == 0, result.output
-    assert f"base       {latest}" in result.output
+    assert f"base       {full}" in result.output
     assert f"candidate  {blank}" in result.output
-    assert "warning: only in candidate: partial_a" in result.output
+    assert "warning" not in result.output
+
+
+def test_a_version_with_only_partial_runs_cannot_stand_for_a_run(evals) -> None:
+    evals("run", "reader", "--version", "textlayer-v0", "--case-id", CTC01)
+
+    result = evals("compare", "reader", "textlayer-v0", "textlayer-v0")
+
+    assert result.exit_code == 1
+    assert (
+        "error: 'textlayer-v0' is neither a run id nor a version with a full run" in result.output
+    )
 
 
 def test_compare_refuses_runs_on_other_cases_unless_forced(evals, blank_reader) -> None:
