@@ -215,6 +215,9 @@ Qwen3-VL 8B reads one crop at a time. The baseline `whole-page-v1` shows the mod
   are plain-code fixes for a v2, to tune on dev.
 - Cost: about twice the time per page; its crops are independent, so a server can batch them.
 
+- Default: the app reads with `vector-crop-v1`, as it finds the most values; `textlayer-v0` stays
+  the fallback for machines without the model.
+
 Notebooks and per-drawing tables: `experiments/drawing/README.md`.
 
 ## Drawing JSON for the 11 drawings
