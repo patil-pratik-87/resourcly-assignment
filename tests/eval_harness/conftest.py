@@ -3,7 +3,9 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner, Result
 
+from resourcly.eval_harness.cli import app
 from resourcly.eval_harness.store import SqliteResultStore
 from tests.conftest import CTC01
 
@@ -50,3 +52,16 @@ def eval_gold(gold_dir: Path, ctc01: dict) -> Path:
 def store(tmp_path: Path) -> Iterator[SqliteResultStore]:
     with SqliteResultStore.open(tmp_path / "runs" / "evals.sqlite") as store:
         yield store
+
+
+@pytest.fixture
+def evals(eval_gold: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """`evals` on the eval gold, with its results in a store of the test's own."""
+    monkeypatch.setenv("RESOURCLY_TRACE_DB", str(tmp_path / "traces.sqlite"))
+    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(eval_gold))
+    monkeypatch.setenv("RESOURCLY_SPLITS", str(eval_gold / "splits.toml"))
+
+    def invoke(*args: str) -> Result:
+        return CliRunner().invoke(app, ["--store", str(tmp_path / "evals.sqlite"), *args])
+
+    return invoke

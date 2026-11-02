@@ -143,6 +143,8 @@ class Implementation:
     required: tuple[str, ...] = ()
     # settings that name a file, relative to the component's versions folder
     files: tuple[str, ...] = ()
+    # settings that name a model the build loads from the local Hugging Face cache
+    models: tuple[str, ...] = ()
     # raises InvalidVersion for settings the build would refuse, so a bad version fails to load
     check: Callable[[dict[str, Any]], None] | None = None
 
@@ -210,11 +212,13 @@ READERS: dict[str, Implementation] = {
             "page_max_tokens",
         ),
         required=("model", "prompt"),
+        models=("model",),
     ),
     "whole-page": Implementation(
         _with_model(WholePageReaderAdapter),
         settings=("model", "prompt", "dpi", "max_tokens"),
         required=("model", "prompt"),
+        models=("model",),
     ),
 }
 # The image models a router probe or a failure finder can embed pictures with, by the name a
@@ -277,6 +281,7 @@ ROUTERS: dict[str, Implementation] = {
         ),
         required=("encoder", "encoder_model", "probe", "threshold", "model", "prompt"),
         files=("probe",),
+        models=("encoder_model", "model"),
         check=_known_encoder,
     ),
 }
@@ -316,6 +321,7 @@ FINDERS: dict[str, Implementation] = {
         ),
         required=("encoder", "encoder_model", "encoder_recipe", "index", "threshold"),
         files=("index",),
+        models=("encoder_model",),
         check=_known_encoder,
     ),
 }
@@ -348,6 +354,7 @@ ANSWERERS: dict[str, Implementation] = {
         ),
         required=("index", "model", "prompt", "max_tokens"),
         files=("index",),
+        models=("model",),
     ),
 }
 IMPLEMENTATIONS: dict[str, dict[str, Implementation]] = {
@@ -397,6 +404,39 @@ def load_version(settings: Settings, component: str, name: str) -> Version:
                 )
             files[key] = hashlib.sha256(file.read_bytes()).hexdigest()[:12]
     return Version(component, name, impl, description, params, files)
+
+
+def version_models(version: Version) -> dict[str, str]:
+    """The models a version loads, by the setting that names each."""
+    implementation = IMPLEMENTATIONS[version.component][version.impl]
+    return {key: version.params[key] for key in implementation.models if key in version.params}
+
+
+def model_cached(model_id: str) -> bool:
+    """Whether the model is in the local Hugging Face cache, or is a local folder.
+
+    It reads the cache folder as a download leaves it: the snapshot that refs/main names, with
+    files in it. So it answers before the packages that load the model are installed.
+    """
+    if Path(model_id).is_dir():
+        return True
+    folder = _hub_cache() / f"models--{model_id.replace('/', '--')}"
+    ref = folder / "refs" / "main"
+    if not ref.is_file():
+        return False
+    snapshot = folder / "snapshots" / ref.read_text(encoding="utf-8").strip()
+    return snapshot.is_dir() and any(snapshot.iterdir())
+
+
+def _hub_cache() -> Path:
+    """The Hugging Face cache folder, found from the settings huggingface_hub reads."""
+    for variable in ("HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE"):
+        if os.environ.get(variable):
+            return Path(os.environ[variable]).expanduser()
+    if os.environ.get("HF_HOME"):
+        return Path(os.environ["HF_HOME"]).expanduser() / "hub"
+    cache = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache").expanduser()
+    return cache / "huggingface" / "hub"
 
 
 def list_versions(settings: Settings, component: str) -> list[Version]:

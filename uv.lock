@@ -2065,6 +2065,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "pymupdf" },
     { name = "python-multipart" },
+    { name = "rich" },
     { name = "typer" },
     { name = "uvicorn" },
 ]
@@ -2103,6 +2104,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.9" },
     { name = "pymupdf", specifier = ">=1.24" },
     { name = "python-multipart", specifier = ">=0.0.12" },
+    { name = "rich", specifier = ">=13" },
     { name = "torch", marker = "extra == 'router'", specifier = ">=2.5" },
     { name = "transformers", marker = "extra == 'router'", specifier = ">=4.46" },
     { name = "typer", specifier = ">=0.12" },
