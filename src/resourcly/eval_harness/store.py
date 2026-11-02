@@ -3,11 +3,10 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from dataclasses import asdict, fields
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.models import CaseResult, Run, now
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
@@ -77,7 +76,7 @@ class SqliteResultStore:
             self.db.execute(
                 "UPDATE runs SET finished_at = ?, summary = ?, errors = ?,"
                 " n_cases = (SELECT count(*) FROM cases WHERE run_id = ?) WHERE run_id = ?",
-                (_now(), json.dumps(summary, ensure_ascii=False), errors, run_id, run_id),
+                (now(), json.dumps(summary, ensure_ascii=False), errors, run_id, run_id),
             )
 
     def run(self, run_id: str) -> Run:
@@ -125,7 +124,3 @@ def _load(kind: type, row: sqlite3.Row) -> Any:
             value = bool(value)
         values[field.name] = value
     return kind(**values)
-
-
-def _now() -> str:
-    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

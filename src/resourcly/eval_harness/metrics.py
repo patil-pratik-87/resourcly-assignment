@@ -26,7 +26,7 @@ UNITS = {
     "°": "deg",
 }
 UNIT_MARKS = str.maketrans({"º": "°", "˚": "°", "″": '"'})
-SYMBOLS = str.maketrans({"ø": "⌀", "∅": "⌀", "−": "-", "–": "-", "—": "-", "‐": "-"})
+SYMBOLS = str.maketrans({"ø": "⌀", "∅": "⌀", "−": "-", "–": "-", "\u2014": "-", "‐": "-"})
 
 
 @dataclass(frozen=True)

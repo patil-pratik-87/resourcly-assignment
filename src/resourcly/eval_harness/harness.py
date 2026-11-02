@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_services
-from resourcly.eval_harness.models import Case, CaseResult, Run
+from resourcly.eval_harness.models import Case, CaseResult, Run, now
 from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES
 
@@ -58,7 +58,7 @@ def run(
             split=split,
             case_ids=[] if len(chosen) == len(pool) else [case.case_id for case in chosen],
             case_set_hash=case_set_hash(chosen),
-            started_at=_now(),
+            started_at=now(),
             **_git(),
         )
         store.start_run(started)
@@ -151,7 +151,3 @@ def _git() -> dict[str, Any]:
         "git_sha": git("rev-parse", "--short", "HEAD") or "unknown",
         "git_dirty": bool(git("status", "--porcelain")),
     }
-
-
-def _now() -> str:
-    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

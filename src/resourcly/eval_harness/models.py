@@ -3,6 +3,7 @@
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -49,3 +50,8 @@ class CaseResult:
     error: str | None
     prediction: Any
     scores: dict[str, Any]
+
+
+def now() -> str:
+    """The time now, in UTC, as runs store it."""
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

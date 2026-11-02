@@ -193,7 +193,7 @@ def _check_routes(
     raw = services.gold.route_cases()
     rows, problems = _route_rows(raw)
     found.extend(("error", f"router {problem}") for problem in problems)
-    for case_id in _duplicates(raw, "id"):
+    for case_id in gold_rules.duplicates(_ids(raw, "id")):
         found.append(("error", f"router case id {case_id} is used more than once"))
     found.extend(("error", f"router {leak}") for leak in _unit_leaks(rows))
     units = {row["unit"] for row in rows}
@@ -210,7 +210,7 @@ def _check_failures(
     raw = services.gold.failure_cases()
     rows, problems = _failure_rows(raw)
     found.extend(("error", f"failure {problem}") for problem in problems)
-    for case_id in _duplicates(raw, "case_id"):
+    for case_id in gold_rules.duplicates(_ids(raw, "case_id")):
         found.append(("error", f"failure case id {case_id} is used more than once"))
     if rows:
         photos = sum(1 for row in rows if row["kind"] == "positive")
@@ -224,9 +224,8 @@ def _check_failures(
     _unmatched("failure", split_of, {row["unit"] for row in rows}, found)
 
 
-def _duplicates(rows: list[Any], key: str) -> list[str]:
-    ids = [row[key] for row in rows if isinstance(row, dict) and row.get(key)]
-    return sorted({i for i in ids if ids.count(i) > 1})
+def _ids(rows: list[Any], key: str) -> list[str]:
+    return [row[key] for row in rows if isinstance(row, dict) and row.get(key)]
 
 
 def _absent(
