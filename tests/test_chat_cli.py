@@ -150,5 +150,5 @@ def test_serve_runs_the_api_on_the_given_port(monkeypatch: pytest.MonkeyPatch) -
 
     assert result.exit_code == 0, result.output
     assert served == {"host": "127.0.0.1", "port": 8123}
-    assert "Chat API on http://127.0.0.1:8123/api/requests" in result.output
+    assert "Chat on http://127.0.0.1:8123" in result.output
     assert "reader textlayer-v0, router stub-v0" in result.output

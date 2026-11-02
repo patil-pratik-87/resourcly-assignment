@@ -1,10 +1,10 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import Body, FastAPI, File, Form, Query, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from resourcly.bootstrap import Services, Settings, open_services
@@ -20,9 +20,13 @@ from resourcly.models import DrawingSummary, Issue, RequestRecord, RequestTrace
 DocumentBody = Annotated[Any, Body()]
 Dpi = Annotated[int, Query(ge=36, le=400)]
 MB = 1024 * 1024
+Screen = Literal["chat", "annotation"]
+# The addresses the chat app routes in the browser; a reload of one must get its page too.
+CHAT_ADDRESSES = ("/chat", "/requests", "/requests/{rest:path}")
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, screen: Screen = "chat") -> FastAPI:
+    """The API, and the built screen at the root when there is one: the chat or the label screen."""
     settings = settings or Settings.from_env()
 
     @asynccontextmanager
@@ -141,7 +145,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         headers = {"Content-Disposition": f'attachment; filename="{item_id}.json"'}
         return JSONResponse(document, headers=headers if download else None)
 
-    if settings.ui_dist.is_dir():
-        app.mount("/", StaticFiles(directory=settings.ui_dist, html=True), name="ui")
+    dist = settings.chat_ui_dist if screen == "chat" else settings.annotation_ui_dist
+    if dist.is_dir():
+        if screen == "chat":
+            index = dist / "index.html"
+            for path in CHAT_ADDRESSES:
+                app.add_api_route(path, lambda: FileResponse(index), include_in_schema=False)
+        app.mount("/", StaticFiles(directory=dist, html=True), name="ui")
 
     return app

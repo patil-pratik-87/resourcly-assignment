@@ -31,7 +31,8 @@ def settings(gold_dir: Path, tmp_path: Path) -> Settings:
         gold_dir=gold_dir,
         splits_path=gold_dir / "splits.toml",
         drawings_dir=PROJECT_ROOT / "data" / "drawings",
-        ui_dist=tmp_path / "no-ui",
+        chat_ui_dist=tmp_path / "no-chat-ui",
+        annotation_ui_dist=tmp_path / "no-annotation-ui",
         trace_path=tmp_path / "var" / "traces.sqlite",
         uploads_dir=tmp_path / "var" / "uploads",
         # the text-layer reader and the stub router need no model, so the tests can run them
