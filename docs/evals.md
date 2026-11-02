@@ -13,7 +13,7 @@ uv run evals run failure --version shuffled-v0 --limit 10   # a partial run of 1
 uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
 uv run resourcly request RUN_ID:CASE_ID              # what one call did
-uv run evals compare failure shuffled-v0 my-finder-v1 --fail-if-worse
+uv run evals compare failure dinov2-small-v1 dinov2-base-v1 --fail-if-worse
 ```
 
 `--split` takes dev, test or all, and train for the router. `--limit N` runs a partial sample,
@@ -39,7 +39,18 @@ The model-free version of each component sets its floor. The two vision readers 
 | reader `whole-page-v1` | all, 11 drawings | f1 0.650 | precision 0.629, recall 0.672, partial_recall 0.543 |
 | reader `vector-crop-v1` | all, 11 drawings | f1 0.725 | precision 0.625, recall 0.862, partial_recall 0.743 |
 | router `stub-v0` | dev, 123 requests | accuracy 0.602 | drawing_recall 0.120, other_kept_out 0.500 |
-| failure `shuffled-v0` | dev, 86 photos | section@1 0.038 | mode@3 0.769, kept_out 0.000 |
+| failure `shuffled-v0` | dev, 86 cases | section@1 0.038 | mode@3 0.769, kept_out 0.000 |
+| failure `dinov2-base-v1` | dev, 86 cases | section@1 1.000 | mode@3 1.000, kept_out 0.375 |
+| failure `dinov2-base-v1` | test, 68 cases | section@1 1.000 | mode@3 1.000, kept_out 0.250 |
+| failure `dinov2-small-v1` | dev, 86 cases | section@1 1.000 | mode@3 1.000, kept_out 0.000 |
+| failure `dinov2-small-v1` | test, 68 cases | section@1 1.000 | mode@3 1.000, kept_out 0.125 |
+
+A failure split's cases are photos of report figures and negatives: 78 and 8 in dev, 60 and 8 in
+test. The photos are changed copies of figures the DINOv2 finders index, so both find every one;
+with each photo's own figure hidden, base finds the right report first for 95.7% and small for
+89.9% ([photo-answers.md](photo-answers.md)). `kept_out` counts drawings, which the router keeps
+from the finder: base keeps out all 5 unrelated images and none of the 11 drawings, small 1 and
+none. The photo answer itself has no gold yet.
 
 ## What each metric means
 

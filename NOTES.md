@@ -256,3 +256,26 @@ top 3 for 94.2%, the best of the signals compared, in under 0.1 s per photo.
   12 unrelated photos; the router's probe has not been tried on DINOv2-base.
 
 Write-up: `research/failure/README.md`.
+
+## Photo answers
+
+`dinov2-base-v1` finds the report figures nearest a photo, and `photo-v1` has Qwen3-VL 8B answer
+from the closest 3 in one call, citing each fact. Code drops findings that cite anything it was
+not shown, and an action is stated only when it cites report text. Both are the defaults. The
+answer shares the reader's Qwen adapter; DINOv2-base loads beside the router's DINOv2-small.
+
+| Version | Split | Section@1 | Mode@3 | Kept out |
+| --- | --- | --- | --- | --- |
+| `dinov2-base-v1` | dev (86) | 1.000 | 1.000 | 0.375 |
+| `dinov2-base-v1` | test (68) | 1.000 | 1.000 | 0.250 |
+| `dinov2-small-v1` | dev (86) | 1.000 | 1.000 | 0.000 |
+| `dinov2-small-v1` | test (68) | 1.000 | 1.000 | 0.125 |
+
+- Honest reading: the gold's photos are copies of indexed figures. Held out, base finds the right
+  report first for 95.7%, small for 89.9% with the same recipe. Kept out counts drawings, which
+  the router stops; base keeps out all 5 unrelated images, small 1.
+- Answers, by hand: 4 of 6 report photos right, 19 to 34 s each.
+- Gate: 10 of 12 real photos of other broken parts pass 0.28. The model then rejected a Roman lock
+  bolt, but answered a ductile fracture as spar fatigue.
+
+Details: `docs/photo-answers.md`.

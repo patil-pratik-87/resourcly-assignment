@@ -2,7 +2,8 @@
 
 Each file here is one named recipe for a component. `versions/<component>/<name>.toml` says which
 code to build (`impl`) and gives that code its settings, such as the model or the prompt. A
-setting that names a file, such as the router's `probe`, points to a file next to the version.
+setting that names a file, such as the router's `probe` or a failure finder's `index`, points to
+a file next to the version.
 The app and the evals read the same files, so the evals score what the app serves.
 
 ## An example
@@ -38,10 +39,16 @@ The file name, without `.toml`, is the version's name. Any key other than `descr
 | | 2. A DINOv2-small probe over drawing, photo and other, deciding at 0.9; weights in `router/probes/`. | |
 | | 3. Qwen3-VL 8B answers one multiple-choice question. | |
 | `failure/shuffled-v0` | Every report figure in one seeded random order. No model. | The floor any failure finder must beat. |
+| `failure/dinov2-base-v1` | The report figures nearest the photo in DINOv2-base, none below 0.28; vectors in `failure/indexes/`. | The default failure finder. |
+| `failure/dinov2-small-v1` | `dinov2-base-v1` with the router's DINOv2-small. | To compare the two models on the failure gold. |
+| `answer/captions-v0` | The closest figures' captions as the answer. No model. | For tests and machines without the model. |
+| `answer/photo-v1` | Qwen3-VL 8B answers from the photo and the closest figures, citing each fact ([docs/photo-answers.md](../docs/photo-answers.md)). | The default photo answer. |
 
 The vision readers need `uv sync --extra vlm` and Qwen3-VL 8B in the local Hugging Face cache
 (`uv run hf download mlx-community/Qwen3-VL-8B-Instruct-4bit`). `router/three-layer-v1` needs
 `uv sync --extra router --extra vlm` and both models in the local Hugging Face cache ([docs/routing.md](../docs/routing.md#run-it)).
+`failure/dinov2-base-v1` needs `--extra router` and `facebook/dinov2-base`, and `answer/photo-v1`
+needs Qwen3-VL 8B.
 
 ## Which version runs
 
@@ -49,10 +56,12 @@ The vision readers need `uv sync --extra vlm` and Qwen3-VL 8B in the local Huggi
 | --- | --- | --- |
 | reader | `vector-crop-v2` | `RESOURCLY_READER_VERSION` |
 | router | `three-layer-v1` | `RESOURCLY_ROUTER_VERSION` |
-| failure | `shuffled-v0` | `RESOURCLY_FAILURE_VERSION` |
+| failure | `dinov2-base-v1` | `RESOURCLY_FAILURE_VERSION` |
+| answer | `photo-v1` | `RESOURCLY_ANSWER_VERSION` |
 
-For example, `RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 uv run
-resourcly serve` runs without any model. The defaults are in `Settings` in `src/resourcly/bootstrap.py`. A file with an unknown
+For example, `RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0
+RESOURCLY_FAILURE_VERSION=shuffled-v0 RESOURCLY_ANSWER_VERSION=captions-v0 uv run resourcly serve`
+runs without any model. The defaults are in `Settings` in `src/resourcly/bootstrap.py`. A file with an unknown
 `impl` or setting, or a missing named file, refuses to load.
 
 ## How the app code uses a version
@@ -62,8 +71,8 @@ All of it is in `src/resourcly/bootstrap.py`.
 1. `Settings.versions` holds the version name of each component: the default, or the
    environment variable.
 2. `load_version` reads `versions/<component>/<name>.toml` and checks it against the
-   `Implementation` registered for its `impl` in `READERS`, `ROUTERS` or `FINDERS`. It returns a
-   `Version` whose hash covers the settings and any file they name.
+   `Implementation` registered for its `impl` in `READERS`, `ROUTERS`, `FINDERS` or `ANSWERERS`.
+   It returns a `Version` whose hash covers the settings and any file they name.
 3. `Services` builds the component on first use: the `Implementation`'s `build` turns the
    settings into an adapter, such as `StubRouteAdapter(min_paths=300)`.
 4. The service writes the version, such as `router stub-v0 (stub)`, into each trace step.
@@ -86,6 +95,6 @@ cp versions/router/three-layer-v1.toml versions/router/my-router-v2.toml
 uv run evals list versions router
 ```
 
-Edit the copy. `impl` must be in `READERS`, `ROUTERS` or `FINDERS` in `bootstrap.py`, and other
+Edit the copy. `impl` must be in `READERS`, `ROUTERS`, `FINDERS` or `ANSWERERS` in `bootstrap.py`, and other
 keys must be settings it lists. `evals compare` warns about a version edited after its runs. More
 in the [eval harness README](../src/resourcly/eval_harness/README.md#add-a-version).
