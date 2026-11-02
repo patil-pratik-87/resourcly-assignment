@@ -2138,7 +2138,7 @@ button.figure-thumb:hover:not(:disabled) {
 
 .figure-caption {
   display: grid;
-  /* a column that may shrink, so a long tag is cut rather than widening the figure's column */
+  /* a column that may shrink, so a long tag wraps rather than widening the figure's column */
   grid-template-columns: minmax(0, 1fr);
   justify-items: start;
   gap: 3px;
@@ -2174,15 +2174,15 @@ button.figure-thumb:hover:not(:disabled) {
   white-space: nowrap;
 }
 
+/* A long label wraps inside the tag, so it reads in full in a narrow column */
 .mode-tag {
   max-width: 100%;
   padding: 1px 7px;
-  overflow: hidden;
   border-radius: 9px;
   font-size: 12px;
   font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .mode-tag.defect {
