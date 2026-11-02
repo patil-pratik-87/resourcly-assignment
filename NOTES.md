@@ -114,7 +114,7 @@ The chat is one HTTP API, made for a later chat screen; the CLI calls the same s
   available yet" reply, so an answerer can be swapped in later without changing the shape.
 - The request store and the worker sit behind ports: at scale they become a database and a queue.
 
-How to use it: `docs/usage.md`.
+How to use it: `README.md`, and the API in `docs/chat-ui.md`.
 
 ## Chat screen
 
@@ -261,8 +261,8 @@ all gold. Each file is in the gold schema and passes its checks.
 - `confidence` is null: no reader measures how sure it is, so it writes nothing rather than a
   made-up number.
 - Each callout is one feature typed by a fixed rule; leaders are not traced.
-- Rerun: `uv run --extra vlm evals run reader --version vector-crop-v1 --split all`, then
-  `04_winner_outputs.ipynb`. Decoding is greedy, so a rerun gives the same files.
+- Rerun: `make outputs`, which runs `evals run reader --version vector-crop-v1 --split all`, then
+  `scripts/write_outputs.py`. Decoding is greedy, so a rerun gives the same files.
 
 ## Fault detection and chat research
 
@@ -296,9 +296,13 @@ defaults; the answer shares the reader's Qwen adapter.
 - Honest reading: gold photos are copies of indexed figures; these are the copy setting, now
   `failure-copy`. Held out, base gets the report first for 95.7%, small 89.9%.
 - Gate: it does not hold on real photos of other parts; 10 of 12 pass 0.28.
-- Answers: a stored 6-photo spot check, 4 right; the 18-photo before and after is pending.
+- Answers: a stored 6-photo spot check, 4 right; the 18-photo before and after is pending. An
+  answer takes 20 to 38 s.
+- Limits: there is no labelled answer text, and the gold photos are report figures changed by
+  code, so real photos of these parts are untested. A real fracture that is not in the reports
+  can pass the gate, and the model may then answer it as a report's failure.
 
-Details: `docs/photo-answers.md`, `evals/photo-answers/`.
+Details: `evals/photo-answers/`; the code is `answers.py` and `adapters/vlm_answer.py`.
 
 ## Fault evals
 
@@ -318,3 +322,22 @@ The eval harness now scores fault finding as the research measured it, and score
   figure from another report. Eight cases do not rank the two. The `photo-v2` run is pending.
 
 Details: `docs/evals.md`.
+
+## Setup
+
+`make setup` (`scripts/setup.sh`) is the only step that uses the network: it installs uv and the
+Python packages, downloads Qwen3-VL 8B and the two DINOv2 models, builds the chat screen and runs
+`resourcly doctor`. After it, the app runs offline, as the brief asks: every model loads from the
+local Hugging Face cache.
+
+- Why native, not Docker: Qwen3-VL runs through MLX on the Mac's GPU. A container on a Mac runs
+  Linux in a virtual machine and cannot reach that GPU.
+- Why a doctor: each check prints the command that fixes it, so a missing model or an unbuilt
+  screen is one line, not a stack trace. It checks only what the running versions need, so the
+  model-free versions pass on any machine.
+- Committed, not rebuilt: the router's probe and the figure indexes are in `versions/`; `make
+  index` rebuilds the indexes, byte for byte the same.
+- Long runs (evals, the index build) draw a progress bar on a terminal and plain lines in a log.
+- Not done: a CUDA adapter for machines without Apple silicon.
+
+Details: `docs/setup.md`.

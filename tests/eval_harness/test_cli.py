@@ -15,18 +15,6 @@ from resourcly.models import ReaderOutput
 from tests.conftest import CTC01
 
 
-@pytest.fixture
-def evals(eval_gold: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv("RESOURCLY_TRACE_DB", str(tmp_path / "traces.sqlite"))
-    monkeypatch.setenv("RESOURCLY_GOLD_DIR", str(eval_gold))
-    monkeypatch.setenv("RESOURCLY_SPLITS", str(eval_gold / "splits.toml"))
-
-    def invoke(*args: str) -> Result:
-        return CliRunner().invoke(app, ["--store", str(tmp_path / "evals.sqlite"), *args])
-
-    return invoke
-
-
 def run_id(result: Result) -> str:
     return next(line.split()[1] for line in result.output.splitlines() if line.startswith("run "))
 
@@ -41,6 +29,31 @@ def test_run_prints_the_selection_progress_and_summary_and_lists_the_run(evals) 
     listed = evals("list", "runs")
     assert run_id(result) in listed.output
     assert "textlayer-v0" in listed.output
+
+
+def test_run_says_what_it_builds_and_runs_before_the_first_case(evals) -> None:
+    result = evals("run", "reader", "--version", "textlayer-v0")
+
+    lines = result.output.splitlines()
+    assert lines[0] == "reader textlayer-v0 (textlayer): building it and loading the dev split"
+    first_case = next(i for i, line in enumerate(lines) if line.startswith("[1/1]"))
+    assert lines.index("running 1 case(s)") < first_case
+
+
+def test_a_setting_of_a_component_says_which_of_its_versions_it_builds(evals) -> None:
+    # the test gold has no failure cases, so only the line before the cases load is checked
+    result = evals("run", "failure-copy", "--version", "shuffled-v0")
+
+    assert result.output.startswith("failure-copy shuffled-v0 (shuffled): building it")
+
+
+def test_run_without_a_version_runs_the_one_the_app_runs(evals) -> None:
+    result = evals("run", "reader")
+
+    assert result.exit_code == 0, result.output
+    assert result.output.startswith("reader textlayer-v0 (textlayer): ")
+    copy = evals("run", "failure-copy")
+    assert copy.output.startswith("failure-copy shuffled-v0 (shuffled): ")
 
 
 def test_run_limit_runs_a_partial_spread_of_the_split(evals) -> None:

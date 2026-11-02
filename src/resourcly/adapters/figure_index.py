@@ -8,6 +8,7 @@ render it again from its report.
 
 import re
 import tomllib
+from collections.abc import Callable
 from io import BytesIO
 from pathlib import Path
 
@@ -77,12 +78,17 @@ class FigureIndex(BaseModel):
 
 
 def build_index(
-    reports_dir: Path, sections: Path, encoder: ImageEncoderPort, dpi: int
+    reports_dir: Path,
+    sections: Path,
+    encoder: ImageEncoderPort,
+    dpi: int,
+    on_report: Callable[[str, int], None] | None = None,
 ) -> FigureIndex:
     """Cut every report PDF in the folder into figures, label each one and embed its image.
 
     Each figure's section and failure mode come from sections.toml. A figure without a label,
-    or a label without a figure, raises ValueError.
+    or a label without a figure, raises ValueError. `on_report` hears each report's number and
+    figure count once its figures are embedded.
     """
     labels = _labels(sections)
     reports, figures = [], []
@@ -116,6 +122,8 @@ def build_index(
                     vector=[round(value, DIGITS) for value in vector],
                 )
             )
+        if on_report:
+            on_report(cut.report, len(cut.figures))
     if labels:
         raise ValueError(f"{', '.join(sorted(labels))} labelled in {sections.name} but not found")
     return FigureIndex(

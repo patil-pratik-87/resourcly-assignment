@@ -15,6 +15,7 @@ from pathlib import Path
 
 from resourcly.adapters.figure_index import build_index
 from resourcly.bootstrap import ENCODERS, Settings
+from resourcly.progress import progress_bar
 
 
 def main() -> None:
@@ -31,9 +32,19 @@ def main() -> None:
     encoder = ENCODERS[args.encoder](
         args.encoder_model, args.max_side, recipe=args.recipe, input_size=args.input_size
     )
-    index = build_index(
-        settings.reports_dir, settings.reports_dir / "sections.toml", encoder, args.dpi
-    )
+    reports = sorted(settings.reports_dir.glob("*.pdf"))
+    print(f"cutting {len(reports)} reports in {settings.reports_dir} into figures")
+    print(f"embedding each with {args.encoder_model}; the model loads on the first figure")
+    with progress_bar() as bar:
+        task = bar.add_task("reports", total=len(reports))
+
+        def done(report: str, figures: int) -> None:
+            bar.advance(task)
+            print(f"{report}: {figures} figures embedded")
+
+        index = build_index(
+            settings.reports_dir, settings.reports_dir / "sections.toml", encoder, args.dpi, done
+        )
     index.save(args.out)
     print(
         f"wrote {args.out}: {len(index.figures)} figures from {len(index.reports)} reports,"
