@@ -18,9 +18,10 @@ uv run resourcly serve            # the chat screen and the API on http://127.0.
 
 Drawings are read by `vector-crop-v2`, which runs Qwen3-VL 8B through MLX on Apple silicon, about
 a minute per page. It reads each callout it finds in the PDF's vector paths; a page with none, such
-as a scan or an image upload, is read whole, and its features say so. It loads the model from the local Hugging Face cache only. Without the model, a
-drawing fails with a message that names the download command. To run without models, on any
-machine, read the text layer, which finds the title block and notes only, and route with the stub:
+as a scan or an image upload, is read whole, and its features say so. It loads the model from the
+local Hugging Face cache only. Without the model, a drawing fails with a message that names the
+download command. To run without models, on any machine, read the text layer, which finds the
+title block and notes only, and route with the stub:
 
 ```sh
 RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 uv run resourcly serve

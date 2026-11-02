@@ -195,30 +195,26 @@ Details: `docs/routing.md`.
 
 ## Drawing reader
 
-Chose `vector-crop-v1`: find each callout from the PDF's vector paths with no model, then
-Qwen3-VL 8B reads one crop at a time. The baseline `whole-page-v1` shows the model each whole page.
+Chose `vector-crop-v2`: find each callout from the PDF's vector paths with no model, then
+Qwen3-VL 8B reads one crop at a time; `whole-page-v1` sends whole pages.
 
-| Version | Split | F1 | Precision | Recall | Partial recall | Seconds per page |
-| --- | --- | --- | --- | --- | --- | --- |
-| `textlayer-v0` | all | 0.344 | 0.902 | 0.213 | 0.129 | 0 |
-| `whole-page-v1` | all | 0.650 | 0.629 | 0.672 | 0.543 | 36 |
-| `vector-crop-v1` | all | **0.725** | 0.625 | **0.862** | **0.743** | 64 |
-| `textlayer-v0` | dev | 0.373 | 1.000 | 0.229 | 0.167 | 0 |
-| `whole-page-v1` | dev | **0.757** | 0.709 | 0.812 | 0.633 | 33 |
-| `vector-crop-v1` | dev | 0.739 | 0.620 | **0.917** | **0.867** | 64 |
+| Version | Split | F1 | Recall | Partial recall |
+| --- | --- | --- | --- | --- |
+| `whole-page-v1` | all | 0.650 | 0.672 | 0.543 |
+| `vector-crop-v1` | all | **0.725** | **0.862** | **0.743** |
+| `whole-page-v1` | dev | **0.757** | 0.812 | 0.633 |
+| `vector-crop-v1` | dev | 0.739 | **0.917** | **0.867** |
 
-- Why it wins: one crop per callout keeps every answer short, so dense sheets lose nothing
-  (FTC-06 recall 0.865 against 0.562), and the 300 dpi crop shows the GD&T symbol.
-- Where it does not: dev F1 rests on 2 full-gold drawings, and it loses FTC-07 page 2 and CTC-03.
-  Its precision is low: frame cells read again as bare numbers (".04"), a two-line note read as
-  two notes, and text of a neighbouring callout cut by the crop edge ("2X ⌀.562 ±."). All three
-  are plain-code fixes for a v2, to tune on dev.
-- Cost: about twice the time per page; its crops are independent, so a server can batch them.
+- Trade-off: vector-crop wins on all gold (F1 0.725 against 0.650); whole-page wins on dev
+  (0.757 against 0.739), where only CTC-01 and FTC-07 page 2 have full gold.
+- Raster pages: `vector-crop-v1` reads nothing from a page with no vector paths, such as a scan or
+  an image upload (0 values). `vector-crop-v2` reads that page whole, as `whole-page-v1` does; a
+  CTC-01 page sent as a PNG gives 15 values. On the NIST PDFs, whose every page has vector
+  callouts, v2 is v1 (its runs are pending).
+- Weak spot: precision 0.625 (whole-page 0.629); frame cells are read again as bare numbers.
+- Cost: 64 s per page against 36.
 
-- Default: the app reads with `vector-crop-v1`, as it finds the most values; `textlayer-v0` stays
-  the fallback for machines without the model.
-
-Notebooks and per-drawing tables: `experiments/drawing/README.md`.
+Details: `experiments/drawing/README.md`.
 
 ## Drawing JSON for the 11 drawings
 
