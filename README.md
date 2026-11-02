@@ -18,6 +18,9 @@ make setup   # the only online step: packages, models, the Agents UI, a check
 make run     # set up once (downloads and builds), then serve the Agents UI on http://127.0.0.1:8000
 ```
 
+If `make setup` ends by saying uv is not on your PATH, add the line it prints to `~/.zshrc`, so
+the `uv run` commands below work in a new shell.
+
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and drop a drawing from `data/drawings/` into it. After setup, nothing
 reaches the network. `make doctor` prints each problem and its fix. Details:
 [docs/setup.md](docs/setup.md).

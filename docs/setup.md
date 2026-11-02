@@ -17,7 +17,9 @@ The script prints each step and an `ok` or `fail` line for it:
 4. Downloads the models the app runs, with their progress bars: Qwen3-VL 8B 4-bit (about 6 GB),
    DINOv2-small and DINOv2-base. A model that is already downloaded is skipped.
 5. Builds the chat screen with Node.js, which it installs with Homebrew if it is missing.
-6. Runs `resourcly doctor`.
+6. Runs `resourcly doctor` with the PATH a new shell gets, so it agrees with `make doctor`.
+
+When uv is not on that PATH, setup ends with the line to add to `~/.zshrc`.
 
 `--cli-only` skips the chat screen, so Node.js is not needed. `--no-models` skips the downloads.
 
