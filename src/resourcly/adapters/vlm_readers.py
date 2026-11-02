@@ -1,9 +1,11 @@
 """Readers that show a drawing to a vision-language model and turn its answers into a document.
 
-The reader asks the model only to transcribe, in the shape `callout_values.readings` expects, and
-leaves the structure to code. It reads the title block and the notes from the PDF text layer,
-exactly, so only the callouts come from the model:
+Both readers ask the model only to transcribe, in the shape `callout_values.readings` expects, and
+leave the structure to code. Both read the title block and the notes from the PDF text layer,
+exactly, so they differ only in how the model sees the callouts:
 
+- `VectorCropReaderAdapter` finds each callout from the vector paths (`callout_locator`) and asks
+  the model about one crop at a time.
 - `WholePageReaderAdapter` asks the model about the whole page at once.
 
 What each callout points at is not traced: each callout becomes one feature, typed by a fixed rule
@@ -11,6 +13,7 @@ on what it says (`callout_values.feature_type`).
 """
 
 import json
+import math
 import re
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -21,8 +24,17 @@ from typing import Any
 
 import pymupdf
 
+from resourcly.adapters.callout_locator import Callout, Rect, locate
 from resourcly.adapters.text_reader import text_records
-from resourcly.callout_values import feature_type, readings, sheet_units, value_fields
+from resourcly.callout_values import (
+    datum_letter,
+    feature_type,
+    name_symbols,
+    needs_symbol,
+    readings,
+    sheet_units,
+    value_fields,
+)
 from resourcly.errors import NotFound, UnreadableDrawing
 from resourcly.models import ReadProgress, drawing_short
 from resourcly.ports import Progress, VisionModelPort
@@ -38,6 +50,89 @@ class Group:
     page: int
     box: Box
     readings: list[dict[str, Any]]
+
+
+class VectorCropReaderAdapter:
+    """Proposal 1: one crop per callout found from the vector paths, one model call per crop.
+
+    Each crop is the callout's box plus `margin` points, rendered at `crop_dpi`, with the other
+    callouts that fall in the margin painted out so the model reads only this one.
+
+    Two follow-up questions are asked about the same crop when they are set. `symbol_prompt` is
+    asked when a frame comes back with a tolerance but no characteristic named. `letter_prompt`
+    is asked when a small frame with one letter in it (a datum feature box) reads as nothing.
+    """
+
+    def __init__(
+        self,
+        folder: Path,
+        model: VisionModelPort,
+        prompt: str,
+        letter_prompt: str | None = None,
+        symbol_prompt: str | None = None,
+        crop_dpi: int = 300,
+        margin: float = 4.0,
+        max_tokens: int = 700,
+    ):
+        self.folder = folder
+        self.model = model
+        self.prompt = prompt
+        self.letter_prompt = letter_prompt
+        self.symbol_prompt = symbol_prompt
+        self.crop_dpi = crop_dpi
+        self.margin = margin
+        self.max_tokens = max_tokens
+
+    def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
+        with _open(self.folder, drawing) as pdf:
+            # Every page is located first, so the progress knows the drawing's callout count.
+            located = [locate(page) for page in pdf]
+            total = sum(map(len, located))
+            groups: list[Group] = []
+
+            def report(page: pymupdf.Page, fractions: list[Box], page_done: int) -> None:
+                if progress:
+                    latest = [r["raw"] for r in groups[-1].readings] if groups else []
+                    progress(
+                        ReadProgress(
+                            page=page.number + 1,
+                            pages=pdf.page_count,
+                            done=len(groups),
+                            total=total,
+                            boxes=fractions,
+                            page_done=page_done,
+                            latest=latest,
+                        )
+                    )
+
+            for page, callouts in zip(pdf, located, strict=True):
+                if not callouts:
+                    continue
+                pixmap = page.get_pixmap(dpi=self.crop_dpi)
+                fractions = [_fraction(c.box, page) for c in callouts]
+                for index, callout in enumerate(callouts):
+                    report(page, fractions, index)
+                    others = [c.box for c in callouts if c.box is not callout.box]
+                    image = crop_png(pixmap, callout.box, others, self.crop_dpi, self.margin)
+                    found = self._read_crop(image, callout)
+                    groups.append(Group(page.number + 1, fractions[index], found))
+                if len(groups) == total:
+                    report(page, fractions, len(callouts))
+            return build_document(drawing, pdf, _merge_repeats(groups))
+
+    def _read_crop(self, image: bytes, callout: Callout) -> list[dict[str, Any]]:
+        transcription = first_json(self.model.generate(self.prompt, [image], self.max_tokens))
+        if self.symbol_prompt and needs_symbol(transcription):
+            answer = first_json(self.model.generate(self.symbol_prompt, [image], 40))
+            name = answer.get("symbol_name") if isinstance(answer, dict) else None
+            if isinstance(name, str):
+                transcription = name_symbols(transcription, name)
+        found = readings(transcription, framed=callout.framed, letters=callout.letters)
+        if not found and self.letter_prompt and callout.framed and callout.letters <= 3:
+            letter = datum_letter(first_json(self.model.generate(self.letter_prompt, [image], 30)))
+            if letter:
+                found = readings({"lines": [letter]}, framed=True, letters=1)
+        return found
 
 
 class WholePageReaderAdapter:
@@ -85,6 +180,32 @@ class WholePageReaderAdapter:
                     for d in datums
                 ]
             return build_document(drawing, pdf, groups)
+
+
+def crop_png(
+    pixmap: pymupdf.Pixmap, box: Rect, others: list[Rect], dpi: int, margin: float
+) -> bytes:
+    """The box plus a margin as PNG, with the other boxes in the margin painted white."""
+    scale = dpi / 72
+
+    def pixels(rect: Rect) -> pymupdf.IRect:
+        found = pymupdf.IRect(
+            math.floor(rect.x0 * scale),
+            math.floor(rect.y0 * scale),
+            math.ceil(rect.x1 * scale),
+            math.ceil(rect.y1 * scale),
+        )
+        return found & pixmap.irect
+
+    region = pixels(box.grown(margin))
+    crop = pymupdf.Pixmap(pixmap.colorspace, region, pixmap.alpha)
+    crop.copy(pixmap, region)
+    for other in others:
+        covered = pixels(other) & region
+        if not covered.is_empty:
+            crop.set_rect(covered, (255,) * pixmap.n)
+    crop.copy(pixmap, pixels(box) & region)
+    return crop.tobytes("png")
 
 
 def first_json(text: str) -> Any:
@@ -233,6 +354,42 @@ def _collapse(callouts: list[dict[str, Any]]) -> list[dict[str, Any]]:
         found = list(run)
         kept += found[:1] if len(found) >= 3 else found
     return kept
+
+
+def _merge_repeats(groups: list[Group], max_gap: float = 0.03) -> list[Group]:
+    """Drop a reading that a neighbouring box already gave, word for word.
+
+    Boxes can overlap, so the same frame can be read from two crops. Two readings are one when
+    they have the same callout and raw text and their boxes are within `max_gap` of the page.
+    """
+    kept: list[Group] = []
+    for group in groups:
+        fresh = [
+            r
+            for r in group.readings
+            if not any(
+                g.page == group.page
+                and _gap(g.box, group.box) <= max_gap
+                and any(k["callout"] == r["callout"] and k["raw"] == r["raw"] for k in g.readings)
+                for g in kept
+            )
+        ]
+        kept.append(Group(group.page, group.box, fresh))
+    return kept
+
+
+def _gap(a: Box, b: Box) -> float:
+    return max(a[0] - b[2], b[0] - a[2], a[1] - b[3], b[1] - a[3], 0.0)
+
+
+def _fraction(box: Rect, page: pymupdf.Page) -> Box:
+    width, height = page.rect.width, page.rect.height
+    return (
+        max(box.x0 / width, 0.0),
+        max(box.y0 / height, 0.0),
+        min(box.x1 / width, 1.0),
+        min(box.y1 / height, 1.0),
+    )
 
 
 @contextmanager

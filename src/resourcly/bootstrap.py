@@ -24,7 +24,7 @@ from resourcly.adapters.stub_router import StubRouteAdapter
 from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.adapters.thread_jobs import ThreadJobsAdapter
 from resourcly.adapters.upload_store import FileUploadStoreAdapter
-from resourcly.adapters.vlm_readers import WholePageReaderAdapter
+from resourcly.adapters.vlm_readers import VectorCropReaderAdapter, WholePageReaderAdapter
 from resourcly.agent import AgentService, recover
 from resourcly.errors import InvalidVersion, NotFound
 from resourcly.ports import ImageEncoderPort, RouteLayerPort, RouterPort
@@ -144,6 +144,19 @@ def _with_model(reader: Callable[..., Any]) -> Callable[[Settings, dict[str, Any
 READERS: dict[str, Implementation] = {
     "textlayer": Implementation(
         lambda settings, params: PyMuPDFTextReaderAdapter(settings.drawings_dir)
+    ),
+    "vector-crop": Implementation(
+        _with_model(VectorCropReaderAdapter),
+        settings=(
+            "model",
+            "prompt",
+            "letter_prompt",
+            "symbol_prompt",
+            "crop_dpi",
+            "margin",
+            "max_tokens",
+        ),
+        required=("model", "prompt"),
     ),
     "whole-page": Implementation(
         _with_model(WholePageReaderAdapter),
