@@ -1,8 +1,8 @@
 # Eval harness
 
-The eval harness tests each part of the agent on its own. Plug in a version of a part, run it on
-chosen gold cases, and see whether it got better or worse than another version. Commands and
-current numbers: [docs/evals.md](../../../docs/evals.md).
+The eval harness tests each part of the agent on its own: run a version of a part on chosen
+gold cases, and see whether it beats another version. Commands and current numbers:
+[docs/evals.md](../../../docs/evals.md).
 
 ```text
 gold cases + split -> version file -> call through open_services() -> score per case
@@ -16,16 +16,15 @@ gold cases + split -> version file -> call through open_services() -> score per 
 | --- | --- |
 | Component | The part of the agent under test: `reader`, `router` or `failure`. |
 | Gold case | An input and its known answer, in `evals/gold/`; partial gold gives recall only. |
-| Split | Which cases are dev and which test, in `evals/splits.toml`. Related cases stay together. |
+| Split | Dev and test cases, in `evals/splits.toml`; related cases stay together. |
 | Version file | `versions/<component>/<name>.toml`: an implementation and its settings. |
 | Implementation | Code behind the component's port, registered as `impl` in `bootstrap.py`. |
 | Run | One version on one split, with its version hash and git commit. |
 | Run store | `runs/evals.sqlite`: every run, with each case's answer and scores. |
-| Case score | One number per case, `case_score`, to compare runs case by case. |
+| Case score | `case_score`, one number per case, to compare runs case by case. |
 | Primary metric | The component's first metric, which says better or worse. |
-| Compare verdict | Better, worse or no change per metric; both runs' stored answers are scored on the current gold. |
-| Trace | A call's steps, as `<run id>:<case id>`; see `resourcly request`. |
-| `evals check` | Checks every gold file and split. |
+| Compare verdict | Better, worse or no change per metric, scoring both runs on the current gold and the same cases. |
+| Trace | A call's steps; `resourcly request <run id>:<case id>`. |
 
 Each component has one suite in `suites.py`, the code defining its test: load, call, score and
 metrics, primary first.
@@ -41,7 +40,7 @@ metrics, primary first.
 | `metrics.py` | Pure scoring functions. |
 | `gold_rules.py` | Drawing gold checks the models do not make. |
 | `compare.py` | Scores two runs on the current gold. |
-| `models.py` | `Run` and `CaseResult`. |
+| `models.py` | `Case`, `Run` and `CaseResult`. |
 | `store.py` | The run store in SQLite. |
 
 ## Components
@@ -52,6 +51,8 @@ metrics, primary first.
 | `router` | request to its case | `accuracy` | `drawing_recall`, `other_kept_out` |
 | `failure` | photo to report figure | `section@1` | `mode@3`, `kept_out` |
 
+Answering from the reports and a whole-agent score are planned components.
+
 ## Add a version
 
 Copy a file in `versions/<component>/` and edit it. `impl` must be in `READERS`, `ROUTERS` or
@@ -59,5 +60,5 @@ Copy a file in `versions/<component>/` and edit it. `impl` must be in `READERS`,
 
 ## Add a component
 
-Write its port and an implementation, registered in `bootstrap.py`, then add its suite, case
-loader and metrics. Nothing else changes.
+Write its port and an implementation, registered in `bootstrap.py` with a default version.
+Then add its suite, case loader and metrics; the CLI, harness and `compare` find it in `SUITES`.
