@@ -3,7 +3,7 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 
-from resourcly.errors import InvalidVersion
+from resourcly.errors import InvalidVersion, UnreadableAttachment
 from resourcly.models import Attachment, LayerVerdict, Route
 from resourcly.ports import ImageEncoderPort
 
@@ -69,7 +69,7 @@ class ProbeRouteAdapter:
     """Layer 2 of the router: a linear probe on a frozen image embedding.
 
     It decides the route it gives the highest probability when that is at least `threshold`, and
-    otherwise passes the request on with its guess.
+    otherwise passes the request on with its guess. A file that cannot be decoded fits no case.
     """
 
     name = "probe"
@@ -91,7 +91,10 @@ class ProbeRouteAdapter:
     def decide(self, attachment: Attachment | None) -> LayerVerdict:
         if attachment is None:
             return LayerVerdict(None, "no attachment for the probe")
-        vector = self.encoder.encode(attachment)
+        try:
+            vector = self.encoder.encode(attachment)
+        except UnreadableAttachment as error:
+            return LayerVerdict(Route.OTHER, str(error), 1.0)
         if len(vector) != self.probe.size:
             raise ValueError(
                 f"the embedding has {len(vector)} numbers, the probe takes {self.probe.size}"

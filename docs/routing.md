@@ -14,7 +14,10 @@ Each layer either decides or passes the request on with its reason. The first to
 | `probe` | `adapters/route_probe.py`, `adapters/dinov2_encoder.py` | A three-class logistic regression (drawing, photo, other) on the DINOv2-small embedding of the picture (an image, or page 1 of a PDF). Decides when one class reaches 0.9. |
 | `vlm` | `adapters/route_vlm.py`, `adapters/mlx_vlm_model.py` | Qwen3-VL 8B answers one multiple-choice question (drawing, photo, something else) about the picture. It never sees the user's text. |
 
-Every layer asked is traced as `route.<layer>` with its verdict, confidence and reason. Both
+A picture is turned upright from its EXIF orientation before a model sees it. A file that opens
+but will not decode or render, such as a truncated JPEG, goes to `other` with the reason instead
+of failing the request. Every layer asked is traced as `route.<layer>` with its verdict,
+confidence and reason. Both
 models load from the local Hugging Face cache with `HF_HUB_OFFLINE=1` and never download.
 
 ## Results
