@@ -140,7 +140,27 @@
         <li><b>Copy:</b> the photo's own figure stays in the index. This only checks that the changes do not break matching.</li>
         <li><b>Held out:</b> the photo's own figure is hidden, so the best possible hit is another figure of the same section. A real user's photo is never a report figure, so <b>this is the setting that decides</b>.</li>
       </ul>
-      <p>Scores: <b>report@1</b>, the top figure is from the right report; <b>section@k</b> and <b>mode@k</b>, one of the top k figures has the right section or failure mode. Retrieval needs no language model, so every option ran on all 161 cases in 5 to 15 s. The describe step, the BM25 search on its query and the answer step need the model, and ran on 3 cases only.</p>
+      <p>Each score asks one question about the list of report figures that search returns for a photo, ranked from closest to least close.</p>
+      <ul class="list-disc pl-5 space-y-1">
+        <li><b>report@1:</b> is the first figure in the list from the right report? There are only three reports, so this checks whether the agent at least opens the right report.</li>
+        <li><b>section@k:</b> is a figure of the same part from the same aircraft somewhere in the first k figures? A section is a group of figures about one part, such as "the N106ER wing spar" or "the mixture control". section@1 looks only at the first figure; section@5 looks at the first five.</li>
+        <li><b>mode@k:</b> is a figure showing the same kind of failure somewhere in the first k figures? The failure modes are fatigue, overstress, jammed control, heat damage, or "no defect". The part doesn't have to match, only the kind of damage.</li>
+      </ul>
+      <p><b>Example.</b> The photo is a damaged copy of a fatigue crack on the N106ER spar. Search returns:</p>
+      <ol class="list-decimal pl-5 space-y-1">
+        <li>Another N106ER spar figure, showing fatigue</li>
+        <li>An N104ER spar figure, showing fatigue</li>
+        <li>A microstructure figure from the same report, showing no defect</li>
+      </ol>
+      <ul class="list-disc pl-5 space-y-1">
+        <li>report@1: <b>yes</b>, the first figure is from the spar report.</li>
+        <li>section@1: <b>yes</b>, the first figure is the same part.</li>
+        <li>mode@1: <b>yes</b>, the first figure shows fatigue.</li>
+        <li>mode@3: <b>yes</b>, at least one of the first three shows fatigue.</li>
+      </ul>
+      <p>If the first figure had been the microstructure one, report@1 would still be yes, but section@1 and mode@1 would be no. mode@3 would still be yes, because a fatigue figure is in the top three.</p>
+      <p><b>Why mode@3 matters most.</b> The answer step reads the top 3 figures, so a correct answer is possible as long as one of them shows the right kind of failure. That is why "DINOv2 gets mode@3 94.2%" is the headline. It means that for 94 of every 100 photos, the evidence the model needs is in front of it.</p>
+      <p class="opacity-70">Search needs no language model, so every option ran on all 161 cases, in 5 to 15 s each. The describe and answer steps ran on 3 cases only.</p>
     </div>
   </div>
 </section>
