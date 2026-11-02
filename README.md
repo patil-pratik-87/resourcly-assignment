@@ -66,12 +66,12 @@ In the Agents UI, the Requests tab shows a file beside its JSON, and its Trace t
 
 ### Validating a new version: the eval harness
 
-The eval harness has one suite per part: reader, router, failure, failure-copy and answer. It runs
-a version on the gold cases in `evals/gold/`, stores every run in `runs/evals.sqlite`, and
-`compare` says whether a new version is better or worse, by metric and by case. Each part's
-settings are a version file, `versions/<part>/<name>.toml`
-([versions/README.md](versions/README.md)). Copy one, edit it, run both on the same sample, and
-compare:
+The eval harness has one suite per part: reader, router, failure and answer, with failure-copy and
+answer-copy for the photo's own figure kept in the search. It runs a version on the gold cases in
+`evals/gold/`, stores every run in `runs/evals.sqlite`, and `compare` says whether a new version
+is better or worse, by metric and by case. Each part's settings are a version file,
+`versions/<part>/<name>.toml` ([versions/README.md](versions/README.md)). Copy one, edit it, run
+both on the same sample, and compare:
 
 ```sh
 cp versions/reader/vector-crop-v2.toml versions/reader/my-reader-v3.toml   # then edit it

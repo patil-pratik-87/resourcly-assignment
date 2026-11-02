@@ -47,6 +47,7 @@ def test_an_answer_citing_the_right_report_and_naming_the_mode_is_correct() -> N
         "mode_named": 1.0,
         "citations": 2,
         "valid_citations": 2,
+        "prompt_free": 1.0,
     }
 
 
@@ -142,6 +143,31 @@ def test_an_inferred_action_may_cite_a_figure_without_a_quote() -> None:
     assert score_answer(PHOTO, found)["correct"] == 1.0
 
 
+@pytest.mark.parametrize(
+    ("part", "text", "free"),
+    [
+        ("answer", "A crack from the hole, as in reference image 1.", 0.0),
+        ("finding", "The reference images show beach marks.", 0.0),
+        ("action", "Set basis to 'inferred' and leave quote empty.", 0.0),
+        ("answer", "A crack from the hole, as in 18-061 fig05.", 1.0),
+        ("action", "Replace the spar cap.", 1.0),
+    ],
+)
+def test_an_answer_is_prompt_free_when_it_uses_none_of_the_prompts_own_words(
+    part: str, text: str, free: float
+) -> None:
+    found = answer("Fatigue.", cite("18-061 p3", "18-061", 3))
+    if part == "answer":
+        found["answer"] = text
+    elif part == "finding":
+        found["findings"][0]["statement"] = text
+    else:
+        found["actions"] = [{"action": text, "basis": "inferred"}]
+
+    assert score_answer(PHOTO, found)["prompt_free"] == free
+    assert score_answer(NEGATIVE, found)["prompt_free"] == free
+
+
 def test_a_photo_the_model_says_does_not_match_is_wrong() -> None:
     refused = answer("The figures show a different part.", matched=False)
 
@@ -161,6 +187,7 @@ def test_a_failed_call_scores_nothing() -> None:
         "mode_named": 0.0,
         "citations": 0,
         "valid_citations": 0,
+        "prompt_free": 1.0,
     }
     assert score_answer(NEGATIVE, None)["kept_out"] == 0.0
 
@@ -205,11 +232,13 @@ def test_the_summary_puts_correct_over_every_case_first() -> None:
         "mode_named",
         "citations_valid",
         "kept_out",
+        "prompt_free",
     ]
     assert summary["correct"] == pytest.approx(2 / 4)
     assert (summary["report_cited"], summary["mode_named"]) == (1.0, 0.5)
     assert summary["citations_valid"] == pytest.approx(4 / 5)
     assert summary["kept_out"] == 0.5
+    assert summary["prompt_free"] == 1.0
 
 
 def test_a_summary_with_no_citation_does_not_measure_them() -> None:

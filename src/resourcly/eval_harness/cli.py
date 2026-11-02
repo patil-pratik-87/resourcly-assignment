@@ -64,7 +64,7 @@ def run(
         str | None,
         typer.Option(
             help="A file in versions/<component>/, the one the app runs by default;"
-            " failure-copy runs failure's."
+            " failure-copy runs failure's, answer-copy answer's."
         ),
     ] = None,
     split: Annotated[str, typer.Option(help="dev, test or all; train for the router.")] = "dev",

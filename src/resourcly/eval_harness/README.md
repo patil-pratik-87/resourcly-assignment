@@ -52,7 +52,8 @@ metrics, primary first.
 | `router` | request to its case | `accuracy` | `drawing_recall`, `other_kept_out` |
 | `failure` | photo to report figure, its own figure hidden | `section@1` | `mode@3`, `kept_out` |
 | `failure-copy` | the same with its own figure in the search | `section@1` | `mode@3`, `kept_out` |
-| `answer` | photo to a cited answer, held out | `correct` | `report_cited`, `mode_named`, `citations_valid`, `kept_out` |
+| `answer` | photo to a cited answer, held out | `correct` | `report_cited`, `mode_named`, `citations_valid`, `kept_out`, `prompt_free` |
+| `answer-copy` | the same with its own figure in the search, as the app answers an upload | `correct` | the same |
 
 Held out is the realistic setting: a real photo is never a copy of an indexed figure, so the
 finder must reach another figure of the same section. The answer runs the failure version the

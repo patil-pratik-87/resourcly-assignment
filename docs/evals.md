@@ -12,6 +12,7 @@ uv run evals run reader --version textlayer-v0 --split all
 uv run evals run failure --version shuffled-v0 --limit 10   # a partial run of 10 cases
 uv run evals run failure-copy --version dinov2-base-v1      # the photo's own figure kept
 uv run --extra vlm evals run answer --version photo-v2 --limit 8
+uv run evals run answer-copy --case-id pos_18-061_fig05_v0  # as the app answers an upload
 uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
 uv run resourcly request RUN_ID:CASE_ID              # what one call did
@@ -34,7 +35,7 @@ Four components are measured today; a score for the whole agent is planned.
 The failure and answer suites run held out: each photo is a perturbed copy of a report figure,
 so its own figure is hidden from the search and the best hit must be another figure of its
 section. `failure-copy` keeps the figure in, which only checks that the perturbations do not
-break matching. The answer runs the failure version the settings name
+break matching, and `answer-copy` keeps it in as the app does for an uploaded photo. The answer runs the failure version the settings name
 (`RESOURCLY_FAILURE_VERSION`, `dinov2-base-v1` by default), and `photo-v1` took 18 to 35 s per
 photo with Qwen3-VL 8B, so run it with `--limit`.
 
@@ -94,5 +95,6 @@ two versions.
 | `report_cited` | Photo answers with a citation in the photo's report. |
 | `mode_named` | Photo answers whose text or findings have a word starting with one of the failure keywords. |
 | `citations_valid` | Citations that name a figure the finder returned, or a page of their reports, and whose source agrees; a stated action's must cite a page and quote at least three words. |
+| `prompt_free` | Answers whose text, findings and actions use none of the prompt's own words, such as "reference image" or the `basis` and `quote` fields. |
 
 A failed call is scored as an empty answer, so a crash lowers the score.

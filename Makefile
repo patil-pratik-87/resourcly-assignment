@@ -10,7 +10,7 @@ UV := $(shell command -v uv 2>/dev/null || echo $(HOME)/.local/bin/uv)
 
 PORT ?= 8000
 # Every suite the evals have
-SUITES := reader router failure failure-copy answer
+SUITES := reader router failure failure-copy answer answer-copy
 CHAT := src/frontend/chat
 # The reader whose answers outputs/ holds
 OUTPUTS_READER := vector-crop-v1

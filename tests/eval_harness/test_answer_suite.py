@@ -52,6 +52,7 @@ def test_an_answer_run_answers_each_photo_held_out_and_scores_it(
         "mode_named": 1.0,
         "citations": 1,
         "valid_citations": 1,
+        "prompt_free": 1.0,
     }
     assert cases["pos_fig01_v0"].prediction["not_in_reports"] is True
     assert cases["pos_fig01_v0"].scores["correct"] == 0.0
@@ -61,6 +62,19 @@ def test_an_answer_run_answers_each_photo_held_out_and_scores_it(
     assert (run.component, run.n_cases, run.errors) == ("answer", 6, 1)
     assert run.summary["correct"] == pytest.approx(3 / 6)
     assert run.summary["kept_out"] == 0.5
+
+
+def test_the_copy_setting_runs_the_answer_versions_and_keeps_the_own_figure(
+    answering: Settings, store: SqliteResultStore
+) -> None:
+    run = harness.run(
+        "answer-copy", "captions-v0", settings=answering, store=store, case_ids=("pos_fig06_v0",)
+    )
+
+    [case] = store.cases(run.run_id)
+    assert (run.component, run.version) == ("answer-copy", "captions-v0")
+    assert NameFinder.hidden == [set()]
+    assert case.prediction["figures"][0]["figure"] == "18-061/fig06"
 
 
 def test_each_answer_is_traced_from_the_finder_to_the_answer(
