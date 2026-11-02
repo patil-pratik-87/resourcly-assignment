@@ -32,8 +32,9 @@ export function AnswerProgress({ item }: { item: RequestItem }) {
 
 /**
  * What the agent says about a photo from the reports: the answer, the findings and actions with
- * their sources, and the closest report figures, each of which opens larger. When the gate finds
- * no figure close enough, it says only that the reports do not show it.
+ * their sources, a stated action with the words that say so, and the closest report figures,
+ * each of which opens larger. When no figure is close enough, or the photo shows no part, it says
+ * only that.
  */
 export function PhotoAnswerView({
   api,
@@ -69,7 +70,7 @@ export function PhotoAnswerView({
           <path d="M13 13 L17 17 M6.5 9 H11.5" />
         </svg>
         <div>
-          <h3>Not in the reports</h3>
+          <h3>{answer.kept_out === "unrelated" ? "No part in the photo" : "Not in the reports"}</h3>
           <p>{answer.answer}</p>
         </div>
       </section>
@@ -103,7 +104,10 @@ export function PhotoAnswerView({
               <li key={index}>
                 <span>{action.action}</span>
                 {action.basis === "stated" && action.citation ? (
-                  <span className="basis stated">Stated in {cite(action.citation)}</span>
+                  <>
+                    <span className="basis stated">Stated in {cite(action.citation)}</span>
+                    {action.quote && <span className="action-quote">"{action.quote}"</span>}
+                  </>
                 ) : (
                   <span
                     className="basis inferred"

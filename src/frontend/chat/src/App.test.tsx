@@ -344,6 +344,8 @@ describe("a photo answered from the reports", () => {
     const [stated, inferredFrom, inferred] = within(actions).getAllByRole("listitem");
     expect(stated).toHaveTextContent("Inspect the spar cap fastener holes with eddy current.");
     expect(stated).toHaveTextContent("Stated in 18-061 p12");
+    // A stated action quotes the words of the report that say to do it.
+    expect(stated).toHaveTextContent('"inspect the spar cap fastener holes using eddy current"');
     expect(inferredFrom).toHaveTextContent("Inferred from 18-061 fig05");
     expect(inferred).toHaveTextContent("Replace the cracked spar cap before flight.");
     expect(inferred).toHaveTextContent(/Inferred$/);
@@ -399,6 +401,7 @@ describe("a photo answered from the reports", () => {
     open("/chat");
     const answer = photoAnswer({
       not_in_reports: true,
+      kept_out: "gate",
       matched: false,
       answer:
         "This failure is not in the three NTSB reports: no report figure is close enough to the photo, so they say nothing about it.",
@@ -414,6 +417,26 @@ describe("a photo answered from the reports", () => {
     expect(within(notice).getByRole("heading", { name: "Not in the reports" })).toBeInTheDocument();
     expect(notice).toHaveTextContent("no report figure is close enough to the photo");
     expect(within(notice).queryByRole("list")).toBeNull();
+  });
+
+  it("says plainly when the photo shows no part", async () => {
+    open("/chat");
+    const answer = photoAnswer({
+      not_in_reports: true,
+      kept_out: "unrelated",
+      matched: false,
+      answer: "This photo does not show a part, so the three NTSB reports say nothing about it.",
+      findings: [],
+      actions: [],
+      figures: [],
+    });
+    const { api } = fakeAgentApi([record({ items: [photo({ answer, reply: answer.answer })] })]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "spar.jpg" });
+    const notice = within(card).getByRole("region", { name: "Answer about spar.jpg" });
+    expect(within(notice).getByRole("heading", { name: "No part in the photo" })).toBeVisible();
+    expect(notice).toHaveTextContent("does not show a part");
   });
 
   it("shows the closest figures when they do not show the failure", async () => {

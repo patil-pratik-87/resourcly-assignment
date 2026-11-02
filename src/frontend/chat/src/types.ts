@@ -50,6 +50,8 @@ export interface Action {
   action: string;
   basis: "stated" | "inferred";
   citation?: Citation | null;
+  /** For a stated action, the words of the cited paragraph that say to do it. */
+  quote?: string | null;
 }
 
 /** A report figure close to the photo, with what the report says it shows. */
@@ -67,6 +69,8 @@ export interface FigureMatch {
 export interface PhotoAnswer {
   /** The gate: no report figure is close enough to the photo, so nothing is said about it. */
   not_in_reports: boolean;
+  /** Why nothing is said: no figure was close enough, or the photo shows no part. */
+  kept_out?: "gate" | "unrelated" | null;
   /** Whether the closest figures show the same failure as the photo. */
   matched: boolean;
   answer: string;

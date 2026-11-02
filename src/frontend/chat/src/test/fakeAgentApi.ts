@@ -65,6 +65,7 @@ export function photoAnswer(overrides: Partial<PhotoAnswer> = {}): PhotoAnswer {
   });
   return {
     not_in_reports: false,
+    kept_out: null,
     matched: true,
     answer: "The spar cap has a fatigue crack that started at a fastener hole.",
     findings: [
@@ -79,6 +80,7 @@ export function photoAnswer(overrides: Partial<PhotoAnswer> = {}): PhotoAnswer {
         action: "Inspect the spar cap fastener holes with eddy current.",
         basis: "stated",
         citation: cite("18-061", 12),
+        quote: "inspect the spar cap fastener holes using eddy current",
       },
       {
         action: "Check the other spar cap for the same crack.",

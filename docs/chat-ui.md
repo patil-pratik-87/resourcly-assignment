@@ -43,13 +43,14 @@ that fits no case gets a reply that says so. Click a page to open the file.
 ![A bulk upload of six files](img/chat-ui/bulk-upload.png)
 
 A photo of a part is answered from the three NTSB reports, and the message's text, if any, is the
-question. While it works, the card says it is answering. The answer says what is wrong, then
-lists the findings from the reports with the figure or page each one cites. Each action is marked
-as stated in a report, with its page, or as inferred from the findings. Under them are the report
-figures closest to the photo, with their section, failure mode and how close the finder found
-them, from 0 to 1. Click a figure, or a cited figure, to see it larger. When no report figure is
-close enough, the card says the failure is not in the reports, with no findings or figures. How
-the answer is made is in [photo-answers.md](photo-answers.md).
+question. While it works, the card says it is answering. The answer says what is wrong, then lists
+the findings from the reports with the figure or page each one cites. Each action is marked as
+stated in a report, with its page and the words of the report that say to do it, or as inferred from
+the findings. Under them are the report figures closest to the photo, with their section, failure
+mode and how close the finder found them, from 0 to 1. Click a figure, or a cited figure, to see it
+larger. When no report figure is close enough, the card says the failure is not in the reports, with
+no findings or figures, and when the photo shows no part, it says that in the same way. How the
+answer is made is in [photo-answers.md](photo-answers.md).
 
 ![A photo of a spar cap answered from the reports](img/chat-ui/photo-answer.png)
 

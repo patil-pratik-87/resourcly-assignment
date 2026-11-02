@@ -2055,6 +2055,15 @@ button.cite:hover:not(:disabled) {
   color: var(--done);
 }
 
+/* The words of the report that say to do a stated action, on a line of their own. */
+.action-quote {
+  flex-basis: 100%;
+  padding-left: 10px;
+  border-left: 2px solid var(--line-strong);
+  color: var(--muted);
+  font-style: italic;
+}
+
 .basis.inferred {
   gap: 4px;
   color: var(--muted);
