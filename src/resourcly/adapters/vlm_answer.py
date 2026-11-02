@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from resourcly.adapters.route_pictures import png
@@ -13,7 +14,9 @@ class VlmPhotoAnswerAdapter:
     images, and a prompt whose `{evidence}` and `{question}` are filled in. The evidence lists each
     figure with its labels, caption and citing paragraphs, then each report with its closing
     paragraphs, every one under the source an answer cites, such as [18-061 p3]. A paragraph is cut
-    to `paragraph_chars`. The model answers in JSON; an answer that is not JSON is an error.
+    to `paragraph_chars`. The model answers in JSON; an answer that is not JSON is an error. An
+    action that repeats the prompt's own words, such as its rule for an inferred action, is
+    dropped.
     """
 
     def __init__(
@@ -62,7 +65,7 @@ class VlmPhotoAnswerAdapter:
                 str(entry.get("quote") or ""),
             )
             for entry in _entries(data.get("actions"))
-            if entry.get("action")
+            if entry.get("action") and not _repeats(str(entry["action"]), self.prompt)
         ]
         return AnswerDraft(
             matched=data.get("match") is True or str(data.get("match")).lower() == "true",
@@ -99,6 +102,19 @@ class VlmPhotoAnswerAdapter:
         if len(text) <= self.paragraph_chars:
             return text
         return text[: self.paragraph_chars - 1].rsplit(" ", 1)[0] + "…"
+
+
+MIN_REPEATED_WORDS = 4  # fewer could be an action the evidence gave that the prompt also says
+
+
+def _repeats(action: str, prompt: str) -> bool:
+    """Whether the action's words, at least `MIN_REPEATED_WORDS` of them, run in the prompt."""
+    words = _words(action)
+    return len(words.split()) >= MIN_REPEATED_WORDS and f" {words} " in f" {_words(prompt)} "
+
+
+def _words(text: str) -> str:
+    return " ".join(re.findall(r"\w+", text.lower()))
 
 
 def _entries(value: Any) -> list[dict[str, Any]]:

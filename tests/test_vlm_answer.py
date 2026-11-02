@@ -123,3 +123,21 @@ def test_a_match_written_as_text_is_read(written: str, matched: bool) -> None:
     adapter = VlmPhotoAnswerAdapter(model, PROMPT, max_tokens=500)
 
     assert adapter.answer(evidence()).matched is matched
+
+
+def test_an_action_that_repeats_the_prompt_is_dropped() -> None:
+    prompt = f'{PROMPT}\nOtherwise set basis to "inferred" and leave quote empty.'
+    model = FakeModel(
+        '{"match": true, "what_is_wrong": "x", "actions": ['
+        '{"action": "Set basis to \'inferred\' and leave quote empty.", "basis": "inferred"},'
+        ' {"action": "Answer from this.", "basis": "inferred"},'
+        ' {"action": "Replace the spar cap.", "basis": "inferred"}]}'
+    )
+
+    draft = VlmPhotoAnswerAdapter(model, prompt, max_tokens=500).answer(evidence())
+
+    # "Answer from this." is too short to tell from an action the evidence gave
+    assert [action.action for action in draft.actions] == [
+        "Answer from this.",
+        "Replace the spar cap.",
+    ]
