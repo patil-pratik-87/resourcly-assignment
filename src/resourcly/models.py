@@ -526,6 +526,19 @@ class FigureMatch(BaseModel):
     score: float | None = None  # how close the finder found it, when it measures that
 
 
+class Passage(BaseModel):
+    """A paragraph of a report, cited by its report and the page it starts on."""
+
+    report: str
+    page: int
+    text: str
+
+    @property
+    def source(self) -> str:
+        """How an answer cites it, such as 18-061 p3."""
+        return f"{self.report} p{self.page}"
+
+
 class FailureMatches(BaseModel):
     """The figures a finder matched to one photo, best first; none when no report shows it."""
 
