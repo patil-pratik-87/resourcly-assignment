@@ -109,7 +109,8 @@ export function PhotoAnswerView({
                     className="basis inferred"
                     title="The reports do not say this; it follows from the findings"
                   >
-                    Inferred
+                    <span className="basis-tag">Inferred</span>
+                    {action.citation && <> from {cite(action.citation)}</>}
                   </span>
                 )}
               </li>

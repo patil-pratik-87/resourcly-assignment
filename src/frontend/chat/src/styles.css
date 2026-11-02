@@ -2056,11 +2056,20 @@ button.cite:hover:not(:disabled) {
 }
 
 .basis.inferred {
+  gap: 4px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.basis-tag {
+  display: inline-flex;
+  align-items: center;
   height: 20px;
   padding: 0 8px;
   border-radius: 10px;
   background: var(--photo-soft);
   color: var(--photo);
+  font-weight: 600;
   cursor: help;
 }
 

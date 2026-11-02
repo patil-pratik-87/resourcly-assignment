@@ -341,11 +341,12 @@ describe("a photo answered from the reports", () => {
     ]);
 
     const actions = within(answer).getByRole("list", { name: "What to do" });
-    const [stated, inferred] = within(actions).getAllByRole("listitem");
+    const [stated, inferredFrom, inferred] = within(actions).getAllByRole("listitem");
     expect(stated).toHaveTextContent("Inspect the spar cap fastener holes with eddy current.");
     expect(stated).toHaveTextContent("Stated in 18-061 p12");
+    expect(inferredFrom).toHaveTextContent("Inferred from 18-061 fig05");
     expect(inferred).toHaveTextContent("Replace the cracked spar cap before flight.");
-    expect(inferred).toHaveTextContent("Inferred");
+    expect(inferred).toHaveTextContent(/Inferred$/);
 
     const figures = within(answer).getByRole("list", { name: "Closest report figures" });
     const [first, , third] = within(figures).getAllByRole("listitem");
@@ -388,7 +389,7 @@ describe("a photo answered from the reports", () => {
     expect(within(card).getByRole("button", { name: "Open 18-061 fig06 larger" })).toHaveFocus();
 
     // A figure a finding cites opens the same way.
-    await user.click(within(card).getByRole("button", { name: "18-061 fig05" }));
+    await user.click(within(card).getAllByRole("button", { name: "18-061 fig05" })[0]!);
     expect(screen.getByRole("dialog", { name: "18-061 fig05" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("dialog")).toBeNull();

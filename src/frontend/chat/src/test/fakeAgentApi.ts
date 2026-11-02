@@ -55,7 +55,7 @@ export function record(overrides: Partial<RequestRecord> = {}): RequestRecord {
   };
 }
 
-/** A photo of a cracked spar answered from the reports: two findings, two actions, three figures. */
+/** A photo of a cracked spar answered from the reports: two findings, three actions, three figures. */
 export function photoAnswer(overrides: Partial<PhotoAnswer> = {}): PhotoAnswer {
   const cite = (report: string, page: number, figure?: number) => ({
     source: figure ? `${report} fig${String(figure).padStart(2, "0")}` : `${report} p${page}`,
@@ -79,6 +79,11 @@ export function photoAnswer(overrides: Partial<PhotoAnswer> = {}): PhotoAnswer {
         action: "Inspect the spar cap fastener holes with eddy current.",
         basis: "stated",
         citation: cite("18-061", 12),
+      },
+      {
+        action: "Check the other spar cap for the same crack.",
+        basis: "inferred",
+        citation: cite("18-061", 7, 5),
       },
       { action: "Replace the cracked spar cap before flight.", basis: "inferred", citation: null },
     ],
