@@ -135,6 +135,24 @@ run and a comparison. The model-free versions set the floors, on the dev split:
 
 Details: `docs/evals.md`.
 
+## Versions
+
+Each component runs a named version: a file in `versions/` that picks the code (`impl`) and gives
+it its settings. The app and the evals load the same file the same way, so a score always belongs
+to the exact recipe the app would serve.
+
+- Why files, not code: trying a new prompt, model or threshold is a new file, not a code change.
+  Old files stay, so an old run still says what it measured.
+- Why a hash: a run stores the version's hash, which covers its settings and any file it names,
+  such as the router's probe. `evals compare` warns when a version changed after its run.
+- Why it refuses to load: with an unknown `impl` or setting, or a missing file, the app and the
+  evals both refuse the version rather than run something other than what was scored.
+- How a version ships: score it, compare it with the current one, then make it the default.
+  `RESOURCLY_<COMPONENT>_VERSION` picks another without a code change, and each trace step names
+  the version that served it.
+
+Details: `versions/README.md`.
+
 ## The router
 
 `three-layer-v1`, the default: structure rules, a DINOv2-small probe over drawing, photo and
