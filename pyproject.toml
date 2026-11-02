@@ -63,4 +63,13 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.isort]
 # First party even before a new module exists, as in a test written before its code
-known-first-party = ["resourcly", "tests", "common", "gold_schema", "grid", "overlay", "train_route_probe"]
+known-first-party = [
+    "resourcly",
+    "tests",
+    "common",
+    "gold_schema",
+    "grid",
+    "limits",
+    "overlay",
+    "train_route_probe",
+]
