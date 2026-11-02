@@ -126,7 +126,7 @@ def run(
         )
     typer.echo(f"run {result.run_id}  (case set {result.case_set_hash}, store {context.store})")
     typer.echo("")
-    _summary(suite.primary_metric, suite.metrics, result)
+    _summary(suite, result)
 
 
 def _rescore(context: Context, run_id: str) -> None:
@@ -137,7 +137,7 @@ def _rescore(context: Context, run_id: str) -> None:
     typer.echo(f"run {result.run_id}  (rescore of {run_id}, case set {result.case_set_hash})")
     typer.echo("")
     suite = SUITES[result.component]
-    _summary(suite.primary_metric, suite.metrics, result)
+    _summary(suite, result)
 
 
 @app.command()
@@ -159,7 +159,6 @@ def compare(
             runs[1],
             store.cases(runs[1].run_id),
             metrics=suite.metrics,
-            primary=suite.primary_metric,
         )
     for label, run in (("base", runs[0]), ("candidate", runs[1])):
         typer.echo(
@@ -169,7 +168,7 @@ def compare(
     typer.echo("")
     rows = [
         [
-            f"{m.name} (primary)" if m.name == suite.primary_metric else m.name,
+            f"{m.name} (primary)" if m.name == suite.primary else m.name,
             _num(m.base),
             _num(m.candidate),
             "-" if m.delta is None else f"{m.delta:+.3f}",
@@ -188,10 +187,10 @@ def compare(
     for warning in comparison.warnings:
         typer.echo(f"warning: {warning}", err=True)
     if fail_if_worse and not comparison.comparable:
-        typer.echo(f"no verdict on {suite.primary_metric}", err=True)
+        typer.echo(f"no verdict on {suite.primary}", err=True)
         raise typer.Exit(1)
     if fail_if_worse and comparison.worse:
-        typer.echo(f"{suite.primary_metric} got worse", err=True)
+        typer.echo(f"{suite.primary} got worse", err=True)
         raise typer.Exit(1)
 
 
@@ -247,7 +246,7 @@ def show(
         if text:
             typer.echo(f"{label} {text}")
     typer.echo("")
-    _summary(suite.primary_metric, suite.metrics, run)
+    _summary(suite, run)
     typer.echo("")
     shown = [r for r in results if not failures or r.error or r.scores["case_score"] < 1]
     rows = [
@@ -344,7 +343,7 @@ def _list_components(context: Context) -> None:
     rows = [
         [
             name,
-            suite.primary_metric,
+            suite.primary,
             ", ".join(sorted(IMPLEMENTATIONS.get(name, {}))) or "none registered yet",
             f"{counts[name]} version(s)",
         ]
@@ -384,7 +383,7 @@ def _list_runs(context: Context, component: str | None, version: str | None, lim
         runs = store.runs(component, version, limit)
     rows = []
     for run in runs:
-        primary = SUITES[run.component].primary_metric
+        primary = SUITES[run.component].primary
         value = (run.summary or {}).get(primary)
         rows.append(
             [
@@ -513,9 +512,8 @@ def _markdown(run: Run, results: list[CaseResult]) -> str:
         "| metric | value |",
         "| --- | --- |",
     ]
-    names = [suite.primary_metric, *(n for n in suite.metrics if n != suite.primary_metric)]
-    for name in names:
-        label = f"{name} (primary)" if name == suite.primary_metric else name
+    for name in suite.metrics:
+        label = f"{name} (primary)" if name == suite.primary else name
         lines.append(f"| {label} | {_num(summary.get(name))} |")
     columns = ["case_score", *suite.case_columns]
     lines += ["", f"| case | stratum | {' | '.join(columns)} | error |"]
@@ -525,9 +523,6 @@ def _markdown(run: Run, results: list[CaseResult]) -> str:
         lines.append(
             f"| {result.case_id} | {result.stratum} | {' | '.join(cells)} | {result.error or ''} |"
         )
-    for name, listed in _listings(summary):
-        lines += ["", f"{name} ({len(listed)}):", ""]
-        lines += [f"- {_listed(row)}" for row in listed]
     return "\n".join(lines) + "\n"
 
 
@@ -546,43 +541,14 @@ def _run(store: ResultStorePort, run_id: str) -> Run:
         raise typer.BadParameter(str(error)) from error
 
 
-def _summary(primary: str, metrics: tuple[str, ...], run: Run) -> None:
+def _summary(suite: Suite, run: Run) -> None:
     summary = run.summary or {}
-    names = [primary, *(name for name in metrics if name != primary)]
     rows = [
-        [f"{name} (primary)" if name == primary else name, _num(summary.get(name))]
-        for name in names
-    ]
-    rows += [
-        [key, _num(value)]
-        for key, value in summary.items()
-        if key not in names and not isinstance(value, list | dict)
+        [f"{name} (primary)" if name == suite.primary else name, _num(summary.get(name))]
+        for name in suite.metrics
     ]
     rows.append(["errors", f"{run.errors} of {run.n_cases}"])
     _table(["metric", "value"], rows)
-    for name, listed in _listings(summary):
-        typer.echo("")
-        typer.echo(f"{name} ({len(listed)})")
-        for row in listed:
-            typer.echo(f"  {_listed(row)}")
-
-
-def _listings(summary: dict[str, Any]) -> list[tuple[str, list[dict[str, Any]]]]:
-    """Summary entries that list cases, such as the router's mistakes, as (name, rows)."""
-    return [
-        (name, value)
-        for name, value in summary.items()
-        if isinstance(value, list) and value and all(isinstance(row, dict) for row in value)
-    ]
-
-
-def _listed(row: dict[str, Any]) -> str:
-    if {"case", "expected", "got", "layer", "reason"} <= row.keys():
-        return (
-            f"{row['case']}  expected {row['expected']}  got {row['got']}"
-            f"  by {row['layer']}: {row['reason']}"
-        )
-    return "  ".join(f"{key} {value}" for key, value in row.items())
 
 
 def _suite(component: str) -> Suite:

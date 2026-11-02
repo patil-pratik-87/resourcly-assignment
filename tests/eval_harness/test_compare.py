@@ -37,8 +37,7 @@ def test_compare_gives_a_verdict_per_metric_with_the_primary_first() -> None:
         [case("a", 0.5)],
         candidate,
         [case("a", 0.4)],
-        metrics=("recall", "f1", "partial_recall"),
-        primary="f1",
+        metrics=("f1", "recall", "partial_recall"),
     )
 
     assert [(m.name, m.base, m.candidate, m.verdict) for m in result.metrics] == [
@@ -55,9 +54,7 @@ def test_compare_pairs_cases_and_warns_about_unpaired_cases_and_changed_gold() -
     base_cases = [case("a", 0.5), case("b", 0.3), case("c", 0.1)]
     candidate_cases = [case("a", 0.9), case("b", 0.3, gold_hash="new"), case("d", 0.2)]
 
-    result = compare_runs(
-        BASE, base_cases, candidate, candidate_cases, metrics=("f1",), primary="f1"
-    )
+    result = compare_runs(BASE, base_cases, candidate, candidate_cases, metrics=("f1",))
 
     assert [(c.case_id, c.base, c.candidate) for c in result.cases] == [
         ("a", 0.5, 0.9),
@@ -80,7 +77,7 @@ def test_compare_pairs_cases_and_warns_about_unpaired_cases_and_changed_gold() -
 def test_a_metric_one_run_did_not_measure_gets_no_verdict() -> None:
     candidate = replace(BASE, run_id="cand", summary={**BASE.summary, "partial_recall": None})
 
-    result = compare_runs(BASE, [], candidate, [], metrics=("partial_recall",), primary="f1")
+    result = compare_runs(BASE, [], candidate, [], metrics=("f1", "partial_recall"))
 
     assert [(m.name, m.base, m.candidate, m.verdict) for m in result.metrics][1] == (
         "partial_recall",
@@ -99,7 +96,6 @@ def test_runs_that_share_no_case_get_no_verdict() -> None:
         candidate,
         [case("b", 0.5)],
         metrics=("f1",),
-        primary="f1",
     )
 
     assert result.metrics[0].verdict == "no verdict"
@@ -109,6 +105,6 @@ def test_runs_that_share_no_case_get_no_verdict() -> None:
 def test_any_change_at_all_is_better_or_worse() -> None:
     candidate = replace(BASE, run_id="cand", summary={**BASE.summary, "f1": 0.501})
 
-    result = compare_runs(BASE, [], candidate, [], metrics=(), primary="f1")
+    result = compare_runs(BASE, [], candidate, [], metrics=("f1",))
 
     assert result.metrics[0].verdict == "better"

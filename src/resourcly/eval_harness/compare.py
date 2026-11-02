@@ -56,9 +56,8 @@ def compare_runs(
     candidate: Run,
     candidate_cases: list[CaseResult],
     metrics: tuple[str, ...],
-    primary: str,
 ) -> Comparison:
-    """A metric is better when it rises; any change counts.
+    """A metric is better when it rises; any change counts. The first metric is the primary one.
 
     Only runs on the same case set, which includes the gold of each case, get a verdict: they
     compare their stored summaries. Otherwise no metric gets a verdict, and the warnings say to
@@ -66,7 +65,6 @@ def compare_runs(
     """
     if base.component != candidate.component:
         raise ValueError(f"cannot compare a {base.component} run with a {candidate.component} run")
-    ordered = [primary, *(name for name in metrics if name != primary)]
     before = {case.case_id: case for case in base_cases}
     after = {case.case_id: case for case in candidate_cases}
     shared = sorted(before.keys() & after.keys())
@@ -94,7 +92,7 @@ def compare_runs(
         _metric(name, base.summary or {}, candidate.summary or {})
         if same
         else MetricChange(name, None, None, "no verdict")
-        for name in ordered
+        for name in metrics
     ]
     cases = [
         CaseChange(

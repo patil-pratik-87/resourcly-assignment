@@ -133,7 +133,7 @@ def _score_again(suite: Suite, case: Case, stored: CaseResult) -> CaseResult:
 
 def _finish(store: ResultStorePort, run_id: str, results: list[tuple[Case, CaseResult]]) -> Run:
     suite = SUITES[store.run(run_id).component]
-    summary = suite.summarise([(case, result.prediction) for case, result in results])
+    summary = suite.summarise([(result.stratum, result.scores) for _, result in results])
     errors = sum(1 for _, result in results if result.error)
     store.finish_run(run_id, summary, errors)
     return store.run(run_id)
