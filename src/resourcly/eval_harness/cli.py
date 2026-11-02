@@ -164,6 +164,9 @@ def compare(
         )
     for warning in comparison.warnings:
         typer.echo(f"warning: {warning}", err=True)
+    if fail_if_worse and comparison.metrics[0].verdict == "not measured":
+        typer.echo(f"{suite.primary} was not measured, so there is no verdict", err=True)
+        raise typer.Exit(1)
     if fail_if_worse and comparison.worse:
         typer.echo(f"{suite.primary} got worse", err=True)
         raise typer.Exit(1)
