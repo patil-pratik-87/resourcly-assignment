@@ -296,9 +296,13 @@ defaults; the answer shares the reader's Qwen adapter.
 - Honest reading: gold photos are copies of indexed figures; these are the copy setting, now
   `failure-copy`. Held out, base gets the report first for 95.7%, small 89.9%.
 - Gate: it does not hold on real photos of other parts; 10 of 12 pass 0.28.
-- Answers: a stored 6-photo spot check, 4 right; the 18-photo before and after is pending.
+- Answers: a stored 6-photo spot check, 4 right; the 18-photo before and after is pending. An
+  answer takes 20 to 38 s.
+- Limits: there is no labelled answer text, and the gold photos are report figures changed by
+  code, so real photos of these parts are untested. A real fracture that is not in the reports
+  can pass the gate, and the model may then answer it as a report's failure.
 
-Details: `docs/photo-answers.md`, `evals/photo-answers/`.
+Details: `evals/photo-answers/`; the code is `answers.py` and `adapters/vlm_answer.py`.
 
 ## Fault evals
 

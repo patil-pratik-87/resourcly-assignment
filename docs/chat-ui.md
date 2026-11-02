@@ -59,7 +59,7 @@ the findings. Under them are the report figures closest to the photo, with their
 mode and how close the finder found them, from 0 to 1. Click a figure, or a cited figure, to see it
 larger. When no report figure is close enough, the card says the failure is not in the reports, with
 no findings or figures, and when the photo shows no part, it says that in the same way. How the
-answer is made is in [photo-answers.md](photo-answers.md).
+answer is made: the "Photo answers" entry of [NOTES.md](../NOTES.md#photo-answers).
 
 ![A photo of a spar cap answered from the reports](img/chat-ui/photo-answer.png)
 
@@ -103,8 +103,33 @@ curl -OJ "http://127.0.0.1:8000/api/requests/<id>/items/nist_ctc_01_asme1_rd/res
 Each file is one item, and its `route` is the case the router picked: `drawing`, `photo`, `text`,
 or `other` for a file that fits no case. A drawing goes from `routing` to `queued`, `reading` and
 `done`; a photo from `routing` to `queued`, `answering` and `answered`; the other cases straight to
-`answered`. Any step can end in `failed`, with the reason in `error`. A photo's `answer` is
-described in [photo-answers.md](photo-answers.md).
+`answered`. Any step can end in `failed`, with the reason in `error`. A photo's item carries its
+`answer`, and `reply` holds the same answer as text:
+
+```json
+{
+  "not_in_reports": false,
+  "kept_out": null,
+  "matched": true,
+  "answer": "Fatigue cracks grew from the attachment holes of the lower spar cap.",
+  "findings": [
+    {"statement": "Fatigue origins were at the lower surface near hole LC-1.",
+     "citation": {"source": "18-061 p2", "report": "18-061", "page": 2, "figure": null}}
+  ],
+  "actions": [
+    {"action": "Inspect the spar cap at the attachment holes.", "basis": "inferred",
+     "citation": null, "quote": null}
+  ],
+  "figures": [
+    {"figure": "18-061/fig05", "report": "18-061", "section": "spar_fatigue_N106ER",
+     "failure_mode": "fatigue", "score": 0.78}
+  ]
+}
+```
+
+`kept_out` is `gate` when no report figure is close enough and `unrelated` when the model sees no
+part; the answer then says so and has no findings, actions or figures. A `stated` action's `quote`
+holds the words of the cited page that say to do it.
 
 | Endpoint | What it does |
 | --- | --- |
