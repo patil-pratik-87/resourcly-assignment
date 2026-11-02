@@ -89,8 +89,9 @@ class GoldService:
     def route_cases(self) -> list[dict[str, Any]]:
         return self.store.load_route_cases()
 
-    def route_file_exists(self, file: str) -> bool:
-        return self.store.file_exists(f"routes/{file}")
+    def file_exists(self, path: str) -> bool:
+        """Whether a file the gold names, by its path under the gold folder, is there."""
+        return self.store.file_exists(path)
 
     def route_attachment(self, file: str) -> Attachment:
         """A file the router gold names, as the attachment of a request."""
@@ -99,9 +100,6 @@ class GoldService:
 
     def failure_cases(self) -> list[dict[str, Any]]:
         return self.store.load_failure_cases()
-
-    def failure_file_exists(self, image: str) -> bool:
-        return self.store.file_exists(f"failure/{image}")
 
     def failure_photo(self, image: str) -> Attachment:
         """An image the failure gold names, as the photo of a request."""

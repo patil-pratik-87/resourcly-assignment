@@ -144,7 +144,7 @@ def test_the_gold_check_warns_once_when_the_files_are_not_built(
 
     assert (
         "warning",
-        "router 3 of 4 file(s) are not in routes/; they are committed, so restore them from git",
+        "router 3 of 4 file(s) are missing; they are committed, so restore them from git",
     ) in found
 
 

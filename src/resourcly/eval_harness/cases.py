@@ -37,41 +37,42 @@ def route_cases(services: Services, split: str) -> list[Case]:
     `evals check` reports as broken is skipped with a warning.
     """
     splits = _splits(services, "router", split)
-    split_of = {unit: name for name, units in splits.items() for unit in units}
-    rows = services.gold.route_cases()
-    by_id = {row["id"]: row for row in rows if isinstance(row, dict) and "id" in row}
+    rows, problems = _route_rows(services.gold.route_cases())
+    for problem in problems:
+        log.warning("router %s; skipped", problem)
+    by_id = {row["id"]: row for row in rows}
     cases = []
-    for row in rows:
-        problem = _route_row_problem(row, by_id)
-        if problem:
-            log.warning("%s; skipped", problem)
-            continue
-        name = split_of.get(row["unit"], "unsplit")
-        if split != "all" and name != split:
-            continue
-        expected = row["label"]
+    for row, name in _in_split(rows, splits, split):
         attached = by_id[row["attachment"]] if row.get("attachment") else row
         gold = {
             **row,
-            "expected_route": expected,
+            "expected_route": row["label"],
             "input": {"text": row.get("text"), "file": attached.get("file")},
         }
-        cases.append(Case(row["id"], name, expected, gold))
+        cases.append(Case(row["id"], name, row["label"], gold))
     return sorted(cases, key=lambda case: case.case_id)
 
 
-def _route_row_problem(row: Any, by_id: dict[str, dict[str, Any]]) -> str | None:
-    missing = [name for name in ROUTE_FIELDS if not isinstance(row, dict) or name not in row]
-    if missing:
-        return f"a routes.jsonl row lacks {', '.join(missing)}"
-    if row["label"] not in ROUTES:
-        return (
-            f"{row['id']} has label '{row['label']}';"
-            " use drawing, photo, text or other (fits no case)"
-        )
-    if row.get("attachment") and row["attachment"] not in by_id:
-        return f"{row['id']} sends the file of '{row['attachment']}', which is not a case"
-    return None
+def _route_rows(rows: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    """The sound router rows, and what is wrong with each of the others."""
+    by_id = {row["id"]: row for row in rows if isinstance(row, dict) and "id" in row}
+    sound, problems = [], []
+    for number, row in enumerate(rows, start=1):
+        missing = [name for name in ROUTE_FIELDS if not isinstance(row, dict) or name not in row]
+        if missing:
+            problems.append(f"routes.jsonl line {number} lacks {', '.join(missing)}")
+        elif row["label"] not in ROUTES:
+            problems.append(
+                f"{row['id']} has label '{row['label']}';"
+                " use drawing, photo, text or other (fits no case)"
+            )
+        elif row.get("attachment") and row["attachment"] not in by_id:
+            problems.append(
+                f"{row['id']} sends the file of '{row['attachment']}', which is not a case"
+            )
+        else:
+            sound.append(row)
+    return sound, problems
 
 
 FAILURE_KINDS = ("positive", "negative_drawing", "negative_unrelated")
@@ -88,36 +89,44 @@ def failure_cases(services: Services, split: str) -> list[Case]:
     warning.
     """
     splits = _splits(services, "failure", split)
-    split_of = {unit: name for name, units in splits.items() for unit in units}
-    cases = []
-    for row in services.gold.failure_cases():
-        problem = _failure_row_problem(row)
-        if problem:
-            log.warning("%s; skipped", problem)
-            continue
-        name = split_of.get(row["unit"], "unsplit")
-        if split == "all" or name == split:
-            cases.append(Case(row["case_id"], name, row["kind"], row))
+    rows, problems = _failure_rows(services.gold.failure_cases())
+    for problem in problems:
+        log.warning("failure %s; skipped", problem)
+    cases = [
+        Case(row["case_id"], name, row["kind"], row) for row, name in _in_split(rows, splits, split)
+    ]
     return sorted(cases, key=lambda case: case.case_id)
 
 
-def _failure_row_problem(row: Any) -> str | None:
-    missing = _failure_fields_missing(row)
-    if missing:
-        return f"a cases.jsonl row lacks {', '.join(missing)}"
-    if row["kind"] not in FAILURE_KINDS:
-        return (
-            f"{row['case_id']} has kind '{row['kind']}';"
-            " use positive, negative_drawing or negative_unrelated"
-        )
-    missing = [name for name in EXPECTED_FIELDS if not row.get(name)]
-    if row["kind"] == "positive" and missing:
-        return f"{row['case_id']} lacks {', '.join(missing)}"
-    return None
+def _failure_rows(rows: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    """The sound failure rows, and what is wrong with each of the others."""
+    sound, problems = [], []
+    for number, row in enumerate(rows, start=1):
+        missing = [
+            name for name in FAILURE_FIELDS if not isinstance(row, dict) or not row.get(name)
+        ]
+        expected = [name for name in EXPECTED_FIELDS if not missing and not row.get(name)]
+        if missing:
+            problems.append(f"cases.jsonl line {number} lacks {', '.join(missing)}")
+        elif row["kind"] not in FAILURE_KINDS:
+            problems.append(
+                f"{row['case_id']} has kind '{row['kind']}';"
+                " use positive, negative_drawing or negative_unrelated"
+            )
+        elif row["kind"] == "positive" and expected:
+            problems.append(f"{row['case_id']} lacks {', '.join(expected)}")
+        else:
+            sound.append(row)
+    return sound, problems
 
 
-def _failure_fields_missing(row: Any) -> list[str]:
-    return [name for name in FAILURE_FIELDS if not isinstance(row, dict) or not row.get(name)]
+def _in_split(
+    rows: list[dict[str, Any]], splits: dict[str, list[str]], split: str
+) -> list[tuple[dict[str, Any], str]]:
+    """Each row of the split, with the split its unit is in; "all" takes every row."""
+    split_of = {unit: name for name, units in splits.items() for unit in units}
+    named = [(row, split_of.get(row["unit"], "unsplit")) for row in rows]
+    return [(row, name) for row, name in named if split == "all" or name == split]
 
 
 def reader_cases(services: Services, split: str) -> list[Case]:
@@ -193,98 +202,77 @@ def check_gold(services: Services) -> list[tuple[str, str]]:
 def _check_routes(
     services: Services, split_of: dict[str, str], found: list[tuple[str, str]]
 ) -> None:
-    rows = services.gold.route_cases()
-    by_id = {row["id"]: row for row in rows if isinstance(row, dict) and "id" in row}
-    ids, units, files = [], set(), set()
-    for number, row in enumerate(rows, start=1):
-        missing = [name for name in ROUTE_FIELDS if not isinstance(row, dict) or name not in row]
-        if missing:
-            found.append(("error", f"router routes.jsonl line {number} lacks {', '.join(missing)}"))
-            continue
-        ids.append(row["id"])
-        problem = _route_row_problem(row, by_id)
-        if problem:
-            found.append(("error", f"router {problem}"))
-            continue
-        units.add(row["unit"])
-        if row.get("file"):
-            files.add(row["file"])
-    for case_id in sorted({i for i in ids if ids.count(i) > 1}):
+    raw = services.gold.route_cases()
+    rows, problems = _route_rows(raw)
+    found.extend(("error", f"router {problem}") for problem in problems)
+    for case_id in _duplicates(raw, "id"):
         found.append(("error", f"router case id {case_id} is used more than once"))
-    found.extend(("error", f"router {leak}") for leak in _unit_leaks(rows, by_id))
-    if ids:
-        found.append(("ok", f"router {len(ids)} case(s) in {len(units)} unit(s)"))
-    absent = sum(1 for file in files if not services.gold.route_file_exists(file))
-    if absent:
-        found.append(
-            (
-                "warning",
-                f"router {absent} of {len(files)} file(s) are not in routes/;"
-                " they are committed, so restore them from git",
-            )
-        )
+    found.extend(("error", f"router {leak}") for leak in _unit_leaks(rows))
+    units = {row["unit"] for row in rows}
+    if rows:
+        found.append(("ok", f"router {len(rows)} case(s) in {len(units)} unit(s)"))
+    files = {f"routes/{row['file']}" for row in rows if row.get("file")}
+    _absent("router", services, files, found)
     _unmatched("router", split_of, units, found)
 
 
 def _check_failures(
     services: Services, split_of: dict[str, str], found: list[tuple[str, str]]
 ) -> None:
-    rows = services.gold.failure_cases()
-    ids, units, valid = [], set(), []
-    for number, row in enumerate(rows, start=1):
-        missing = _failure_fields_missing(row)
-        if missing:
-            found.append(("error", f"failure cases.jsonl line {number} lacks {', '.join(missing)}"))
-            continue
-        ids.append(row["case_id"])
-        problem = _failure_row_problem(row)
-        if problem:
-            found.append(("error", f"failure {problem}"))
-            continue
-        units.add(row["unit"])
-        valid.append(row)
-    for case_id in sorted({i for i in ids if ids.count(i) > 1}):
+    raw = services.gold.failure_cases()
+    rows, problems = _failure_rows(raw)
+    found.extend(("error", f"failure {problem}") for problem in problems)
+    for case_id in _duplicates(raw, "case_id"):
         found.append(("error", f"failure case id {case_id} is used more than once"))
-    if valid:
-        photos = sum(1 for row in valid if row["kind"] == "positive")
+    if rows:
+        photos = sum(1 for row in rows if row["kind"] == "positive")
         found.append(
             (
                 "ok",
-                f"failure {len(valid)} case(s): {photos} photo(s),"
-                f" {len(valid) - photos} negative(s)",
+                f"failure {len(rows)} case(s): {photos} photo(s), {len(rows) - photos} negative(s)",
             )
         )
-    images = {row["image"] for row in valid}
-    absent = sum(1 for image in images if not services.gold.failure_file_exists(image))
+    _absent("failure", services, {f"failure/{row['image']}" for row in rows}, found)
+    _unmatched("failure", split_of, {row["unit"] for row in rows}, found)
+
+
+def _duplicates(rows: list[Any], key: str) -> list[str]:
+    ids = [row[key] for row in rows if isinstance(row, dict) and row.get(key)]
+    return sorted({i for i in ids if ids.count(i) > 1})
+
+
+def _absent(
+    component: str, services: Services, files: set[str], found: list[tuple[str, str]]
+) -> None:
+    absent = sum(1 for file in files if not services.gold.file_exists(file))
     if absent:
         found.append(
             (
                 "warning",
-                f"failure {absent} of {len(images)} image(s) are missing;"
+                f"{component} {absent} of {len(files)} file(s) are missing;"
                 " they are committed, so restore them from git",
             )
         )
-    _unmatched("failure", split_of, units, found)
 
 
-def _unit_leaks(rows: list[Any], by_id: dict[str, dict[str, Any]]) -> list[str]:
+def _unit_leaks(rows: list[dict[str, Any]]) -> list[str]:
     """Rows that a split could put on two sides: a group whose items are in different units, and
     a message whose file is in another unit than the message."""
-    sound = [row for row in rows if _route_row_problem(row, by_id) is None]
+    by_id = {row["id"]: row for row in rows}
     units_of: dict[str, set[str]] = {}
-    for row in sound:
+    for row in rows:
         units_of.setdefault(row.get("group", row["unit"]), set()).add(row["unit"])
     leaks = [
         f"group {group} spans units {', '.join(sorted(units))}"
         for group, units in sorted(units_of.items())
         if len(units) > 1
     ]
-    for row in sound:
+    for row in rows:
         attached = by_id.get(row.get("attachment") or "")
-        if attached and attached.get("unit") != row["unit"]:
+        if attached and attached["unit"] != row["unit"]:
             leaks.append(
                 f"{row['id']} is in unit {row['unit']} but its file {attached['id']}"
-                f" is in {attached.get('unit')}"
+                f" is in {attached['unit']}"
             )
     return leaks
 

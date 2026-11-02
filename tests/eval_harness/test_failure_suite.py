@@ -172,7 +172,7 @@ def test_the_gold_check_accepts_the_cases_and_warns_about_a_missing_image(
     assert ("ok", "failure 7 case(s): 4 photo(s), 3 negative(s)") in failure
     assert (
         "warning",
-        "failure 1 of 7 image(s) are missing; they are committed, so restore them from git",
+        "failure 1 of 7 file(s) are missing; they are committed, so restore them from git",
     ) in failure
     assert [level for level, _ in failure if level == "error"] == []
 
