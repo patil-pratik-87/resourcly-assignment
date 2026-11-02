@@ -41,7 +41,7 @@ def inside(name: str, package: str) -> bool:
     return name == package or name.startswith(f"{package}.")
 
 
-EVALS = [path for path in MODULES if inside(module_name(path), "resourcly.evals")]
+EVALS = [path for path in MODULES if inside(module_name(path), "resourcly.eval_harness")]
 APP = [path for path in MODULES if path not in EVALS]
 NOT_BOOTSTRAP = [
     path
@@ -53,7 +53,7 @@ NOT_BOOTSTRAP = [
 
 @pytest.mark.parametrize("path", EVALS, ids=module_name)
 def test_evals_reach_the_app_only_through_bootstrap_and_ports(path: Path) -> None:
-    allowed = ("resourcly.bootstrap", "resourcly.ports", "resourcly.evals")
+    allowed = ("resourcly.bootstrap", "resourcly.ports", "resourcly.eval_harness")
     imported = imports(path) - {"resourcly"}
 
     assert [name for name in imported if not any(inside(name, a) for a in allowed)] == []
@@ -61,7 +61,7 @@ def test_evals_reach_the_app_only_through_bootstrap_and_ports(path: Path) -> Non
 
 @pytest.mark.parametrize("path", APP, ids=module_name)
 def test_the_app_never_imports_the_evals(path: Path) -> None:
-    assert [name for name in imports(path) if inside(name, "resourcly.evals")] == []
+    assert [name for name in imports(path) if inside(name, "resourcly.eval_harness")] == []
 
 
 @pytest.mark.parametrize("path", NOT_BOOTSTRAP, ids=module_name)
@@ -72,28 +72,28 @@ def test_only_bootstrap_builds_adapters(path: Path) -> None:
 RESULT_STORE_USERS = [
     path
     for path in EVALS
-    if module_name(path) not in ("resourcly.evals.cli", "resourcly.evals.store")
+    if module_name(path) not in ("resourcly.eval_harness.cli", "resourcly.eval_harness.store")
 ]
 
 
 @pytest.mark.parametrize("path", RESULT_STORE_USERS, ids=module_name)
 def test_only_the_evals_cli_builds_the_result_store(path: Path) -> None:
     """The harness and compare take a ResultStorePort; store.py is its SQLite adapter."""
-    assert [name for name in imports(path) if inside(name, "resourcly.evals.store")] == []
+    assert [name for name in imports(path) if inside(name, "resourcly.eval_harness.store")] == []
 
 
 def test_relative_imports_are_resolved_against_the_module() -> None:
     source = "from ..services import GoldService\nfrom . import metrics\nfrom .cases import Case\n"
 
-    found = imports_in(source, "resourcly.evals.harness", is_package=False)
+    found = imports_in(source, "resourcly.eval_harness.harness", is_package=False)
 
     assert found == {
         "resourcly.services",
         "resourcly.services.GoldService",
-        "resourcly.evals",
-        "resourcly.evals.metrics",
-        "resourcly.evals.cases",
-        "resourcly.evals.cases.Case",
+        "resourcly.eval_harness",
+        "resourcly.eval_harness.metrics",
+        "resourcly.eval_harness.cases",
+        "resourcly.eval_harness.cases.Case",
     }
     assert imports_in("from .adapters import x", "resourcly", is_package=True) == {
         "resourcly.adapters",

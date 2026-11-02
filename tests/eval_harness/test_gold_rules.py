@@ -4,7 +4,7 @@ import json
 import pytest
 
 from resourcly.bootstrap import PROJECT_ROOT
-from resourcly.evals import gold_rules as rules
+from resourcly.eval_harness import gold_rules as rules
 
 CTC01 = json.loads(
     (PROJECT_ROOT / "evals" / "gold" / "drawings" / "nist_ctc_01_asme1_rd.json").read_text()

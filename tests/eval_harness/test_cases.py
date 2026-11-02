@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from resourcly.bootstrap import Settings, open_services
-from resourcly.evals.cases import reader_cases
+from resourcly.eval_harness.cases import reader_cases
 from tests.conftest import CTC01
 
 

@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 
 from resourcly.bootstrap import Settings, open_services
-from resourcly.evals import harness
-from resourcly.evals.store import SqliteResultStore
+from resourcly.eval_harness import harness
+from resourcly.eval_harness.store import SqliteResultStore
 from tests.conftest import CTC01
 
 

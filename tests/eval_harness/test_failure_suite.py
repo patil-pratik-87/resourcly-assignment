@@ -9,10 +9,10 @@ import pytest
 from typer.testing import CliRunner
 
 from resourcly.bootstrap import FINDERS, Implementation, Settings, open_services
-from resourcly.evals import harness
-from resourcly.evals.cases import check_gold, failure_cases
-from resourcly.evals.cli import app
-from resourcly.evals.store import SqliteResultStore
+from resourcly.eval_harness import harness
+from resourcly.eval_harness.cases import check_gold, failure_cases
+from resourcly.eval_harness.cli import app
+from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.models import FigureMatch
 from tests.conftest import png
 

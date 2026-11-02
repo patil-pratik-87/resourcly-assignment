@@ -1,6 +1,6 @@
 import pytest
 
-from resourcly.evals.metrics import RouteOutcome, summarise_routes
+from resourcly.eval_harness.metrics import RouteOutcome, summarise_routes
 
 
 def outcome(case_id, expected, route, layer="probe", ms=30.0, attached=True) -> RouteOutcome:

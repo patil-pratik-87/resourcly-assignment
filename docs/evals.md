@@ -1,9 +1,9 @@
 # The eval harness
 
-The `resourcly.evals` package scores any version of a component on its gold cases and says
-whether a new version got better or worse. Every component has one shape: gold cases, a version
-file, a score per case, a stored run and a comparison. The harness reaches the app only through
-`open_services()` in `bootstrap.py`, so it measures the code the app runs.
+The `resourcly.eval_harness` package, run as `uv run evals`, scores any version of a component on
+its gold cases and says whether a new version got better or worse. Every component has one shape:
+gold cases, a version file, a score per case, a stored run and a comparison. The harness reaches
+the app only through `open_services()` in `bootstrap.py`, so it measures the code the app runs.
 
 ```sh
 uv run evals check                                   # every gold file and split
@@ -48,5 +48,5 @@ saw the same cases and gold, then lists each case by its change in `case_score`.
 A version is a TOML file whose `impl` names an entry of `READERS`, `ROUTERS` or `FINDERS` in
 `bootstrap.py`, and whose other keys are settings that entry lists. A new implementation is an
 adapter of the component's port, registered there. A new component is one more `Suite` in
-`src/resourcly/evals/suites.py`, with its gold loader in `cases.py` and its metrics in
+`src/resourcly/eval_harness/suites.py`, with its gold loader in `cases.py` and its metrics in
 `metrics.py`; the harness, the run store and `compare` need no change.

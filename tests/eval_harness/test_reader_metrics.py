@@ -2,7 +2,12 @@ from typing import Any
 
 import pytest
 
-from resourcly.evals.metrics import normalise_unit, score_reading, summarise_readings, unmatched
+from resourcly.eval_harness.metrics import (
+    normalise_unit,
+    score_reading,
+    summarise_readings,
+    unmatched,
+)
 
 
 def v(page: int, value: Any, unit: str | None, kind: str, raw: str | None = None) -> dict:

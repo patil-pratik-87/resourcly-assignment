@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from typing import Any
 
 from resourcly.bootstrap import Services
-from resourcly.evals import metrics
-from resourcly.evals.cases import Case, failure_cases, reader_cases, route_cases
+from resourcly.eval_harness import metrics
+from resourcly.eval_harness.cases import Case, failure_cases, reader_cases, route_cases
 
 
 @dataclass(frozen=True)

@@ -8,11 +8,11 @@ import pytest
 from typer.testing import CliRunner
 
 from resourcly.bootstrap import ROUTERS, Implementation, Settings, open_services
-from resourcly.evals import harness
-from resourcly.evals.cli import app
-from resourcly.evals.store import SqliteResultStore
+from resourcly.eval_harness import harness
+from resourcly.eval_harness.cli import app
+from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.models import LayerVerdict, Route
-from tests.evals.test_route_gold import row, write_routes
+from tests.eval_harness.test_route_gold import row, write_routes
 
 ROWS = [
     row("d_a", "drawing", "ctc01"),

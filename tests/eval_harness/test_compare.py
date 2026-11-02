@@ -1,7 +1,7 @@
 from dataclasses import replace
 
-from resourcly.evals.compare import compare_runs
-from resourcly.evals.models import CaseResult, Run
+from resourcly.eval_harness.compare import compare_runs
+from resourcly.eval_harness.models import CaseResult, Run
 
 BASE = Run(
     run_id="base",

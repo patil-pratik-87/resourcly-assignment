@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from resourcly.evals.models import CaseResult, Run
+from resourcly.eval_harness.models import CaseResult, Run
 
 EPSILON = 1e-9
 

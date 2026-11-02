@@ -11,10 +11,10 @@ from datetime import UTC, datetime
 from typing import Any
 
 from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_services
-from resourcly.evals.cases import Case
-from resourcly.evals.models import CaseResult, Run
-from resourcly.evals.ports import ResultStorePort
-from resourcly.evals.suites import SUITES, Suite
+from resourcly.eval_harness.cases import Case
+from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.ports import ResultStorePort
+from resourcly.eval_harness.suites import SUITES, Suite
 
 log = logging.getLogger(__name__)
 

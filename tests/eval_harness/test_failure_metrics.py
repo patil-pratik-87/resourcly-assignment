@@ -1,6 +1,6 @@
 import pytest
 
-from resourcly.evals.metrics import score_failure, summarise_failures
+from resourcly.eval_harness.metrics import score_failure, summarise_failures
 
 FATIGUE = {
     "kind": "positive",

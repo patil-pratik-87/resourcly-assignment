@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from resourcly.evals.models import CaseResult, Run
+from resourcly.eval_harness.models import CaseResult, Run
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (

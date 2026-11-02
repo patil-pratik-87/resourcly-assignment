@@ -1,5 +1,5 @@
-from resourcly.evals.cases import Case
-from resourcly.evals.suites import SUITES
+from resourcly.eval_harness.cases import Case
+from resourcly.eval_harness.suites import SUITES
 
 GOLD = {"values": [{"page": 1, "value": 5, "unit": "mm", "kind": "linear", "raw": "5"}]}
 PREDICTION = {

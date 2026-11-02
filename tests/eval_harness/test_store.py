@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from resourcly.evals.models import CaseResult, Run
-from resourcly.evals.store import SqliteResultStore
+from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.store import SqliteResultStore
 
 
 def run(run_id: str, version: str = "textlayer-v0") -> Run:

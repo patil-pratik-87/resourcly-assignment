@@ -15,7 +15,7 @@ dependencies = [
 
 [project.scripts]
 resourcly = "resourcly.cli:app"
-evals = "resourcly.evals.cli:app"
+evals = "resourcly.eval_harness.cli:app"
 
 [dependency-groups]
 dev = [

@@ -7,9 +7,9 @@ import pytest
 from typer.testing import CliRunner, Result
 
 from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation, open_services
-from resourcly.evals.cli import app
-from resourcly.evals.models import Run
-from resourcly.evals.store import SqliteResultStore
+from resourcly.eval_harness.cli import app
+from resourcly.eval_harness.models import Run
+from resourcly.eval_harness.store import SqliteResultStore
 from tests.conftest import CTC01
 
 

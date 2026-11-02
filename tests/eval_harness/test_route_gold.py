@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from resourcly.bootstrap import Settings, open_services
-from resourcly.evals.cases import check_gold, route_cases
+from resourcly.eval_harness.cases import check_gold, route_cases
 
 
 def row(item_id: str, label: str, unit: str, **fields) -> dict:

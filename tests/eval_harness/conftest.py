@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from resourcly.evals.store import SqliteResultStore
+from resourcly.eval_harness.store import SqliteResultStore
 from tests.conftest import CTC01
 
 

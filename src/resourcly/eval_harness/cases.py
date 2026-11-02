@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from resourcly.bootstrap import Services
-from resourcly.evals import gold_rules
+from resourcly.eval_harness import gold_rules
 
 log = logging.getLogger(__name__)
 
