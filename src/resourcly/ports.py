@@ -4,6 +4,7 @@ from typing import Any, Literal, Protocol
 
 from resourcly.models import (
     Attachment,
+    Choice,
     FigureMatch,
     GoldDocument,
     LayerVerdict,
@@ -99,6 +100,22 @@ class ImageEncoderPort(Protocol):
 
     def encode(self, attachment: Attachment) -> list[float]:
         """The embedding of the picture (an image, or page 1 of a PDF), of length 1."""
+        ...
+
+
+class VisionModelPort(Protocol):
+    model_id: str
+    revision: str  # the snapshot of the weights in use, or "not loaded"
+
+    def generate(self, prompt: str, images: list[bytes], max_tokens: int) -> str:
+        """The model's text answer to the prompt about the PNG images, decoded greedily."""
+        ...
+
+    def choose(self, prompt: str, images: list[bytes], options: list[str]) -> Choice:
+        """The probability of each option as the answer's first token, normalised over them.
+
+        Each option must be one token, such as a letter that the prompt defines.
+        """
         ...
 
 
