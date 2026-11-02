@@ -261,8 +261,8 @@ all gold. Each file is in the gold schema and passes its checks.
 - `confidence` is null: no reader measures how sure it is, so it writes nothing rather than a
   made-up number.
 - Each callout is one feature typed by a fixed rule; leaders are not traced.
-- Rerun: `uv run --extra vlm evals run reader --version vector-crop-v1 --split all`, then
-  `04_winner_outputs.ipynb`. Decoding is greedy, so a rerun gives the same files.
+- Rerun: `make outputs`, which runs `evals run reader --version vector-crop-v1 --split all`, then
+  `scripts/write_outputs.py`. Decoding is greedy, so a rerun gives the same files.
 
 ## Fault detection and chat research
 
@@ -318,3 +318,22 @@ The eval harness now scores fault finding as the research measured it, and score
   figure from another report. Eight cases do not rank the two. The `photo-v2` run is pending.
 
 Details: `docs/evals.md`.
+
+## Setup
+
+`make setup` (`scripts/setup.sh`) is the only step that uses the network: it installs uv and the
+Python packages, downloads Qwen3-VL 8B and the two DINOv2 models, builds the chat screen and runs
+`resourcly doctor`. After it, the app runs offline, as the brief asks: every model loads from the
+local Hugging Face cache.
+
+- Why native, not Docker: Qwen3-VL runs through MLX on the Mac's GPU. A container on a Mac runs
+  Linux in a virtual machine and cannot reach that GPU.
+- Why a doctor: each check prints the command that fixes it, so a missing model or an unbuilt
+  screen is one line, not a stack trace. It checks only what the running versions need, so the
+  model-free versions pass on any machine.
+- Committed, not rebuilt: the router's probe and the figure indexes are in `versions/`; `make
+  index` rebuilds the indexes, byte for byte the same.
+- Long runs (evals, the index build) draw a progress bar on a terminal and plain lines in a log.
+- Not done: a CUDA adapter for machines without Apple silicon.
+
+Details: `docs/setup.md`.
