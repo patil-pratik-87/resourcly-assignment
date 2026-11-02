@@ -75,7 +75,7 @@ Tests: `make test` (`uv run pytest`).
 ## 6. Run it (4 minutes, plus model time)
 
 ```sh
-make setup   # (uv sync --extra router --extra vlm, then the downloads in docs/usage.md)
+make setup   # (scripts/setup.sh): packages, models, the screen build
 make serve   # (uv run resourcly serve), then open http://127.0.0.1:8000
 ```
 
@@ -89,16 +89,15 @@ The chat opens with two demo chats, answered before, that show results with no m
 | A bulk upload | CTC-01, CTC-03, CTC-04 and the photo together |
 | A trace | Open a file, then its Trace tab |
 
-Terminal and no-model use: [docs/usage.md](docs/usage.md). Screen build:
-[docs/chat-ui.md](docs/chat-ui.md#start-it).
+Setup details: [docs/setup.md](docs/setup.md). Terminal and no-model use:
+[README.md](README.md#run-each-part).
 
 ## Known limits
 
 - Text questions are not answered yet.
 - Test photos and scans are made by code ([routing](docs/routing.md#limits),
-  [photo answers](docs/photo-answers.md#limits)).
+  [photo answers](NOTES.md#photo-answers)).
 - The photo gate lets drawings and most real photos of other parts through.
 - The answer eval has 8 cases, and the `photo-v2` and `vector-crop-v2` runs are pending
   ([docs/evals.md](docs/evals.md#current-numbers)).
-- No page on privacy and scale yet.
 - All drawings come from one NIST family.

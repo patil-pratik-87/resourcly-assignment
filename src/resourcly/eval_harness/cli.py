@@ -20,6 +20,7 @@ from resourcly.eval_harness.compare import EPSILON, compare_runs
 from resourcly.eval_harness.models import Case, CaseResult, Run
 from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES, Suite
+from resourcly.progress import progress_bar
 
 app = typer.Typer(help="Measure each part of the agent on its gold cases.", no_args_is_help=True)
 
@@ -60,8 +61,12 @@ def run(
     ctx: typer.Context,
     component: Component,
     version: Annotated[
-        str, typer.Option(help="A file in versions/<component>/; failure-copy runs failure's.")
-    ],
+        str | None,
+        typer.Option(
+            help="A file in versions/<component>/, the one the app runs by default;"
+            " failure-copy runs failure's."
+        ),
+    ] = None,
     split: Annotated[str, typer.Option(help="dev, test or all; train for the router.")] = "dev",
     case_id: Annotated[
         list[str] | None, typer.Option(help="Run only these cases; every case by default.")
@@ -73,15 +78,23 @@ def run(
 ) -> None:
     """Run a version of a component on the gold cases of a split."""
     suite = _suite(component)
+    settings = Settings.from_env()
+    version = version or settings.versions[suite.part]
+    impl = load_version(settings, suite.part, version).impl
+    typer.echo(f"{component} {version} ({impl}): building it and loading the {split} split")
     progress = {"done": 0, "total": 0}
+    bar = progress_bar()
 
     def started(run: Run, chosen: list[Case], pool: int) -> None:
         progress["total"] = len(chosen)
         typer.echo(f"selected {len(chosen)} of {pool} {split} cases")
         typer.echo(f"version {run.version}  hash {run.version_hash}  git {_git_label(run)}")
+        typer.echo(f"running {len(chosen)} case(s)")
+        bar.add_task(f"{component} {version}", total=len(chosen))
 
     def finished(result: CaseResult) -> None:
         progress["done"] += 1
+        bar.advance(bar.task_ids[0])
         outcome = (
             f"error {result.error}"
             if result.error
@@ -90,11 +103,11 @@ def run(
         counter = f"[{progress['done']}/{progress['total']}]"
         typer.echo(f"{counter} {result.case_id}  {outcome}  {result.latency_ms:.0f} ms")
 
-    with SqliteResultStore.open(ctx.obj) as store:
+    with SqliteResultStore.open(ctx.obj) as store, bar:
         result = harness.run(
             component,
             version,
-            settings=Settings.from_env(),
+            settings=settings,
             store=store,
             split=split,
             case_ids=tuple(case_id or ()),

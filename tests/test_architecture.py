@@ -53,7 +53,12 @@ NOT_BOOTSTRAP = [
 
 @pytest.mark.parametrize("path", EVALS, ids=module_name)
 def test_evals_reach_the_app_only_through_bootstrap_and_ports(path: Path) -> None:
-    allowed = ("resourcly.bootstrap", "resourcly.ports", "resourcly.eval_harness")
+    allowed = (
+        "resourcly.bootstrap",
+        "resourcly.ports",
+        "resourcly.eval_harness",
+        "resourcly.progress",
+    )
     imported = imports(path) - {"resourcly"}
 
     assert [name for name in imported if not any(inside(name, a) for a in allowed)] == []

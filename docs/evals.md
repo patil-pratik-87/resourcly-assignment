@@ -19,7 +19,9 @@ uv run evals compare failure dinov2-small-v1 dinov2-base-v1 --fail-if-worse
 ```
 
 `--split` takes dev, test or all, and train for the router. `--limit N` runs a partial sample,
-spread over the strata in proportion with seed 0, so it is the same each time.
+spread over the strata in proportion with seed 0, so it is the same each time. Without
+`--version`, a run uses the version the app runs. On a terminal, a run draws a progress bar
+under its case lines.
 
 `compare` takes run ids or version names; a version stands for its latest run on every case of a
 split. It scores both runs' stored answers on the current gold, so a gold fix needs no rerun. It

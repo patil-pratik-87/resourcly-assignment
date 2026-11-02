@@ -9,6 +9,7 @@ from typing import Annotated
 import typer
 import uvicorn
 
+from resourcly import doctor as checks
 from resourcly.api import create_app
 from resourcly.bootstrap import Services, Settings, open_services
 from resourcly.errors import EmptyRequest, NotFound
@@ -127,6 +128,37 @@ def _warn_unbuilt(dist: Path, app_dir: str) -> None:
             f"Run `npm run build` in src/frontend/{app_dir} first.",
             err=True,
         )
+
+
+@app.command()
+def doctor() -> None:
+    """Check that this machine can run the app's versions; print the fix for each problem.
+
+    Exits with 1 when a problem stops the app from running.
+    """
+    results = checks.run(Settings.from_env(), checks.System.current())
+    colors = {"ok": typer.colors.GREEN, "warn": typer.colors.YELLOW, "fail": typer.colors.RED}
+    for check in results:
+        status = "ok" if check.ok else "fail" if check.blocker else "warn"
+        typer.secho(f"{status:<6}{check.name}: {check.detail}", fg=colors[status])
+        if check.fix:
+            typer.echo(f"  fix: {check.fix}")
+    blockers = sum(not check.ok and check.blocker for check in results)
+    warnings = sum(not check.ok and not check.blocker for check in results)
+    if blockers:
+        first = checks.first_fix(results)
+        typer.secho(
+            f"not ready: {blockers} problem(s) to fix; start with {first}", fg=colors["fail"]
+        )
+        raise typer.Exit(1)
+    typer.secho(f"ready, {warnings} warning(s)", fg=colors["ok"])
+
+
+@app.command()
+def models() -> None:
+    """The Hugging Face models the app's versions load, one per line, downloaded or not."""
+    for model_id in checks.needed_models(checks.running_versions(Settings.from_env())):
+        typer.echo(model_id)
 
 
 def _expand(paths: list[Path]) -> list[Path]:

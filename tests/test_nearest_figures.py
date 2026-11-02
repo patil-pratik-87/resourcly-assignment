@@ -204,6 +204,21 @@ def test_the_index_is_built_from_every_figure_of_the_reports_with_its_label() ->
     assert Image.open(BytesIO(encoder.seen[0].data)).format == "PNG"
 
 
+def test_the_build_tells_when_each_report_is_done() -> None:
+    done: list[tuple[str, int]] = []
+
+    build_index(
+        REPORTS,
+        REPORTS / "sections.toml",
+        FakeEncoder(),
+        dpi=50,
+        on_report=lambda report, figures: done.append((report, figures)),
+    )
+
+    assert [report for report, _ in done] == ["16-006", "18-061", "24-013"]
+    assert sum(figures for _, figures in done) == 46
+
+
 def test_a_figure_without_a_label_stops_the_build(tmp_path: Path) -> None:
     sections = tmp_path / "sections.toml"
     sections.write_text(
