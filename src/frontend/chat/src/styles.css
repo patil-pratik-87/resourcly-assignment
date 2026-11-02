@@ -18,6 +18,10 @@
   --issue: #c2271f;
   --issue-soft: #fdeceb;
   --slate-soft: #eceef1;
+  /* The grey a page or a figure sits on, and the dim behind a figure shown larger. */
+  --sheet: #e6e8ec;
+  --sheet-hover: #dfe2e7;
+  --scrim: rgb(26 29 35 / 0.55);
   --radius: 6px;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light;
@@ -287,6 +291,7 @@ input {
 }
 
 .status-pill.reading,
+.status-pill.answering,
 .status-pill.routing,
 .status-pill.queued {
   background: var(--accent-soft);
@@ -485,6 +490,7 @@ input {
 }
 
 .item-card.is-reading,
+.item-card.is-answering,
 .item-card.is-routing {
   border-color: #c3d1f5;
 }
@@ -1541,6 +1547,10 @@ button.value-card-close {
   overflow: auto;
 }
 
+.side-answer {
+  padding: 14px 16px 20px;
+}
+
 .side-wait {
   padding: 16px;
   color: var(--muted);
@@ -1880,10 +1890,333 @@ button.j-fold {
   color: var(--muted);
 }
 
+/* A photo's answer from the reports, in its card and beside it in the viewer */
+
+/* An answer's length is unknown, so its bar shows work without a share. */
+.read-bar.working span {
+  width: 32%;
+  animation: working 1.4s ease-in-out infinite;
+}
+
+@keyframes working {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(320%);
+  }
+}
+
+.photo-answer {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.photo-answer h3 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.answer-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.photo-answer h3.answer-miss {
+  justify-self: start;
+  margin: 0 0 -6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--slate-soft);
+}
+
+.answer-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.answer-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.answer-list li > span:first-child {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+/* A source the answer cites; a figure is a button that opens it larger. */
+.cite,
+button.cite {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+button.cite {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line-strong));
+  color: var(--accent);
+  cursor: zoom-in;
+}
+
+button.cite:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+.basis {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.basis.stated {
+  color: var(--done);
+}
+
+.basis.inferred {
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: var(--photo-soft);
+  color: var(--photo);
+  cursor: help;
+}
+
+.figure-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.figure-strip li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+button.figure-thumb {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 120px;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: var(--sheet);
+  cursor: zoom-in;
+}
+
+button.figure-thumb:hover:not(:disabled) {
+  background: var(--sheet-hover);
+}
+
+.figure-thumb img {
+  display: block;
+  max-width: 100%;
+  max-height: 108px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.figure-caption {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+  min-width: 0;
+  font-size: 12.5px;
+}
+
+.figure-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+}
+
+.figure-name strong {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.figure-score {
+  margin-left: auto;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}
+
+.figure-section {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mode-tag {
+  padding: 1px 7px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mode-tag.defect {
+  background: var(--issue-soft);
+  color: var(--issue);
+}
+
+.mode-tag.reference {
+  background: var(--done-soft);
+  color: var(--done);
+}
+
+/* The gate: no report figure is close enough to the photo. */
+.photo-answer.gate {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.photo-answer.gate h3 {
+  margin: 0 0 2px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.photo-answer.gate p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.gate-icon {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+/* A report figure shown larger over the page */
+
+.figure-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--scrim);
+}
+
+.figure-dialog {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(1100px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.5);
+}
+
+.figure-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.figure-dialog-head strong {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.figure-dialog-image {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 16px;
+  overflow: auto;
+  background: var(--sheet);
+}
+
+.figure-dialog-image img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 220px);
+  object-fit: contain;
+  background: #fff;
+}
+
+.figure-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.figure-facts div {
+  display: flex;
+  gap: 8px;
+}
+
+.figure-facts dt {
+  color: var(--muted);
+}
+
+.figure-facts dd {
+  margin: 0;
+}
+
 /* Narrower screens: the versions go first, then everything stacks. */
 
+@media (max-width: 1440px) {
+  .versions div:nth-child(3) {
+    display: none;
+  }
+}
+
 @media (max-width: 1180px) {
-  .versions div:last-child {
+  .versions div:nth-child(2) {
     display: none;
   }
 }
@@ -1976,6 +2309,10 @@ button.j-fold {
     background: transparent;
     text-decoration: underline;
   }
+
+  .figure-overlay {
+    padding: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1985,5 +2322,11 @@ button.j-fold {
 
   .read-bar span {
     transition: none;
+  }
+
+  .read-bar.working span {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
   }
 }

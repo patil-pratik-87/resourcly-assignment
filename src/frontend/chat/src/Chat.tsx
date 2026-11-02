@@ -174,7 +174,8 @@ function Welcome() {
       <h1>Send a drawing, a photo, or a question.</h1>
       <p>
         The agent decides what each file is. A technical drawing comes back as JSON with every value
-        on it. Attach many drawings at once and each is read in turn while you watch.
+        on it, and a photo of a part with what the NTSB reports say about it. Attach many files at
+        once and each is done in turn while you watch.
       </p>
       <ul className="welcome-cases">
         <li>
@@ -183,7 +184,7 @@ function Welcome() {
         </li>
         <li>
           <span className="route-tag photo">Photo of a part</span>
-          What is wrong and what to do. Not available yet.
+          What is wrong and what to do, citing the reports
         </li>
         <li>
           <span className="route-tag text">Text question</span>

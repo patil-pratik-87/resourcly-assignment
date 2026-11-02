@@ -28,7 +28,53 @@ export interface ReadProgress {
   latest: string[];
 }
 
-export type ItemStatus = "routing" | "queued" | "reading" | "done" | "failed" | "answered";
+export type ItemStatus =
+  "routing" | "queued" | "reading" | "answering" | "done" | "failed" | "answered";
+
+/** A source an answer cites: a report figure, such as 18-061 fig05, or a page, 18-061 p3. */
+export interface Citation {
+  source: string;
+  report: string;
+  page: number;
+  /** `<report>/fig<nn>` when the source is a figure. */
+  figure?: string | null;
+}
+
+export interface Finding {
+  statement: string;
+  citation: Citation;
+}
+
+/** What to do: stated in the cited report text, or inferred from the findings. */
+export interface Action {
+  action: string;
+  basis: "stated" | "inferred";
+  citation?: Citation | null;
+}
+
+/** A report figure close to the photo, with what the report says it shows. */
+export interface FigureMatch {
+  /** `<report>/fig<nn>`, such as 18-061/fig06. */
+  figure: string;
+  report: string;
+  section: string;
+  failure_mode: string;
+  /** How close the finder found it, when it measures that. */
+  score?: number | null;
+}
+
+/** What the agent says about a photo; see PhotoAnswer in src/resourcly/models.py. */
+export interface PhotoAnswer {
+  /** The gate: no report figure is close enough to the photo, so nothing is said about it. */
+  not_in_reports: boolean;
+  /** Whether the closest figures show the same failure as the photo. */
+  matched: boolean;
+  answer: string;
+  findings: Finding[];
+  actions: Action[];
+  /** The closest report figures, best first. */
+  figures: FigureMatch[];
+}
 
 export interface RequestItem {
   item_id: string;
@@ -41,6 +87,8 @@ export interface RequestItem {
   status: ItemStatus;
   progress: ReadProgress | null;
   reply: string | null;
+  /** A photo's answer; `reply` is the same as text. */
+  answer: PhotoAnswer | null;
   values: number | null;
   issues: number | null;
   error: string | null;
@@ -75,6 +123,9 @@ export interface RequestTrace {
 export interface AgentInfo {
   reader: string;
   router: string;
+  /** The figure finder and the photo answerer. */
+  failure?: string;
+  answer?: string;
   /** The upload caps: the server refuses a message over either one. */
   max_file_mb: number;
   max_files: number;

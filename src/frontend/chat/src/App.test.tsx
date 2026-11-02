@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
 import { createAgentApi } from "./api";
-import { event, fakeAgentApi, item, record, routing } from "./test/fakeAgentApi";
+import { event, fakeAgentApi, item, photoAnswer, record, routing } from "./test/fakeAgentApi";
 
 afterEach(() => {
   window.history.replaceState(null, "", "/");
@@ -165,7 +165,7 @@ describe("the agent's answer for each item", () => {
     expect(within(card).queryByRole("region", { name: "JSON of ctc.pdf" })).toBeNull();
   });
 
-  it("answers a photo as a reply, without a result to download", async () => {
+  it("shows a photo's reply when it has no answer, without a result to download", async () => {
     open("/chat");
     const photo = item({
       item_id: "crack",
@@ -277,6 +277,179 @@ describe("the agent's answer for each item", () => {
         .getAllByRole("listitem")
         .map((li) => li.textContent),
     ).toEqual(shown);
+  });
+});
+
+describe("a photo answered from the reports", () => {
+  const photoRoute = routing({
+    route: "photo",
+    confidence: 0.98,
+    reason: "the probe gives photo 0.98",
+  });
+  const photo = (overrides: Parameters<typeof item>[0] = {}) =>
+    item({
+      item_id: "spar",
+      name: "spar.jpg",
+      media_type: "image/jpeg",
+      pages: 1,
+      route: photoRoute,
+      status: "answered",
+      values: null,
+      issues: null,
+      reply: "The spar cap has a fatigue crack that started at a fastener hole.",
+      answer: photoAnswer(),
+      ...overrides,
+    });
+
+  it("says the photo waits, then that it is being answered", async () => {
+    open("/chat");
+    const queued = photo({ status: "queued", reply: null, answer: null, finished_at: null });
+    const { api, state } = fakeAgentApi([record({ status: "working", items: [queued] })]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "spar.jpg" });
+    expect(card).toHaveTextContent("Waiting for the answerer");
+    expect(within(card).getByRole("status")).toHaveTextContent("Queued");
+    expect(card).not.toHaveTextContent("Waiting for the reader");
+
+    state.requests = [record({ status: "working", items: [{ ...queued, status: "answering" }] })];
+    await waitFor(() => expect(within(card).getByRole("status")).toHaveTextContent("Answering"), {
+      timeout: 3000,
+    });
+    expect(card).toHaveTextContent("Finding the closest report figures and answering");
+    // How long an answer takes is unknown, so the bar shows work without a share.
+    const bar = within(card).getByRole("progressbar", { name: "Answering spar.jpg" });
+    expect(bar).not.toHaveAttribute("aria-valuenow");
+  });
+
+  it("shows the answer, its findings and actions with their sources, and the closest figures", async () => {
+    open("/chat");
+    const { api } = fakeAgentApi([record({ items: [photo()] })]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "spar.jpg" });
+    const answer = within(card).getByRole("region", { name: "Answer about spar.jpg" });
+    expect(answer).toHaveTextContent(
+      "The spar cap has a fatigue crack that started at a fastener hole.",
+    );
+
+    const findings = within(answer).getByRole("list", { name: "From the reports" });
+    const found = within(findings).getAllByRole("listitem");
+    expect(found.map((li) => li.textContent)).toEqual([
+      "The crack grew by fatigue from the lower forward fastener hole.18-061 fig05",
+      "The spar cap met the specified hardness.18-061 p3",
+    ]);
+
+    const actions = within(answer).getByRole("list", { name: "What to do" });
+    const [stated, inferred] = within(actions).getAllByRole("listitem");
+    expect(stated).toHaveTextContent("Inspect the spar cap fastener holes with eddy current.");
+    expect(stated).toHaveTextContent("Stated in 18-061 p12");
+    expect(inferred).toHaveTextContent("Replace the cracked spar cap before flight.");
+    expect(inferred).toHaveTextContent("Inferred");
+
+    const figures = within(answer).getByRole("list", { name: "Closest report figures" });
+    const [first, , third] = within(figures).getAllByRole("listitem");
+    expect(within(first!).getByRole("presentation")).toHaveAttribute(
+      "src",
+      "/figures/18-061/fig05.png?max_side=320",
+    );
+    expect(first).toHaveTextContent("18-061 fig05");
+    expect(first).toHaveTextContent("Spar fatigue N106ER");
+    expect(first).toHaveTextContent("Fatigue");
+    expect(first).toHaveTextContent("0.62");
+    expect(third).toHaveTextContent("No defect, a reference");
+    // The plain reply is the answer as text: the card shows the answer in its place.
+    expect(within(card).queryByRole("note")).toBeNull();
+    expect(screen.getByLabelText("Agent versions")).toHaveTextContent(
+      "Answercaptions-v0 (captions)",
+    );
+  });
+
+  it("opens a report figure larger, and closes it again", async () => {
+    open("/chat");
+    const user = userEvent.setup();
+    const { api } = fakeAgentApi([record({ items: [photo()] })]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "spar.jpg" });
+    await user.click(within(card).getByRole("button", { name: "Open 18-061 fig06 larger" }));
+
+    const dialog = screen.getByRole("dialog", { name: "18-061 fig06" });
+    expect(within(dialog).getByRole("img", { name: "18-061 fig06" })).toHaveAttribute(
+      "src",
+      "/figures/18-061/fig06.png?max_side=1600",
+    );
+    expect(dialog).toHaveTextContent("Spar fatigue N106ER");
+    expect(dialog).toHaveTextContent("Fatigue");
+    expect(dialog).toHaveTextContent("0.58");
+    expect(within(dialog).getByRole("button", { name: "Close" })).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(within(card).getByRole("button", { name: "Open 18-061 fig06 larger" })).toHaveFocus();
+
+    // A figure a finding cites opens the same way.
+    await user.click(within(card).getByRole("button", { name: "18-061 fig05" }));
+    expect(screen.getByRole("dialog", { name: "18-061 fig05" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("says plainly when the failure is not in the reports", async () => {
+    open("/chat");
+    const answer = photoAnswer({
+      not_in_reports: true,
+      matched: false,
+      answer:
+        "This failure is not in the three NTSB reports: no report figure is close enough to the photo, so they say nothing about it.",
+      findings: [],
+      actions: [],
+      figures: [],
+    });
+    const { api } = fakeAgentApi([record({ items: [photo({ answer, reply: answer.answer })] })]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "spar.jpg" });
+    const notice = within(card).getByRole("region", { name: "Answer about spar.jpg" });
+    expect(within(notice).getByRole("heading", { name: "Not in the reports" })).toBeInTheDocument();
+    expect(notice).toHaveTextContent("no report figure is close enough to the photo");
+    expect(within(notice).queryByRole("list")).toBeNull();
+  });
+
+  it("shows the closest figures when they do not show the failure", async () => {
+    open("/chat");
+    const answer = photoAnswer({
+      matched: false,
+      answer: "The closest report figures do not show the failure in this photo.",
+      findings: [],
+      actions: [],
+    });
+    const { api } = fakeAgentApi([record({ items: [photo({ answer, reply: answer.answer })] })]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "spar.jpg" });
+    const shown = within(card).getByRole("region", { name: "Answer about spar.jpg" });
+    expect(shown).toHaveTextContent("do not show the failure");
+    expect(within(shown).getByRole("heading", { name: "No match in the reports" })).toBeVisible();
+    expect(within(shown).getByRole("list", { name: "Closest report figures" })).toBeVisible();
+    expect(within(shown).queryByRole("list", { name: "From the reports" })).toBeNull();
+  });
+
+  it("opens a photo in the viewer on its answer, beside its trace", async () => {
+    open("/requests/r1/spar");
+    render(<App api={fakeAgentApi([record({ items: [photo()] })]).api} />);
+
+    const side = await screen.findByRole("complementary", { name: "What the agent did" });
+    expect(within(side).getByRole("tab", { name: "Answer" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const answer = within(side).getByRole("region", { name: "Answer about spar.jpg" });
+    expect(within(answer).getByRole("list", { name: "What to do" })).toBeInTheDocument();
+    expect(within(side).queryByRole("note")).toBeNull();
+
+    await userEvent.setup().click(within(side).getByRole("tab", { name: "Trace" }));
+    expect(await within(side).findByRole("region", { name: "Trace" })).toBeInTheDocument();
+    expect(within(side).queryByRole("region", { name: "Answer about spar.jpg" })).toBeNull();
   });
 });
 
