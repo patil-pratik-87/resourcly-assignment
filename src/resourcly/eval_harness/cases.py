@@ -1,27 +1,12 @@
-import hashlib
-import json
 import logging
 from collections.abc import Iterable
-from dataclasses import dataclass
 from typing import Any
 
 from resourcly.bootstrap import Services
 from resourcly.eval_harness import gold_rules
+from resourcly.eval_harness.models import Case
 
 log = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class Case:
-    case_id: str
-    split: str
-    stratum: str
-    gold: Any
-
-    @property
-    def gold_hash(self) -> str:
-        text = json.dumps(self.gold, sort_keys=True, ensure_ascii=False)
-        return hashlib.sha256(text.encode()).hexdigest()[:12]
 
 
 # A row's label is the route the router should give it; "other" items fit no case.

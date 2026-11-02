@@ -11,8 +11,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_services
-from resourcly.eval_harness.cases import Case
-from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.models import Case, CaseResult, Run
 from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES
 

@@ -69,6 +69,18 @@ def test_only_bootstrap_builds_adapters(path: Path) -> None:
     assert [name for name in imports(path) if inside(name, "resourcly.adapters")] == []
 
 
+PURE = ("models", "metrics", "compare", "store")
+
+
+@pytest.mark.parametrize("name", PURE)
+def test_the_scoring_and_storing_modules_stay_pure(name: str) -> None:
+    """They take data in and give data out; the app, its services and the suites stay out."""
+    allowed = ("resourcly.eval_harness.models", "resourcly.eval_harness.metrics")
+    imported = imports(PACKAGE / "eval_harness" / f"{name}.py")
+
+    assert [n for n in imported if not any(inside(n, a) for a in allowed)] == []
+
+
 def test_relative_imports_are_resolved_against_the_module() -> None:
     source = "from ..services import GoldService\nfrom . import metrics\nfrom .cases import Case\n"
 

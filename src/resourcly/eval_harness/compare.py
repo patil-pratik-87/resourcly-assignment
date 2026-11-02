@@ -1,12 +1,21 @@
 """Compare two runs of one component: metric deltas with a verdict, and per-case changes."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any, Protocol
 
-from resourcly.eval_harness.cases import Case
-from resourcly.eval_harness.models import CaseResult, Run
-from resourcly.eval_harness.suites import Suite
+from resourcly.eval_harness.metrics import Scored
+from resourcly.eval_harness.models import Case, CaseResult, Run
 
 EPSILON = 1e-9
+
+
+class Scoring(Protocol):
+    """What compare needs of a suite: its metrics, primary first, and how it scores."""
+
+    metrics: tuple[str, ...]
+    score: Callable[[Case, Any], dict[str, Any]]
+    summarise: Callable[[Scored], dict[str, Any]]
 
 
 @dataclass(frozen=True)
@@ -47,7 +56,7 @@ class Comparison:
 
 
 def compare_runs(
-    suite: Suite,
+    suite: Scoring,
     gold: dict[str, Case],
     base: Run,
     base_cases: list[CaseResult],

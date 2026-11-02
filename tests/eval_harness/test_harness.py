@@ -4,7 +4,7 @@ import pytest
 
 from resourcly.bootstrap import Settings, open_services
 from resourcly.eval_harness import harness
-from resourcly.eval_harness.cases import Case
+from resourcly.eval_harness.models import Case
 from resourcly.eval_harness.store import SqliteResultStore
 from tests.conftest import CTC01
 

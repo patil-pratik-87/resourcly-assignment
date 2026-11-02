@@ -1,4 +1,4 @@
-from resourcly.eval_harness.cases import Case
+from resourcly.eval_harness.models import Case
 from resourcly.eval_harness.suites import SUITES
 
 GOLD = {"values": [{"page": 1, "value": 5, "unit": "mm", "kind": "linear", "raw": "5"}]}

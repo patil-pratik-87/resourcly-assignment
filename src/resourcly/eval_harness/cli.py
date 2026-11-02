@@ -15,9 +15,9 @@ from resourcly.bootstrap import (
     open_services,
 )
 from resourcly.eval_harness import harness
-from resourcly.eval_harness.cases import Case, check_gold
+from resourcly.eval_harness.cases import check_gold
 from resourcly.eval_harness.compare import EPSILON, compare_runs
-from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.models import Case, CaseResult, Run
 from resourcly.eval_harness.store import SqliteResultStore
 from resourcly.eval_harness.suites import SUITES, Suite
 

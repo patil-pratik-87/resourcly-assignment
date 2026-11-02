@@ -6,7 +6,8 @@ from typing import Any
 
 from resourcly.bootstrap import Services
 from resourcly.eval_harness import metrics
-from resourcly.eval_harness.cases import Case, failure_cases, reader_cases, route_cases
+from resourcly.eval_harness.cases import failure_cases, reader_cases, route_cases
+from resourcly.eval_harness.models import Case
 
 
 @dataclass(frozen=True)

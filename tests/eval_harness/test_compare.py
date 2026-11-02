@@ -2,9 +2,8 @@ from dataclasses import replace
 
 import pytest
 
-from resourcly.eval_harness.cases import Case
 from resourcly.eval_harness.compare import compare_runs
-from resourcly.eval_harness.models import CaseResult, Run
+from resourcly.eval_harness.models import Case, CaseResult, Run
 from resourcly.eval_harness.suites import SUITES
 
 READER = SUITES["reader"]
