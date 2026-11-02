@@ -9,10 +9,10 @@ def test_the_eval_data_defaults_to_the_evals_folder_and_the_versions_to_the_root
     assert settings.splits_path == PROJECT_ROOT / "evals" / "splits.toml"
 
 
-def test_the_app_runs_the_model_free_versions_by_default() -> None:
+def test_the_app_runs_the_layered_router_and_model_free_reader_and_finder_by_default() -> None:
     assert Settings().versions == {
         "reader": "textlayer-v0",
-        "router": "stub-v0",
+        "router": "three-layer-v1",
         "failure": "shuffled-v0",
     }
     assert Settings.from_env().versions == Settings().versions
