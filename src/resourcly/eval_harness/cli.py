@@ -60,7 +60,7 @@ def run(
     ctx: typer.Context,
     component: Component,
     version: Annotated[str, typer.Option(help="A file in versions/<component>/.")],
-    split: Annotated[str, typer.Option(help="dev, test or all.")] = "dev",
+    split: Annotated[str, typer.Option(help="dev, test or all; train for the router.")] = "dev",
     case_id: Annotated[
         list[str] | None, typer.Option(help="Run only these cases; every case by default.")
     ] = None,
@@ -229,7 +229,9 @@ def list_(
     component: Annotated[
         str | None, typer.Argument(help=f"One of {NAMES}; cases need one.")
     ] = None,
-    split: Annotated[str, typer.Option(help="dev, test or all, for cases.")] = "dev",
+    split: Annotated[
+        str, typer.Option(help="For cases: dev, test or all; train for the router.")
+    ] = "dev",
     version: Annotated[str | None, typer.Option(help="Only this version's runs.")] = None,
     limit: Annotated[int, typer.Option(help="How many runs.")] = 20,
 ) -> None:
