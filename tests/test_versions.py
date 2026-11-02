@@ -106,7 +106,8 @@ def test_the_committed_default_versions_exist() -> None:
     for component, impl in (
         ("reader", "vector-crop"),
         ("router", "three-layer"),
-        ("failure", "shuffled"),
+        ("failure", "nearest-figures"),
+        ("answer", "vlm"),
     ):
         assert load_version(settings, component, settings.versions[component]).impl == impl
 

@@ -9,13 +9,15 @@ def test_the_eval_data_defaults_to_the_evals_folder_and_the_versions_to_the_root
     assert settings.splits_path == PROJECT_ROOT / "evals" / "splits.toml"
 
 
-def test_the_app_runs_the_layered_router_and_vector_crop_reader_by_default(monkeypatch) -> None:
-    monkeypatch.delenv("RESOURCLY_READER_VERSION")
+def test_the_app_runs_the_researched_version_of_each_component_by_default(monkeypatch) -> None:
+    for component in ("READER", "FAILURE", "ANSWER"):
+        monkeypatch.delenv(f"RESOURCLY_{component}_VERSION")
 
     assert Settings().versions == {
         "reader": "vector-crop-v2",
         "router": "three-layer-v1",
-        "failure": "shuffled-v0",
+        "failure": "dinov2-base-v1",
+        "answer": "photo-v2",
     }
     assert Settings.from_env().versions == Settings().versions
 
@@ -30,11 +32,13 @@ def test_the_environment_can_pick_the_versions(monkeypatch) -> None:
     monkeypatch.setenv("RESOURCLY_READER_VERSION", "my-reader-v1")
     monkeypatch.setenv("RESOURCLY_ROUTER_VERSION", "my-router-v1")
     monkeypatch.setenv("RESOURCLY_FAILURE_VERSION", "my-finder-v1")
+    monkeypatch.setenv("RESOURCLY_ANSWER_VERSION", "my-answer-v1")
 
     assert Settings.from_env().versions == {
         "reader": "my-reader-v1",
         "router": "my-router-v1",
         "failure": "my-finder-v1",
+        "answer": "my-answer-v1",
     }
 
 

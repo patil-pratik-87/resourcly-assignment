@@ -256,3 +256,22 @@ top 3 for 94.2%, the best of the signals compared, in under 0.1 s per photo.
   12 unrelated photos; the router's probe has not been tried on DINOv2-base.
 
 Write-up: `research/failure/README.md`.
+
+## Photo answers
+
+`dinov2-base-v1` finds the report figures nearest a photo; `photo-v2` has Qwen3-VL 8B answer from
+the closest 3 in one call. Code keeps only findings citing what it was shown, a "stated" action
+must quote a report paragraph, and a photo the model calls unrelated is kept out. Both are the
+defaults; the answer shares the reader's Qwen adapter.
+
+| Version | Split | Section@1 | Mode@3 | Kept out |
+| --- | --- | --- | --- | --- |
+| `dinov2-base-v1` | dev / test | 1.000 / 1.000 | 1.000 / 1.000 | 0.375 / 0.250 |
+| `dinov2-small-v1` | dev / test | 1.000 / 1.000 | 1.000 / 1.000 | 0.000 / 0.125 |
+
+- Honest reading: gold photos are copies of indexed figures. Held out, base gets the report first
+  for 95.7%, small 89.9%.
+- Gate: it does not hold on real photos of other parts; 10 of 12 pass 0.28.
+- Answers: a stored 6-photo spot check, 4 right; the 18-photo before and after is pending.
+
+Details: `docs/photo-answers.md`, `evals/photo-answers/`.

@@ -1,8 +1,9 @@
 """The agent a user chats with: each message becomes one request, and each of its files one item.
 
 `submit` keeps the files and returns at once. A background job then routes every item: a drawing
-is queued for the reader, and the other cases get their reply straight away. Reads run after
-routing, one at a time, and report their progress into the request record, which the chat polls.
+is queued for the reader, a photo is queued for an answer from the reports, and the other cases
+get their reply straight away. Reads and photo answers run after routing, one at a time, and
+report their state into the request record, which the chat polls.
 Every step is traced under the request id when it ends, so the trace of a running request is
 already readable.
 """
@@ -18,6 +19,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+from resourcly.answers import PhotoAnswerService, render_reply
 from resourcly.errors import EmptyRequest, ModelNotCached, NotFound, UnsupportedUpload
 from resourcly.models import (
     ACTIVE,
@@ -42,12 +44,8 @@ from resourcly.services import DrawingService, now
 log = logging.getLogger(__name__)
 
 ROUTE_JOB, READ_JOB = 0, 1
-# The reply for each route other than a drawing; none of them has an answerer yet.
+# The reply for each route other than a drawing or a photo; neither has an answerer yet.
 REPLIES = {
-    Route.PHOTO: (
-        "This looks like a photo of a part. Saying what is wrong with it and what to do, from the"
-        " NTSB reports, is not available yet."
-    ),
     Route.TEXT: (
         "Answering questions from the NTSB reports is not available yet. Attach a technical"
         " drawing, or many at once, and each comes back as JSON with every value on it."
@@ -58,7 +56,6 @@ REPLIES = {
     ),
 }
 NO_ANSWERER = {
-    Route.PHOTO: "nothing: picture answering is not available yet",
     Route.TEXT: "nothing: text answering is not available yet",
     Route.OTHER: "nothing: no case applies",
 }
@@ -73,6 +70,7 @@ class AgentService:
         router: RouterPort,
         router_name: str,
         drawings_in: Callable[[Path], DrawingService],
+        photos: Callable[[], PhotoAnswerService],
         pages_in: Callable[[Path], DrawingPagePort],
         trace: TracePort,
         jobs: JobsPort,
@@ -82,6 +80,7 @@ class AgentService:
         self.router = router
         self.router_name = router_name
         self.drawings_in = drawings_in
+        self.photos = photos
         self.pages_in = pages_in
         self.trace = trace
         self.jobs = jobs
@@ -158,7 +157,7 @@ class AgentService:
             with self._update(request_id, item.item_id) as current:
                 if decision is None:
                     _fail(current, "The router could not decide; see the trace.")
-                elif decision.route == Route.DRAWING:
+                elif _queued(item, decision):
                     current.route, current.status = decision, "queued"
                 else:
                     current.route = decision
@@ -166,6 +165,10 @@ class AgentService:
                 continue
             if decision.route == Route.DRAWING:
                 self.jobs.submit(partial(self._read, request_id, item.item_id), priority=READ_JOB)
+            elif _queued(item, decision):
+                self.jobs.submit(
+                    partial(self._answer_photo, request_id, item.item_id), priority=READ_JOB
+                )
             else:
                 self._answer(request_id, item, decision)
 
@@ -197,6 +200,29 @@ class AgentService:
             step["output"] = {"reply": reply}
         with self._update(request_id, item_id) as item:
             item.status, item.reply, item.finished_at = "answered", reply, now()
+
+    def _answer_photo(self, request_id: str, item_id: str) -> None:
+        """Say what is wrong with the part in a photo and what to do, from the reports.
+
+        The message's text, when there is one, is the question.
+        """
+        with self._update(request_id, item_id) as item:
+            item.status, item.started_at = "answering", now()
+            name, text = item.name, self.requests.load(request_id).text
+        try:
+            data, media_type = self.uploads.original(request_id, item_id)
+            answer = self.photos().answer(Attachment(name, media_type, data), text, request_id)
+        except Exception as error:
+            if isinstance(error, ModelNotCached):
+                log.warning("answering %s of request %s failed: %s", item_id, request_id, error)
+            else:
+                log.exception("answering %s of request %s failed", item_id, request_id)
+            with self._update(request_id, item_id) as item:
+                _fail(item, str(error) or type(error).__name__)
+            return
+        with self._update(request_id, item_id) as item:
+            item.status, item.answer, item.finished_at = "answered", answer, now()
+            item.reply = render_reply(answer)
 
     def _read(self, request_id: str, item_id: str) -> None:
         with self._update(request_id, item_id) as item:
@@ -280,6 +306,13 @@ def _traced_text(text: str) -> dict[str, Any]:
     The words live once, in the request record, which is the chat history.
     """
     return {"text_chars": len(text), "text_sha256": hashlib.sha256(text.encode()).hexdigest()}
+
+
+def _queued(item: RequestItem, decision: Routing) -> bool:
+    """Whether the item waits for a job: a drawing to read, or a photo to answer."""
+    return decision.route == Route.DRAWING or (
+        decision.route == Route.PHOTO and item.kind == "file"
+    )
 
 
 def _fail(item: RequestItem, error: str) -> None:

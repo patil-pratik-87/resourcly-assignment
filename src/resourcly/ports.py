@@ -3,13 +3,17 @@ from pathlib import Path
 from typing import Any, Literal, Protocol
 
 from resourcly.models import (
+    AnswerDraft,
     Attachment,
     Choice,
+    FigureEvidence,
     FigureMatch,
     GoldDocument,
     LayerVerdict,
+    PhotoEvidence,
     ReaderOutput,
     ReadProgress,
+    ReportEvidence,
     RequestRecord,
     Routing,
     StoredFile,
@@ -101,6 +105,8 @@ class ImageEncoderPort(Protocol):
 
     model_id: str
     revision: str  # the snapshot of the weights in use, or "not loaded"
+    recipe: str  # how the vector is made from the model's output
+    input_size: int  # the side of the square the model sees, in pixels
 
     def encode(self, attachment: Attachment) -> list[float]:
         """The embedding of the picture (an image, or page 1 of a PDF), of length 1."""
@@ -128,6 +134,31 @@ class FailureFinderPort(Protocol):
 
     def find(self, photo: Attachment) -> list[FigureMatch]:
         """The matching figures, best first; an empty list when no report shows this failure."""
+
+
+class ReportEvidencePort(Protocol):
+    """What the reports say about their figures, for an answer about a photo to cite."""
+
+    def figure(self, figure: str) -> FigureEvidence:
+        """The figure's caption, labels and citing paragraphs; NotFound for an unknown figure."""
+        ...
+
+    def figure_image(self, figure: str, max_side: int) -> bytes:
+        """The figure as a PNG, at most max_side pixels on its long side."""
+        ...
+
+    def report(self, report: str) -> ReportEvidence: ...
+
+
+class PhotoAnswererPort(Protocol):
+    """Says what is wrong with a part in a photo and what to do, from the evidence it is shown."""
+
+    called: str  # what it runs, for the trace
+
+    def answer(self, evidence: PhotoEvidence) -> AnswerDraft:
+        """An answer citing the evidence's figures and pages; matched is False when the figures
+        do not show the photo's failure."""
+        ...
 
 
 class UploadStorePort(Protocol):

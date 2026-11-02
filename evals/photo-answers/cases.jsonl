@@ -1,0 +1,18 @@
+{"case_id": "pos_18-061_fig05_v1", "image": "failure/images/pos_18-061_fig05_v1.jpg", "kind": "report_photo", "expected": "18-061/fig05: spar_fatigue_N106ER, fatigue"}
+{"case_id": "pos_24-013_fig04_v0", "image": "failure/images/pos_24-013_fig04_v0.jpg", "kind": "report_photo", "expected": "24-013/fig04: bending_overstress, overstress"}
+{"case_id": "pos_16-006_fig05_v2", "image": "failure/images/pos_16-006_fig05_v2.jpg", "kind": "report_photo", "expected": "16-006/fig05: throttle_lock_mechanism, reference_no_defect"}
+{"case_id": "pos_18-061_fig21_v2", "image": "failure/images/pos_18-061_fig21_v2.jpg", "kind": "report_photo", "expected": "18-061/fig21: microstructure, reference_no_defect"}
+{"case_id": "pos_18-061_fig24_v2", "image": "failure/images/pos_18-061_fig24_v2.jpg", "kind": "report_photo", "expected": "18-061/fig24: spar_N3986M, reference_no_defect"}
+{"case_id": "pos_16-006_fig04_v1", "image": "failure/images/pos_16-006_fig04_v1.jpg", "kind": "report_photo", "expected": "16-006/fig04: throttle_lock_mechanism, reference_no_defect"}
+{"case_id": "commons_altensiletest", "image": "routes/items/photo/commons_altensiletest.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_brokenshaftandterminalfr", "image": "routes/items/photo/commons_brokenshaftandterminalfr.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_castirontensiletest", "image": "routes/items/photo/commons_castirontensiletest.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_conchoidal", "image": "routes/items/photo/commons_conchoidal.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_ductilefracturesurface60", "image": "routes/items/photo/commons_ductilefracturesurface60.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_eprouvetteplatecasseefac", "image": "routes/items/photo/commons_eprouvetteplatecasseefac.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_limescaleinpipe", "image": "routes/items/photo/commons_limescaleinpipe.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_ndiexposingthecracks5123", "image": "routes/items/photo/commons_ndiexposingthecracks5123.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_ndiexposingthecracks5123808", "image": "routes/items/photo/commons_ndiexposingthecracks5123808.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_ourbrokenvcrpart3detail7", "image": "routes/items/photo/commons_ourbrokenvcrpart3detail7.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_pedalarm", "image": "routes/items/photo/commons_pedalarm.jpg", "kind": "other_part", "expected": "not in the reports"}
+{"case_id": "commons_romanlockboltfindid10037", "image": "routes/items/photo/commons_romanlockboltfindid10037.jpg", "kind": "other_part", "expected": "not in the reports"}

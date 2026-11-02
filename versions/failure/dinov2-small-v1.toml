@@ -1,0 +1,12 @@
+description = "dinov2-base-v1 with the router's DINOv2-small, to compare the two on the failure gold"
+impl = "nearest-figures"
+
+# dinov2-base-v1's recipe and gate with the router's smaller model. Held out, the research found
+# it worse on every score; it is here so the evals can measure that on the failure gold.
+encoder = "dinov2"
+encoder_model = "facebook/dinov2-small"
+encoder_recipe = "cls_patch_mean"
+encoder_input_size = 224
+index = "indexes/dinov2-small-v1.json"
+threshold = 0.28
+top = 5

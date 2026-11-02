@@ -526,6 +526,140 @@ class FigureMatch(BaseModel):
     score: float | None = None  # how close the finder found it, when it measures that
 
 
+class Passage(BaseModel):
+    """A paragraph of a report, cited by its report and the page it starts on."""
+
+    report: str
+    page: int
+    text: str
+
+    @property
+    def source(self) -> str:
+        """How an answer cites it, such as 18-061 p3."""
+        return f"{self.report} p{self.page}"
+
+
+class FigureEvidence(BaseModel):
+    """What a report says about one of its figures, for an answer to cite."""
+
+    figure: str  # <report>/fig<nn>, such as 18-061/fig05
+    report: str
+    page: int
+    section: str
+    failure_mode: str
+    caption: str
+    citing: list[Passage]  # the paragraphs that name the figure
+
+    @property
+    def source(self) -> str:
+        """How an answer cites it, such as 18-061 fig05."""
+        return self.figure.replace("/", " ")
+
+
+class ReportEvidence(BaseModel):
+    """What a report is about, and its closing paragraphs, for an answer to cite."""
+
+    report: str
+    file: str  # the PDF in the reports folder
+    vehicle: str | None
+    components: str | None
+    closing: list[Passage]
+
+
+class Citation(BaseModel):
+    """A source an answer cites: a report figure, such as 18-061 fig05, or a page, 18-061 p3."""
+
+    source: str  # as the answer cites it
+    report: str
+    page: int
+    # <report>/fig<nn> for a figure, whose image is GET /api/reports/<report>/figures/<nn>.png
+    figure: str | None = None
+
+
+class Finding(BaseModel):
+    """A fact from the reports that explains what is wrong, with the source it comes from."""
+
+    statement: str
+    citation: Citation
+
+
+class Action(BaseModel):
+    """What to do: stated in the cited report paragraph, or inferred from the findings.
+
+    A stated action cites a report paragraph and quotes the words of it that say so.
+    """
+
+    action: str
+    basis: Literal["stated", "inferred"]
+    citation: Citation | None = None
+    quote: str | None = None  # word for word from the cited paragraph, for a stated action
+
+
+class PhotoAnswer(BaseModel):
+    """What the agent says about a photo of a part, from the NTSB reports.
+
+    `not_in_reports` says nothing is said about the photo, and `kept_out` says why: the gate found
+    no report figure close enough, or the model saw no part in the photo ("unrelated").
+    Otherwise `figures` are the closest report figures, best first, and `matched` says whether
+    the model found that they show the same failure as the photo: the same failure mode on the
+    same kind of part, or the same intact part for a figure of a part with no defect. Only the
+    findings and actions whose citations are in the evidence the model was given are kept, and
+    a match without one kept finding is given as no match.
+    """
+
+    not_in_reports: bool
+    kept_out: Literal["gate", "unrelated"] | None = None
+    matched: bool
+    answer: str
+    findings: list[Finding]
+    actions: list[Action]
+    figures: list[FigureMatch] = []
+
+
+@dataclass(frozen=True)
+class PhotoEvidence:
+    """What an answerer is shown about a photo: the closest figures and their reports' text.
+
+    `images` are the first figures as PNGs, in order; the rest are shown as text only.
+    """
+
+    question: str
+    photo: Attachment
+    figures: list[FigureEvidence]
+    images: list[bytes]
+    reports: list[ReportEvidence]
+
+
+@dataclass(frozen=True)
+class DraftFinding:
+    statement: str
+    source: str  # as written, such as "18-061 fig05" or "[18-061 p3]"
+
+
+@dataclass(frozen=True)
+class DraftAction:
+    action: str
+    basis: str  # as written; "stated" or "inferred" when the answerer follows its prompt
+    source: str
+    quote: str  # the words of the source that say to do it, for a stated action
+
+
+@dataclass(frozen=True)
+class AnswerDraft:
+    """An answerer's answer as it gave it, before its citations are checked.
+
+    `image_type` is what the answerer took the photo for, such as "unrelated" or
+    "technical_drawing", or "" when it does not say; `text` is the whole answer, for the trace.
+    """
+
+    matched: bool
+    answer: str
+    findings: list[DraftFinding]
+    actions: list[DraftAction]
+    text: str
+    image_type: str = ""
+
+
 class FailureMatches(BaseModel):
     """The figures a finder matched to one photo, best first; none when no report shows it."""
 
@@ -566,16 +700,17 @@ class StoredFile(BaseModel):
     pages: int
 
 
-ItemStatus = Literal["routing", "queued", "reading", "done", "failed", "answered"]
-ACTIVE: tuple[ItemStatus, ...] = ("routing", "queued", "reading")
+ItemStatus = Literal["routing", "queued", "reading", "answering", "done", "failed", "answered"]
+ACTIVE: tuple[ItemStatus, ...] = ("routing", "queued", "reading", "answering")
 
 
 class RequestItem(BaseModel):
     """One file of a chat request, or its text when it has no file, and what the agent did.
 
-    An item is routed, then a drawing is queued and read, and the other cases are answered at
-    once. `values` counts the read document's values, and `issues` its schema issues and the
-    model answers the reader could not use.
+    An item is routed, then a drawing is queued and read, and a photo is queued and answered
+    from the reports; the other cases are answered at once. `values` counts the read document's
+    values, and `issues` its schema issues and the model answers the reader could not use.
+    `answer` is a photo's answer, and `reply` its text.
     """
 
     item_id: str
@@ -588,6 +723,7 @@ class RequestItem(BaseModel):
     status: ItemStatus = "routing"
     progress: ReadProgress | None = None
     reply: str | None = None
+    answer: PhotoAnswer | None = None
     values: int | None = None
     issues: int | None = None
     error: str | None = None

@@ -19,9 +19,14 @@ def png(width: int = 40, height: int = 30) -> bytes:
 
 
 @pytest.fixture(autouse=True)
-def model_free_reader(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The app's default reader runs a vision model; tests read with the text layer instead."""
+def model_free_versions(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The app's default reader, failure finder and answer run models; tests use model-free ones.
+
+    The router's stub is set by the tests that run the app's router.
+    """
     monkeypatch.setenv("RESOURCLY_READER_VERSION", "textlayer-v0")
+    monkeypatch.setenv("RESOURCLY_FAILURE_VERSION", "shuffled-v0")
+    monkeypatch.setenv("RESOURCLY_ANSWER_VERSION", "captions-v0")
 
 
 @pytest.fixture
@@ -41,8 +46,13 @@ def settings(gold_dir: Path, tmp_path: Path) -> Settings:
         annotation_ui_dist=tmp_path / "no-annotation-ui",
         trace_path=tmp_path / "var" / "traces.sqlite",
         uploads_dir=tmp_path / "var" / "uploads",
-        # the text-layer reader and the stub router need no model, so the tests can run them
-        versions={"reader": "textlayer-v0", "router": "stub-v0"},
+        # these versions need no model, so the tests can run them
+        versions={
+            "reader": "textlayer-v0",
+            "router": "stub-v0",
+            "failure": "shuffled-v0",
+            "answer": "captions-v0",
+        },
     )
 
 

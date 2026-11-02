@@ -36,8 +36,10 @@ one message is a bulk upload: each file gets a card, and a line over them counts
 
 Each card shows the router's answer: the case, the layer that chose it, how sure it was, and why.
 A drawing shows its page with a box on each callout as it is read, then buttons to show or
-download its JSON. A photo or a text question gets a reply that the answer is not available yet,
-and a file that fits no case gets a reply that says so. Click a page to open the file.
+download its JSON. A photo gets its answer from the reports as text, with each source cited
+([photo-answers.md](photo-answers.md)). A text question gets a reply that the answer is not
+available yet, and a file that fits no case gets a reply that says so. Click a page to open the
+file.
 
 ![A bulk upload of six files](img/chat-ui/bulk-upload.png)
 

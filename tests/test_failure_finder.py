@@ -1,9 +1,15 @@
 import logging
+import shutil
+from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
+from resourcly.adapters.dinov2_encoder import Dinov2EncoderAdapter
+from resourcly.adapters.nearest_figures import NearestFiguresAdapter
 from resourcly.adapters.shuffled_figures import ShuffledFiguresAdapter
-from resourcly.bootstrap import PROJECT_ROOT, Settings, open_services
+from resourcly.bootstrap import FINDERS, PROJECT_ROOT, Settings, load_version, open_services
+from resourcly.errors import InvalidVersion
 from resourcly.models import Attachment, FigureMatch, TraceEvent
 from resourcly.services import FailureService
 from tests.conftest import png
@@ -120,3 +126,59 @@ def test_the_baseline_version_finds_without_a_model(settings: Settings) -> None:
 
     assert len(matches.figures) == 46
     assert steps == ["failure.find"]
+
+
+@pytest.mark.parametrize(
+    ("name", "model", "size"),
+    [
+        ("dinov2-base-v1", "facebook/dinov2-base", 1536),
+        ("dinov2-small-v1", "facebook/dinov2-small", 768),
+    ],
+)
+def test_the_dinov2_versions_build_their_finder_without_loading_a_model(
+    settings: Settings, name: str, model: str, size: int
+) -> None:
+    version = load_version(settings, "failure", name)
+    finder = FINDERS[version.impl].build(settings, version.params)
+
+    assert isinstance(finder, NearestFiguresAdapter)
+    assert isinstance(finder.encoder, Dinov2EncoderAdapter)
+    assert (finder.encoder.model_id, finder.encoder.recipe, finder.encoder.input_size) == (
+        model,
+        "cls_patch_mean",
+        224,
+    )
+    assert finder.encoder.revision == "not loaded"
+    assert (finder.threshold, finder.top) == (0.28, 5)
+    assert len(finder.index.figures) == 46
+    assert {len(figure.vector) for figure in finder.index.figures} == {size}
+    assert "index" in version.files
+
+
+def test_a_finder_version_whose_index_was_made_with_another_model_is_refused(
+    settings: Settings, tmp_path: Path
+) -> None:
+    folder = tmp_path / "versions" / "failure"
+    shutil.copytree(PROJECT_ROOT / "versions" / "failure", folder)
+    text = (folder / "dinov2-base-v1.toml").read_text(encoding="utf-8")
+    (folder / "mixed.toml").write_text(
+        text.replace('"indexes/dinov2-base-v1.json"', '"indexes/dinov2-small-v1.json"'),
+        encoding="utf-8",
+    )
+    versioned = replace(settings, versions_dir=tmp_path / "versions")
+    version = load_version(versioned, "failure", "mixed")
+
+    with pytest.raises(InvalidVersion, match="made with facebook/dinov2-small"):
+        FINDERS[version.impl].build(versioned, version.params)
+
+
+def test_a_finder_version_with_an_unknown_encoder_is_refused(
+    settings: Settings, tmp_path: Path
+) -> None:
+    folder = tmp_path / "versions" / "failure"
+    shutil.copytree(PROJECT_ROOT / "versions" / "failure", folder)
+    text = (folder / "dinov2-base-v1.toml").read_text(encoding="utf-8")
+    (folder / "clip.toml").write_text(text.replace('"dinov2"', '"clip"', 1), encoding="utf-8")
+
+    with pytest.raises(InvalidVersion, match="'clip' is not an image encoder"):
+        load_version(replace(settings, versions_dir=tmp_path / "versions"), "failure", "clip")
