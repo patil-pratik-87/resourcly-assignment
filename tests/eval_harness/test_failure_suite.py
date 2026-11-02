@@ -62,6 +62,7 @@ SPLITS = (
 FIG06 = FigureMatch(
     figure="18-061/fig06", report="18-061", section="spar_fatigue_N106ER", failure_mode="fatigue"
 )
+FIG05 = FIG06.model_copy(update={"figure": "18-061/fig05"})
 
 
 def write_failures(gold_dir: Path, rows: list[dict], splits: str) -> None:
@@ -73,10 +74,14 @@ def write_failures(gold_dir: Path, rows: list[dict], splits: str) -> None:
 
 
 class NameFinder:
-    """Finds figure 6 of report 18-061 in any photo whose file name says pos_fig06."""
+    """Finds figures 6 and 5 of report 18-061 in any photo whose file name says pos_fig06."""
 
-    def find(self, photo) -> list[FigureMatch]:
-        return [FIG06] if "pos_fig06" in photo.name or "logo" in photo.name else []
+    hidden: list[set[str]] = []
+
+    def find(self, photo, exclude=()) -> list[FigureMatch]:
+        self.hidden.append(set(exclude))
+        found = [FIG06, FIG05] if "pos_fig06" in photo.name or "logo" in photo.name else []
+        return [match for match in found if match.figure not in exclude]
 
 
 @pytest.fixture
@@ -87,6 +92,7 @@ def failing(gold_dir: Path, settings: Settings, tmp_path: Path, monkeypatch) -> 
             path = gold_dir / "failure" / r["image"]
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(png())
+    monkeypatch.setattr(NameFinder, "hidden", [])
     monkeypatch.setitem(FINDERS, "fake", Implementation(lambda settings, params: NameFinder()))
     versions = tmp_path / "versions" / "failure"
     versions.mkdir(parents=True)
@@ -116,12 +122,12 @@ def test_a_failure_run_stores_each_answer_and_scores_the_split(
     run = harness.run("failure", "fake-v1", settings=failing, store=store, split="dev")
     cases = {case.case_id: case for case in store.cases(run.run_id)}
 
-    assert cases["pos_fig06_v0"].prediction["figures"][0]["figure"] == "18-061/fig06"
+    assert cases["pos_fig06_v0"].prediction["figures"][0]["figure"] == "18-061/fig05"
     assert cases["pos_fig06_v0"].scores == {
         "case_score": 1.0,
         "section@1": 1.0,
         "mode@3": 1.0,
-        "top": "18-061/fig06",
+        "top": "18-061/fig05",
     }
     assert cases["pos_fig01_v0"].scores["case_score"] == 0.0
     assert cases["neg_drawing_ctc01"].scores == {"case_score": 1.0, "kept_out": 1.0, "top": None}
@@ -132,6 +138,33 @@ def test_a_failure_run_stores_each_answer_and_scores_the_split(
     assert run.summary["kept_out"] == pytest.approx(1 / 2)
 
 
+def test_a_failure_run_hides_each_photos_own_figure_from_the_finder(
+    failing: Settings, store: SqliteResultStore
+) -> None:
+    harness.run("failure", "fake-v1", settings=failing, store=store, split="dev")
+
+    assert NameFinder.hidden == [
+        set(),
+        set(),
+        {"16-006/fig01"},
+        {"18-061/fig06"},
+        {"18-061/fig06"},
+    ]
+
+
+def test_the_copy_setting_runs_the_failure_versions_and_keeps_the_own_figure(
+    failing: Settings, store: SqliteResultStore
+) -> None:
+    run = harness.run(
+        "failure-copy", "fake-v1", settings=failing, store=store, case_ids=("pos_fig06_v0",)
+    )
+
+    [case] = store.cases(run.run_id)
+    assert (run.component, run.version) == ("failure-copy", "fake-v1")
+    assert NameFinder.hidden == [set()]
+    assert case.scores["top"] == "18-061/fig06"
+
+
 def test_every_answer_can_be_looked_up(failing: Settings, store: SqliteResultStore) -> None:
     run = harness.run(
         "failure", "fake-v1", settings=failing, store=store, case_ids=("pos_fig06_v1",)
@@ -140,7 +173,8 @@ def test_every_answer_can_be_looked_up(failing: Settings, store: SqliteResultSto
     with open_services(failing) as services:
         [event] = services.traces.lookup(f"{run.run_id}:pos_fig06_v1").events
 
-    assert (event.step, event.output["top"]) == ("failure.find", "18-061/fig06")
+    assert (event.step, event.output["top"]) == ("failure.find", "18-061/fig05")
+    assert event.input["exclude"] == ["18-061/fig06"]
 
 
 def test_evals_run_failure_prints_the_summary(

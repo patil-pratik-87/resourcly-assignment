@@ -39,8 +39,8 @@ def run(
     A case whose call fails is stored with its error and scored as if it returned nothing.
     """
     suite = SUITES[component]
-    resolved = load_version(settings, component, version)
-    with open_services(settings.with_version(component, version)) as services:
+    resolved = load_version(settings, suite.part, version)
+    with open_services(settings.with_version(suite.part, version)) as services:
         pool = suite.load(services, split)
         chosen = _choose(pool, case_ids)
         if limit is not None:

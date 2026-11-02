@@ -15,7 +15,8 @@ class Suite:
     """A component's eval. Each case's scores carry a "case_score" that compare pairs by case.
 
     The first metric is the primary one, the number that says better or worse. A run's summary
-    is made from its cases' stored scores, with each case's stratum.
+    is made from its cases' stored scores, with each case's stratum. A suite that is a second
+    setting of a component, such as failure-copy, runs that component's versions.
     """
 
     component: str
@@ -26,10 +27,16 @@ class Suite:
     score: Callable[[Case, Any], dict[str, Any]]
     summarise: Callable[[metrics.Scored], dict[str, Any]]
     explain: Callable[[Case, Any], list[str]]
+    setting_of: str | None = None
 
     @property
     def primary(self) -> str:
         return self.metrics[0]
+
+    @property
+    def part(self) -> str:
+        """The component whose versions it runs: its own, or the one it is a setting of."""
+        return self.setting_of or self.component
 
 
 def _read(services: Services, case: Case, request_id: str) -> Any:
@@ -143,8 +150,21 @@ def _explain_route(case: Case, prediction: Any) -> list[str]:
     return lines
 
 
+def _hidden(case: Case) -> set[str]:
+    """The figure a photo was made from, which the held-out setting hides from the search."""
+    return {case.gold["expected_figure"]} if case.stratum == metrics.PHOTO else set()
+
+
 def _find(services: Services, case: Case, request_id: str) -> Any:
-    """Send the case's image to the failure finder of the version under test."""
+    """Send the case's image to the failure finder of the version under test, held out: the
+    photo's own figure is hidden, so the best hit must be another figure of its section."""
+    photo = services.gold.failure_photo(case.gold["image"])
+    found = services.failures.find(photo, request_id=request_id, exclude=_hidden(case))
+    return found.model_dump(mode="json")
+
+
+def _find_copy(services: Services, case: Case, request_id: str) -> Any:
+    """Send the case's image to the finder with its own figure in the search: the copy setting."""
     photo = services.gold.failure_photo(case.gold["image"])
     return services.failures.find(photo, request_id=request_id).model_dump(mode="json")
 
@@ -215,5 +235,16 @@ SUITES: dict[str, Suite] = {
         score=_score_failure,
         summarise=metrics.summarise_failures,
         explain=_explain_failure,
+    ),
+    "failure-copy": Suite(
+        component="failure-copy",
+        metrics=("section@1", "mode@3", "kept_out"),
+        case_columns=("top",),
+        load=failure_cases,
+        call=_find_copy,
+        score=_score_failure,
+        summarise=metrics.summarise_failures,
+        explain=_explain_failure,
+        setting_of="failure",
     ),
 }

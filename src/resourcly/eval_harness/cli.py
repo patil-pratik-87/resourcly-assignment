@@ -59,7 +59,9 @@ def _user_errors(command: Callable[..., None]) -> Callable[..., None]:
 def run(
     ctx: typer.Context,
     component: Component,
-    version: Annotated[str, typer.Option(help="A file in versions/<component>/.")],
+    version: Annotated[
+        str, typer.Option(help="A file in versions/<component>/; failure-copy runs failure's.")
+    ],
     split: Annotated[str, typer.Option(help="dev, test or all; train for the router.")] = "dev",
     case_id: Annotated[
         list[str] | None, typer.Option(help="Run only these cases; every case by default.")
@@ -251,15 +253,15 @@ def _list_versions(path: Path, component: str | None) -> None:
     with SqliteResultStore.open(path) as store:
         rows = [
             [
-                version.component,
+                suite.component,
                 version.name,
                 version.impl,
                 version.hash,
-                f"{len(store.runs(version.component, version.name))} run(s)",
+                f"{len(store.runs(suite.component, version.name))} run(s)",
                 version.description,
             ]
-            for name in ([_suite(component).component] if component else list(SUITES))
-            for version in list_versions(settings, name)
+            for suite in ([_suite(component)] if component else list(SUITES.values()))
+            for version in list_versions(settings, suite.part)
         ]
     _table(["component", "version", "impl", "hash", "runs", "description"], rows)
 
@@ -332,7 +334,7 @@ def _resolve(store: SqliteResultStore, settings: Settings, component: str, ref: 
 
 def _warn_if_edited(settings: Settings, component: str, version: str, run: Run) -> None:
     try:
-        now = load_version(settings, component, version).hash
+        now = load_version(settings, SUITES[component].part, version).hash
     except (LookupError, ValueError) as error:
         typer.echo(f"warning: {version} can't be loaded now ({error})", err=True)
         return
