@@ -6,6 +6,7 @@ import { JsonView } from "./JsonView";
 import {
   ROUTE_LABELS,
   chosenBy,
+  percent,
   elapsed,
   fileSize,
   plural,
@@ -127,17 +128,17 @@ function StatusPill({ item }: { item: RequestItem }) {
 
 /** The router's answer for an item: the case, the layer that chose it, how sure, and why. */
 export function Decision({ route }: { route: Routing }) {
-  const percent = route.confidence === null ? null : Math.round(route.confidence * 100);
+  const sure = route.confidence === null ? null : percent(route.confidence);
   return (
     <div className="decision">
       <div className="decision-line">
         <span className={`route-tag ${route.route}`}>{ROUTE_LABELS[route.route]}</span>
-        {percent !== null && (
+        {sure !== null && (
           <span className="confidence" title={`Confidence ${route.confidence}`}>
             <span className="confidence-meter" aria-hidden>
-              <span style={{ width: `${percent}%` }} />
+              <span style={{ width: `${sure}%` }} />
             </span>
-            <span>{percent}% sure</span>
+            <span>{sure}% sure</span>
           </span>
         )}
       </div>

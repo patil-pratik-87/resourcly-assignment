@@ -136,6 +136,13 @@ export function sentence(text: string): string {
   return /[.!?]$/.test(capital) ? capital : `${capital}.`;
 }
 
+/** A confidence from 0 to 1 in percent; one short of sure never rounds up to "100". */
+export function percent(confidence: number): string {
+  const value = confidence * 100;
+  if (confidence >= 1 || Math.round(value) < 100) return String(Math.min(100, Math.round(value)));
+  return (Math.floor(value * 10) / 10).toFixed(1);
+}
+
 export function plural(count: number, word: string): string {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
 }

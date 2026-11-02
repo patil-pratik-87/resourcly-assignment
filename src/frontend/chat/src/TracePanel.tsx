@@ -5,6 +5,7 @@ import {
   type LayerVerdict,
   duration,
   layerLabel,
+  percent,
   sentence,
   traceSteps,
 } from "./describe";
@@ -101,7 +102,7 @@ export function TracePanel({ api, requestId, itemId, version }: Props) {
 
 /** One router layer: whether it decided or passed the item on, how sure, and why. */
 function Layer({ layer }: { layer: LayerVerdict }) {
-  const percent = layer.confidence === null ? null : Math.round(layer.confidence * 100);
+  const sure = layer.confidence === null ? null : percent(layer.confidence);
   const outcome = layer.error ? "failed" : layer.decided ? "decided" : "passed";
   return (
     <li className={`layer ${outcome}`}>
@@ -119,7 +120,7 @@ function Layer({ layer }: { layer: LayerVerdict }) {
             "Passed on"
           )}
         </span>
-        {percent !== null && <span className="layer-sure">{percent}%</span>}
+        {sure !== null && <span className="layer-sure">{sure}%</span>}
         <span className="trace-time">{duration(layer.duration_ms)}</span>
       </div>
       {layer.error ? (
