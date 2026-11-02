@@ -14,15 +14,15 @@ uv run evals show RUN_ID --failures                  # the cases that scored bel
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
 uv run resourcly request RUN_ID:CASE_ID              # what one call did
 uv run evals compare failure shuffled-v0 my-finder-v1 --fail-if-worse
-uv run evals run --rescore RUN_ID                    # a stored run against corrected gold
 ```
 
-`compare` takes run ids or version names; a version stands for its latest run. Runs are stored
-in `runs/evals.sqlite`. Tune on dev, and run test only at milestones.
+`compare` takes run ids or version names; a version stands for its latest run. It scores both
+runs' stored answers on the current gold, on the cases both ran, so a gold fix needs no rerun.
+Runs are stored in `runs/evals.sqlite`. Tune on dev, and run test only at milestones.
 
 ## Current numbers
 
-The model-free versions set the floor for each component.
+The model-free version of each component sets its floor.
 
 | Version | Split | Primary | Other |
 | --- | --- | --- | --- |

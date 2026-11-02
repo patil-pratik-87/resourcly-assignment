@@ -119,8 +119,8 @@ How to use it: `docs/usage.md`.
 ## One harness for every use case
 
 The router and the failure finder are scored by the same harness as the reader. Each is one more
-suite: gold cases, a version file, a score per case, a stored run and a comparison. The
-model-free versions set the floors, on the dev split:
+component with one suite in `suites.py`: gold cases, a version file, a score per case, a stored
+run and a comparison. The model-free versions set the floors, on the dev split:
 
 | Version | Cases | Primary | Other |
 | --- | --- | --- | --- |
