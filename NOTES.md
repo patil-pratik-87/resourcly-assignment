@@ -137,8 +137,8 @@ Details: `docs/evals.md`.
 
 ## The router
 
-`three-layer-v1` runs structure rules, then a DINOv2-small probe deciding at 0.9, then Qwen3-VL
-8B for the rest. The probe has three classes and trained on the train split only (37 drawings,
+`three-layer-v1`, the default: structure rules, a DINOv2-small probe over drawing, photo and
+other deciding at 0.9, then Qwen3-VL 8B. The probe trained on the train split only (37 drawings,
 23 photos, 2 other).
 
 | Version | Split | Accuracy | Drawing recall | Other kept out |
@@ -148,12 +148,11 @@ Details: `docs/evals.md`.
 | `stub-v0` | test (57) | 0.421 | 0.091 | 0.500 |
 | `three-layer-v1` | test (57) | 1.000 | 1.000 | 1.000 |
 
-- How: `evals run` on dev, once on test, then `evals compare` with `stub-v0`.
-- Honest reading: near-perfect scores mean the route set is easy, not that the router is perfect. Its
-  phone photos and scans of drawings are made by code from clean renders; it has no real phone
-  photos, no real scanned reports and no mixed pages.
-- Miss: a dimensioned physics diagram goes to drawing (probe 0.986).
-- Limits: the NIST drawings in every split share one family. The app runs this router by
-  default; `RESOURCLY_ROUTER_VERSION=stub-v0` needs no model.
+- How: `evals run`, then `evals compare` with `stub-v0`. Accuracy counts other files too.
+- Other class: the probe now keeps 3 dev report pages out itself, so 18 dev files reach Qwen3-VL,
+  not 23. A dimensioned physics diagram still goes to drawing (probe 0.989).
+- Honest reading: near-perfect scores mean the route set is easy. Its phone photos and scans are
+  made by code; it has no real ones and no mixed pages.
+- Limits: one NIST drawing family in every split. `stub-v0` needs no model.
 
 Details: `docs/routing.md`.
