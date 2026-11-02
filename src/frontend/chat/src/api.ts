@@ -1,4 +1,5 @@
 // The chat agent's HTTP API; see docs/usage.md.
+import { figureNumber } from "./describe";
 import type { AgentInfo, ReadDocument, RequestRecord, RequestTrace } from "./types";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
@@ -51,5 +52,11 @@ export function createAgentApi(fetch: Fetch) {
     /** A page of an uploaded file as an image; a photo is its one page. */
     pageUrl: (requestId: string, itemId: string, page: number, dpi = 150) =>
       `${item(requestId, itemId)}/pages/${page}.png?dpi=${dpi}`,
+
+    /** A report figure, such as 18-061/fig05, as an image of at most `maxSide` pixels a side. */
+    figureUrl(figure: string, maxSide: number) {
+      const report = figure.split("/")[0]!;
+      return `/api/reports/${encodeURIComponent(report)}/figures/${figureNumber(figure)}.png?max_side=${maxSide}`;
+    },
   };
 }

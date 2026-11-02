@@ -3,12 +3,14 @@ import type { Bbox } from "./bbox";
 import type { AgentApi } from "./api";
 import { FileGlyph } from "./Composer";
 import { JsonView } from "./JsonView";
+import { AnswerProgress, PhotoAnswerView } from "./PhotoAnswer";
 import {
   ROUTE_LABELS,
   chosenBy,
   percent,
   elapsed,
   fileSize,
+  isPhoto,
   plural,
   progressShare,
   sentence,
@@ -71,8 +73,14 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
           <img src={api.pageUrl(requestId, item.item_id, 1, CARD_DPI)} alt="" />
         </button>
       )}
-      {(item.status === "reading" || item.status === "queued") && <ReadProgressView item={item} />}
-      {item.reply && (
+      {isPhoto(item) && (item.status === "queued" || item.status === "answering") && (
+        <AnswerProgress item={item} />
+      )}
+      {!isPhoto(item) && (item.status === "reading" || item.status === "queued") && (
+        <ReadProgressView item={item} />
+      )}
+      {item.answer && <PhotoAnswerView api={api} name={item.name} answer={item.answer} />}
+      {item.reply && !item.answer && (
         <p className="item-reply" role="note">
           {item.reply}
         </p>
@@ -115,6 +123,7 @@ function StatusPill({ item }: { item: RequestItem }) {
     routing: "Routing",
     queued: "Queued",
     reading: "Reading",
+    answering: "Answering",
     done: "Done",
     answered: "Answered",
     failed: "Failed",

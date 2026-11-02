@@ -10,6 +10,13 @@
   --accent: #2459d6;
   --accent-deep: #1d4bb8;
   --accent-soft: #e8eefc;
+  /* The accent as a fill under white text, and the faint and line tints around it. */
+  --accent-fill: #2459d6;
+  --on-accent: #fff;
+  --accent-faint: #f7f9fe;
+  --accent-line: #c3d1f5;
+  --hover: #f0f2f5;
+  --panel-sunk: #fbfbfc;
   /* Each state colour reaches 4.5:1 against white text and against its soft tint. */
   --done: #137336;
   --done-soft: #e6f4ea;
@@ -17,7 +24,16 @@
   --photo-soft: #fdf1e2;
   --issue: #c2271f;
   --issue-soft: #fdeceb;
+  --issue-line: #f5c9c6;
+  --photo-line: #ecd2ad;
   --slate-soft: #eceef1;
+  /* The grey a page or a figure sits on, and the dim behind a figure shown larger. */
+  --sheet: #e6e8ec;
+  --sheet-hover: #dfe2e7;
+  --scrim: rgb(26 29 35 / 0.55);
+  --code-key: #23408f;
+  --code-str: #116149;
+  --code-num: #94400b;
   --radius: 6px;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light;
@@ -31,6 +47,51 @@
   line-height: 1.4;
   color: var(--text);
   background: var(--bg);
+}
+
+/* Dark, when the system asks for it: the same roles on dark surfaces. Pages and figures keep their
+   white paper. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171c;
+    --panel: #1d2026;
+    --line: #2c3038;
+    --line-strong: #40454f;
+    --text: #e6e8ec;
+    --muted: #9ba2ae;
+    --accent: #84a9ff;
+    --accent-deep: #2f5fc9;
+    --accent-soft: #1f2a44;
+    --accent-fill: #3a68d8;
+    --on-accent: #fff;
+    --accent-faint: #1a2032;
+    --accent-line: #34466e;
+    --hover: #262a31;
+    --panel-sunk: #181a1f;
+    --done: #63cf8f;
+    --done-soft: #163021;
+    --photo: #f2aa55;
+    --photo-soft: #392914;
+    --issue: #f4877f;
+    --issue-soft: #3a1d1c;
+    --issue-line: #5c2c29;
+    --photo-line: #5a4220;
+    --slate-soft: #2a2e36;
+    --sheet: #2a2d34;
+    --sheet-hover: #32363e;
+    --scrim: rgb(0 0 0 / 0.6);
+    --code-key: #9ab8fa;
+    --code-str: #74d39f;
+    --code-num: #f0aa6c;
+    color-scheme: dark;
+  }
+
+  /* Marks on a page are drawn on its white paper, so they keep the light accent. */
+  .sheet-page,
+  .sheet-paper {
+    --accent: #2459d6;
+    --accent-fill: #2459d6;
+  }
 }
 
 * {
@@ -69,7 +130,7 @@ button,
 
 button:hover:not(:disabled),
 .button:hover {
-  background: #f0f2f5;
+  background: var(--hover);
 }
 
 button:disabled {
@@ -87,9 +148,9 @@ a:focus-visible,
 }
 
 button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -203,8 +264,8 @@ input {
   height: 18px;
   padding: 0 5px;
   border-radius: 9px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-size: 11.5px;
   font-weight: 600;
 }
@@ -233,7 +294,7 @@ input {
   padding: 8px 16px;
   background: var(--issue-soft);
   color: var(--issue);
-  border-bottom: 1px solid #f5c9c6;
+  border-bottom: 1px solid var(--issue-line);
   flex-shrink: 0;
 }
 
@@ -287,6 +348,7 @@ input {
 }
 
 .status-pill.reading,
+.status-pill.answering,
 .status-pill.routing,
 .status-pill.queued {
   background: var(--accent-soft);
@@ -319,12 +381,12 @@ input {
 }
 
 .file-glyph.pdf {
-  border-color: #bccbf1;
+  border-color: var(--accent-line);
   color: var(--accent);
 }
 
 .file-glyph.image {
-  border-color: #ecd2ad;
+  border-color: var(--photo-line);
   color: var(--photo);
 }
 
@@ -428,8 +490,8 @@ input {
   margin: 0;
   padding: 8px 12px;
   border-radius: 12px 12px 3px 12px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   white-space: pre-wrap;
 }
 
@@ -485,8 +547,9 @@ input {
 }
 
 .item-card.is-reading,
+.item-card.is-answering,
 .item-card.is-routing {
-  border-color: #c3d1f5;
+  border-color: var(--accent-line);
 }
 
 .item-head {
@@ -580,7 +643,7 @@ input {
 .item-error {
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid #f5c9c6;
+  border: 1px solid var(--issue-line);
   border-radius: var(--radius);
   background: var(--issue-soft);
   color: var(--issue);
@@ -617,13 +680,13 @@ button.item-photo {
   padding: 12px;
   border: none;
   border-radius: 8px;
-  background: #e6e8ec;
+  background: var(--sheet);
   cursor: zoom-in;
 }
 
 button.sheet-preview:hover:not(:disabled),
 button.item-photo:hover:not(:disabled) {
-  background: #dfe2e7;
+  background: var(--sheet-hover);
 }
 
 .sheet-page {
@@ -696,7 +759,7 @@ button.item-photo:hover:not(:disabled) {
   padding: 3px 10px;
   border-radius: var(--radius);
   background: var(--text);
-  color: #fff;
+  color: var(--panel);
   font-size: 12.5px;
 }
 
@@ -705,7 +768,7 @@ button.item-photo:hover:not(:disabled) {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfbfc;
+  background: var(--panel-sunk);
 }
 
 .inline-json > p {
@@ -892,9 +955,9 @@ button.item-photo:hover:not(:disabled) {
 .composer-send {
   height: 36px;
   padding: 0 16px;
-  border-color: var(--accent);
-  background: var(--accent);
-  color: #fff;
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -921,7 +984,7 @@ button.composer-send:disabled {
   place-items: center;
   border: 2px dashed var(--accent);
   border-radius: 14px;
-  background: rgb(244 245 247 / 0.9);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
   pointer-events: none;
 }
 
@@ -1252,7 +1315,7 @@ button.follow {
 .viewer-message {
   flex: 1;
   padding: 32px;
-  background: #e6e8ec;
+  background: var(--sheet);
 }
 
 .viewer-message blockquote {
@@ -1260,8 +1323,8 @@ button.follow {
   margin: 0;
   padding: 14px 18px;
   border-radius: 12px 12px 3px 12px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-size: 18px;
   line-height: 1.4;
 }
@@ -1271,7 +1334,7 @@ button.follow {
   position: relative;
   flex: 1;
   min-height: 0;
-  background: #e6e8ec;
+  background: var(--sheet);
 }
 
 .sheet-viewport {
@@ -1359,8 +1422,8 @@ button.vbox.selected {
 .vbox.hovered .balloon,
 .vbox.selected .balloon,
 .vbox:hover .balloon {
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .zoom {
@@ -1412,8 +1475,8 @@ button.vbox.selected {
 .value-card .balloon {
   flex-shrink: 0;
   margin-top: 1px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .value-card-raw {
@@ -1493,8 +1556,8 @@ button.value-card-close {
   margin: 0;
   padding: 8px 12px;
   border-radius: 12px 12px 3px 12px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   white-space: pre-wrap;
 }
 
@@ -1539,6 +1602,10 @@ button.value-card-close {
   flex: 1;
   min-height: 0;
   overflow: auto;
+}
+
+.side-answer {
+  padding: 14px 16px 20px;
 }
 
 .side-wait {
@@ -1604,8 +1671,8 @@ button.value-card-close {
 
 .j-entry.hovered .j-balloon,
 .j-entry.selected .j-balloon {
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .j-balloon {
@@ -1627,15 +1694,15 @@ button.value-card-close {
 }
 
 .j-key {
-  color: #23408f;
+  color: var(--code-key);
 }
 
 .j-str {
-  color: #116149;
+  color: var(--code-str);
 }
 
 .j-num {
-  color: #94400b;
+  color: var(--code-num);
 }
 
 .j-null,
@@ -1832,12 +1899,12 @@ button.j-fold {
 }
 
 .layer.decided {
-  border-color: #c3d1f5;
-  background: #f7f9fe;
+  border-color: var(--accent-line);
+  background: var(--accent-faint);
 }
 
 .layer.failed {
-  border-color: #f5c9c6;
+  border-color: var(--issue-line);
 }
 
 /* The layer and its time, then what it made of the file and how sure: the same at any width. */
@@ -1880,10 +1947,351 @@ button.j-fold {
   color: var(--muted);
 }
 
+/* A photo's answer from the reports, in its card and beside it in the viewer */
+
+/* An answer's length is unknown, so its bar shows work without a share. */
+.read-bar.working span {
+  width: 32%;
+  animation: working 1.4s ease-in-out infinite;
+}
+
+@keyframes working {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(320%);
+  }
+}
+
+.photo-answer {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.photo-answer h3 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.answer-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.photo-answer h3.answer-miss {
+  justify-self: start;
+  margin: 0 0 -6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--slate-soft);
+}
+
+.answer-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.answer-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.answer-list li > span:first-child {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+/* A source the answer cites; a figure is a button that opens it larger. */
+.cite,
+button.cite {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+button.cite {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line-strong));
+  color: var(--accent);
+  cursor: zoom-in;
+}
+
+button.cite:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+.basis {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.basis.stated {
+  color: var(--done);
+}
+
+/* The words of the report that say to do a stated action, on a line of their own. */
+.action-quote {
+  flex-basis: 100%;
+  padding-left: 10px;
+  border-left: 2px solid var(--line-strong);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.basis.inferred {
+  gap: 4px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.basis-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: var(--photo-soft);
+  color: var(--photo);
+  font-weight: 600;
+  cursor: help;
+}
+
+.figure-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.figure-strip li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+button.figure-thumb {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 120px;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: var(--sheet);
+  cursor: zoom-in;
+}
+
+button.figure-thumb:hover:not(:disabled) {
+  background: var(--sheet-hover);
+}
+
+.figure-thumb img {
+  display: block;
+  max-width: 100%;
+  max-height: 108px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.figure-caption {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+  min-width: 0;
+  font-size: 12.5px;
+}
+
+.figure-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+}
+
+.figure-name strong {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.figure-score {
+  margin-left: auto;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}
+
+.figure-section {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mode-tag {
+  padding: 1px 7px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mode-tag.defect {
+  background: var(--issue-soft);
+  color: var(--issue);
+}
+
+.mode-tag.reference {
+  background: var(--done-soft);
+  color: var(--done);
+}
+
+/* The gate: no report figure is close enough to the photo. */
+.photo-answer.gate {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.photo-answer.gate h3 {
+  margin: 0 0 2px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.photo-answer.gate p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.gate-icon {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+/* A report figure shown larger over the page */
+
+.figure-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--scrim);
+}
+
+.figure-dialog {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(1100px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.5);
+}
+
+.figure-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.figure-dialog-head strong {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.figure-dialog-image {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 16px;
+  overflow: auto;
+  background: var(--sheet);
+}
+
+.figure-dialog-image img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 220px);
+  object-fit: contain;
+  background: #fff;
+}
+
+.figure-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.figure-facts div {
+  display: flex;
+  gap: 8px;
+}
+
+.figure-facts dt {
+  color: var(--muted);
+}
+
+.figure-facts dd {
+  margin: 0;
+}
+
 /* Narrower screens: the versions go first, then everything stacks. */
 
-@media (max-width: 1180px) {
-  .versions div:last-child {
+@media (max-width: 1120px) {
+  .versions div:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .versions div:nth-child(2) {
     display: none;
   }
 }
@@ -1976,6 +2384,10 @@ button.j-fold {
     background: transparent;
     text-decoration: underline;
   }
+
+  .figure-overlay {
+    padding: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1985,5 +2397,11 @@ button.j-fold {
 
   .read-bar span {
     transition: none;
+  }
+
+  .read-bar.working span {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
   }
 }

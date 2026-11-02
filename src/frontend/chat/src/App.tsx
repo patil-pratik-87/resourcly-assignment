@@ -102,6 +102,12 @@ export default function App({ api = browserApi }: { api?: AgentApi }) {
               <dt>Reader</dt>
               <dd>{info.reader}</dd>
             </div>
+            {info.answer && (
+              <div>
+                <dt>Answer</dt>
+                <dd>{info.answer}</dd>
+              </div>
+            )}
           </dl>
         )}
       </header>

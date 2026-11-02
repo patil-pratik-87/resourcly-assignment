@@ -38,7 +38,17 @@ export function chosenBy(layer: string): string {
 }
 
 export function isActive(item: RequestItem): boolean {
-  return item.status === "routing" || item.status === "queued" || item.status === "reading";
+  return (
+    item.status === "routing" ||
+    item.status === "queued" ||
+    item.status === "reading" ||
+    item.status === "answering"
+  );
+}
+
+/** Whether the item is a photo of a part, which is answered from the reports. */
+export function isPhoto(item: RequestItem): boolean {
+  return item.route?.route === "photo" && item.kind === "file";
 }
 
 /** One line on where an item is, for the chat card and the request list. */
@@ -47,9 +57,11 @@ export function statusLine(item: RequestItem): string {
     case "routing":
       return "Choosing the case";
     case "queued":
-      return "Waiting for the reader";
+      return isPhoto(item) ? "Waiting for the answerer" : "Waiting for the reader";
     case "reading":
       return item.progress ? progressLine(item.progress) : "Opening the drawing";
+    case "answering":
+      return "Finding the closest report figures and answering";
     case "done": {
       const values = plural(item.values ?? 0, "value");
       const issues = item.issues ? `, ${plural(item.issues, "issue")}` : "";
@@ -88,6 +100,35 @@ export function tally(items: RequestItem[]): string {
   ] as const;
   const said = parts.filter(([n]) => n > 0).map(([n, word]) => `${n} ${word}`);
   return `${plural(items.length, "file")}: ${said.join(", ")}`;
+}
+
+/** A report figure as an answer cites it: 18-061/fig05 is "18-061 fig05". */
+export function figureLabel(figure: string): string {
+  return figure.replace("/", " ");
+}
+
+/** The number of a report figure, as the figure image address takes it: 18-061/fig05 is 5. */
+export function figureNumber(figure: string): number {
+  return Number(/fig0*(\d+)$/.exec(figure)?.[1] ?? 0);
+}
+
+/** A report section as the reports label it, in words: spar_fatigue_N106ER is "Spar fatigue N106ER". */
+export function sectionLabel(section: string): string {
+  const words = section.replace(/_/g, " ").trim();
+  return words ? words[0]!.toUpperCase() + words.slice(1) : words;
+}
+
+/** The failure modes the reports are labelled with; see data/reports/sections.toml. */
+const FAILURE_MODES: Record<string, string> = {
+  fatigue: "Fatigue",
+  overstress: "Overstress",
+  heat_damage: "Heat damage",
+  jam_corrosion: "Jam from corrosion",
+  reference_no_defect: "No defect, a reference",
+};
+
+export function failureModeLabel(mode: string): string {
+  return FAILURE_MODES[mode] ?? sectionLabel(mode);
 }
 
 /** How long a read has run, as "0:42" or "12:05". */

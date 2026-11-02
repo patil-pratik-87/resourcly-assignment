@@ -1,5 +1,6 @@
 import type { AgentApi } from "../api";
 import type {
+  PhotoAnswer,
   ReadDocument,
   RequestItem,
   RequestRecord,
@@ -33,6 +34,7 @@ export function item(overrides: Partial<RequestItem> = {}): RequestItem {
     status: "done",
     progress: null,
     reply: null,
+    answer: null,
     values: 3,
     issues: 0,
     error: null,
@@ -49,6 +51,67 @@ export function record(overrides: Partial<RequestRecord> = {}): RequestRecord {
     created_at: "2026-11-01T10:00:00.000+00:00",
     items: [item()],
     status: "done",
+    ...overrides,
+  };
+}
+
+/** A photo of a cracked spar answered from the reports: two findings, three actions, three figures. */
+export function photoAnswer(overrides: Partial<PhotoAnswer> = {}): PhotoAnswer {
+  const cite = (report: string, page: number, figure?: number) => ({
+    source: figure ? `${report} fig${String(figure).padStart(2, "0")}` : `${report} p${page}`,
+    report,
+    page,
+    figure: figure ? `${report}/fig${String(figure).padStart(2, "0")}` : null,
+  });
+  return {
+    not_in_reports: false,
+    kept_out: null,
+    matched: true,
+    answer: "The spar cap has a fatigue crack that started at a fastener hole.",
+    findings: [
+      {
+        statement: "The crack grew by fatigue from the lower forward fastener hole.",
+        citation: cite("18-061", 7, 5),
+      },
+      { statement: "The spar cap met the specified hardness.", citation: cite("18-061", 3) },
+    ],
+    actions: [
+      {
+        action: "Inspect the spar cap fastener holes with eddy current.",
+        basis: "stated",
+        citation: cite("18-061", 12),
+        quote: "inspect the spar cap fastener holes using eddy current",
+      },
+      {
+        action: "Check the other spar cap for the same crack.",
+        basis: "inferred",
+        citation: cite("18-061", 7, 5),
+      },
+      { action: "Replace the cracked spar cap before flight.", basis: "inferred", citation: null },
+    ],
+    figures: [
+      {
+        figure: "18-061/fig05",
+        report: "18-061",
+        section: "spar_fatigue_N106ER",
+        failure_mode: "fatigue",
+        score: 0.6241,
+      },
+      {
+        figure: "18-061/fig06",
+        report: "18-061",
+        section: "spar_fatigue_N106ER",
+        failure_mode: "fatigue",
+        score: 0.5815,
+      },
+      {
+        figure: "24-013/fig02",
+        report: "24-013",
+        section: "new_extrusion",
+        failure_mode: "reference_no_defect",
+        score: 0.4102,
+      },
+    ],
     ...overrides,
   };
 }
@@ -176,6 +239,8 @@ export function fakeAgentApi(initial: RequestRecord[] = []) {
     agent: async () => ({
       reader: "textlayer-v0 (textlayer)",
       router: "stub-v0 (stub)",
+      failure: "dinov2-base-v1 (nearest-figures)",
+      answer: "captions-v0 (captions)",
       max_file_mb: 25,
       max_files: 50,
     }),
@@ -195,6 +260,7 @@ export function fakeAgentApi(initial: RequestRecord[] = []) {
     result: async () => readDocument(),
     downloadUrl: (requestId, itemId) => `/download/${requestId}/${itemId}`,
     pageUrl: (requestId, itemId, page) => `/pages/${requestId}/${itemId}/${page}.png`,
+    figureUrl: (figure, maxSide) => `/figures/${figure}.png?max_side=${maxSide}`,
   };
   return { api, state };
 }

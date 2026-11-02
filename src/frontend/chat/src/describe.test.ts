@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   elapsed,
+  failureModeLabel,
+  figureLabel,
+  figureNumber,
   fileKind,
   firstItem,
+  isActive,
   layerLabel,
   matchRequest,
   middleCut,
@@ -11,13 +15,14 @@ import {
   percent,
   progressLine,
   sentAt,
+  sectionLabel,
   sentence,
   statusLine,
   tally,
   traceSteps,
   valuesOnPage,
 } from "./describe";
-import { event, item, readDocument, record, trace } from "./test/fakeAgentApi";
+import { event, item, readDocument, record, routing, trace } from "./test/fakeAgentApi";
 
 describe("status lines", () => {
   it("counts callouts while a drawing is read, and pages when it has several", () => {
@@ -46,6 +51,16 @@ describe("status lines", () => {
     expect(statusLine(item({ status: "queued" }))).toBe("Waiting for the reader");
   });
 
+  it("says a photo waits for the answerer, then is answered", () => {
+    const photo = { route: routing({ route: "photo" }), values: null };
+
+    expect(statusLine(item({ ...photo, status: "queued" }))).toBe("Waiting for the answerer");
+    expect(statusLine(item({ ...photo, status: "answering" }))).toBe(
+      "Finding the closest report figures and answering",
+    );
+    expect(isActive(item({ ...photo, status: "answering" }))).toBe(true);
+  });
+
   it("counts a bulk upload's items by state", () => {
     const items = [
       item(),
@@ -53,11 +68,22 @@ describe("status lines", () => {
       item({ status: "answered" }),
       item({ status: "reading" }),
       item({ status: "queued" }),
+      item({ status: "answering" }),
       item({ status: "failed" }),
     ];
 
-    expect(tally(items)).toBe("6 files: 2 read, 1 answered, 2 in progress, 1 failed");
+    expect(tally(items)).toBe("7 files: 2 read, 1 answered, 3 in progress, 1 failed");
     expect(tally([item()])).toBe("1 file: 1 read");
+  });
+
+  it("names a report figure, its section and its failure mode in words", () => {
+    expect(figureLabel("18-061/fig05")).toBe("18-061 fig05");
+    expect(figureNumber("18-061/fig05")).toBe(5);
+    expect(figureNumber("16-006/fig12")).toBe(12);
+    expect(sectionLabel("spar_fatigue_N106ER")).toBe("Spar fatigue N106ER");
+    expect(failureModeLabel("reference_no_defect")).toBe("No defect, a reference");
+    expect(failureModeLabel("jam_corrosion")).toBe("Jam from corrosion");
+    expect(failureModeLabel("something_new")).toBe("Something new");
   });
 
   it("names the router's layers in words", () => {

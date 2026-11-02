@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { AgentApi } from "./api";
 import { Decision, ItemGlyph, JustRead } from "./ItemCard";
 import { JsonView } from "./JsonView";
+import { PhotoAnswerView } from "./PhotoAnswer";
 import {
   MAX_SIDE_SHARE,
   MIN_SIDE_SHARE,
@@ -269,12 +270,16 @@ function listState(item: RequestItem): string {
     return `${Math.round(progressShare(item.progress) * 100)}%`;
   if (item.status === "done") return plural(item.values ?? 0, "value");
   if (item.status === "answered") return item.route ? ROUTE_LABELS[item.route.route] : "Answered";
-  return { routing: "Routing", queued: "Queued", reading: "Reading", failed: "Failed" }[
-    item.status
-  ];
+  return {
+    routing: "Routing",
+    queued: "Queued",
+    reading: "Reading",
+    answering: "Answering",
+    failed: "Failed",
+  }[item.status];
 }
 
-type Tab = "json" | "trace";
+type Tab = "json" | "answer" | "trace";
 
 /** One item: the page with its values on the left, its routing and its JSON or trace on the right. */
 function ItemViewer({
@@ -297,9 +302,11 @@ function ItemViewer({
   const [document, setDocument] = useState<ReadDocument | null>(null);
   // The page a person picked; until then a read in progress shows the page it is on.
   const [picked, setPage] = useState<number | null>(null);
-  // Until a tab is picked, a drawing opens on its JSON and anything else on its trace.
+  // Until a tab is picked, a drawing opens on its JSON, a photo on its answer once it has one,
+  // and anything else on its trace.
   const [pickedTab, setTab] = useState<Tab | null>(null);
-  const tab = pickedTab ?? (drawing ? "json" : "trace");
+  const answer = item.answer;
+  const tab = pickedTab ?? (drawing ? "json" : answer ? "answer" : "trace");
   const [hovered, setHovered] = useState<number | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [focusSheet, setFocusSheet] = useState<{ index: number; nonce: number } | null>(null);
@@ -514,12 +521,12 @@ function ItemViewer({
           {isActive(item) && item.route && (
             <p className="side-status">
               {statusLine(item)}
-              {item.status === "reading" && item.started_at && (
+              {(item.status === "reading" || item.status === "answering") && item.started_at && (
                 <span className="read-time">{elapsed(item.started_at)}</span>
               )}
             </p>
           )}
-          {item.reply && (
+          {item.reply && !answer && (
             <p className="item-reply" role="note">
               {item.reply}
             </p>
@@ -538,6 +545,16 @@ function ItemViewer({
               JSON
             </button>
           )}
+          {answer && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "answer"}
+              onClick={() => setTab("answer")}
+            >
+              Answer
+            </button>
+          )}
           <button
             type="button"
             role="tab"
@@ -554,7 +571,11 @@ function ItemViewer({
           )}
         </div>
         <div className="side-body">
-          {tab === "json" && drawing ? (
+          {tab === "answer" && answer ? (
+            <div className="side-answer">
+              <PhotoAnswerView api={api} name={item.name} answer={answer} />
+            </div>
+          ) : tab === "json" && drawing ? (
             document ? (
               <section aria-label={`JSON of ${title}`}>
                 <JsonView
