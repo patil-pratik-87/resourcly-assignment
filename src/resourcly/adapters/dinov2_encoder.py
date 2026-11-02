@@ -52,9 +52,10 @@ class Dinov2EncoderAdapter:
         return self._revisions.get(self.model_id, "not loaded")
 
     def encode(self, attachment: Attachment) -> list[float]:
+        seen = picture(attachment, self.max_side)
+        # after the picture, so a file that does not decode is refused without torch installed
         import torch
 
-        seen = picture(attachment, self.max_side)
         with self._lock:
             processor, model, device = self._load()
             inputs = processor(images=seen, return_tensors="pt")
