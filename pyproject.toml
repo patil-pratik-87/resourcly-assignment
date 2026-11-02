@@ -81,4 +81,5 @@ known-first-party = [
     "overlay",
     "train_route_probe",
     "check_photo_answers",
+    "write_outputs",
 ]

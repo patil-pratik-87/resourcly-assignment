@@ -43,6 +43,22 @@ def test_run_prints_the_selection_progress_and_summary_and_lists_the_run(evals) 
     assert "textlayer-v0" in listed.output
 
 
+def test_run_says_what_it_builds_and_runs_before_the_first_case(evals) -> None:
+    result = evals("run", "reader", "--version", "textlayer-v0")
+
+    lines = result.output.splitlines()
+    assert lines[0] == "reader textlayer-v0 (textlayer): building it and loading the dev cases"
+    first_case = next(i for i, line in enumerate(lines) if line.startswith("[1/1]"))
+    assert lines.index("running 1 case(s)") < first_case
+
+
+def test_a_setting_of_a_component_says_which_of_its_versions_it_builds(evals) -> None:
+    result = evals("run", "failure-copy", "--version", "shuffled-v0", "--limit", "1")
+
+    assert result.exit_code == 0, result.output
+    assert result.output.startswith("failure-copy shuffled-v0 (shuffled): building it")
+
+
 def test_run_limit_runs_a_partial_spread_of_the_split(evals) -> None:
     result = evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--limit", "1")
     refused = evals("run", "reader", "--version", "textlayer-v0", "--limit", "0")
