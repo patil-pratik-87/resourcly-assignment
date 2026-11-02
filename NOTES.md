@@ -216,3 +216,25 @@ Qwen3-VL 8B reads one crop at a time. The baseline `whole-page-v1` shows the mod
 - Cost: about twice the time per page; its crops are independent, so a server can batch them.
 
 Notebooks and per-drawing tables: `experiments/drawing/README.md`.
+
+## Drawing JSON for the 11 drawings
+
+`outputs/<drawing>.json` is what `vector-crop-v1` returns for each NIST drawing, from the run on
+all gold. Each file is in the gold schema and passes its checks.
+
+| Measure | Value |
+| --- | --- |
+| Pages read | 30, in 32 minutes (64 s per page, model load included) |
+| Errors, schema issues | 0 of 11, 0 |
+| Values written | 984, each with page, box, kind, value, limits and meaning |
+| Partial-gold recall | 0.743 (FTC-09 1.0, CTC-05 and FTC-10 0.5) |
+| Full-gold F1 | 0.725 |
+
+- Known precision issues: frame cells read again as bare numbers, a two-line note split in two,
+  and a neighbouring callout's cut-off text read as a value. On FTC-07 a modifier written as text
+  ("⌀.06 M") is kept as a separate diameter.
+- `confidence` is null: no reader measures how sure it is, so it writes nothing rather than a
+  made-up number.
+- Each callout is one feature typed by a fixed rule; leaders are not traced.
+- Rerun: `uv run --extra vlm evals run reader --version vector-crop-v1 --split all`, then
+  `04_winner_outputs.ipynb`. Decoding is greedy, so a rerun gives the same files.
