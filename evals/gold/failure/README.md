@@ -26,7 +26,7 @@ that no report covers, such as a drawing or a logo, should match nothing.
     expected_figure    <report>/fig<nn>, for a positive
     section            the part and assembly the figure is about
     failure_mode       heat_damage, jam_corrosion, fatigue, overstress or reference_no_defect
-    failure_keywords   words an answer about this failure should use, for answer checks later
+    failure_keywords   word starts an answer about this failure should use, as the answer evals check
     perturbations      what was done to the figure: crop, rotation, colour, blur, downscale
     unit               what a split keeps on one side: a figure with its copies, or one negative
 
@@ -37,9 +37,9 @@ Each figure was cut from its report and perturbed three times with seed 0: a ran
 as JPEG at quality 35 to 85. The labels were assigned by hand from the report text, by figure
 range.
 
-The positives are copies of the figures a finder indexes, so they test matching under damage,
-not photos the reports have never seen. Hiding each case's own figure from the index would test
-the harder question.
+The positives are copies of the figures a finder indexes. The failure and answer evals hide each
+case's own figure from the search, so the best hit must be another figure of its section;
+`failure-copy` keeps it in, which only tests matching under damage.
 
 ## Licences
 

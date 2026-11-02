@@ -10,6 +10,8 @@ uv run evals check                                   # every gold file and split
 uv run evals run router --version stub-v0            # the dev split by default
 uv run evals run reader --version textlayer-v0 --split all
 uv run evals run failure --version shuffled-v0 --limit 10   # a partial run of 10 cases
+uv run evals run failure-copy --version dinov2-base-v1      # the photo's own figure kept
+uv run --extra vlm evals run answer --version photo-v1 --limit 8
 uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
 uv run resourcly request RUN_ID:CASE_ID              # what one call did
@@ -25,8 +27,14 @@ refuses runs on other splits or cases unless `--force`, and `--fail-if-worse` al
 the primary metric was not measured. Runs are stored in `runs/evals.sqlite`. Tune on dev, and
 run test only at milestones.
 
-Three components are measured today. Answering questions from the reports, and a score for the
-whole agent, are planned as further components.
+Four components are measured today; a score for the whole agent is planned.
+
+The failure and answer suites run held out: each photo is a perturbed copy of a report figure,
+so its own figure is hidden from the search and the best hit must be another figure of its
+section. `failure-copy` keeps the figure in, which only checks that the perturbations do not
+break matching. The answer runs the failure version the settings name
+(`RESOURCLY_FAILURE_VERSION`, `dinov2-base-v1` by default), and `photo-v1` takes 18 to 35 s per
+photo with Qwen3-VL 8B, so run it with `--limit`.
 
 ## Current numbers
 
@@ -39,18 +47,30 @@ The model-free version of each component sets its floor. The two vision readers 
 | reader `whole-page-v1` | all, 11 drawings | f1 0.650 | precision 0.629, recall 0.672, partial_recall 0.543 |
 | reader `vector-crop-v1` | all, 11 drawings | f1 0.725 | precision 0.625, recall 0.862, partial_recall 0.743 |
 | router `stub-v0` | dev, 123 requests | accuracy 0.602 | drawing_recall 0.120, other_kept_out 0.500 |
-| failure `shuffled-v0` | dev, 86 cases | section@1 0.038 | mode@3 0.769, kept_out 0.000 |
-| failure `dinov2-base-v1` | dev, 86 cases | section@1 1.000 | mode@3 1.000, kept_out 0.375 |
-| failure `dinov2-base-v1` | test, 68 cases | section@1 1.000 | mode@3 1.000, kept_out 0.250 |
-| failure `dinov2-small-v1` | dev, 86 cases | section@1 1.000 | mode@3 1.000, kept_out 0.000 |
-| failure `dinov2-small-v1` | test, 68 cases | section@1 1.000 | mode@3 1.000, kept_out 0.125 |
+| failure `dinov2-base-v1` | all, 154 cases | section@1 0.645 | mode@3 0.942, kept_out 0.312 |
+| failure `dinov2-small-v1` | all, 154 cases | section@1 0.551 | mode@3 0.913, kept_out 0.062 |
+| failure `shuffled-v0` | all, 154 cases | section@1 0.022 | mode@3 0.739, kept_out 0.000 |
+| failure-copy `dinov2-base-v1` | all, 154 cases | section@1 1.000 | mode@3 1.000, kept_out 0.312 |
+| failure-copy `dinov2-small-v1` | all, 154 cases | section@1 1.000 | mode@3 1.000, kept_out 0.062 |
+| answer `captions-v0` | dev, 86 cases | correct 0.535 | report_cited 0.987, mode_named 0.564, citations_valid 1.000, kept_out 0.375 |
+| answer `captions-v0` | dev, `--limit 8` | correct 0.500 | report_cited 1.000, mode_named 0.500, citations_valid 1.000, kept_out 0.500 |
+| answer `photo-v1` | dev, `--limit 8` | correct 0.625 | report_cited 0.667, mode_named 0.667, citations_valid 1.000, kept_out 0.500 |
 
 A failure split's cases are photos of report figures and negatives: 78 and 8 in dev, 60 and 8 in
-test. The photos are changed copies of figures the DINOv2 finders index, so both find every one;
-with each photo's own figure hidden, base finds the right report first for 95.7% and small for
-89.9% ([photo-answers.md](photo-answers.md)). `kept_out` counts drawings, which the router keeps
-from the finder: base keeps out all 5 unrelated images and none of the 11 drawings, small 1 and
-none. The photo answer itself has no gold yet.
+test. Held out, `dinov2-base-v1` repeats the research exactly (`research/failure/README.md`):
+report@1 95.7%, section@1 64.5%, mode@1 79.0%, mode@3 94.2%. `dinov2-small-v1` is lower than the
+research's DINOv2-small (section@1 55.1% against 58.0%, report@1 89.9% against 90.6%) but mode@3
+is higher (91.3% against 90.6%). The research measured the router's class-token vector, and this
+version uses the class token joined to the patch mean. In the copy setting both find every photo.
+No finder keeps a drawing out: the 0.28 gate is below what drawings reach (0.42), so the router
+must keep them out. `dinov2-base-v1` keeps all 5 unrelated images out, and `dinov2-small-v1`
+keeps 1.
+
+On its 8 cases, `photo-v1` answers 4 of 6 photos correctly and the captions floor 3. Both photos
+it gets wrong had a top figure from another report, and the model followed it. It keeps the logo
+out, at the gate. It does not keep the drawing out: the drawing passes the gate and the model
+calls it spar fatigue. Every citation is valid in both runs. Eight cases are too few to rank the
+two versions.
 
 ## What each metric means
 
@@ -63,6 +83,10 @@ none. The photo answer itself has no gold yet.
 | `other_kept_out` | Files that fit no case, routed to `other`. |
 | `section@1` | Photos whose top figure is in the right report section. |
 | `mode@3` | Photos with the right failure mode in the top three figures. |
-| `kept_out` | Drawings and unrelated images that get no figure. |
+| `kept_out` | Drawings and unrelated images that get no figure; for `answer`, an answer that matches no figure. |
+| `correct` | Answers that are right: a photo's answer cites its report, names its failure mode and cites only valid sources; a negative's matches no figure. |
+| `report_cited` | Photo answers with a citation in the photo's report. |
+| `mode_named` | Photo answers whose text or findings have a word starting with one of the failure keywords. |
+| `citations_valid` | Citations that name a figure the finder returned, or a page of their reports, and whose source agrees. |
 
 A failed call is scored as an empty answer, so a crash lowers the score.
