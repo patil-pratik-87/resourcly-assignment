@@ -205,6 +205,45 @@ def _explain_failure(case: Case, prediction: Any) -> list[str]:
     return lines
 
 
+def _answer(services: Services, case: Case, request_id: str) -> Any:
+    """Ask the photo answer of the version under test about the case's image, with no text, held
+    out like the failure suite. The finder is the failure version the settings name."""
+    photo = services.gold.failure_photo(case.gold["image"])
+    answer = services.photo_answers.answer(photo, "", request_id, exclude=_hidden(case))
+    return answer.model_dump(mode="json")
+
+
+def _score_answer(case: Case, prediction: Any) -> dict[str, Any]:
+    return metrics.score_answer(case.gold, prediction)
+
+
+def _explain_answer(case: Case, prediction: Any) -> list[str]:
+    gold = case.gold
+    if case.stratum == metrics.PHOTO:
+        keywords = ", ".join(gold["failure_keywords"])
+        lines = [
+            f"expected report {gold['expected_report']}, failure mode {gold['failure_mode']}"
+            f" (keywords: {keywords})"
+        ]
+    else:
+        lines = [f"a negative ({case.stratum.removeprefix('negative_')}): expected no match"]
+    if not isinstance(prediction, dict):
+        return [*lines, "no answer"]
+    said = "not in the reports" if prediction.get("not_in_reports") else "matched"
+    if not prediction.get("not_in_reports") and not prediction.get("matched"):
+        said = "no match"
+    lines.append(f"{said}: {prediction.get('answer')}")
+    figures = [f for f in prediction.get("figures") or [] if isinstance(f, dict)]
+    for item in [*(prediction.get("findings") or []), *(prediction.get("actions") or [])]:
+        citation = item.get("citation") if isinstance(item, dict) else None
+        if isinstance(citation, dict):
+            valid = "valid" if metrics.valid_citation(citation, figures) else "invalid"
+            text = item.get("statement") or item.get("action")
+            lines.append(f"  [{citation.get('source')}] {valid}  {text}")
+    lines.append(f"closest figures: {', '.join(str(f.get('figure')) for f in figures[:3])}")
+    return lines
+
+
 SUITES: dict[str, Suite] = {
     "reader": Suite(
         component="reader",
@@ -246,5 +285,15 @@ SUITES: dict[str, Suite] = {
         summarise=metrics.summarise_failures,
         explain=_explain_failure,
         setting_of="failure",
+    ),
+    "answer": Suite(
+        component="answer",
+        metrics=("correct", "report_cited", "mode_named", "citations_valid", "kept_out"),
+        case_columns=("matched", "report_cited", "mode_named"),
+        load=failure_cases,
+        call=_answer,
+        score=_score_answer,
+        summarise=metrics.summarise_answers,
+        explain=_explain_answer,
     ),
 }
