@@ -484,6 +484,19 @@ class LayerVerdict:
     probabilities: dict[str, float] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class Choice:
+    """A model's answer to a multiple-choice question, read from its first answer token.
+
+    The probabilities are normalised over the options; mass is the share of the first token's
+    probability that fell on the options at all, so a low mass means the model wanted to say
+    something else.
+    """
+
+    probabilities: dict[str, float]
+    mass: float
+
+
 class Routing(BaseModel):
     """The router's answer to one request: the route, the layer that decided it, and why."""
 

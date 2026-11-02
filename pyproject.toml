@@ -14,6 +14,12 @@ dependencies = [
     "uvicorn>=0.32",
 ]
 
+[project.optional-dependencies]
+# The vision-language readers run Qwen3-VL on Apple silicon through MLX.
+vlm = [
+    "mlx-vlm==0.7.11; sys_platform == 'darwin' and platform_machine == 'arm64'",
+]
+
 [project.scripts]
 resourcly = "resourcly.cli:app"
 evals = "resourcly.eval_harness.cli:app"
