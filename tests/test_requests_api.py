@@ -9,6 +9,7 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+import pymupdf
 import pytest
 from fastapi.testclient import TestClient
 
@@ -338,6 +339,43 @@ def test_an_unknown_request_or_result_is_not_found(client: TestClient) -> None:
     assert client.get(f"/api/requests/{sent['request_id']}/items/message/result").status_code == (
         404
     )
+
+
+def test_each_page_of_an_upload_renders_as_an_image(client: TestClient) -> None:
+    sent = send(client, "", (f"{CTC01}.pdf", CTC01_PDF), ("bolt.png", png(40, 30)))
+    finished(client, sent["request_id"])
+    items = f"/api/requests/{sent['request_id']}/items"
+
+    drawing = client.get(f"{items}/{CTC01}/pages/1.png")
+    small = client.get(f"{items}/{CTC01}/pages/1.png?dpi=72")
+    photo = client.get(f"{items}/bolt/pages/1.png")
+
+    assert drawing.status_code == 200 and drawing.headers["content-type"] == "image/png"
+    page = pymupdf.Pixmap(drawing.content)
+    assert pymupdf.Pixmap(small.content).width * 150 // 72 in range(page.width - 2, page.width + 3)
+    # A photo is kept as a one-page PDF too, so it renders the same way, its shape unchanged.
+    picture = pymupdf.Pixmap(photo.content)
+    assert photo.status_code == 200 and picture.width * 3 == picture.height * 4
+
+
+@pytest.mark.parametrize(
+    ("path", "status"),
+    [
+        (f"{CTC01}/pages/2.png", 404),
+        ("absent/pages/1.png", 404),
+        ("message/pages/1.png", 404),
+        (f"{CTC01}/pages/1.png?dpi=10", 422),
+    ],
+)
+def test_a_page_that_is_not_there_is_not_found(client: TestClient, path: str, status: int) -> None:
+    sent = send(client, "read this", (f"{CTC01}.pdf", CTC01_PDF))
+    text = send(client, "hello")
+    finished(client, sent["request_id"])
+    finished(client, text["request_id"])
+    request_id = text["request_id"] if path.startswith("message") else sent["request_id"]
+
+    assert client.get(f"/api/requests/{request_id}/items/{path}").status_code == status
+    assert client.get(f"/api/requests/absent/items/{CTC01}/pages/1.png").status_code == 404
 
 
 def test_requests_list_newest_first_up_to_the_limit(client: TestClient) -> None:
