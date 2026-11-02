@@ -1,52 +1,46 @@
-# The eval harness
+# Running the evals
 
-The `resourcly.eval_harness` package, run as `uv run evals`, scores any version of a component on
-its gold cases and says whether a new version got better or worse. Every component has one shape:
-gold cases, a version file, a score per case, a stored run and a comparison. The harness reaches
-the app only through `open_services()` in `bootstrap.py`, so it measures the code the app runs.
+How to run the eval harness, and the numbers it gives today. What the harness is, its concepts
+and its modules: [src/resourcly/eval_harness/README.md](../src/resourcly/eval_harness/README.md).
+
+## Commands
 
 ```sh
 uv run evals check                                   # every gold file and split
-uv run evals run router --version stub-v0            # dev split by default
+uv run evals list components                         # components, metrics and versions
+uv run evals run router --version stub-v0            # the dev split by default
+uv run evals run reader --version textlayer-v0 --split all
+uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
-uv run evals compare failure shuffled-v0 my-finder-v1 --fail-if-worse
 uv run evals show --request REQUEST_ID               # what one call did
+uv run evals compare failure shuffled-v0 my-finder-v1 --fail-if-worse
+uv run evals run --rescore RUN_ID                    # a stored run against corrected gold
 ```
 
-## Components
+`compare` takes run ids or version names; a version stands for its latest run. Runs are stored
+in `runs/evals.sqlite`. Tune on dev, and run test only at milestones.
 
-| Component | Gold | Primary metric | Other metrics | Versions |
-| --- | --- | --- | --- | --- |
-| `reader`: drawing to JSON | `evals/gold/drawings/`, `partial/` | `f1` | `precision`, `recall`, `partial_recall` | `textlayer-v0` |
-| `router`: which case a request is | `evals/gold/routes/` | `accuracy` | `drawing_recall`, `other_kept_out` | `stub-v0` |
-| `failure`: photo to report figure | `evals/gold/failure/` | `section@1` | `mode@3`, `kept_out` | `shuffled-v0` |
+## Current numbers
 
-- Reader: a value matches on page, unit, kind and number. Partial gold gives recall only.
-- Router: accuracy covers drawing, photo and text requests. Drawing recall is the share of
-  drawings sent to the reader. Files that fit no case are scored apart, as the share kept out.
-- Failure: section@1 asks whether the top figure is in the right report section, mode@3 whether
-  one of the top three shows the right failure mode. Drawings and unrelated images should get no
-  figure (`kept_out`).
+The model-free versions set the floor for each component.
 
-## How a run works
+| Version | Split | Primary | Other |
+| --- | --- | --- | --- |
+| reader `textlayer-v0` | all, 11 drawings | f1 0.344 | precision 0.902, recall 0.213, partial_recall 0.129 |
+| router `stub-v0` | dev, 123 requests | accuracy 0.607 | drawing_recall 0.120, other_kept_out 0.500 |
+| failure `shuffled-v0` | dev, 86 photos | section@1 0.038 | mode@3 0.769, kept_out 0.000 |
 
-A run loads the split's gold cases (`evals/splits.toml`) and calls the version on each one with
-request id `<run id>:<case id>`, which leaves a trace. It stores each raw answer, error, time and
-score in `runs/evals.sqlite`, with the version hash, the git commit and a hash of the cases and
-their gold. A failed call is scored as an empty answer. `evals run --rescore RUN_ID` scores
-stored answers against corrected gold without calling the component.
+## What each metric means
 
-Splits keep related cases, such as a figure and its perturbed copies, on one side. Tune on dev.
+| Metric | Meaning |
+| --- | --- |
+| `f1`, `precision`, `recall` | Reader values that match the full gold on page, unit, kind and number. |
+| `partial_recall` | Recall on partial gold, which lists only some values per drawing. |
+| `accuracy` | Router requests with a case (drawing, photo, text) sent to the right one. |
+| `drawing_recall` | Drawings the router sends to the reader. |
+| `other_kept_out` | Files that fit no case, routed to `other`. |
+| `section@1` | Photos whose top figure is in the right report section. |
+| `mode@3` | Photos with the right failure mode in the top three figures. |
+| `kept_out` | Drawings and unrelated images that get no figure. |
 
-## Comparing versions
-
-`evals compare` takes run ids or version names. It gives a verdict per metric only when both runs
-saw the same cases and gold, then lists each case by its change in `case_score`.
-
-## Adding a component or a version
-
-A version is a TOML file whose `impl` names an entry of `READERS`, `ROUTERS` or `FINDERS` in
-`bootstrap.py`, and whose other keys are settings that entry lists. A new implementation is an
-adapter of the component's port, registered there. A new component is one more `Suite` in
-`src/resourcly/eval_harness/suites.py`, with its gold loader in `cases.py` and its metrics in
-`metrics.py`; the harness, the run store and `compare` need no change.
+A failed call is scored as an empty answer, so a crash lowers the score.
