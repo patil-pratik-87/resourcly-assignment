@@ -23,8 +23,9 @@ def test_the_outputs_are_the_documents_of_the_latest_full_run(
     written = out / f"{CTC01}.json"
     expected = json.dumps(cases[CTC01].prediction["document"], indent=2, ensure_ascii=False)
     assert written.read_text(encoding="utf-8") == expected + "\n"
-    assert sorted(path.name for path in out.iterdir()) == [f"{CTC01}.json", "partial_a.json"]
-    assert f"wrote 2 file(s) to {out} from run {full}" in capsys.readouterr().out
+    # partial_a has no PDF, so its case failed and left no document to write
+    assert [path.name for path in out.iterdir()] == [f"{CTC01}.json"]
+    assert f"wrote 1 file(s) to {out} from run {full}" in capsys.readouterr().out
 
 
 def test_without_a_full_run_it_says_how_to_make_one(evals, tmp_path: Path) -> None:
