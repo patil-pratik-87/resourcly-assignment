@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -163,8 +164,10 @@ def _splits(services: Services, component: str, split: str) -> dict[str, list[st
     return splits
 
 
-def check_gold(services: Services) -> list[tuple[str, str]]:
+def check_gold(services: Services, components: Iterable[str]) -> list[tuple[str, str]]:
     """(level, message) pairs about the gold and splits; level is ok, warning or error.
+
+    `components` are those with a suite; splits.toml naming another is a warning.
 
     Each drawing's gold goes through the package models, then, once they accept it, the rules in
     gold_rules, so one bad field is reported once. The router and failure gold go through their
@@ -172,7 +175,7 @@ def check_gold(services: Services) -> list[tuple[str, str]]:
     """
     splits = services.gold.splits()
     found: list[tuple[str, str]] = []
-    for component in sorted(splits.keys() - {"reader", "router", "failure"}):
+    for component in sorted(splits.keys() - set(components)):
         found.append(("warning", f"splits.toml names an unknown component '{component}'"))
     sources = {row.drawing: row.source for row in services.gold.list_drawings() if row.has_gold}
     issues = services.gold.check_all()

@@ -29,7 +29,8 @@ DEFAULT_STORE = PROJECT_ROOT / "runs" / "evals.sqlite"
 StorePath = Annotated[
     Path, typer.Option("--store", envvar="RESOURCLY_EVALS_DB", help="SQLite file of the results.")
 ]
-Component = Annotated[str, typer.Argument(help="reader, router or failure")]
+NAMES = ", ".join(SUITES)
+Component = Annotated[str, typer.Argument(help=f"One of {NAMES}.")]
 
 
 @app.callback()
@@ -254,7 +255,7 @@ def list_(
     ctx: typer.Context,
     what: Annotated[Listing, typer.Argument(help="What to list.")],
     component: Annotated[
-        str | None, typer.Argument(help="reader, router or failure; cases need one.")
+        str | None, typer.Argument(help=f"One of {NAMES}; cases need one.")
     ] = None,
     split: Annotated[str, typer.Option(help="dev, test or all, for cases.")] = "dev",
     version: Annotated[str | None, typer.Option(help="Only this version's runs.")] = None,
@@ -265,7 +266,7 @@ def list_(
         _list_versions(ctx.obj, component)
     elif what is Listing.cases:
         if component is None:
-            raise ValueError("cases need a component: reader, router or failure")
+            raise ValueError(f"cases need a component: {NAMES}")
         _list_cases(component, split)
     else:
         _list_runs(ctx.obj, component, version, limit)
@@ -327,7 +328,7 @@ def check(ctx: typer.Context) -> None:
     through their row checks; and every split for leaks and gaps.
     """
     with open_services(Settings.from_env()) as services:
-        found = check_gold(services)
+        found = check_gold(services, SUITES)
     for level, message in found:
         typer.echo(f"{'ok   ' if level == 'ok' else level + ':'} {message}")
     errors = sum(1 for level, _ in found if level == "error")
@@ -429,7 +430,7 @@ def _metric_rows(suite: Suite, run: Run) -> list[list[str]]:
 
 def _suite(component: str) -> Suite:
     if component not in SUITES:
-        raise LookupError(f"'{component}' is not a component; use {', '.join(SUITES)}")
+        raise LookupError(f"'{component}' is not a component; use {NAMES}")
     return SUITES[component]
 
 
