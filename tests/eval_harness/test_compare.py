@@ -63,7 +63,22 @@ def test_both_runs_are_scored_again_on_the_current_gold_with_the_primary_first()
     assert result.warnings == []
 
 
-def test_cases_one_run_lacks_or_with_no_gold_now_are_left_out_with_a_warning() -> None:
+def test_runs_on_different_cases_or_splits_are_refused_without_force() -> None:
+    fewer = [answer("a", 1, 2)]
+    both = [answer("a", 1, 2), answer("b", 3)]
+    test = replace(CANDIDATE, split="test")
+
+    with pytest.raises(ValueError, match="the runs ran on different cases: 2 dev and 1 dev"):
+        compare_runs(READER, GOLD, BASE, both, CANDIDATE, fewer)
+    with pytest.raises(ValueError, match="the runs ran on different cases: 2 dev and 2 test"):
+        compare_runs(READER, GOLD, BASE, both, test, both)
+    forced = compare_runs(READER, GOLD, BASE, both, test, fewer, force=True)
+
+    assert [c.case_id for c in forced.cases] == ["a"]
+    assert forced.warnings == ["only in base: b"]
+
+
+def test_with_force_the_cases_one_run_lacks_or_with_no_gold_now_are_left_out() -> None:
     result = compare_runs(
         READER,
         GOLD,
@@ -71,6 +86,7 @@ def test_cases_one_run_lacks_or_with_no_gold_now_are_left_out_with_a_warning() -
         [answer("a", 1, 2), answer("b", 3), answer("gone", 5)],
         CANDIDATE,
         [answer("a", 1, 2), answer("gone", 5), answer("new", 6)],
+        force=True,
     )
 
     assert [c.case_id for c in result.cases] == ["a"]
@@ -89,7 +105,7 @@ def test_a_failed_call_is_scored_as_an_empty_answer() -> None:
 
 def test_runs_that_share_no_case_with_gold_are_refused() -> None:
     with pytest.raises(ValueError, match="the runs share no case that has gold now"):
-        compare_runs(READER, GOLD, BASE, [answer("a", 1)], CANDIDATE, [answer("b", 3)])
+        compare_runs(READER, GOLD, BASE, [answer("a", 1)], CANDIDATE, [answer("b", 3)], force=True)
 
 
 def test_runs_of_two_components_are_refused() -> None:

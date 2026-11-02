@@ -130,7 +130,7 @@ def test_compare_takes_the_latest_run_of_a_version_on_the_cases_both_ran(
     latest = run_id(evals("run", "reader", "--version", "textlayer-v0", "--case-id", CTC01))
     blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "all"))
 
-    result = evals("compare", "reader", "textlayer-v0", "blank-v0")
+    result = evals("compare", "reader", "textlayer-v0", "blank-v0", "--force")
 
     assert result.exit_code == 0, result.output
     assert f"base       {latest}" in result.output
@@ -138,11 +138,24 @@ def test_compare_takes_the_latest_run_of_a_version_on_the_cases_both_ran(
     assert "warning: only in candidate: partial_a" in result.output
 
 
+def test_compare_refuses_runs_on_other_cases_unless_forced(evals, blank_reader) -> None:
+    base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
+    blank = run_id(evals("run", "reader", "--version", "blank-v0"))
+
+    refused = evals("compare", "reader", base, blank)
+    forced = evals("compare", "reader", base, blank, "--force")
+
+    assert refused.exit_code == 1
+    assert "error: the runs ran on different cases: 2 all and 1 dev" in refused.output
+    assert forced.exit_code == 0, forced.output
+    assert "warning: only in base: partial_a" in forced.output
+
+
 def test_runs_that_share_no_case_are_not_compared(evals, blank_reader) -> None:
     base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "test"))
     blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "dev"))
 
-    result = evals("compare", "reader", base, blank)
+    result = evals("compare", "reader", base, blank, "--force")
 
     assert result.exit_code == 1
     assert "error: the runs share no case that has gold now" in result.output
