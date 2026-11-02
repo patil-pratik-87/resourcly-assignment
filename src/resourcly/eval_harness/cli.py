@@ -61,8 +61,12 @@ def run(
     ctx: typer.Context,
     component: Component,
     version: Annotated[
-        str, typer.Option(help="A file in versions/<component>/; failure-copy runs failure's.")
-    ],
+        str | None,
+        typer.Option(
+            help="A file in versions/<component>/, the one the app runs by default;"
+            " failure-copy runs failure's."
+        ),
+    ] = None,
     split: Annotated[str, typer.Option(help="dev, test or all; train for the router.")] = "dev",
     case_id: Annotated[
         list[str] | None, typer.Option(help="Run only these cases; every case by default.")
@@ -75,6 +79,7 @@ def run(
     """Run a version of a component on the gold cases of a split."""
     suite = _suite(component)
     settings = Settings.from_env()
+    version = version or settings.versions[suite.part]
     impl = load_version(settings, suite.part, version).impl
     typer.echo(f"{component} {version} ({impl}): building it and loading the {split} split")
     progress = {"done": 0, "total": 0}
