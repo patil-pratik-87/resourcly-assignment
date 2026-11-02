@@ -71,6 +71,7 @@ describe("status lines", () => {
     expect(percent(0.7)).toBe("70");
     expect(percent(0.9038)).toBe("90");
     expect(percent(0.998)).toBe("99.8");
+    expect(percent(0.99783)).toBe("99.8");
     expect(percent(0.9999)).toBe("99.9");
     expect(percent(1)).toBe("100");
   });

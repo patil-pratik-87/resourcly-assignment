@@ -140,7 +140,8 @@ export function sentence(text: string): string {
 export function percent(confidence: number): string {
   const value = confidence * 100;
   if (confidence >= 1 || Math.round(value) < 100) return String(Math.min(100, Math.round(value)));
-  return (Math.floor(value * 10) / 10).toFixed(1);
+  const tenths = Math.round(value * 10);
+  return ((tenths < 1000 ? tenths : 999) / 10).toFixed(1);
 }
 
 export function plural(count: number, word: string): string {
