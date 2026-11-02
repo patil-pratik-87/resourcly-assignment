@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { Bbox } from "./bbox";
 import type { AgentApi } from "./api";
 import { FileGlyph } from "./Composer";
 import { JsonView } from "./JsonView";
@@ -11,6 +12,7 @@ import {
   progressShare,
   sentence,
   statusLine,
+  valuesOnPage,
 } from "./describe";
 import type { ReadDocument, RequestItem, Routing } from "./types";
 
@@ -21,12 +23,17 @@ interface Props {
   onOpen: () => void;
 }
 
+/** Pages in the chat render small: enough to see the callouts light up, quick to load. */
+const CARD_DPI = 96;
+
 /** The agent's answer about one file, or about the text alone: the case, then the result. */
 export function ItemCard({ api, requestId, item, onOpen }: Props) {
   const [showJson, setShowJson] = useState(false);
   const route = item.route;
   const read = item.status === "done";
   const title = item.kind === "file" ? item.name : "Your message";
+  const drawing = route?.route === "drawing" && item.kind === "file";
+  const picture = item.kind === "file" && !drawing && item.status !== "failed" && item.pages > 0;
   return (
     <section className={`item-card is-${item.status}`} aria-label={title}>
       <header className="item-head">
@@ -41,7 +48,7 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
           )}
         </div>
         <button type="button" className="quiet open" onClick={onOpen}>
-          Open in requests
+          Open in viewer
         </button>
         <StatusPill item={item} />
       </header>
@@ -52,6 +59,17 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
         item.status === "routing" && <p className="decision pending">Choosing the case</p>
       )}
 
+      {drawing && <SheetPreview api={api} requestId={requestId} item={item} onOpen={onOpen} />}
+      {picture && (
+        <button
+          type="button"
+          className="item-photo"
+          aria-label={`Open ${item.name} in the viewer`}
+          onClick={onOpen}
+        >
+          <img src={api.pageUrl(requestId, item.item_id, 1, CARD_DPI)} alt="" />
+        </button>
+      )}
       {(item.status === "reading" || item.status === "queued") && <ReadProgressView item={item} />}
       {item.reply && (
         <p className="item-reply" role="note">
@@ -167,6 +185,66 @@ export function JustRead({ latest }: { latest: string[] }) {
       ))}
     </div>
   );
+}
+
+/**
+ * The drawing's page with its callouts: while reading, the found callouts with the one being read
+ * marked; when done, every value the reader placed on the first page. A click opens the viewer.
+ */
+function SheetPreview({ api, requestId, item, onOpen }: Props) {
+  const [placed, setPlaced] = useState<{ index: number; bbox: Bbox }[]>([]);
+  const progress = item.progress;
+  const page = progress?.page ?? 1;
+
+  useEffect(() => {
+    if (item.status !== "done") return;
+    let alive = true;
+    api
+      .result(requestId, item.item_id)
+      .then((document) => alive && setPlaced(valuesOnPage(document, 1)))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [api, requestId, item.item_id, item.status]);
+
+  const boxes =
+    item.status === "reading" && progress
+      ? progress.boxes.map((bbox, index) => ({
+          bbox,
+          key: index,
+          state:
+            index < progress.page_done ? "read" : index === progress.page_done ? "now" : "next",
+        }))
+      : placed.map(({ bbox, index }) => ({ bbox, key: index, state: "read" }));
+
+  return (
+    <button
+      type="button"
+      className="sheet-preview"
+      aria-label={`Open ${item.name} in the viewer`}
+      onClick={onOpen}
+    >
+      <span className="sheet-page">
+        <img src={api.pageUrl(requestId, item.item_id, page, CARD_DPI)} alt="" />
+        <span className="sheet-marks">
+          {boxes.map(({ bbox, key, state }) => (
+            <span key={key} className={`mark ${state}`} style={boxStyle(bbox)} />
+          ))}
+        </span>
+      </span>
+      {item.status === "queued" && <span className="sheet-note">Waiting for the reader</span>}
+    </button>
+  );
+}
+
+export function boxStyle([x0, y0, x1, y1]: Bbox): React.CSSProperties {
+  return {
+    left: `${x0 * 100}%`,
+    top: `${y0 * 100}%`,
+    width: `${(x1 - x0) * 100}%`,
+    height: `${(y1 - y0) * 100}%`,
+  };
 }
 
 /** A read drawing's JSON in the chat, fetched when first shown. */

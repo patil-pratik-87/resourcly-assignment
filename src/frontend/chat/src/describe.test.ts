@@ -7,14 +7,16 @@ import {
   matchRequest,
   middleCut,
   overCap,
+  pageOf,
   progressLine,
   sentAt,
   sentence,
   statusLine,
   tally,
   traceSteps,
+  valuesOnPage,
 } from "./describe";
-import { event, item, record, trace } from "./test/fakeAgentApi";
+import { event, item, readDocument, record, trace } from "./test/fakeAgentApi";
 
 describe("status lines", () => {
   it("counts callouts while a drawing is read, and pages when it has several", () => {
@@ -107,6 +109,23 @@ describe("status lines", () => {
     expect(sentAt(new Date(2026, 10, 1, 9, 5).toISOString(), now)).toBe("09:05");
     expect(sentAt(new Date(2026, 9, 31, 9, 5).toISOString(), now)).toBe("Yesterday 09:05");
     expect(sentAt(new Date(2026, 9, 28, 9, 5).toISOString(), now)).toBe("28 Oct 09:05");
+  });
+});
+
+describe("linking values and pages", () => {
+  it("places each value on its page by its index in the document", () => {
+    const document = readDocument();
+
+    expect(valuesOnPage(document, 1).map(({ index }) => index)).toEqual([0, 1]);
+    expect(valuesOnPage(document, 2)).toEqual([{ index: 2, bbox: [0.3, 0.3, 0.4, 0.4] }]);
+    expect(pageOf(document, 2)).toBe(2);
+  });
+
+  it("leaves out a value without a usable box", () => {
+    const document = readDocument();
+    document.values![0]!.bbox = "somewhere";
+
+    expect(valuesOnPage(document, 1).map(({ index }) => index)).toEqual([1]);
   });
 });
 

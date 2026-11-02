@@ -28,7 +28,7 @@ export function item(overrides: Partial<RequestItem> = {}): RequestItem {
     name: "ctc.pdf",
     media_type: "application/pdf",
     size: 55_000,
-    pages: 1,
+    pages: 2,
     route: routing(),
     status: "done",
     progress: null,
@@ -53,22 +53,26 @@ export function record(overrides: Partial<RequestRecord> = {}): RequestRecord {
   };
 }
 
-/** A read drawing of three values. */
+/** A read drawing of two pages: values 1 and 2 on page 1, value 3 on page 2. */
 export function readDocument(): ReadDocument {
-  const value = (n: number) => ({
+  const value = (n: number, page: number, bbox: number[]) => ({
     id: `ctc01-0${n}`,
     raw: `⌀${n}0 ±0.1`,
     kind: "diameter",
     meaning: `A diameter of ${n}0 mm.`,
-    page: 1,
-    bbox: [0.1 * n, 0.1, 0.1 * n + 0.05, 0.15],
+    page,
+    bbox,
   });
   return {
     drawing: "ctc",
-    page_count: 1,
+    page_count: 2,
     title_block: { units: "mm" },
     features: [{ id: "callout_01" }],
-    values: [value(1), value(2), value(3)],
+    values: [
+      value(1, 1, [0.1, 0.1, 0.2, 0.2]),
+      value(2, 1, [0.5, 0.5, 0.6, 0.6]),
+      value(3, 2, [0.3, 0.3, 0.4, 0.4]),
+    ],
   };
 }
 
@@ -190,6 +194,7 @@ export function fakeAgentApi(initial: RequestRecord[] = []) {
     trace: async (id) => trace(id),
     result: async () => readDocument(),
     downloadUrl: (requestId, itemId) => `/download/${requestId}/${itemId}`,
+    pageUrl: (requestId, itemId, page) => `/pages/${requestId}/${itemId}/${page}.png`,
   };
   return { api, state };
 }

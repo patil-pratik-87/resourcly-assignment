@@ -47,5 +47,9 @@ export function createAgentApi(fetch: Fetch) {
 
     downloadUrl: (requestId: string, itemId: string) =>
       `${item(requestId, itemId)}/result?download=true`,
+
+    /** A page of an uploaded file as an image; a photo is its one page. */
+    pageUrl: (requestId: string, itemId: string, page: number, dpi = 150) =>
+      `${item(requestId, itemId)}/pages/${page}.png?dpi=${dpi}`,
   };
 }

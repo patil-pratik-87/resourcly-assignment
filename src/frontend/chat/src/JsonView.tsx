@@ -1,16 +1,38 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { ReadDocument } from "./types";
+
+interface Props {
+  document: ReadDocument;
+  hovered?: number | null;
+  selected?: number | null;
+  /** Scroll this value's entry into view; `nonce` repeats the request for the same value. */
+  focus?: { index: number; nonce: number } | null;
+  onHover?: (index: number | null) => void;
+  /** Without it the entries are plain text, as in the chat; with it each one is a button. */
+  onSelect?: (index: number) => void;
+}
 
 /** Short objects and arrays of plain values print on one line, as a person would write them. */
 const INLINE_WIDTH = 64;
 
-/** The document as pretty-printed JSON; each entry of `values` is one numbered block. */
-export function JsonView({ document }: { document: ReadDocument }) {
+/**
+ * The document as pretty-printed JSON. Each entry of `values` is one block, numbered like its
+ * balloon on the page, and linked to it both ways when the page is shown beside it.
+ */
+export function JsonView(props: Props) {
+  const { document, hovered = null, selected = null, focus = null, onHover, onSelect } = props;
+  const box = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({ features: false });
+
+  useEffect(() => {
+    if (!focus) return;
+    const entry = box.current?.querySelector<HTMLElement>(`[data-entry="${focus.index}"]`);
+    entry?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+  }, [focus]);
 
   const keys = Object.keys(document);
   return (
-    <div className="json">
+    <div className="json" ref={box} onMouseLeave={() => onHover?.(null)}>
       <div className="j-line">{"{"}</div>
       <div className="j-children">
         {keys.map((key, position) => {
@@ -26,7 +48,27 @@ export function JsonView({ document }: { document: ReadDocument }) {
                 </div>
                 <div className="j-children j-values">
                   {value.map((entry, index) => (
-                    <div key={index} className="j-entry">
+                    <div
+                      key={index}
+                      data-entry={index}
+                      className={`j-entry${onSelect ? " linked" : ""}${
+                        index === hovered ? " hovered" : ""
+                      }${index === selected ? " selected" : ""}`}
+                      {...(onSelect && {
+                        role: "button",
+                        tabIndex: 0,
+                        "aria-label": `JSON of value ${index + 1}`,
+                        "aria-pressed": index === selected,
+                        onMouseEnter: () => onHover?.(index),
+                        onClick: () => onSelect(index),
+                        onKeyDown: (event: React.KeyboardEvent) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            onSelect(index);
+                          }
+                        },
+                      })}
+                    >
                       <span className="j-balloon" aria-hidden>
                         {index + 1}
                       </span>

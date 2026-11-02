@@ -142,7 +142,7 @@ function Exchange({
           </ul>
         )}
       </div>
-      <div className="reply">
+      <div className={`reply${record.items.length > 1 ? " bulk" : ""}`}>
         <div className="said-meta">
           <span>Agent</span>
           <span className="reply-id" title={`Request ${record.request_id}`}>

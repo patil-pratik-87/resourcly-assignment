@@ -606,6 +606,100 @@ button.open + .status-pill {
   margin-right: auto;
 }
 
+/* A drawing's page in its card, as a button that opens the viewer. */
+button.sheet-preview,
+button.item-photo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: auto;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #e6e8ec;
+  cursor: zoom-in;
+}
+
+button.sheet-preview:hover:not(:disabled),
+button.item-photo:hover:not(:disabled) {
+  background: #dfe2e7;
+}
+
+.sheet-page {
+  position: relative;
+  display: block;
+  max-width: 100%;
+}
+
+.sheet-page img,
+.item-photo img {
+  display: block;
+  max-width: 100%;
+  max-height: 340px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 4px 16px rgb(0 0 0 / 0.06);
+}
+
+.item-photo img {
+  max-height: 240px;
+}
+
+/* In a message of many files the pages stay small, so the cards can be scanned. */
+.bulk .sheet-page img,
+.bulk .item-photo img {
+  max-height: 180px;
+}
+
+.sheet-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mark {
+  position: absolute;
+  border-radius: 2px;
+}
+
+.mark.next {
+  border: 1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.mark.read {
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.mark.now {
+  z-index: 1;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 2px;
+  animation: marking 1.1s ease-in-out infinite;
+}
+
+@keyframes marking {
+  50% {
+    outline-offset: 5px;
+    outline-color: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+}
+
+.sheet-note {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  padding: 3px 10px;
+  border-radius: var(--radius);
+  background: var(--text);
+  color: #fff;
+  font-size: 12.5px;
+}
+
 .inline-json {
   max-height: 420px;
   overflow: auto;
@@ -852,7 +946,7 @@ button.composer-send:disabled {
 /* Requests */
 
 .requests {
-  --side-share: 34%;
+  --side-share: 28%;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr) minmax(320px, var(--side-share));
   flex: 1;
@@ -1055,6 +1149,7 @@ button.request-item.current:hover:not(:disabled) {
 }
 
 .viewer-main {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -1095,57 +1190,258 @@ button.request-item.current:hover:not(:disabled) {
   font-size: 12px;
 }
 
-.viewer-body {
+.pager {
   display: flex;
-  flex-direction: column;
-  flex: 1;
-  gap: 12px;
-  min-height: 0;
-  padding: 16px;
-  overflow-y: auto;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  color: var(--muted);
 }
 
-.viewer-summary {
-  display: grid;
-  gap: 10px;
-  max-width: 860px;
+.pager button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 16px;
 }
 
-.viewer-summary .decision {
+.viewer-count {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
   background: var(--panel);
-  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11.5px;
 }
 
-.viewer-summary .item-reply {
-  background: var(--panel);
+button.follow {
+  height: 28px;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
 }
 
-.viewer-summary > .read-line {
-  color: var(--done);
-  font-weight: 600;
-}
-
+.viewer-empty,
 .viewer-message {
-  margin: 0;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #fff;
-  justify-self: start;
-  white-space: pre-wrap;
-}
-
-.viewer-json {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
 }
 
 .viewer-empty {
-  display: grid;
   grid-column: span 2;
+}
+
+.viewer-message {
+  flex: 1;
+  padding: 32px;
+  background: #e6e8ec;
+}
+
+.viewer-message blockquote {
+  max-width: 46ch;
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: 12px 12px 3px 12px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+/* The page, as on the label screen: grey around a white sheet with a soft shadow. */
+.sheet-view {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #e6e8ec;
+}
+
+.sheet-viewport {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: safe center;
+  overflow: auto;
+  padding: 16px;
+  cursor: grab;
+}
+
+.sheet-viewport.panning {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.sheet-paper {
+  position: relative;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 4px 16px rgb(0 0 0 / 0.06);
+}
+
+.sheet-paper img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.sheet-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+button.vbox {
+  position: absolute;
+  display: block;
+  height: auto;
+  padding: 0;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border-radius: 2px;
+  background: transparent;
+  cursor: pointer;
+}
+
+button.vbox:hover:not(:disabled),
+button.vbox.hovered {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+button.vbox.selected {
+  z-index: 2;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.balloon {
+  display: inline-grid;
   place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* The balloon sits just outside the box's top left corner, clear of the callout it numbers. */
+.vbox .balloon {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  transform: translate(-100%, -100%);
+}
+
+.vbox.hovered .balloon,
+.vbox.selected .balloon,
+.vbox:hover .balloon {
+  background: var(--accent);
+  color: #fff;
+}
+
+.zoom {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 4px 14px -8px rgb(26 29 35 / 0.4);
+}
+
+.zoom button {
+  height: 30px;
+  min-width: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 16px;
+}
+
+.zoom .zoom-level {
+  min-width: 56px;
+  border-right: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.value-card {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: min(520px, calc(100% - 200px));
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 8px 24px -12px rgb(26 29 35 / 0.45);
+}
+
+.value-card .balloon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: var(--accent);
+  color: #fff;
+}
+
+.value-card-raw {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.value-card-meaning {
   color: var(--muted);
+}
+
+button.value-card-close {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin: -4px -6px 0 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.value-card-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
 }
 
 .viewer-side {
@@ -1163,44 +1459,107 @@ button.request-item.current:hover:not(:disabled) {
   top: 0;
   bottom: 0;
   left: -4px;
-  z-index: 2;
+  z-index: 4;
   width: 8px;
   cursor: col-resize;
+  touch-action: none;
 }
 
 .side-resizer:hover,
-.side-resizer:focus-visible {
+.side-resizer:focus-visible,
+.side-resizer:active {
   background: linear-gradient(to right, transparent 3px, var(--accent) 3px 5px, transparent 5px);
   outline: none;
 }
 
-.side-head {
-  display: flex;
-  align-items: baseline;
+.side-summary {
+  display: grid;
   gap: 10px;
-  height: 52px;
-  padding: 16px 16px 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.side-summary .decision {
+  border: 1px solid var(--line);
+}
+
+.side-summary > .read-line {
+  color: var(--done);
+  font-weight: 600;
+}
+
+.side-message {
+  justify-self: start;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 12px 12px 3px 12px;
+  background: var(--accent);
+  color: #fff;
+  white-space: pre-wrap;
+}
+
+.side-status {
+  display: flex;
+  margin: 0;
+  color: var(--muted);
+}
+
+.side-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 0 12px 0 8px;
   border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
 
-.side-head h2 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 650;
+.side-tabs [role="tab"] {
+  height: 44px;
+  padding: 0 10px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
 }
 
-.side-head .muted {
-  overflow: hidden;
-  font-size: 12.5px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.side-tabs [role="tab"]:hover:not(:disabled) {
+  background: transparent;
+  color: var(--text);
+}
+
+.side-tabs [role="tab"][aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--text);
 }
 
 .side-body {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
+  overflow: auto;
+}
+
+.side-wait {
+  padding: 16px;
+  color: var(--muted);
+}
+
+.side-wait p {
+  margin: 0 0 12px;
+}
+
+.found {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.found li:not(.newest) code {
+  background: var(--bg);
 }
 
 /* JSON */
@@ -1229,8 +1588,24 @@ button.request-item.current:hover:not(:disabled) {
   border-radius: var(--radius);
 }
 
-.j-entry:hover {
-  background: var(--bg);
+.j-entry.linked {
+  cursor: pointer;
+}
+
+.j-entry.linked:hover,
+.j-entry.hovered {
+  background: var(--accent-soft);
+}
+
+.j-entry.selected {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.j-entry.hovered .j-balloon,
+.j-entry.selected .j-balloon {
+  background: var(--accent);
+  color: #fff;
 }
 
 .j-balloon {
@@ -1465,31 +1840,39 @@ button.j-fold {
   border-color: #f5c9c6;
 }
 
+/* The layer and its time, then what it made of the file and how sure: the same at any width. */
 .layer-head {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-areas:
+    "name time"
+    "outcome sure";
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 4px 10px;
 }
 
 .layer-name {
+  grid-area: name;
   font-weight: 600;
 }
 
 .layer-outcome {
   display: inline-flex;
+  grid-area: outcome;
   align-items: center;
   gap: 6px;
   color: var(--muted);
 }
 
 .layer-sure {
+  grid-area: sure;
   color: var(--text);
   font-weight: 600;
 }
 
 .layer .trace-time {
-  margin-left: auto;
+  grid-area: time;
+  margin-left: 0;
 }
 
 .layer-why {
@@ -1506,7 +1889,8 @@ button.j-fold {
 }
 
 @media (max-width: 920px) {
-  .versions {
+  .versions,
+  .viewer-keys {
     display: none;
   }
 
@@ -1595,6 +1979,10 @@ button.j-fold {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mark.now {
+    animation: none;
+  }
+
   .read-bar span {
     transition: none;
   }

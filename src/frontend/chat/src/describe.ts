@@ -1,6 +1,14 @@
 // Plain words and numbers for what the agent did, kept apart from the components so they can be
 // tested on their own.
-import type { ReadProgress, RequestItem, RequestRecord, Route, TraceEvent } from "./types";
+import { type Bbox, isBbox } from "./bbox";
+import type {
+  ReadDocument,
+  ReadProgress,
+  RequestItem,
+  RequestRecord,
+  Route,
+  TraceEvent,
+} from "./types";
 
 export const ROUTE_LABELS: Record<Route, string> = {
   drawing: "Technical drawing",
@@ -158,6 +166,24 @@ export function duration(ms: number): string {
   if (ms < 1) return "under 1 ms";
   if (ms < 1000) return `${Math.round(ms)} ms`;
   return `${(ms / 1000).toFixed(1)} s`;
+}
+
+/** Every value of a read document that can be placed on `page`, with its index in the document. */
+export function valuesOnPage(
+  document: ReadDocument | null,
+  page: number,
+): { index: number; bbox: Bbox }[] {
+  const found: { index: number; bbox: Bbox }[] = [];
+  (document?.values ?? []).forEach((value, index) => {
+    if ((value.page ?? 1) === page && isBbox(value.bbox)) found.push({ index, bbox: value.bbox });
+  });
+  return found;
+}
+
+/** The page a value is on, from 1; a value without one is on the first page. */
+export function pageOf(document: ReadDocument | null, index: number): number {
+  const page = document?.values?.[index]?.page;
+  return typeof page === "number" && page >= 1 ? page : 1;
 }
 
 /** The item a viewer opens first: the newest finished drawing, else the newest item. */

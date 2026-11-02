@@ -1,7 +1,5 @@
 // The chat requests as the API sends them; see RequestRecord in src/resourcly/models.py.
-
-/** A box on a page as fractions of its width and height: x0, y0, x1, y1. */
-export type Bbox = [number, number, number, number];
+import type { Bbox } from "./bbox";
 
 /** The case the router picks for an item; `other` is a file that fits no case. */
 export type Route = "drawing" | "photo" | "text" | "other";
@@ -89,6 +87,7 @@ export interface ReadValue {
   kind?: string;
   meaning?: string;
   page?: number;
+  bbox?: unknown;
   [key: string]: unknown;
 }
 
