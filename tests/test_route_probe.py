@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from resourcly.adapters.route_probe import LinearProbe, ProbeRouteAdapter
-from resourcly.errors import InvalidVersion
+from resourcly.errors import InvalidVersion, UnreadableAttachment
 from resourcly.models import Attachment, Route
 
 PICTURE = Attachment("part.png", "image/png", b"\x89PNG\r\n\x1a\n")
@@ -156,3 +156,17 @@ def test_the_trace_names_the_encoder_snapshot() -> None:
     layer = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.9, 0.05, 0.05), 0.9)
 
     assert layer.called == "linear probe on org/encoder (snapshot def456), deciding at 0.9"
+
+
+class UnreadableEncoder(FakeEncoder):
+    def encode(self, attachment: Attachment) -> list[float]:
+        raise UnreadableAttachment("not a readable image/jpeg image: image file is truncated")
+
+
+def test_a_file_the_encoder_cannot_read_fits_no_case() -> None:
+    layer = ProbeRouteAdapter(UnreadableEncoder([1.0]), probe_for(0.9, 0.05, 0.05), 0.9)
+
+    verdict = layer.decide(PICTURE)
+
+    assert (verdict.route, verdict.confidence) == (Route.OTHER, 1.0)
+    assert verdict.reason == "not a readable image/jpeg image: image file is truncated"
