@@ -1,0 +1,4 @@
+description = "No model: the closest figures' captions, each citing its figure; the floor any photo answer must beat"
+impl = "captions"
+# The figure index whose report text and figure images the answer cites
+index = "../failure/indexes/dinov2-base-v1.json"

@@ -3,12 +3,14 @@ from pathlib import Path
 from typing import Any, Literal, Protocol
 
 from resourcly.models import (
+    AnswerDraft,
     Attachment,
     Choice,
     FigureEvidence,
     FigureMatch,
     GoldDocument,
     LayerVerdict,
+    PhotoEvidence,
     ReaderOutput,
     ReadProgress,
     ReportEvidence,
@@ -146,6 +148,17 @@ class ReportEvidencePort(Protocol):
         ...
 
     def report(self, report: str) -> ReportEvidence: ...
+
+
+class PhotoAnswererPort(Protocol):
+    """Says what is wrong with a part in a photo and what to do, from the evidence it is shown."""
+
+    called: str  # what it runs, for the trace
+
+    def answer(self, evidence: PhotoEvidence) -> AnswerDraft:
+        """An answer citing the evidence's figures and pages; matched is False when the figures
+        do not show the photo's failure."""
+        ...
 
 
 class UploadStorePort(Protocol):

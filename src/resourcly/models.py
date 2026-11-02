@@ -566,6 +566,77 @@ class ReportEvidence(BaseModel):
     closing: list[Passage]
 
 
+class Citation(BaseModel):
+    """A source an answer cites: a report figure, such as 18-061 fig05, or a page, 18-061 p3."""
+
+    source: str  # as the answer cites it
+    report: str
+    page: int
+    # <report>/fig<nn> for a figure, whose image is GET /api/reports/<report>/figures/<nn>.png
+    figure: str | None = None
+
+
+class Finding(BaseModel):
+    """A fact from the reports that explains what is wrong, with the source it comes from."""
+
+    statement: str
+    citation: Citation
+
+
+class Action(BaseModel):
+    """What to do: stated in the cited report text, or inferred from the findings."""
+
+    action: str
+    basis: Literal["stated", "inferred"]
+    citation: Citation | None = None
+
+
+class PhotoAnswer(BaseModel):
+    """What the agent says about a photo of a part, from the NTSB reports.
+
+    `not_in_reports` is the gate: no report figure is close enough to the photo, so nothing is
+    said about it. Otherwise `figures` are the closest report figures, best first, and `matched`
+    says whether the model found that they show the same failure. Only the findings and actions
+    whose citations are in the evidence the model was given are kept.
+    """
+
+    not_in_reports: bool
+    matched: bool
+    answer: str
+    findings: list[Finding]
+    actions: list[Action]
+    figures: list[FigureMatch] = []
+
+
+@dataclass(frozen=True)
+class PhotoEvidence:
+    """What an answerer is shown about a photo: the closest figures and their reports' text.
+
+    `images` are the first figures as PNGs, in order; the rest are shown as text only.
+    """
+
+    question: str
+    photo: bytes  # PNG
+    figures: list[FigureEvidence]
+    images: list[bytes]
+    reports: list[ReportEvidence]
+
+
+@dataclass(frozen=True)
+class AnswerDraft:
+    """An answerer's answer as it gave it, before its citations are checked.
+
+    Each source is as written, such as "18-061 fig05" or "[18-061 p3]"; `text` is the whole
+    answer, for the trace.
+    """
+
+    matched: bool
+    answer: str
+    findings: list[tuple[str, str]]  # statement, source
+    actions: list[tuple[str, str, str | None]]  # action, basis, source
+    text: str
+
+
 class FailureMatches(BaseModel):
     """The figures a finder matched to one photo, best first; none when no report shows it."""
 
@@ -606,16 +677,17 @@ class StoredFile(BaseModel):
     pages: int
 
 
-ItemStatus = Literal["routing", "queued", "reading", "done", "failed", "answered"]
-ACTIVE: tuple[ItemStatus, ...] = ("routing", "queued", "reading")
+ItemStatus = Literal["routing", "queued", "reading", "answering", "done", "failed", "answered"]
+ACTIVE: tuple[ItemStatus, ...] = ("routing", "queued", "reading", "answering")
 
 
 class RequestItem(BaseModel):
     """One file of a chat request, or its text when it has no file, and what the agent did.
 
-    An item is routed, then a drawing is queued and read, and the other cases are answered at
-    once. `values` counts the read document's values, and `issues` its schema issues and the
-    model answers the reader could not use.
+    An item is routed, then a drawing is queued and read, and a photo is queued and answered
+    from the reports; the other cases are answered at once. `values` counts the read document's
+    values, and `issues` its schema issues and the model answers the reader could not use.
+    `answer` is a photo's answer, and `reply` its text.
     """
 
     item_id: str
@@ -628,6 +700,7 @@ class RequestItem(BaseModel):
     status: ItemStatus = "routing"
     progress: ReadProgress | None = None
     reply: str | None = None
+    answer: PhotoAnswer | None = None
     values: int | None = None
     issues: int | None = None
     error: str | None = None

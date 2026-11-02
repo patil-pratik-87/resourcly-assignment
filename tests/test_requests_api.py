@@ -409,10 +409,12 @@ def test_requests_list_newest_first_up_to_the_limit(client: TestClient) -> None:
     assert [record["request_id"] for record in listed] == ids[:0:-1]
 
 
-def test_the_agent_names_its_reader_and_router_and_its_upload_caps(client: TestClient) -> None:
+def test_the_agent_names_its_versions_and_its_upload_caps(client: TestClient) -> None:
     assert client.get("/api/agent").json() == {
         "reader": "textlayer-v0 (textlayer)",
         "router": "stub-v0 (stub)",
+        "failure": "shuffled-v0 (shuffled)",
+        "answer": "captions-v0 (captions)",
         "max_file_mb": 50,
         "max_files": 50,
     }

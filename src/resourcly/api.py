@@ -19,6 +19,7 @@ from resourcly.models import DrawingSummary, Issue, RequestRecord, RequestTrace
 
 DocumentBody = Annotated[Any, Body()]
 Dpi = Annotated[int, Query(ge=36, le=400)]
+Side = Annotated[int, Query(ge=32, le=2048)]
 MB = 1024 * 1024
 Screen = Literal["chat", "annotation"]
 # The addresses the chat app routes in the browser; a reload of one must get its page too.
@@ -92,6 +93,8 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
         return {
             "reader": found.reader_name,
             "router": found.router_name,
+            "failure": found.failure_name,
+            "answer": found.answer_name,
             "max_file_mb": round(settings.max_upload_bytes / MB, 2),
             "max_files": settings.max_files,
         }
@@ -151,6 +154,16 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
     ) -> Response:
         """One page of an uploaded file, a photo included, for a screen to place values on."""
         png = services(request).agent.page(request_id, item_id, page, dpi)
+        return Response(
+            png, media_type="image/png", headers={"Cache-Control": "public, max-age=3600"}
+        )
+
+    @app.get("/api/reports/{report}/figures/{number}.png")
+    def report_figure(
+        request: Request, report: str, number: int, max_side: Side = 1024
+    ) -> Response:
+        """A report figure a photo answer cites, such as 18-061 fig05 at 18-061/figures/5.png."""
+        png = services(request).reports.figure_image(report, number, max_side)
         return Response(
             png, media_type="image/png", headers={"Cache-Control": "public, max-age=3600"}
         )

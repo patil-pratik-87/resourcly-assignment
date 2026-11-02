@@ -30,6 +30,7 @@ from resourcly.ports import (
     GoldStorePort,
     Progress,
     ReaderPort,
+    ReportEvidencePort,
     RouteLayerPort,
     Source,
     Splits,
@@ -352,6 +353,16 @@ class FailureService:
         if error:
             raise error
         return FailureMatches(request_id=request_id, figures=figures, elapsed_ms=elapsed)
+
+
+class ReportService:
+    """The NTSB report figures an answer cites, for a screen to show."""
+
+    def __init__(self, evidence: ReportEvidencePort):
+        self.evidence = evidence
+
+    def figure_image(self, report: str, number: int, max_side: int) -> bytes:
+        return self.evidence.figure_image(f"{report}/fig{number:02d}", max_side)
 
 
 class TraceService:

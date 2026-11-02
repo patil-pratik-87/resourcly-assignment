@@ -16,6 +16,7 @@ def test_the_app_runs_the_layered_router_and_vector_crop_reader_by_default(monke
         "reader": "vector-crop-v2",
         "router": "three-layer-v1",
         "failure": "shuffled-v0",
+        "answer": "captions-v0",
     }
     assert Settings.from_env().versions == Settings().versions
 
@@ -30,11 +31,13 @@ def test_the_environment_can_pick_the_versions(monkeypatch) -> None:
     monkeypatch.setenv("RESOURCLY_READER_VERSION", "my-reader-v1")
     monkeypatch.setenv("RESOURCLY_ROUTER_VERSION", "my-router-v1")
     monkeypatch.setenv("RESOURCLY_FAILURE_VERSION", "my-finder-v1")
+    monkeypatch.setenv("RESOURCLY_ANSWER_VERSION", "my-answer-v1")
 
     assert Settings.from_env().versions == {
         "reader": "my-reader-v1",
         "router": "my-router-v1",
         "failure": "my-finder-v1",
+        "answer": "my-answer-v1",
     }
 
 

@@ -11,8 +11,9 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Any
 
+from resourcly.adapters.captions_answer import CaptionsAnswerAdapter
 from resourcly.adapters.dinov2_encoder import Dinov2EncoderAdapter
-from resourcly.adapters.figure_index import FigureIndex
+from resourcly.adapters.figure_index import FigureIndex, IndexedEvidenceAdapter
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
 from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter, cached_snapshot
 from resourcly.adapters.nearest_figures import NearestFiguresAdapter
@@ -35,6 +36,7 @@ from resourcly.services import (
     DrawingService,
     FailureService,
     GoldService,
+    ReportService,
     RouterService,
     TraceService,
 )
@@ -64,6 +66,7 @@ class Settings:
             "reader": "vector-crop-v2",
             "router": "three-layer-v1",
             "failure": "shuffled-v0",
+            "answer": "captions-v0",
         }
     )
 
@@ -292,10 +295,21 @@ FINDERS: dict[str, Implementation] = {
         check=_known_encoder,
     ),
 }
+# Every answerer names the figure index whose report text and figure images it cites, as `index`.
+ANSWERERS: dict[str, Implementation] = {
+    # No model: the closest figures' captions, the floor for the photo answers.
+    "captions": Implementation(
+        lambda settings, params: CaptionsAnswerAdapter(),
+        settings=("index",),
+        required=("index",),
+        files=("index",),
+    ),
+}
 IMPLEMENTATIONS: dict[str, dict[str, Implementation]] = {
     "reader": READERS,
     "router": ROUTERS,
     "failure": FINDERS,
+    "answer": ANSWERERS,
 }
 
 
@@ -430,13 +444,39 @@ class Services:
         return f"{self._router_version.name} ({self._router_version.impl})"
 
     @cached_property
+    def _failure_version(self) -> Version:
+        return load_version(self._settings, "failure", self._settings.versions["failure"])
+
+    @property
+    def failure_name(self) -> str:
+        return f"{self._failure_version.name} ({self._failure_version.impl})"
+
+    @cached_property
     def failures(self) -> FailureService:
-        finder = load_version(self._settings, "failure", self._settings.versions["failure"])
+        finder = self._failure_version
         return FailureService(
             finder=FINDERS[finder.impl].build(self._settings, finder.params),
             trace=self._trace(),
-            finder_name=f"{finder.name} ({finder.impl})",
+            finder_name=self.failure_name,
         )
+
+    @cached_property
+    def _answer_version(self) -> Version:
+        return load_version(self._settings, "answer", self._settings.versions["answer"])
+
+    @property
+    def answer_name(self) -> str:
+        return f"{self._answer_version.name} ({self._answer_version.impl})"
+
+    @cached_property
+    def _evidence(self) -> IndexedEvidenceAdapter:
+        """The report text and figure images of the figure index the answer version names."""
+        index = self._settings.versions_dir / "answer" / self._answer_version.params["index"]
+        return IndexedEvidenceAdapter(FigureIndex.load(index), self._settings.reports_dir)
+
+    @cached_property
+    def reports(self) -> ReportService:
+        return ReportService(self._evidence)
 
     @cached_property
     def traces(self) -> TraceService:

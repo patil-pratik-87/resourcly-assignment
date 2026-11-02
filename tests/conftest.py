@@ -41,8 +41,13 @@ def settings(gold_dir: Path, tmp_path: Path) -> Settings:
         annotation_ui_dist=tmp_path / "no-annotation-ui",
         trace_path=tmp_path / "var" / "traces.sqlite",
         uploads_dir=tmp_path / "var" / "uploads",
-        # the text-layer reader and the stub router need no model, so the tests can run them
-        versions={"reader": "textlayer-v0", "router": "stub-v0"},
+        # these versions need no model, so the tests can run them
+        versions={
+            "reader": "textlayer-v0",
+            "router": "stub-v0",
+            "failure": "shuffled-v0",
+            "answer": "captions-v0",
+        },
     )
 
 
