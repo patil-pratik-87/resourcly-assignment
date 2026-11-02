@@ -18,7 +18,7 @@ Every record is a draft (`"status": "draft"`) until a person reviews it and sets
 | `failure/` | Failure gold: 154 photos and the report figure each shows ([README](failure/README.md)). |
 | `../../research/schema/README.md` | Why the gold has this shape, and the options that were compared. |
 | `../splits.toml` | Which cases of each component are in the dev and test splits. |
-| `../../scripts/gold_tools/` | Grid render, bbox overlay, and the writer of `schema.json`. |
+| `../../scripts/gold_tools/` | Grid render, bbox overlay, limits check, and the writer of `schema.json`. |
 
 Check the gold after any change. It runs the package models, then the rules only gold needs (limits
 that agree with `raw`, key order, unique ids, references that resolve), then the splits:
@@ -76,6 +76,7 @@ were checked row by row against the NIST answer key.
 ```sh
 uv run python scripts/gold_tools/overlay.py nist_ctc_01_asme1_rd   # gold boxes on each page
 uv run python scripts/gold_tools/grid.py nist_ctc_01_asme1_rd --region 0.39 0.09 0.47 0.16 --dpi 400 --step 0.01
+uv run python scripts/gold_tools/limits.py nist_ctc_01_asme1_rd  # value and limits again from raw
 ```
 
 Renders go to `out/gold_tools/`, which git ignores.
