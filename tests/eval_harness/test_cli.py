@@ -138,7 +138,7 @@ def test_a_version_stands_for_its_latest_run_on_every_case_of_a_split(evals, bla
 
 
 def test_a_version_with_only_partial_runs_cannot_stand_for_a_run(evals) -> None:
-    evals("run", "reader", "--version", "textlayer-v0", "--case-id", CTC01)
+    evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
 
     result = evals("compare", "reader", "textlayer-v0", "textlayer-v0")
 

@@ -334,13 +334,16 @@ def check(ctx: typer.Context) -> None:
 
 
 def _resolve(store: SqliteResultStore, settings: Settings, component: str, ref: str) -> Run:
-    """The run a ref names: a run id, or a version for its latest finished run."""
+    """The run a ref names: a run id, or a version for its latest finished run on every case of
+    a split, so a run of a few cases never stands for the version."""
     try:
         run = store.run(ref)
     except LookupError:
-        runs = [run for run in store.runs(component, ref) if run.finished_at]
+        runs = [run for run in store.runs(component, ref) if run.finished_at and not run.case_ids]
         if not runs:
-            raise LookupError(f"'{ref}' is neither a run id nor a version with runs") from None
+            raise LookupError(
+                f"'{ref}' is neither a run id nor a version with a full run"
+            ) from None
         run = runs[0]
         _warn_if_edited(settings, component, ref, run)
     if run.component != component:
