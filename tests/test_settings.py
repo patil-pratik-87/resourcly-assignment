@@ -13,7 +13,7 @@ def test_the_app_runs_the_layered_router_and_vector_crop_reader_by_default(monke
     monkeypatch.delenv("RESOURCLY_READER_VERSION")
 
     assert Settings().versions == {
-        "reader": "vector-crop-v1",
+        "reader": "vector-crop-v2",
         "router": "three-layer-v1",
         "failure": "shuffled-v0",
     }

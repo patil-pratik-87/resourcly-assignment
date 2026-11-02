@@ -122,7 +122,11 @@ def test_gold_work_needs_no_reader_version_or_trace_file(
 
 @pytest.mark.parametrize(
     ("name", "reader"),
-    [("vector-crop-v1", VectorCropReaderAdapter), ("whole-page-v1", WholePageReaderAdapter)],
+    [
+        ("vector-crop-v1", VectorCropReaderAdapter),
+        ("vector-crop-v2", VectorCropReaderAdapter),
+        ("whole-page-v1", WholePageReaderAdapter),
+    ],
 )
 def test_the_vlm_versions_build_their_reader_without_loading_the_model(
     settings: Settings, name: str, reader: type
@@ -183,3 +187,17 @@ def test_a_machine_without_the_vlm_extra_says_how_to_install_it_or_fall_back(
 
     assert "uv sync --extra vlm" in message
     assert "RESOURCLY_READER_VERSION=textlayer-v0" in message
+
+
+def test_vector_crop_v2_is_v1_plus_the_whole_page_fallback(settings: Settings) -> None:
+    v1, v2, page = (
+        load_version(settings, "reader", name).params
+        for name in ("vector-crop-v1", "vector-crop-v2", "whole-page-v1")
+    )
+
+    assert {k: v for k, v in v2.items() if not k.startswith("page_")} == v1
+    assert (v2["page_prompt"], v2["page_dpi"], v2["page_max_tokens"]) == (
+        page["prompt"],
+        page["dpi"],
+        page["max_tokens"],
+    )

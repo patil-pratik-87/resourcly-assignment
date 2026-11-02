@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pymupdf
 
@@ -174,3 +175,51 @@ def test_the_page_reader_reports_each_page_before_it_reads_it() -> None:
         (2, 3, 1, 3),
         (3, 3, 2, 3),
     ]
+
+
+def _raster_copy(drawing: str, folder: Path) -> str:
+    """The drawing's first page as a picture in a one-page PDF, as an image upload is stored."""
+    with pymupdf.open(DRAWINGS / f"{drawing}.pdf") as pdf:
+        picture = pdf[0].get_pixmap(dpi=100).tobytes("png")
+    with pymupdf.open() as raster:
+        page = raster.new_page(width=792, height=612)
+        page.insert_image(page.rect, stream=picture)
+        raster.save(folder / "raster.pdf")
+    return "raster"
+
+
+def test_a_page_with_no_vector_callouts_is_read_whole(tmp_path: Path) -> None:
+    drawing = _raster_copy(CTC01, tmp_path)
+    model = FakeModel(_page_answer([{"lines": ["Ø25 ±0.15"]}], datums=["A"]))
+    reader = VectorCropReaderAdapter(tmp_path, model, prompt="crop", page_prompt="page")
+    seen: list[ReadProgress] = []
+
+    document = reader.read(drawing, progress=seen.append)
+
+    assert [prompt for prompt, _, _ in model.calls] == ["page"]
+    assert [v["raw"] for v in document["values"]] == ["⌀25 ±0.15", "A"]
+    assert {tuple(v["bbox"]) for v in document["values"]} == {(0.0, 0.0, 1.0, 1.0)}
+    features = {f["id"]: f for f in document["features"]}
+    described = {features[v["feature_id"]]["description"] for v in document["values"]}
+    assert described == {
+        "Read from the whole page, which has no vector callouts (a scan or an image)."
+    }
+    assert [(p.done, p.total) for p in seen] == [(0, 1), (1, 1)]
+    assert validate_document(document, gold=False)[1] == []
+
+
+def test_a_page_with_vector_callouts_never_needs_the_whole_page() -> None:
+    model = FakeModel(_answer(["Ø25 ±0.15"]))
+
+    VectorCropReaderAdapter(DRAWINGS, model, prompt="crop", page_prompt="page").read(CTC01)
+
+    assert {prompt for prompt, _, _ in model.calls} == {"crop"}
+
+
+def test_without_a_page_prompt_a_raster_page_reads_as_nothing(tmp_path: Path) -> None:
+    drawing = _raster_copy(CTC01, tmp_path)
+    model = FakeModel(_page_answer([{"lines": ["Ø25 ±0.15"]}]))
+
+    document = VectorCropReaderAdapter(tmp_path, model, prompt="crop").read(drawing)
+
+    assert model.calls == [] and document["values"] == []
