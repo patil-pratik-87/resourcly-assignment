@@ -13,23 +13,26 @@ torch = pytest.importorskip("torch")
 
 
 class FakeOutput:
-    def __init__(self, pooled):
-        self.pooler_output = pooled
+    def __init__(self, hidden):
+        self.last_hidden_state = hidden
+        self.pooler_output = hidden[:, 0]
 
 
 class FakeModel:
-    """Stands in for DINOv2: its pooled output is [3, 4] whatever the picture."""
+    """Stands in for DINOv2: a class token [3, 4] and two patch tokens, whatever the picture."""
 
     def __call__(self, pixel_values):
-        return FakeOutput(torch.tensor([[3.0, 4.0]]))
+        return FakeOutput(torch.tensor([[[3.0, 4.0], [1.0, 0.0], [3.0, 2.0]]]))
 
 
 class FakeProcessor:
     def __init__(self):
         self.sizes: list[tuple[int, int]] = []
+        self.resized: list[tuple[dict, dict]] = []
 
-    def __call__(self, images, return_tensors):
+    def __call__(self, images, return_tensors, size, crop_size):
         self.sizes.append(images.size)
+        self.resized.append((size, crop_size))
         return {"pixel_values": torch.zeros(1, 3, 2, 2)}
 
 
@@ -59,6 +62,45 @@ def test_the_embedding_is_the_normalised_pooled_output_of_the_picture(tmp_path: 
     assert vector == pytest.approx([0.6, 0.8])
     assert processor.sizes == [(1024, 512), (10, 10)]
     assert loads == [str(tmp_path)]
+
+
+def test_the_class_and_patch_recipe_joins_the_class_token_to_the_mean_patch_token(
+    tmp_path: Path,
+) -> None:
+    encoder = Dinov2EncoderAdapter(
+        "org/dino",
+        locate=lambda _: tmp_path,
+        load=lambda _: (FakeProcessor(), FakeModel(), "cpu"),
+        recipe="cls_patch_mean",
+    )
+
+    vector = encoder.encode(image((10, 10)))
+
+    # [3, 4] then [2, 1], the mean of [1, 0] and [3, 2], scaled to length 1
+    assert vector == pytest.approx([value / 30**0.5 for value in (3, 4, 2, 1)])
+
+
+def test_the_picture_is_resized_and_centre_cropped_to_the_input_size(tmp_path: Path) -> None:
+    processor = FakeProcessor()
+
+    def load(path: str):
+        return processor, FakeModel(), "cpu"
+
+    Dinov2EncoderAdapter("org/dino", locate=lambda _: tmp_path, load=load).encode(image((9, 9)))
+    Dinov2EncoderAdapter("org/dino", locate=lambda _: tmp_path, load=load, input_size=448).encode(
+        image((9, 9))
+    )
+
+    # DINOv2's own default: the short side to 256, then the centre 224 square
+    assert processor.resized == [
+        ({"shortest_edge": 256}, {"height": 224, "width": 224}),
+        ({"shortest_edge": 512}, {"height": 448, "width": 448}),
+    ]
+
+
+def test_an_unknown_recipe_is_refused() -> None:
+    with pytest.raises(ValueError, match="'mean' is not a DINOv2 vector recipe"):
+        Dinov2EncoderAdapter("org/dino", recipe="mean")
 
 
 def test_a_model_that_is_not_cached_is_refused_before_anything_loads() -> None:
