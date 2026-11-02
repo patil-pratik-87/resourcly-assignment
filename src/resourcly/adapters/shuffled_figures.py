@@ -1,5 +1,6 @@
 import random
 import tomllib
+from collections.abc import Collection
 from pathlib import Path
 
 from resourcly.models import Attachment, FigureMatch
@@ -17,8 +18,8 @@ class ShuffledFiguresAdapter:
         random.Random(seed).shuffle(figures)
         self.figures = figures
 
-    def find(self, photo: Attachment) -> list[FigureMatch]:
-        return list(self.figures)
+    def find(self, photo: Attachment, exclude: Collection[str] = ()) -> list[FigureMatch]:
+        return [figure for figure in self.figures if figure.figure not in exclude]
 
 
 def report_figures(sections: Path) -> list[FigureMatch]:

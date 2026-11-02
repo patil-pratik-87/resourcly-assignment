@@ -3,6 +3,7 @@ import logging
 import re
 import time
 import uuid
+from collections.abc import Collection
 from datetime import UTC, datetime
 from typing import Any
 
@@ -327,12 +328,15 @@ class FailureService:
         self.trace = trace
         self.finder_name = finder_name
 
-    def find(self, photo: Attachment, request_id: str | None = None) -> FailureMatches:
+    def find(
+        self, photo: Attachment, request_id: str | None = None, exclude: Collection[str] = ()
+    ) -> FailureMatches:
+        """The figures, best first, leaving out those in `exclude` as if no report held them."""
         request_id = request_id or uuid.uuid4().hex
         started, began = now(), time.perf_counter()
         figures, error = [], None
         try:
-            figures = self.finder.find(photo)
+            figures = self.finder.find(photo, exclude)
         except Exception as exc:
             error = exc
         elapsed = round((time.perf_counter() - began) * 1000, 1)
@@ -340,7 +344,7 @@ class FailureService:
             request_id=request_id,
             step="failure.find",
             called=f"finder {self.finder_name}",
-            input={"photo": _described(photo)},
+            input={"photo": _described(photo), **({"exclude": sorted(exclude)} if exclude else {})},
             output={"figures": len(figures), "top": figures[0].figure if figures else None},
             error=f"{type(error).__name__}: {error}" if error else None,
             started_at=started,

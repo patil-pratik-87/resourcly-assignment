@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from pathlib import Path
 from typing import Any, Literal, Protocol
 
@@ -132,8 +132,12 @@ class VisionModelPort(Protocol):
 class FailureFinderPort(Protocol):
     """Finds the report figures that show the same failure as a photo of a part."""
 
-    def find(self, photo: Attachment) -> list[FigureMatch]:
-        """The matching figures, best first; an empty list when no report shows this failure."""
+    def find(self, photo: Attachment, exclude: Collection[str] = ()) -> list[FigureMatch]:
+        """The matching figures, best first; an empty list when no report shows this failure.
+
+        The figures in `exclude` are searched as if the reports did not hold them; the evals
+        hide a test photo's own figure this way.
+        """
 
 
 class ReportEvidencePort(Protocol):
