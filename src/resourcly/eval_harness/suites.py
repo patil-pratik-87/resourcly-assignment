@@ -15,7 +15,8 @@ class Suite:
     """A component's eval. Each case's scores carry a "case_score" that compare pairs by case.
 
     The first metric is the primary one, the number that says better or worse. A run's summary
-    is made from its cases' stored scores, with each case's stratum.
+    is made from its cases' stored scores, with each case's stratum. A suite that is a second
+    setting of a component, such as failure-copy, runs that component's versions.
     """
 
     component: str
@@ -26,10 +27,16 @@ class Suite:
     score: Callable[[Case, Any], dict[str, Any]]
     summarise: Callable[[metrics.Scored], dict[str, Any]]
     explain: Callable[[Case, Any], list[str]]
+    setting_of: str | None = None
 
     @property
     def primary(self) -> str:
         return self.metrics[0]
+
+    @property
+    def part(self) -> str:
+        """The component whose versions it runs: its own, or the one it is a setting of."""
+        return self.setting_of or self.component
 
 
 def _read(services: Services, case: Case, request_id: str) -> Any:
@@ -143,8 +150,21 @@ def _explain_route(case: Case, prediction: Any) -> list[str]:
     return lines
 
 
+def _hidden(case: Case) -> set[str]:
+    """The figure a photo was made from, which the held-out setting hides from the search."""
+    return {case.gold["expected_figure"]} if case.stratum == metrics.PHOTO else set()
+
+
 def _find(services: Services, case: Case, request_id: str) -> Any:
-    """Send the case's image to the failure finder of the version under test."""
+    """Send the case's image to the failure finder of the version under test, held out: the
+    photo's own figure is hidden, so the best hit must be another figure of its section."""
+    photo = services.gold.failure_photo(case.gold["image"])
+    found = services.failures.find(photo, request_id=request_id, exclude=_hidden(case))
+    return found.model_dump(mode="json")
+
+
+def _find_copy(services: Services, case: Case, request_id: str) -> Any:
+    """Send the case's image to the finder with its own figure in the search: the copy setting."""
     photo = services.gold.failure_photo(case.gold["image"])
     return services.failures.find(photo, request_id=request_id).model_dump(mode="json")
 
@@ -185,6 +205,50 @@ def _explain_failure(case: Case, prediction: Any) -> list[str]:
     return lines
 
 
+def _answer(services: Services, case: Case, request_id: str) -> Any:
+    """Ask the photo answer of the version under test about the case's image, with no text, held
+    out like the failure suite. The finder is the failure version the settings name."""
+    photo = services.gold.failure_photo(case.gold["image"])
+    answer = services.photo_answers.answer(photo, "", request_id, exclude=_hidden(case))
+    return answer.model_dump(mode="json")
+
+
+def _score_answer(case: Case, prediction: Any) -> dict[str, Any]:
+    return metrics.score_answer(case.gold, prediction)
+
+
+def _explain_answer(case: Case, prediction: Any) -> list[str]:
+    gold = case.gold
+    if case.stratum == metrics.PHOTO:
+        keywords = ", ".join(gold["failure_keywords"])
+        lines = [
+            f"expected report {gold['expected_report']}, failure mode {gold['failure_mode']}"
+            f" (keywords: {keywords})"
+        ]
+    else:
+        lines = [f"a negative ({case.stratum.removeprefix('negative_')}): expected no match"]
+    if not isinstance(prediction, dict):
+        return [*lines, "no answer"]
+    if prediction.get("not_in_reports"):
+        unrelated = prediction.get("kept_out") == "unrelated"
+        said = "kept out, the model saw no part" if unrelated else "kept out at the gate"
+    else:
+        said = "matched" if prediction.get("matched") else "no match"
+    lines.append(f"{said}: {prediction.get('answer')}")
+    figures = [f for f in prediction.get("figures") or [] if isinstance(f, dict)]
+    for kind in ("findings", "actions"):
+        for item in prediction.get(kind) or []:
+            citation = item.get("citation") if isinstance(item, dict) else None
+            if isinstance(citation, dict):
+                cited = {**citation, "basis": item.get("basis"), "quote": item.get("quote")}
+                valid = "valid" if metrics.valid_citation(cited, figures) else "invalid"
+                text = item.get("statement") or f"action: {item.get('action')}"
+                lines.append(f"  [{citation.get('source')}] {valid}  {text}")
+    closest = ", ".join(str(f.get("figure")) for f in figures[:3]) or "none"
+    lines.append(f"closest figures: {closest}")
+    return lines
+
+
 SUITES: dict[str, Suite] = {
     "reader": Suite(
         component="reader",
@@ -215,5 +279,26 @@ SUITES: dict[str, Suite] = {
         score=_score_failure,
         summarise=metrics.summarise_failures,
         explain=_explain_failure,
+    ),
+    "failure-copy": Suite(
+        component="failure-copy",
+        metrics=("section@1", "mode@3", "kept_out"),
+        case_columns=("top",),
+        load=failure_cases,
+        call=_find_copy,
+        score=_score_failure,
+        summarise=metrics.summarise_failures,
+        explain=_explain_failure,
+        setting_of="failure",
+    ),
+    "answer": Suite(
+        component="answer",
+        metrics=("correct", "report_cited", "mode_named", "citations_valid", "kept_out"),
+        case_columns=("matched", "report_cited", "mode_named"),
+        load=failure_cases,
+        call=_answer,
+        score=_score_answer,
+        summarise=metrics.summarise_answers,
+        explain=_explain_answer,
     ),
 }

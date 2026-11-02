@@ -1,5 +1,6 @@
 import logging
 import shutil
+from collections.abc import Collection
 from dataclasses import replace
 from pathlib import Path
 
@@ -28,11 +29,13 @@ FATIGUE = FigureMatch(
 class FakeFinder:
     def __init__(self, found: list[FigureMatch] | Exception):
         self.found = found
+        self.excluded: list[set[str]] = []
 
-    def find(self, photo: Attachment) -> list[FigureMatch]:
+    def find(self, photo: Attachment, exclude: Collection[str] = ()) -> list[FigureMatch]:
+        self.excluded.append(set(exclude))
         if isinstance(self.found, Exception):
             raise self.found
-        return self.found
+        return [match for match in self.found if match.figure not in exclude]
 
 
 class MemoryTrace:
@@ -76,6 +79,24 @@ def test_the_seed_picks_the_order() -> None:
     assert orders[0] == orders[1] != orders[2]
 
 
+def test_the_shuffled_baseline_leaves_out_a_hidden_figure() -> None:
+    finder = ShuffledFiguresAdapter(SECTIONS, seed=0)
+
+    found = [match.figure for match in finder.find(PHOTO, exclude={"18-061/fig06"})]
+
+    assert found == [m.figure for m in finder.find(PHOTO) if m.figure != "18-061/fig06"]
+    assert len(found) == 45
+
+
+def test_the_service_passes_the_hidden_figures_to_the_finder_and_traces_them() -> None:
+    trace, finder = MemoryTrace(), FakeFinder([FATIGUE])
+
+    matches = FailureService(finder, trace, "v1").find(PHOTO, "req-5", exclude={"18-061/fig06"})
+
+    assert (matches.figures, finder.excluded) == ([], [{"18-061/fig06"}])
+    assert trace.find("req-5")[0].input["exclude"] == ["18-061/fig06"]
+
+
 def test_the_service_returns_the_ranked_figures_and_traces_the_call() -> None:
     trace = MemoryTrace()
 
@@ -86,6 +107,7 @@ def test_the_service_returns_the_ranked_figures_and_traces_the_call() -> None:
     [event] = trace.find("req-1")
     assert (event.step, event.called, event.error) == ("failure.find", "finder v1 (fake)", None)
     assert event.input["photo"]["name"] == "crack.png"
+    assert "exclude" not in event.input
     assert event.output == {"figures": 1, "top": "18-061/fig06"}
 
 

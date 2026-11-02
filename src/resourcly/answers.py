@@ -15,6 +15,7 @@ import hashlib
 import logging
 import re
 import time
+from collections.abc import Collection
 from typing import Any
 
 from resourcly.models import (
@@ -74,8 +75,11 @@ class PhotoAnswerService:
         self.images = images  # the first of them shown as images too
         self.figure_side = figure_side
 
-    def answer(self, photo: Attachment, text: str, request_id: str) -> PhotoAnswer:
-        matches = self.failures.find(photo, request_id=request_id).figures
+    def answer(
+        self, photo: Attachment, text: str, request_id: str, exclude: Collection[str] = ()
+    ) -> PhotoAnswer:
+        """The answer; the figures in `exclude` are left out, as if no report held them."""
+        matches = self.failures.find(photo, request_id=request_id, exclude=exclude).figures
         started, began = now(), time.perf_counter()
         step: dict[str, Any] = {"input": {}, "output": {}, "error": None}
         try:

@@ -1,3 +1,5 @@
+from collections.abc import Collection
+
 from resourcly.adapters.figure_index import FigureIndex
 from resourcly.models import Attachment, FigureMatch
 from resourcly.ports import ImageEncoderPort
@@ -19,7 +21,7 @@ class NearestFiguresAdapter:
         self.threshold = threshold
         self.top = top
 
-    def find(self, photo: Attachment) -> list[FigureMatch]:
+    def find(self, photo: Attachment, exclude: Collection[str] = ()) -> list[FigureMatch]:
         vector = self.encoder.encode(photo)
         size = len(self.index.figures[0].vector) if self.index.figures else len(vector)
         if len(vector) != size:
@@ -30,6 +32,7 @@ class NearestFiguresAdapter:
             (
                 (sum(a * b for a, b in zip(vector, figure.vector, strict=True)), figure)
                 for figure in self.index.figures
+                if figure.figure not in exclude
             ),
             key=lambda pair: -pair[0],
         )

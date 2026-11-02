@@ -68,11 +68,12 @@ uv run --extra router python scripts/build_figure_index.py \
 
 ## Results
 
-The failure gold scores the finder only ([evals.md](evals.md)). Its photos are changed copies of
-the figures the index holds, so both DINOv2 versions find every one; that score says little. With
-each photo's own figure hidden, as for a real photo, base finds the right report first for 95.7%
-of the 138 photos and small for 89.9%, with the same vector recipe (the research's 90.6% for small
-used the router's class token alone).
+The failure gold scores the finder and the answer ([evals.md](evals.md)). Its photos are changed
+copies of the figures the index holds, so in the copy setting (`failure-copy`) both DINOv2
+versions find every one. With each photo's own figure hidden, as for a real photo and the
+`failure` eval, base finds the right report first for 95.7% of the 138 photos and
+small for 89.9%, with the same vector recipe (the research's 90.6% for small used the router's
+class token alone).
 
 The gate keeps out all 5 unrelated images of the gold with base, and none of the 11 drawings,
 which the router keeps away. It does not hold on real photos of other broken parts: 10 of the 12
@@ -87,7 +88,8 @@ run of `photo-v1` against `photo-v2` is pending.
 
 ## Limits
 
-- There is no labelled answer gold; answers are checked by hand on stored runs.
+- There is no labelled answer text. Answers are scored by the `answer` eval on 8 sampled gold
+  cases and checked by hand on stored runs.
 - The report photos are figures changed by code. Real photos of these parts are untested.
 - A real photo of a fracture that is not in the reports can pass the gate, and the model may then
   answer it as a report's failure.

@@ -118,6 +118,24 @@ def test_an_index_made_with_another_encoder_is_refused(encoder: FakeEncoder, dif
         NearestFiguresAdapter(encoder, SPARS, threshold=0.28, top=3)
 
 
+def test_a_hidden_figure_is_left_out_as_if_the_index_did_not_hold_it() -> None:
+    finder = NearestFiguresAdapter(FakeEncoder([1.0, 0.0]), SPARS, threshold=0.28, top=2)
+
+    found = finder.find(PHOTO, exclude={"18-061/fig06"})
+
+    assert [(match.figure, match.score) for match in found] == [
+        ("18-061/fig05", 0.6),
+        ("18-061/fig13", 0.0),
+    ]
+
+
+def test_the_gate_judges_the_best_figure_left_after_hiding() -> None:
+    finder = NearestFiguresAdapter(FakeEncoder([1.0, 0.0]), SPARS, threshold=0.7, top=1)
+
+    assert [match.figure for match in finder.find(PHOTO)] == ["18-061/fig06"]
+    assert finder.find(PHOTO, exclude={"18-061/fig06"}) == []
+
+
 def test_a_vector_of_another_length_is_refused() -> None:
     finder = NearestFiguresAdapter(FakeEncoder([1.0, 0.0, 0.0]), SPARS, threshold=0.28, top=3)
 

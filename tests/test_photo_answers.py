@@ -124,6 +124,18 @@ def test_the_answerer_sees_the_closest_figures_their_reports_and_the_users_quest
     assert [report.report for report in seen.reports] == ["18-061", "24-013"]
 
 
+def test_a_hidden_figure_is_neither_matched_nor_shown_to_the_answerer() -> None:
+    answerer = FakeAnswerer(FATIGUE)
+
+    answer = service(FakeFinder(SPAR), answerer).answer(PHOTO, "", "r1", exclude={"18-061/fig05"})
+
+    assert [figure.source for figure in answerer.seen[0].figures] == [
+        "18-061 fig06",
+        "24-013 fig03",
+    ]
+    assert [figure.figure for figure in answer.figures] == ["18-061/fig06", "24-013/fig03"]
+
+
 def test_without_text_the_question_is_what_is_wrong_and_what_to_do() -> None:
     answerer = FakeAnswerer(FATIGUE)
 

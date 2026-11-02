@@ -275,9 +275,28 @@ defaults; the answer shares the reader's Qwen adapter.
 | `dinov2-base-v1` | dev / test | 1.000 / 1.000 | 1.000 / 1.000 | 0.375 / 0.250 |
 | `dinov2-small-v1` | dev / test | 1.000 / 1.000 | 1.000 / 1.000 | 0.000 / 0.125 |
 
-- Honest reading: gold photos are copies of indexed figures. Held out, base gets the report first
-  for 95.7%, small 89.9%.
+- Honest reading: gold photos are copies of indexed figures; these are the copy setting, now
+  `failure-copy`. Held out, base gets the report first for 95.7%, small 89.9%.
 - Gate: it does not hold on real photos of other parts; 10 of 12 pass 0.28.
 - Answers: a stored 6-photo spot check, 4 right; the 18-photo before and after is pending.
 
 Details: `docs/photo-answers.md`, `evals/photo-answers/`.
+
+## Fault evals
+
+The eval harness now scores fault finding as the research measured it, and scores the answer.
+
+- Held out: the failure suite hides each photo's own figure from the search, through an
+  `exclude` argument on the finder. On all 154 cases, `dinov2-base-v1` repeats the research
+  exactly: section@1 0.645, mode@3 0.942, report@1 95.7%. `dinov2-small-v1` gets 0.551 and
+  0.913 and the shuffled floor 0.022 and 0.739. `failure-copy` keeps the old setting, where base
+  scores 1.000.
+- Gate: base keeps all 5 unrelated images out and no drawing (kept_out 0.312); drawings pass the
+  0.28 gate, so the router must stop them.
+- Answer: the `answer` suite asks the photo answer about each case, held out. `correct` needs a
+  match, a citation in the right report, a failure keyword and only valid citations; a negative
+  must be kept out. On a stratified `--limit 8` dev sample, `photo-v1` (Qwen3-VL 8B) scores 0.625
+  against 0.500 for the captions floor, at 18 to 35 s per photo. Both photo misses followed a top
+  figure from another report. Eight cases do not rank the two. The `photo-v2` run is pending.
+
+Details: `docs/evals.md`.
