@@ -16,8 +16,9 @@ uv run hf download mlx-community/Qwen3-VL-8B-Instruct-4bit
 uv run resourcly serve            # the chat screen and the API on http://127.0.0.1:8000
 ```
 
-Drawings are read by `vector-crop-v1`, which runs Qwen3-VL 8B through MLX on Apple silicon, about
-a minute per page. It loads the model from the local Hugging Face cache only. Without the model, a
+Drawings are read by `vector-crop-v2`, which runs Qwen3-VL 8B through MLX on Apple silicon, about
+a minute per page. It reads each callout it finds in the PDF's vector paths; a page with none, such
+as a scan or an image upload, is read whole, and its features say so. It loads the model from the local Hugging Face cache only. Without the model, a
 drawing fails with a message that names the download command. To run without models, on any
 machine, read the text layer, which finds the title block and notes only, and route with the stub:
 
@@ -94,7 +95,7 @@ curl http://127.0.0.1:8000/api/requests/<id>/trace
 
 | Variable | Default |
 | --- | --- |
-| `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION` | `vector-crop-v1`, `three-layer-v1` |
+| `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION` | `vector-crop-v2`, `three-layer-v1` |
 | `RESOURCLY_UPLOADS_DIR` | `var/uploads` |
 | `RESOURCLY_TRACE_DB` | `var/traces.sqlite` |
 | `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES` | 50 MB, 50 |

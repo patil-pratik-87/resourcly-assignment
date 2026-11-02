@@ -12,8 +12,8 @@ uv run hf download mlx-community/Qwen3-VL-8B-Instruct-4bit   # about 6 GB
 uv run resourcly ask "read this" --file data/drawings/nist_ctc_01_asme1_rd.pdf
 ```
 
-The models run locally and are downloaded once. Drawings are read by `vector-crop-v1` with
-Qwen3-VL 8B on Apple silicon. On a machine without the models, set
+The models run locally and are downloaded once. Drawings are read by `vector-crop-v2` with
+Qwen3-VL 8B on Apple silicon; a scan or an image is read a whole page at a time. On a machine without the models, set
 `RESOURCLY_READER_VERSION=textlayer-v0` (the text layer only) and
 `RESOURCLY_ROUTER_VERSION=stub-v0`, which need no model.
 

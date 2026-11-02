@@ -5,7 +5,8 @@ leave the structure to code. Both read the title block and the notes from the PD
 exactly, so they differ only in how the model sees the callouts:
 
 - `VectorCropReaderAdapter` finds each callout from the vector paths (`callout_locator`) and asks
-  the model about one crop at a time.
+  the model about one crop at a time. A page with no vector callouts, such as a scan or an image
+  upload, is read whole instead when the version gives a `page_prompt`.
 - `WholePageReaderAdapter` asks the model about the whole page at once.
 
 What each callout points at is not traced: each callout becomes one feature, typed by a fixed rule
@@ -41,6 +42,8 @@ from resourcly.ports import Progress, VisionModelPort
 
 Box = tuple[float, float, float, float]
 WHOLE_PAGE: Box = (0.0, 0.0, 1.0, 1.0)
+CALLOUT = "The feature this callout points at; the leader is not traced."
+RASTER_PAGE = "Read from the whole page, which has no vector callouts (a scan or an image)."
 
 
 @dataclass(frozen=True)
@@ -50,6 +53,7 @@ class Group:
     page: int
     box: Box
     readings: list[dict[str, Any]]
+    description: str = CALLOUT
 
 
 class VectorCropReaderAdapter:
@@ -61,6 +65,10 @@ class VectorCropReaderAdapter:
     Two follow-up questions are asked about the same crop when they are set. `symbol_prompt` is
     asked when a frame comes back with a tolerance but no characteristic named. `letter_prompt`
     is asked when a small frame with one letter in it (a datum feature box) reads as nothing.
+
+    A page with no vector callouts, such as a scan or an image upload, has nothing to crop. With
+    `page_prompt` set it is read whole, as `WholePageReaderAdapter` reads a page, and its features
+    say so; without it the page gives no values.
     """
 
     def __init__(
@@ -73,6 +81,9 @@ class VectorCropReaderAdapter:
         crop_dpi: int = 300,
         margin: float = 4.0,
         max_tokens: int = 700,
+        page_prompt: str | None = None,
+        page_dpi: int = 150,
+        page_max_tokens: int = 4000,
     ):
         self.folder = folder
         self.model = model
@@ -82,13 +93,19 @@ class VectorCropReaderAdapter:
         self.crop_dpi = crop_dpi
         self.margin = margin
         self.max_tokens = max_tokens
+        self.page_prompt = page_prompt
+        self.page_dpi = page_dpi
+        self.page_max_tokens = page_max_tokens
 
     def read(self, drawing: str, progress: Progress | None = None) -> dict[str, Any]:
         with _open(self.folder, drawing) as pdf:
-            # Every page is located first, so the progress knows the drawing's callout count.
+            # Every page is located first, so the progress knows the drawing's step count: one
+            # step per callout, and one per page read whole.
             located = [locate(page) for page in pdf]
-            total = sum(map(len, located))
+            whole = [not callouts and self.page_prompt is not None for callouts in located]
+            total = sum(map(len, located)) + sum(whole)
             groups: list[Group] = []
+            done = 0
 
             def report(page: pymupdf.Page, fractions: list[Box], page_done: int) -> None:
                 if progress:
@@ -97,7 +114,7 @@ class VectorCropReaderAdapter:
                         ReadProgress(
                             page=page.number + 1,
                             pages=pdf.page_count,
-                            done=len(groups),
+                            done=done,
                             total=total,
                             boxes=fractions,
                             page_done=page_done,
@@ -105,7 +122,21 @@ class VectorCropReaderAdapter:
                         )
                     )
 
-            for page, callouts in zip(pdf, located, strict=True):
+            for page, callouts, read_whole in zip(pdf, located, whole, strict=True):
+                if read_whole:
+                    report(page, [], 0)
+                    groups += page_groups(
+                        self.model,
+                        self.page_prompt,
+                        page,
+                        self.page_dpi,
+                        self.page_max_tokens,
+                        RASTER_PAGE,
+                    )
+                    done += 1
+                    if done == total:
+                        report(page, [], 0)
+                    continue
                 if not callouts:
                     continue
                 pixmap = page.get_pixmap(dpi=self.crop_dpi)
@@ -116,7 +147,8 @@ class VectorCropReaderAdapter:
                     image = crop_png(pixmap, callout.box, others, self.crop_dpi, self.margin)
                     found = self._read_crop(image, callout)
                     groups.append(Group(page.number + 1, fractions[index], found))
-                if len(groups) == total:
+                    done += 1
+                if done == total:
                     report(page, fractions, len(callouts))
             return build_document(drawing, pdf, _merge_repeats(groups))
 
@@ -170,16 +202,25 @@ class WholePageReaderAdapter:
                             total=pdf.page_count,
                         )
                     )
-                image = page.get_pixmap(dpi=self.dpi).tobytes("png")
-                answer = self.model.generate(self.prompt, [image], self.max_tokens)
-                callouts, datums = _page_answer(answer)
-                number = page.number + 1
-                groups += [Group(number, WHOLE_PAGE, readings(c)) for c in _collapse(callouts)]
-                groups += [
-                    Group(number, WHOLE_PAGE, readings({"lines": [d]}, framed=True, letters=1))
-                    for d in datums
-                ]
+                groups += page_groups(self.model, self.prompt, page, self.dpi, self.max_tokens)
             return build_document(drawing, pdf, groups)
+
+
+def page_groups(
+    model: VisionModelPort,
+    prompt: str,
+    page: pymupdf.Page,
+    dpi: int,
+    max_tokens: int,
+    description: str = CALLOUT,
+) -> list[Group]:
+    """The callouts of one page from one model call about the whole page at `dpi`."""
+    image = page.get_pixmap(dpi=dpi).tobytes("png")
+    callouts, datums = _page_answer(model.generate(prompt, [image], max_tokens))
+    number = page.number + 1
+    found = [readings(c) for c in _collapse(callouts)]
+    found += [readings({"lines": [d]}, framed=True, letters=1) for d in datums]
+    return [Group(number, WHOLE_PAGE, r, description) for r in found]
 
 
 def crop_png(
@@ -269,7 +310,7 @@ def build_document(drawing: str, pdf: pymupdf.Document, groups: list[Group]) -> 
                 "id": feature_id,
                 "type": feature_type(group.readings),
                 "label": group.readings[0]["raw"],
-                "description": "The feature this callout points at; the leader is not traced.",
+                "description": group.description,
                 "page": group.page,
             }
         )
@@ -374,7 +415,7 @@ def _merge_repeats(groups: list[Group], max_gap: float = 0.03) -> list[Group]:
                 for g in kept
             )
         ]
-        kept.append(Group(group.page, group.box, fresh))
+        kept.append(Group(group.page, group.box, fresh, group.description))
     return kept
 
 

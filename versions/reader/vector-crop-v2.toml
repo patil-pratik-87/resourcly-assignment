@@ -1,0 +1,27 @@
+description = "vector-crop-v1, plus a page with no vector callouts (a scan or an image) read whole as whole-page-v1 reads it"
+impl = "vector-crop"
+model = "mlx-community/Qwen3-VL-8B-Instruct-4bit"
+crop_dpi = 300
+margin = 4.0
+max_tokens = 700
+# The GD&T prompt: it names each geometric symbol by its shape and asks for every line and cell
+prompt = """
+This image is cut from an ASME Y14.5 engineering drawing. It may contain a dimension line of text AND, below or beside it, a feature control frame: a row of boxed cells. The first cell of a feature control frame holds a geometric characteristic symbol, for example position (circle with a cross), profile of a surface (half circle), profile of a line (arc), flatness (parallelogram), perpendicularity (inverted T), parallelism (two slanted lines), circularity (circle), cylindricity, runout (arrow), angularity (angle). The next cell holds the tolerance (maybe with Ø and a circled M or L), and the remaining cells hold datum letters.
+Transcribe EVERY line of text and EVERY boxed cell, top to bottom, left to right. Do not skip anything. Return only JSON:
+{"lines": ["<line 1 exactly as printed>", "..."], "feature_control_frames": [{"symbol_name": "<characteristic name>", "tolerance": "<as printed>", "modifiers": ["..."], "datums": ["..."]}]}
+"""
+# Asked only when a small frame with one letter in it reads as nothing
+letter_prompt = """
+This image is cut from an ASME Y14.5 engineering drawing. It shows a datum feature symbol: one capital letter inside a small box, which may be drawn slanted. Which letter is it? Return only JSON: {"letter": "<the letter>"}
+"""
+# Asked only when a frame comes back with a tolerance but no characteristic named
+symbol_prompt = """
+This image is cut from an ASME Y14.5 engineering drawing. It shows a feature control frame. Its first cell holds one geometric characteristic symbol. Which one is it? Choose from: position (circle with a cross), profile of a surface (half circle), profile of a line (arc), flatness (parallelogram), perpendicularity (inverted T), parallelism (two slanted parallel lines), angularity (angle), circularity (circle), cylindricity (circle between two slanted lines), circular runout (one arrow), total runout (two arrows), concentricity (two circles), symmetry (three stacked lines), straightness (one line). Return only JSON: {"symbol_name": "<name>"}
+"""
+# The fallback for a page with nothing to crop: whole-page-v1's settings and prompt, unchanged
+page_dpi = 150
+page_max_tokens = 4000
+page_prompt = """This is a full sheet of an ASME Y14.5 engineering drawing. Its annotations are dimensions (lines of text such as a diameter with its tolerance), feature control frames and datum feature symbols. A feature control frame is a row of boxed cells. The first cell of a feature control frame holds a geometric characteristic symbol, for example position (circle with a cross), profile of a surface (half circle), profile of a line (arc), flatness (parallelogram), perpendicularity (inverted T), parallelism (two slanted lines), circularity (circle), cylindricity, runout (arrow), angularity (angle). The next cell holds the tolerance (maybe with Ø and a circled M or L), and the remaining cells hold datum letters. A datum feature symbol is a single capital letter in a small box joined to a triangle.
+Transcribe EVERY annotation on the sheet, one entry per annotation, with EVERY line of text and EVERY boxed cell. Do not skip anything. Do not include the title block, the notes block or the axis letters X, Y and Z. Return only JSON:
+{"callouts": [{"lines": ["<line 1 exactly as printed>", "..."], "feature_control_frames": [{"symbol_name": "<characteristic name>", "tolerance": "<as printed>", "modifiers": ["..."], "datums": ["..."]}]}], "datum_feature_symbols": ["<letter>", "..."]}
+"""

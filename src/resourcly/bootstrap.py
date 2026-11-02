@@ -59,7 +59,7 @@ class Settings:
     # The version each component runs, a file in versions_dir; the app and the evals both read it
     versions: dict[str, str] = field(
         default_factory=lambda: {
-            "reader": "vector-crop-v1",
+            "reader": "vector-crop-v2",
             "router": "three-layer-v1",
             "failure": "shuffled-v0",
         }
@@ -176,6 +176,9 @@ READERS: dict[str, Implementation] = {
             "crop_dpi",
             "margin",
             "max_tokens",
+            "page_prompt",
+            "page_dpi",
+            "page_max_tokens",
         ),
         required=("model", "prompt"),
     ),
