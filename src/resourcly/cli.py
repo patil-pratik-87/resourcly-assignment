@@ -146,7 +146,10 @@ def doctor() -> None:
     blockers = sum(not check.ok and check.blocker for check in results)
     warnings = sum(not check.ok and not check.blocker for check in results)
     if blockers:
-        typer.secho(f"not ready: {blockers} problem(s) to fix", fg=colors["fail"])
+        first = checks.first_fix(results)
+        typer.secho(
+            f"not ready: {blockers} problem(s) to fix; start with {first}", fg=colors["fail"]
+        )
         raise typer.Exit(1)
     typer.secho(f"ready, {warnings} warning(s)", fg=colors["ok"])
 

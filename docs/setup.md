@@ -52,4 +52,7 @@ make doctor       # or uv run resourcly doctor
 The doctor prints one line per check: Python, uv, Node.js, the MLX and PyTorch packages, each
 model, each version the app runs and the files it names, and the chat screen. A `fail` or `warn`
 line is followed by the command that fixes it. It exits with 1 when a problem stops the app, such
-as a missing model; a missing chat screen is only a warning, as the CLI works without it.
+as a missing model; a missing chat screen is only a warning, as the CLI works without it. A model
+already in the cache reads `ok` even before the packages are installed, and the last line names
+the fix to make first: `uv sync --extra vlm --extra router` (or `make setup`) when packages are
+missing.

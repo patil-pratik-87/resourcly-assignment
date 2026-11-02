@@ -413,14 +413,30 @@ def version_models(version: Version) -> dict[str, str]:
 
 
 def model_cached(model_id: str) -> bool:
-    """Whether the model is in the local Hugging Face cache, looked up without the network."""
-    if find_spec("huggingface_hub") is None:
+    """Whether the model is in the local Hugging Face cache, or is a local folder.
+
+    It reads the cache folder as a download leaves it: the snapshot that refs/main names, with
+    files in it. So it answers before the packages that load the model are installed.
+    """
+    if Path(model_id).is_dir():
+        return True
+    folder = _hub_cache() / f"models--{model_id.replace('/', '--')}"
+    ref = folder / "refs" / "main"
+    if not ref.is_file():
         return False
-    try:
-        cached_snapshot(model_id)
-    except ModelNotCached:
-        return False
-    return True
+    snapshot = folder / "snapshots" / ref.read_text(encoding="utf-8").strip()
+    return snapshot.is_dir() and any(snapshot.iterdir())
+
+
+def _hub_cache() -> Path:
+    """The Hugging Face cache folder, found from the settings huggingface_hub reads."""
+    for variable in ("HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE"):
+        if os.environ.get(variable):
+            return Path(os.environ[variable]).expanduser()
+    if os.environ.get("HF_HOME"):
+        return Path(os.environ["HF_HOME"]).expanduser() / "hub"
+    cache = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache").expanduser()
+    return cache / "huggingface" / "hub"
 
 
 def list_versions(settings: Settings, component: str) -> list[Version]:

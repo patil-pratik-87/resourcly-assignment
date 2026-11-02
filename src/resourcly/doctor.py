@@ -73,6 +73,15 @@ def run(settings: Settings, system: System) -> list[Check]:
     ]
 
 
+def first_fix(checks: list[Check]) -> str:
+    """The fix to make first: the packages when they are missing, as the other checks need them,
+    else the first blocker's fix."""
+    blocked = [check for check in checks if not check.ok and check.blocker]
+    if any(check.fix == SYNC for check in blocked):
+        return f"`{SYNC}` (or make setup)"
+    return f"`{blocked[0].fix}`" if blocked else ""
+
+
 def needed_models(versions: list[Version]) -> list[str]:
     """The models the versions load, each once, in the order the versions name them."""
     return list(dict.fromkeys(m for v in versions for m in version_models(v).values()))
