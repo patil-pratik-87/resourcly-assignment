@@ -113,6 +113,9 @@ def compare(
     base: Annotated[str, typer.Argument(help="A run id, or a version for its latest run.")],
     candidate: Annotated[str, typer.Argument(help="A run id, or a version for its latest run.")],
     fail_if_worse: Annotated[bool, typer.Option(help="Exit 1 if the primary got worse.")] = False,
+    force: Annotated[
+        bool, typer.Option(help="Compare runs on other splits or cases, on the cases both ran.")
+    ] = False,
 ) -> None:
     """Whether the candidate is better or worse than the base, metric by metric and case by case.
 
@@ -131,6 +134,7 @@ def compare(
             store.cases(runs[0].run_id),
             runs[1],
             store.cases(runs[1].run_id),
+            force=force,
         )
     for label, run in (("base", runs[0]), ("candidate", runs[1])):
         typer.echo(

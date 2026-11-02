@@ -53,17 +53,25 @@ def compare_runs(
     base_cases: list[CaseResult],
     candidate: Run,
     candidate_cases: list[CaseResult],
+    force: bool = False,
 ) -> Comparison:
     """Score both runs' stored answers against the current gold, on the cases both ran.
 
     Both sides are scored the same way on the same cases, so the verdict holds even when the gold
-    changed after a run. A case only one run has, or one with no gold now, is left out with a
-    warning. A metric is better when it rises; any change counts. The first is the primary one.
+    changed after a run. Runs on other splits or other cases are refused, since their numbers do
+    not measure the same thing; with `force`, a case only one run has, or one with no gold now, is
+    left out with a warning. A metric is better when it rises; any change counts. The first is
+    the primary one.
     """
     if base.component != candidate.component:
         raise ValueError(f"cannot compare a {base.component} run with a {candidate.component} run")
     before = {case.case_id: case for case in base_cases}
     after = {case.case_id: case for case in candidate_cases}
+    if not force and (base.split != candidate.split or before.keys() != after.keys()):
+        raise ValueError(
+            f"the runs ran on different cases: {len(before)} {base.split} and"
+            f" {len(after)} {candidate.split}; --force compares the cases both ran"
+        )
     warnings = [
         f"only in {side}: {', '.join(sorted(only))}"
         for side, only in (
