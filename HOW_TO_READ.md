@@ -85,7 +85,7 @@ Tests: `make test` (`uv run pytest`).
 
 ```sh
 make setup   # (scripts/setup.sh): packages, models, the screen build
-make serve   # (uv run resourcly serve), then open http://127.0.0.1:8000
+make run     # sets up if needed, then serves on http://127.0.0.1:8000
 ```
 
 The chat opens with two demo chats, answered before, that show results with no model
