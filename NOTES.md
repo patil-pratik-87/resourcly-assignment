@@ -134,3 +134,25 @@ run and a comparison. The model-free versions set the floors, on the dev split:
   as pictures. The shuffled finder gives the same order for every photo and never keeps one out.
 
 Details: `docs/evals.md`.
+
+## The router
+
+`three-layer-v1` runs structure rules, then a DINOv2-small probe deciding at 0.9, then Qwen3-VL
+8B for the rest. The probe trained on the train split only (37 drawings, 23 photos).
+
+| Version | Split | Accuracy | Drawing recall | Other kept out |
+| --- | --- | --- | --- | --- |
+| `stub-v0` | dev (123) | 0.607 | 0.120 | 0.500 |
+| `three-layer-v1` | dev (123) | 1.000 | 1.000 | 0.833 |
+| `stub-v0` | test (57) | 0.418 | 0.091 | 0.500 |
+| `three-layer-v1` | test (57) | 1.000 | 1.000 | 1.000 |
+
+- How: `evals run` on dev, once on test, then `evals compare` with `stub-v0`.
+- Honest reading: perfect scores mean the route set is easy, not that the router is perfect. Its
+  phone photos and scans of drawings are made by code from clean renders; it has no real phone
+  photos, no real scanned reports and no mixed pages.
+- Miss: a dimensioned physics diagram goes to drawing (probe 0.986).
+- Limits: the NIST drawings in every split share one family. The app still runs `stub-v0` by
+  default; `RESOURCLY_ROUTER_VERSION=three-layer-v1` picks the layered router.
+
+Details: `docs/routing.md`.

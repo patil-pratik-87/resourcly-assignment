@@ -10,9 +10,14 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from resourcly.adapters.dinov2_encoder import Dinov2EncoderAdapter
 from resourcly.adapters.gold_store import JsonGoldStoreAdapter
+from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
 from resourcly.adapters.request_store import JsonRequestStoreAdapter
+from resourcly.adapters.route_probe import LinearProbe, ProbeRouteAdapter
+from resourcly.adapters.route_structure import StructureRouteAdapter
+from resourcly.adapters.route_vlm import VlmRouteAdapter
 from resourcly.adapters.shuffled_figures import ShuffledFiguresAdapter
 from resourcly.adapters.sqlite_trace import SqliteTraceAdapter
 from resourcly.adapters.stub_router import StubRouteAdapter
@@ -21,7 +26,7 @@ from resourcly.adapters.thread_jobs import ThreadJobsAdapter
 from resourcly.adapters.upload_store import FileUploadStoreAdapter
 from resourcly.agent import AgentService, recover
 from resourcly.errors import InvalidVersion, NotFound
-from resourcly.ports import RouterPort
+from resourcly.ports import ImageEncoderPort, RouteLayerPort, RouterPort
 from resourcly.services import (
     DrawingService,
     FailureService,
@@ -84,18 +89,25 @@ class Settings:
 
 @dataclass(frozen=True)
 class Version:
-    """A named implementation of one component and its settings, from
-    versions/<component>/<name>.toml."""
+    """A named implementation of one component and its settings.
+
+    It is read from versions/<component>/<name>.toml. A setting that names a file next to
+    it, such as a router's probe weights, adds the file's SHA-256 to `files`, so the hash changes
+    when the file does.
+    """
 
     component: str
     name: str
     impl: str
     description: str
     params: dict[str, Any]
+    files: dict[str, str] = field(default_factory=dict)
 
     @property
     def hash(self) -> str:
         config = {"component": self.component, "impl": self.impl, "params": self.params}
+        if self.files:
+            config["files"] = self.files
         text = json.dumps(config, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(text.encode()).hexdigest()[:12]
 
@@ -107,6 +119,10 @@ class Implementation:
     build: Callable[[Settings, dict[str, Any]], Any]
     settings: tuple[str, ...] = ()
     required: tuple[str, ...] = ()
+    # settings that name a file, relative to the component's versions folder
+    files: tuple[str, ...] = ()
+    # raises InvalidVersion for settings the build would refuse, so a bad version fails to load
+    check: Callable[[dict[str, Any]], None] | None = None
 
 
 READERS: dict[str, Implementation] = {
@@ -114,10 +130,64 @@ READERS: dict[str, Implementation] = {
         lambda settings, params: PyMuPDFTextReaderAdapter(settings.drawings_dir)
     ),
 }
+# The image models a router probe can embed pictures with, by the name a version gives as
+# `encoder`. Each takes the model id and the long side of the picture it sees.
+ENCODERS: dict[str, Callable[[str, int], ImageEncoderPort]] = {
+    "dinov2": lambda model_id, max_side: Dinov2EncoderAdapter(model_id, max_side),
+}
+
+
+def _three_layers(settings: Settings, params: dict[str, Any]) -> list[RouteLayerPort]:
+    """The router of docs/routing.md: structure rules, a probe and a vision-language model."""
+    structure = StructureRouteAdapter(
+        **{key: params[key] for key in STRUCTURE_SETTINGS if key in params}
+    )
+    encoder = ENCODERS[params["encoder"]](
+        params["encoder_model"], params.get("encoder_max_side", 1024)
+    )
+    probe = LinearProbe.load(settings.versions_dir / "router" / params["probe"])
+    vlm = VlmRouteAdapter(
+        MlxVlmModelAdapter(params["model"]), params["prompt"], params.get("vlm_max_side", 768)
+    )
+    return [structure, ProbeRouteAdapter(encoder, probe, params["threshold"]), vlm]
+
+
+def _known_encoder(params: dict[str, Any]) -> None:
+    if params["encoder"] not in ENCODERS:
+        raise InvalidVersion(
+            f"'{params['encoder']}' is not an image encoder; use {', '.join(sorted(ENCODERS))}"
+        )
+
+
+STRUCTURE_SETTINGS = (
+    "vector_paths",
+    "cad_max_picture",
+    "prose_chars",
+    "full_page_picture",
+    "raster_picture",
+    "pages",
+)
 ROUTERS: dict[str, Implementation] = {
     # A model-free stand-in, for tests and machines without the router's models.
     "stub": Implementation(
         lambda settings, params: [StubRouteAdapter(**params)], settings=("min_paths",)
+    ),
+    "three-layer": Implementation(
+        _three_layers,
+        settings=(
+            *STRUCTURE_SETTINGS,
+            "encoder",
+            "encoder_model",
+            "encoder_max_side",
+            "probe",
+            "threshold",
+            "model",
+            "vlm_max_side",
+            "prompt",
+        ),
+        required=("encoder", "encoder_model", "probe", "threshold", "model", "prompt"),
+        files=("probe",),
+        check=_known_encoder,
     ),
 }
 FINDERS: dict[str, Implementation] = {
@@ -162,7 +232,19 @@ def load_version(settings: Settings, component: str, name: str) -> Version:
         raise InvalidVersion(
             f"{component} version '{name}': {impl} needs the setting {', '.join(missing)}"
         )
-    return Version(component, name, impl, description, params)
+    if registered[impl].check:
+        registered[impl].check(params)
+    files = {}
+    for key in registered[impl].files:
+        if key in params:
+            file = path.parent / params[key]
+            if not file.is_file():
+                raise InvalidVersion(
+                    f"{component} version '{name}' names the {key} file {params[key]},"
+                    f" which is not in {path.parent}"
+                )
+            files[key] = hashlib.sha256(file.read_bytes()).hexdigest()[:12]
+    return Version(component, name, impl, description, params, files)
 
 
 def list_versions(settings: Settings, component: str) -> list[Version]:

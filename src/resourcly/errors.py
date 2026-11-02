@@ -29,3 +29,7 @@ class InvalidDocument(ValueError):
 
 class InvalidVersion(ValueError):
     pass
+
+
+class ModelNotCached(LookupError):
+    """A model the reader needs is not on this machine; readers never download one."""
