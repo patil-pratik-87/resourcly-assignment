@@ -6,11 +6,23 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.115",
+    "pillow>=10.4",
     "pydantic>=2.9",
     "pymupdf>=1.24",
     "python-multipart>=0.0.12",
     "typer>=0.12",
     "uvicorn>=0.32",
+]
+
+[project.optional-dependencies]
+# The vision-language readers run Qwen3-VL on Apple silicon through MLX.
+vlm = [
+    "mlx-vlm==0.7.11; sys_platform == 'darwin' and platform_machine == 'arm64'",
+]
+# The router's probe embeds pictures with a frozen image model (DINOv2) through PyTorch.
+router = [
+    "torch>=2.5",
+    "transformers>=4.46",
 ]
 
 [project.scripts]
@@ -22,6 +34,10 @@ dev = [
     "httpx2>=2.16.0",
     "pytest>=8.3",
     "ruff>=0.7",
+]
+# Retrains the router's probe.
+router-build = [
+    "scikit-learn>=1.5",
 ]
 
 [build-system]
@@ -47,4 +63,4 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.isort]
 # First party even before a new module exists, as in a test written before its code
-known-first-party = ["resourcly", "tests", "common", "gold_schema", "grid", "overlay"]
+known-first-party = ["resourcly", "tests", "common", "gold_schema", "grid", "overlay", "train_route_probe"]

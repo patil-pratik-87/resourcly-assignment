@@ -10,9 +10,13 @@ screen uses ([chat-ui.md](chat-ui.md)). Both store requests in the same place, s
 look up the other's requests.
 
 ```sh
-uv sync
+uv sync --extra router --extra vlm
+hf download facebook/dinov2-small                       # the router's models, downloaded once
+hf download mlx-community/Qwen3-VL-8B-Instruct-4bit
 uv run resourcly serve            # the chat screen and the API on http://127.0.0.1:8000
 ```
+
+`RESOURCLY_ROUTER_VERSION=stub-v0` runs a router that needs no model.
 
 ## Chat
 
@@ -83,7 +87,7 @@ curl http://127.0.0.1:8000/api/requests/<id>/trace
 
 | Variable | Default |
 | --- | --- |
-| `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION` | `textlayer-v0`, `stub-v0` |
+| `RESOURCLY_READER_VERSION`, `RESOURCLY_ROUTER_VERSION` | `textlayer-v0`, `three-layer-v1` |
 | `RESOURCLY_UPLOADS_DIR` | `var/uploads` |
 | `RESOURCLY_TRACE_DB` | `var/traces.sqlite` |
 | `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES` | 50 MB, 50 |

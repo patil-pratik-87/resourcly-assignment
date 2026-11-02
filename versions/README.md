@@ -10,11 +10,14 @@ version the evals measure is the version the app serves.
 | `<component>/<name>.toml` | One version, such as `reader/textlayer-v0.toml`. |
 | `reader/textlayer-v0.toml` | Values from the PDF text layer, no model. |
 | `router/stub-v0.toml` | One structure rule per file type, no model. |
+| `router/three-layer-v1.toml` | Structure rules, a DINOv2 probe, then Qwen3-VL ([docs/routing.md](../docs/routing.md)). |
+| `router/probes/` | Probe weights a router version names; their hash is part of its hash. |
 | `failure/shuffled-v0.toml` | Every report figure in one seeded random order, no model. |
 
-Each is the model-free floor of its component, and the version the app runs unless told
-otherwise. `RESOURCLY_<COMPONENT>_VERSION`, such as `RESOURCLY_ROUTER_VERSION`, picks another, and
-`RESOURCLY_VERSIONS_DIR` points everything at another folder.
+The `-v0` files are the model-free floor of their component. The app runs `textlayer-v0`,
+`three-layer-v1` and `shuffled-v0` unless told otherwise. `RESOURCLY_<COMPONENT>_VERSION`, such as
+`RESOURCLY_ROUTER_VERSION`, picks another, and `RESOURCLY_VERSIONS_DIR` points everything at
+another folder.
 
 ## Add a version
 

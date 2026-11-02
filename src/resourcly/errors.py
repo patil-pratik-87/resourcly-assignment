@@ -29,3 +29,11 @@ class InvalidDocument(ValueError):
 
 class InvalidVersion(ValueError):
     pass
+
+
+class ModelNotCached(LookupError):
+    """A model the reader needs is not on this machine; readers never download one."""
+
+
+class UnreadableAttachment(ValueError):
+    """An attached file that opens but cannot be decoded or rendered into a picture."""

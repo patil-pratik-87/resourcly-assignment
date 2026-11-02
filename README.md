@@ -6,9 +6,14 @@ into JSON, and stores what it did for every request.
 ## Use it
 
 ```sh
-uv sync
+uv sync --extra router --extra vlm
+hf download facebook/dinov2-small
+hf download mlx-community/Qwen3-VL-8B-Instruct-4bit
 uv run resourcly ask "read this" --file data/drawings/nist_ctc_01_asme1_rd.pdf
 ```
+
+The router's two models run locally and are downloaded once. On a machine without them, set
+`RESOURCLY_ROUTER_VERSION=stub-v0`, a router that needs no model.
 
 How to chat, send many drawings at once, and look up a request, from the CLI or over HTTP:
 [docs/usage.md](docs/usage.md). The same in a browser, with `uv run resourcly serve`:

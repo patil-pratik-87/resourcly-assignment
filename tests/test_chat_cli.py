@@ -18,6 +18,8 @@ DRAWING = PROJECT_ROOT / "data" / "drawings" / f"{CTC01}.pdf"
 def stores(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("RESOURCLY_UPLOADS_DIR", str(tmp_path / "uploads"))
     monkeypatch.setenv("RESOURCLY_TRACE_DB", str(tmp_path / "traces.sqlite"))
+    # the model-free router, so the commands run without the router's models
+    monkeypatch.setenv("RESOURCLY_ROUTER_VERSION", "stub-v0")
 
 
 def invoke(*args: str) -> Result:

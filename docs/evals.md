@@ -35,7 +35,7 @@ The model-free version of each component sets its floor.
 | Version | Split | Primary | Other |
 | --- | --- | --- | --- |
 | reader `textlayer-v0` | all, 11 drawings | f1 0.344 | precision 0.902, recall 0.213, partial_recall 0.129 |
-| router `stub-v0` | dev, 123 requests | accuracy 0.607 | drawing_recall 0.120, other_kept_out 0.500 |
+| router `stub-v0` | dev, 123 requests | accuracy 0.602 | drawing_recall 0.120, other_kept_out 0.500 |
 | failure `shuffled-v0` | dev, 86 photos | section@1 0.038 | mode@3 0.769, kept_out 0.000 |
 
 ## What each metric means
@@ -44,7 +44,7 @@ The model-free version of each component sets its floor.
 | --- | --- |
 | `f1`, `precision`, `recall` | Reader values that match the full gold on page, unit, kind and number. |
 | `partial_recall` | Recall on partial gold, which lists only some values per drawing. |
-| `accuracy` | Router requests with a case (drawing, photo, text) sent to the right one. |
+| `accuracy` | Router requests sent to the right route, files that fit no case included. |
 | `drawing_recall` | Drawings the router sends to the reader. |
 | `other_kept_out` | Files that fit no case, routed to `other`. |
 | `section@1` | Photos whose top figure is in the right report section. |
