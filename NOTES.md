@@ -288,9 +288,9 @@ The eval harness now scores fault finding as the research measured it, and score
 - Gate: base keeps all 5 unrelated images out and no drawing (kept_out 0.312); drawings pass the
   0.28 gate, so the router must stop them.
 - Answer: the `answer` suite asks the photo answer about each case, held out. `correct` needs a
-  citation in the right report, a failure keyword and only valid citations; a negative must
-  match no figure. On a stratified `--limit 8` dev sample, Qwen3-VL 8B scores 0.625 against
-  0.500 for the captions floor, at 18 to 35 s per photo. Both photo misses followed a top figure
-  from another report. Eight cases do not rank the two.
+  match, a citation in the right report, a failure keyword and only valid citations; a negative
+  must be kept out. On a stratified `--limit 8` dev sample, `photo-v1` (Qwen3-VL 8B) scores 0.625
+  against 0.500 for the captions floor, at 18 to 35 s per photo. Both photo misses followed a top
+  figure from another report. Eight cases do not rank the two. The `photo-v2` run is pending.
 
 Details: `docs/evals.md`.

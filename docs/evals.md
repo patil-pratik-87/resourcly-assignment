@@ -11,7 +11,7 @@ uv run evals run router --version stub-v0            # the dev split by default
 uv run evals run reader --version textlayer-v0 --split all
 uv run evals run failure --version shuffled-v0 --limit 10   # a partial run of 10 cases
 uv run evals run failure-copy --version dinov2-base-v1      # the photo's own figure kept
-uv run --extra vlm evals run answer --version photo-v1 --limit 8
+uv run --extra vlm evals run answer --version photo-v2 --limit 8
 uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
 uv run resourcly request RUN_ID:CASE_ID              # what one call did
@@ -33,7 +33,7 @@ The failure and answer suites run held out: each photo is a perturbed copy of a 
 so its own figure is hidden from the search and the best hit must be another figure of its
 section. `failure-copy` keeps the figure in, which only checks that the perturbations do not
 break matching. The answer runs the failure version the settings name
-(`RESOURCLY_FAILURE_VERSION`, `dinov2-base-v1` by default), and `photo-v1` takes 18 to 35 s per
+(`RESOURCLY_FAILURE_VERSION`, `dinov2-base-v1` by default), and `photo-v1` took 18 to 35 s per
 photo with Qwen3-VL 8B, so run it with `--limit`.
 
 ## Current numbers
@@ -66,6 +66,10 @@ No finder keeps a drawing out: the 0.28 gate is below what drawings reach (0.42)
 must keep them out. `dinov2-base-v1` keeps all 5 unrelated images out, and `dinov2-small-v1`
 keeps 1.
 
+The answer numbers were measured on `photo-v1`. `photo-v2`, now the default, asks for the same
+failure and can keep out a photo it sees no part in; its run on the same 8 cases is pending. The
+`photo-v1` runs score the same under the current rules, since none of its actions is stated.
+
 On its 8 cases, `photo-v1` answers 4 of 6 photos correctly and the captions floor 3. Both photos
 it gets wrong had a top figure from another report, and the model followed it. It keeps the logo
 out, at the gate. It does not keep the drawing out: the drawing passes the gate and the model
@@ -83,10 +87,10 @@ two versions.
 | `other_kept_out` | Files that fit no case, routed to `other`. |
 | `section@1` | Photos whose top figure is in the right report section. |
 | `mode@3` | Photos with the right failure mode in the top three figures. |
-| `kept_out` | Drawings and unrelated images that get no figure; for `answer`, an answer that matches no figure. |
-| `correct` | Answers that are right: a photo's answer cites its report, names its failure mode and cites only valid sources; a negative's matches no figure. |
+| `kept_out` | Drawings and unrelated images that get no figure; for `answer`, an answer that says the reports say nothing about it, at the gate or because the model saw no part. |
+| `correct` | Answers that are right: a photo's answer is a match, cites its report, names its failure mode and cites only valid sources; a negative's is kept out. |
 | `report_cited` | Photo answers with a citation in the photo's report. |
 | `mode_named` | Photo answers whose text or findings have a word starting with one of the failure keywords. |
-| `citations_valid` | Citations that name a figure the finder returned, or a page of their reports, and whose source agrees. |
+| `citations_valid` | Citations that name a figure the finder returned, or a page of their reports, and whose source agrees; a stated action's must cite a page and quote at least three words. |
 
 A failed call is scored as an empty answer, so a crash lowers the score.
