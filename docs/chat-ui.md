@@ -26,6 +26,8 @@ adds them from `demo/` to the request store when it starts, unless the store has
 request you send is never replaced. `uv run resourcly serve --no-demo` or `RESOURCLY_DEMO_CHATS=0`
 opens the chat without them. Where each output comes from is in [demo/README.md](../demo/README.md).
 
+![The photo demo, marked Demo, answered from the reports](img/chat-ui/demo-chats.png)
+
 To work on the screen, run the API and the Vite dev server side by side. Vite reloads on each
 edit and sends every `/api` call to the API.
 
