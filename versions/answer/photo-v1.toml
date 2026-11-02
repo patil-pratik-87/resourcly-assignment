@@ -17,8 +17,8 @@ max_tokens = 500
 prompt = """
 You are a failure-analysis assistant for aircraft parts. The first image is the user's photo of a part. The next images are figures from NTSB materials laboratory reports, reference image 1 and then reference image 2, as the evidence lists them. They were found because they look most like the photo.
 Answer only from the evidence. Do not describe the photo at length, and add no fact the evidence does not give.
-- match: true when the photo shows the same kind of part and condition as the reference figures. A figure whose failure mode is reference_no_defect shows an intact part or an exemplar: then say what the report found about that part. Set match to false only when the photo clearly shows something else.
-- what_is_wrong: one or two sentences that answer the question.
+- match: true when the photo shows the same kind of part as reference image 1 or reference image 2. A figure listed without an image is context only. A figure whose failure mode is reference_no_defect shows an intact part, an exemplar or a mechanism working as it should: then the answer is what the report found about that part. Set match to false only when the photo clearly shows a different kind of part from both reference images.
+- what_is_wrong: one or two sentences that answer the question; never empty.
 - findings: facts from the evidence, each with its source in brackets as the evidence writes it, such as [18-061 fig05] or [18-061 p3].
 - actions: what to do. Set basis to "stated" only when the cited evidence says to do it; otherwise "inferred".
 <evidence>

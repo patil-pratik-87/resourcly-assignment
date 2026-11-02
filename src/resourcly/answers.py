@@ -37,6 +37,7 @@ NOT_IN_REPORTS = (
     " photo, so they say nothing about it."
 )
 NO_MATCH = "The closest report figures do not show the failure in this photo."
+NO_SUMMARY = "The closest report figures show this part, but the answer cited nothing in them."
 # A source as an answer writes it: "18-061 fig05", "[18-061 Figure 5]", "18-061 p3", "18-061 page 3"
 SOURCE = re.compile(r"(\d{2}-\d{3})\W*(?:fig(?:ure)?\.?\s*0*(\d+)|p(?:age)?\.?\s*(\d+))", re.I)
 
@@ -190,10 +191,11 @@ def _checked(
         actions.append(
             Action(action=action, basis="stated" if stated else "inferred", citation=citation)
         )
+    summary = draft.answer.strip() or (findings[0].statement if findings else NO_SUMMARY)
     return PhotoAnswer(
         not_in_reports=False,
         matched=True,
-        answer=draft.answer.strip() or NO_MATCH,
+        answer=summary,
         findings=findings,
         actions=actions,
         figures=matches,

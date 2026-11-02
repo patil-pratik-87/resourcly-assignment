@@ -213,3 +213,12 @@ def test_the_default_answer_shares_the_readers_model_and_loads_nothing(settings:
     assert (answers.figures, answers.images, answers.figure_side) == (3, 2, 768)
     assert services.failures.finder.encoder.revision == "not loaded"
     assert services.answer_name == "photo-v1 (vlm)"
+
+
+def test_a_match_without_a_summary_leads_with_its_first_finding() -> None:
+    draft = AnswerDraft(True, "", [("Fatigue origins were at the holes.", "18-061 fig05")], [], "")
+
+    answer = service(FakeFinder(SPAR), FakeAnswerer(draft)).answer(PHOTO, "", "r1")
+
+    assert answer.matched is True
+    assert answer.answer == "Fatigue origins were at the holes."
