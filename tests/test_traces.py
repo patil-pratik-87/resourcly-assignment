@@ -19,7 +19,7 @@ def test_a_read_is_recorded_under_its_request_id_and_survives_a_restart(
     assert (event.request_id, event.step, event.error) == ("req-1", "drawings.read", None)
     assert event.called == "reader textlayer-v0 (textlayer)"
     assert event.input == {"drawing": CTC01}
-    assert event.output == {"values": 6, "schema_issues": 0}
+    assert event.output == {"values": 6, "schema_issues": 0, "answer_issues": 0}
     assert event.duration_ms >= 0
 
 
@@ -44,4 +44,4 @@ def test_a_failed_read_is_recorded_with_its_error(settings: Settings) -> None:
         [event] = services.traces.lookup("req-2").events
 
     assert event.error == "NotFound: no drawing named absent_drawing"
-    assert event.output == {"values": 0, "schema_issues": 0}
+    assert event.output == {"values": 0, "schema_issues": 0, "answer_issues": 0}

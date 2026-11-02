@@ -93,7 +93,7 @@ def _explain_reading(case: Case, prediction: Any) -> list[str]:
     lines += [heading, *(f"  {_record(r)}" for r in extra)]
     issues = prediction.get("issues", []) if isinstance(prediction, dict) else []
     if issues:
-        lines.append(f"schema issues ({len(issues)})")
+        lines.append(f"issues ({len(issues)})")
         lines += [
             f"  {'.'.join(map(str, i['loc'])) or '(document)'}: {i['message']}" for i in issues
         ]

@@ -166,7 +166,8 @@ class DrawingService:
     ) -> Reading:
         """Read a drawing's values; the call is traced under request_id, or a new one.
 
-        The reader calls `progress`, when given, before each step of the read.
+        The reader calls `progress`, when given, before each step of the read. The reading's
+        issues are the document's schema issues, then each model answer the reader could not use.
 
         The trace is recorded after the read. A trace that cannot be recorded is logged and
         changes neither the reading nor the reader's error.
@@ -176,9 +177,11 @@ class DrawingService:
         started, began = now(), time.perf_counter()
         document = None
         issues: list[Issue] = []
+        answer_issues: list[Issue] = []
         error = None
         try:
-            document = self.reader.read(drawing, progress).document
+            output = self.reader.read(drawing, progress)
+            document, answer_issues = output.document, output.answer_issues
             _, issues = validate_document(document, gold=False)
         except Exception as exc:
             error = exc
@@ -192,6 +195,7 @@ class DrawingService:
                 output={
                     "values": len(values) if isinstance(values, list) else 0,
                     "schema_issues": len(issues),
+                    "answer_issues": len(answer_issues),
                 },
                 error=f"{type(error).__name__}: {error}" if error else None,
                 started_at=started,
@@ -200,7 +204,12 @@ class DrawingService:
         )
         if error:
             raise error
-        return Reading(request_id=request_id, drawing=drawing, document=document, issues=issues)
+        return Reading(
+            request_id=request_id,
+            drawing=drawing,
+            document=document,
+            issues=issues + answer_issues,
+        )
 
     def _record(self, event: TraceEvent) -> None:
         try:
