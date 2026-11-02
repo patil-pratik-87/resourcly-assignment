@@ -16,12 +16,11 @@ CREATE TABLE IF NOT EXISTS runs (
     version TEXT NOT NULL,
     version_hash TEXT NOT NULL,
     split TEXT NOT NULL,
-    selection TEXT NOT NULL,
+    case_ids TEXT NOT NULL,
     case_set_hash TEXT NOT NULL,
     started_at TEXT NOT NULL,
     git_sha TEXT NOT NULL,
     git_dirty INTEGER NOT NULL,
-    rescored_from TEXT,
     note TEXT,
     finished_at TEXT,
     n_cases INTEGER NOT NULL DEFAULT 0,
@@ -41,13 +40,13 @@ CREATE TABLE IF NOT EXISTS cases (
     PRIMARY KEY (run_id, case_id)
 );
 """
-JSON_COLUMNS = {"selection", "summary", "prediction", "scores"}
+JSON_COLUMNS = {"case_ids", "summary", "prediction", "scores"}
 
 
 class SqliteResultStore:
     """The ResultStorePort in SQLite: one row per run and one per case, with the raw prediction.
 
-    Keeping the prediction lets a run be scored again against new gold without calling the
+    Keeping the prediction lets `compare` score a run again against new gold without calling the
     component again.
     """
 
@@ -61,6 +60,11 @@ class SqliteResultStore:
         with closing(sqlite3.connect(path)) as db:
             db.row_factory = sqlite3.Row
             db.executescript(SCHEMA)
+            columns = {row["name"] for row in db.execute("PRAGMA table_info(runs)")}
+            if columns != {field.name for field in fields(Run)}:
+                raise ValueError(
+                    f"{path} was written by an older harness; move it away to start anew"
+                )
             yield cls(db)
 
     def start_run(self, run: Run) -> None:

@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 import pytest
@@ -54,7 +53,7 @@ def test_a_run_takes_every_case_of_the_split_or_only_the_named_ones(
 
     assert [c.case_id for c in store.cases(whole.run_id)] == [CTC01, "partial_a"]
     assert [c.case_id for c in store.cases(named.run_id)] == ["partial_a"]
-    assert named.selection == {"case_ids": ["partial_a"]}
+    assert (whole.case_ids, named.case_ids) == ([], ["partial_a"])
 
 
 def test_a_component_without_a_version_cannot_run(
@@ -71,44 +70,6 @@ def test_a_run_with_no_cases_is_refused_and_not_stored(
     with pytest.raises(ValueError, match="no reader case of the dev split was selected"):
         harness.run("reader", "textlayer-v0", settings=settings, store=store, case_ids=("nope",))
     assert store.runs() == []
-
-
-def test_rescore_scores_the_stored_predictions_against_the_current_gold(
-    eval_gold: Path, settings: Settings, store: SqliteResultStore
-) -> None:
-    first = harness.run("reader", "textlayer-v0", settings=settings, store=store, split="dev")
-    path = eval_gold / "drawings" / f"{CTC01}.json"
-    document = json.loads(path.read_text(encoding="utf-8"))
-    document["values"] = [v for v in document["values"] if v["raw"] != "Rev D"]
-    path.write_text(json.dumps(document), encoding="utf-8")
-
-    again = harness.rescore(first.run_id, settings=settings, store=store)
-
-    [before], [after] = store.cases(first.run_id), store.cases(again.run_id)
-    assert (again.rescored_from, again.version, again.split) == (
-        first.run_id,
-        "textlayer-v0",
-        "dev",
-    )
-    assert after.prediction == before.prediction
-    assert after.request_id == before.request_id
-    assert (after.scores["matched"], after.scores["gold"]) == (1, 18)
-    assert after.gold_hash != before.gold_hash
-    assert store.run(first.run_id) == first
-
-
-def test_rescore_stores_the_stratum_the_case_has_now(
-    eval_gold: Path, settings: Settings, store: SqliteResultStore
-) -> None:
-    first = harness.run("reader", "textlayer-v0", settings=settings, store=store, split="dev")
-    name = f"{CTC01}.json"
-    (eval_gold / "drawings" / name).rename(eval_gold / "partial" / name)
-
-    again = harness.rescore(first.run_id, settings=settings, store=store)
-
-    [case] = store.cases(again.run_id)
-    assert case.stratum == "partial"
-    assert case.scores["case_score"] == case.scores["recall"]
 
 
 def test_every_case_leaves_a_trace_under_its_request_id(

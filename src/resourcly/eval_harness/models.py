@@ -11,12 +11,11 @@ class Run:
     version: str
     version_hash: str
     split: str
-    selection: dict[str, Any]
+    case_ids: list[str]  # the cases run when not every case of the split ran
     case_set_hash: str
     started_at: str
     git_sha: str
     git_dirty: bool
-    rescored_from: str | None = None
     note: str | None = None
     finished_at: str | None = None
     n_cases: int = 0

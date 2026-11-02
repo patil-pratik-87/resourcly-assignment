@@ -69,30 +69,16 @@ def main(
 @app.command()
 def run(
     ctx: typer.Context,
-    component: Annotated[str | None, typer.Argument(help="reader, router or failure")] = None,
-    version: Annotated[str | None, typer.Option(help="A file in versions/<component>/.")] = None,
+    component: Component,
+    version: Annotated[str, typer.Option(help="A file in versions/<component>/.")],
     split: Annotated[str, typer.Option(help="dev, test or all.")] = "dev",
     case_id: Annotated[
         list[str] | None, typer.Option(help="Run only these cases; every case by default.")
     ] = None,
     note: Annotated[str | None, typer.Option(help="Free text stored with the run.")] = None,
-    rescore: Annotated[
-        str | None,
-        typer.Option(
-            metavar="RUN_ID",
-            help="Score this run's stored predictions against the current gold, as a new run.",
-        ),
-    ] = None,
 ) -> None:
-    """Run a version of a component on the gold cases of a split, or rescore a stored run."""
+    """Run a version of a component on the gold cases of a split."""
     context: Context = ctx.obj
-    if rescore is not None:
-        if component is not None or version is not None:
-            raise typer.BadParameter("--rescore takes no component or --version")
-        _rescore(context, rescore)
-        return
-    if component is None or version is None:
-        raise typer.BadParameter("give a component and --version, or --rescore RUN_ID")
     suite = _suite(component)
     progress = {"done": 0, "total": 0}
 
@@ -129,17 +115,6 @@ def run(
     _summary(suite, result)
 
 
-def _rescore(context: Context, run_id: str) -> None:
-    with SqliteResultStore.open(context.store) as store:
-        _run(store, run_id)
-        with _short_errors():
-            result = harness.rescore(run_id, settings=context.settings, store=store)
-    typer.echo(f"run {result.run_id}  (rescore of {run_id}, case set {result.case_set_hash})")
-    typer.echo("")
-    suite = SUITES[result.component]
-    _summary(suite, result)
-
-
 @app.command()
 def compare(
     ctx: typer.Context,
@@ -148,17 +123,23 @@ def compare(
     candidate: Annotated[str, typer.Argument(help="A run id, or a version for its latest run.")],
     fail_if_worse: Annotated[bool, typer.Option(help="Exit 1 if the primary got worse.")] = False,
 ) -> None:
-    """Whether the candidate is better or worse than the base, metric by metric and case by case."""
+    """Whether the candidate is better or worse than the base, metric by metric and case by case.
+
+    Both runs' stored answers are scored again on the current gold, on the cases both ran.
+    """
     context: Context = ctx.obj
     suite = _suite(component)
     with SqliteResultStore.open(context.store) as store, _short_errors():
-        runs = _pair(store, context.settings, component, base, candidate)
+        runs = [_resolve(store, context.settings, component, ref) for ref in (base, candidate)]
+        with open_services(context.settings) as services:
+            gold = {case.case_id: case for case in suite.load(services, "all")}
         comparison = compare_runs(
+            suite,
+            gold,
             runs[0],
             store.cases(runs[0].run_id),
             runs[1],
             store.cases(runs[1].run_id),
-            metrics=suite.metrics,
         )
     for label, run in (("base", runs[0]), ("candidate", runs[1])):
         typer.echo(
@@ -186,9 +167,6 @@ def compare(
         )
     for warning in comparison.warnings:
         typer.echo(f"warning: {warning}", err=True)
-    if fail_if_worse and not comparison.comparable:
-        typer.echo(f"no verdict on {suite.primary}", err=True)
-        raise typer.Exit(1)
     if fail_if_worse and comparison.worse:
         typer.echo(f"{suite.primary} got worse", err=True)
         raise typer.Exit(1)
@@ -239,12 +217,12 @@ def show(
         _explain(context, run, suite, next((r for r in results if r.case_id == case), None), case)
         return
     typer.echo(f"run {run.run_id}  {run.component} {run.version} (hash {run.version_hash})")
-    typer.echo(f"split {run.split}  selection {run.selection}  case set {run.case_set_hash}")
+    chosen = f"{len(run.case_ids)} chosen case(s)" if run.case_ids else "every case"
+    typer.echo(f"split {run.split}, {chosen}, case set {run.case_set_hash}")
     finished = run.finished_at or "-"
     typer.echo(f"started {run.started_at}  finished {finished}  git {_git_label(run)}")
-    for label, text in (("rescore of", run.rescored_from), ("note", run.note)):
-        if text:
-            typer.echo(f"{label} {text}")
+    if run.note:
+        typer.echo(f"note {run.note}")
     typer.echo("")
     _summary(suite, run)
     typer.echo("")
@@ -393,10 +371,9 @@ def _list_runs(context: Context, component: str | None, version: str | None, lim
                 str(run.n_cases),
                 str(run.errors),
                 f"{primary} {_num(value)}" if run.finished_at else "unfinished",
-                run.rescored_from and f"rescore of {run.rescored_from}" or "",
             ]
         )
-    _table(["run", "version", "split", "cases", "errors", "primary", ""], rows)
+    _table(["run", "version", "split", "cases", "errors", "primary"], rows)
 
 
 @app.command()
@@ -428,44 +405,21 @@ def _short_errors() -> Iterator[None]:
         raise typer.Exit(1) from error
 
 
-def _pair(
-    store: ResultStorePort, settings: Settings, component: str, base: str, candidate: str
-) -> tuple[Run, Run]:
-    """The runs two refs name. A version stands for its latest finished run, but a run on the
-    same case set as the other side is preferred, so that both are scored on the same cases."""
-    options = [_runs_of(store, component, ref) for ref in (base, candidate)]
-    pair = next(
-        (
-            (old, new)
-            for old in options[0]
-            for new in options[1]
-            if old.case_set_hash == new.case_set_hash and old.run_id != new.run_id
-        ),
-        (options[0][0], options[1][0]),
-    )
-    for ref, run in zip((base, candidate), pair, strict=True):
-        if ref != run.run_id:
-            _warn_if_edited(settings, component, ref, run)
-    if pair[0].run_id == pair[1].run_id:
-        typer.echo(
-            f"warning: the base and the candidate are the same run, {pair[0].run_id}", err=True
-        )
-    return pair
-
-
-def _runs_of(store: ResultStorePort, component: str, ref: str) -> list[Run]:
-    """[the run] for a run id, or a version's finished runs, newest first."""
+def _resolve(store: SqliteResultStore, settings: Settings, component: str, ref: str) -> Run:
+    """The run a ref names: a run id, or a version for its latest finished run."""
     try:
-        runs = [store.run(ref)]
+        run = store.run(ref)
     except LookupError:
         runs = [run for run in store.runs(component, ref) if run.finished_at]
         if not runs:
             raise typer.BadParameter(
                 f"'{ref}' is neither a run id nor a version with runs"
             ) from None
-    if runs[0].component != component:
-        raise typer.BadParameter(f"run {runs[0].run_id} is a {runs[0].component} run")
-    return runs
+        run = runs[0]
+        _warn_if_edited(settings, component, ref, run)
+    if run.component != component:
+        raise typer.BadParameter(f"run {run.run_id} is a {run.component} run")
+    return run
 
 
 def _warn_if_edited(settings: Settings, component: str, version: str, run: Run) -> None:
@@ -528,9 +482,8 @@ def _markdown(run: Run, results: list[CaseResult]) -> str:
 
 def _selected(run: Run) -> str | None:
     """How a run picked part of its split, as the run options; None for every case."""
-    selection = run.selection
-    if selection.get("case_ids"):
-        return f"--case-id {', '.join(selection['case_ids'])}"
+    if run.case_ids:
+        return f"--case-id {', '.join(run.case_ids)}"
     return None
 
 

@@ -6,7 +6,6 @@ import secrets
 import subprocess
 import time
 from collections.abc import Callable
-from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Any
 
@@ -14,7 +13,7 @@ from resourcly.bootstrap import PROJECT_ROOT, Settings, load_version, open_servi
 from resourcly.eval_harness.cases import Case
 from resourcly.eval_harness.models import CaseResult, Run
 from resourcly.eval_harness.ports import ResultStorePort
-from resourcly.eval_harness.suites import SUITES, Suite
+from resourcly.eval_harness.suites import SUITES
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ def run(
     on_case: Callable[[CaseResult], None] | None = None,
 ) -> Run:
     """Run one version of a component on every gold case of a split, or only the named ones, and
-    store the result.
+    store the result. `compare` scores the stored answers again on the current gold.
 
     A case whose call fails is stored with its error and scored as if it returned nothing.
     """
@@ -52,7 +51,7 @@ def run(
             version=version,
             version_hash=resolved.hash,
             split=split,
-            selection={"case_ids": list(case_ids)},
+            case_ids=[] if len(chosen) == len(pool) else [case.case_id for case in chosen],
             case_set_hash=case_set_hash(chosen),
             started_at=_now(),
             note=note,
@@ -84,51 +83,6 @@ def run(
             if on_case:
                 on_case(result)
     return _finish(store, run_id, results)
-
-
-def rescore(run_id: str, *, settings: Settings, store: ResultStorePort) -> Run:
-    """Score a run's stored predictions against the current gold as a new run; nothing is called."""
-    old = store.run(run_id)
-    suite = SUITES[old.component]
-    current = _current_cases(suite, settings)
-    results = []
-    for stored in store.cases(run_id):
-        case = current.get(stored.case_id)
-        if case is None:
-            log.warning("%s has no gold now; left out of the rescore", stored.case_id)
-            continue
-        results.append((case, _score_again(suite, case, stored)))
-    if not results:
-        raise ValueError(f"no case of run {run_id} has gold now; nothing was stored")
-    new_id = _new_run_id(old.component)
-    store.start_run(
-        replace(
-            old,
-            run_id=new_id,
-            case_set_hash=case_set_hash([case for case, _ in results]),
-            started_at=_now(),
-            rescored_from=old.run_id,
-            note=f"rescore of {old.run_id}",
-            finished_at=None,
-            summary=None,
-            n_cases=0,
-            errors=0,
-            **_git(),
-        )
-    )
-    for _, result in results:
-        store.add_case(new_id, result)
-    return _finish(store, new_id, results)
-
-
-def _current_cases(suite: Suite, settings: Settings) -> dict[str, Case]:
-    with open_services(settings) as services:
-        return {case.case_id: case for case in suite.load(services, "all")}
-
-
-def _score_again(suite: Suite, case: Case, stored: CaseResult) -> CaseResult:
-    scores = suite.score(case, stored.prediction)
-    return replace(stored, stratum=case.stratum, gold_hash=case.gold_hash, scores=scores)
 
 
 def _finish(store: ResultStorePort, run_id: str, results: list[tuple[Case, CaseResult]]) -> Run:

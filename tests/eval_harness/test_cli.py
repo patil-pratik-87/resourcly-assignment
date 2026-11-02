@@ -105,49 +105,41 @@ def test_compare_says_what_got_worse_and_can_fail_on_it(evals, blank_reader) -> 
     assert "split dev  1 case(s)" in by_version.output
 
 
-def test_compare_gives_no_verdict_until_the_older_run_is_rescored(evals, eval_gold: Path) -> None:
+def test_compare_scores_both_runs_on_the_current_gold(evals, eval_gold: Path) -> None:
     base = run_id(evals("run", "reader", "--version", "textlayer-v0"))
     drop_rev_d(eval_gold)
     candidate = run_id(evals("run", "reader", "--version", "textlayer-v0"))
 
-    stale = evals("compare", "reader", base, candidate, "--fail-if-worse")
-    rescored = run_id(evals("run", "--rescore", base))
-    fresh = evals("compare", "reader", rescored, candidate, "--fail-if-worse")
+    result = evals("compare", "reader", base, candidate, "--fail-if-worse")
 
-    assert stale.exit_code == 1
-    assert re.search(r"f1 +\(primary\) +\- +\- +\- +no +verdict", stale.output)
-    assert "rescore the older run first with `evals run --rescore RUN_ID`" in stale.output
-    assert f"gold changed between the runs for {CTC01}" in stale.output
-    assert fresh.exit_code == 0, fresh.output
-    assert re.search(r"f1 +\(primary\) +0\.083 +0\.083 +\+0\.000 +no +change", fresh.output)
-    assert "warning" not in fresh.output
+    assert result.exit_code == 0, result.output
+    assert re.search(r"f1 +\(primary\) +0\.083 +0\.083 +\+0\.000 +no +change", result.output)
+    assert "warning" not in result.output
 
 
-def test_compare_prefers_runs_on_the_same_cases(evals, blank_reader) -> None:
-    base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
-    evals("run", "reader", "--version", "textlayer-v0", "--case-id", CTC01)
+def test_compare_takes_the_latest_run_of_a_version_on_the_cases_both_ran(
+    evals, blank_reader
+) -> None:
+    evals("run", "reader", "--version", "textlayer-v0", "--split", "all")
+    latest = run_id(evals("run", "reader", "--version", "textlayer-v0", "--case-id", CTC01))
     blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "all"))
 
     result = evals("compare", "reader", "textlayer-v0", "blank-v0")
 
     assert result.exit_code == 0, result.output
-    assert f"base       {base}" in result.output
+    assert f"base       {latest}" in result.output
     assert f"candidate  {blank}" in result.output
-    assert "warning" not in result.output
+    assert "warning: only in candidate: partial_a" in result.output
 
 
-def test_compare_refuses_a_verdict_it_cannot_give(evals, blank_reader, eval_gold: Path) -> None:
+def test_runs_that_share_no_case_are_not_compared(evals, blank_reader) -> None:
     base = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "test"))
     blank = run_id(evals("run", "reader", "--version", "blank-v0", "--split", "dev"))
 
     result = evals("compare", "reader", base, blank)
-    failing = evals("compare", "reader", base, blank, "--fail-if-worse")
 
-    assert result.exit_code == 0, result.output
-    assert re.search(r"f1 +\(primary\) +\- +\- +\- +no +verdict", result.output)
-    assert "no verdict: the runs share no case" in result.output
-    assert failing.exit_code == 1
-    assert "no verdict on f1" in failing.output
+    assert result.exit_code == 1
+    assert "error: the runs share no case that has gold now" in result.output
 
 
 def test_list_shows_components_versions_and_cases(evals) -> None:
@@ -284,39 +276,6 @@ def test_list_runs_says_unfinished_only_for_a_run_that_did_not_finish(
 
     assert "f1 -" in rows[partial_only]
     assert "unfinished" in rows["reader-cut"]
-
-
-def test_compare_warns_when_both_sides_are_the_same_run(evals) -> None:
-    only = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-
-    by_version = evals("compare", "reader", "textlayer-v0", "textlayer-v0")
-    by_id = evals("compare", "reader", only, only)
-
-    for result in (by_version, by_id):
-        assert result.exit_code == 0, result.output
-        assert f"warning: the base and the candidate are the same run, {only}" in result.output
-
-
-def test_run_rescore_scores_a_stored_run_against_the_current_gold(evals, eval_gold: Path) -> None:
-    base = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-    drop_rev_d(eval_gold)
-
-    result = evals("run", "--rescore", base)
-
-    assert result.exit_code == 0, result.output
-    assert f"(rescore of {base}," in result.output
-    assert re.search(r"f1 +\(primary\) +0\.083", result.output)
-    assert f"rescore of {base}" in evals("list", "runs").output
-
-
-def test_run_needs_a_component_and_version_or_a_rescore_but_not_both(evals) -> None:
-    neither = evals("run", "reader")
-    both = evals("run", "reader", "--version", "textlayer-v0", "--rescore", "reader-x")
-
-    assert neither.exit_code == 2
-    assert "give a component and --version, or --rescore RUN_ID" in neither.output
-    assert both.exit_code == 2
-    assert "--rescore takes no component or --version" in both.output
 
 
 def test_show_request_prints_what_a_request_did_and_called(
