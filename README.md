@@ -3,8 +3,8 @@
 A chat agent for technical documents that runs fully on one Mac. You send text, files or both, and
 the agent routes each file itself. A technical drawing comes back as JSON with every value on it,
 what it belongs to and what it means. A photo of a failed part gets what is wrong and what to do
-from the three NTSB reports, each fact cited. A text question alone gets a reply that text answers
-are not available yet, and a file that fits no case gets a reply that says so. Every step of every
+from the three NTSB reports, each fact cited. A text question alone is told text answers are not
+available yet, and a file that fits no case is told so. Every step of every
 request is stored, and an eval harness scores each part.
 
 ## Quick start
@@ -16,9 +16,9 @@ make setup   # the only online step: packages, models, the Agents UI, a check
 make run     # set up once (downloads and builds), then serve the Agents UI on http://127.0.0.1:8000
 ```
 
-Open http://127.0.0.1:8000 and drop a drawing from `data/drawings/` into the Agents UI. After
-setup, nothing reaches the network. `make doctor` prints each problem with the command that fixes
-it. Details: [docs/setup.md](docs/setup.md).
+Open http://127.0.0.1:8000 and drop a drawing from `data/drawings/` into it. After setup, nothing
+reaches the network. `make doctor` prints each problem and its fix. Details:
+[docs/setup.md](docs/setup.md).
 
 ![A drawing read in the Agents UI: each value boxed on the page and linked to its JSON](docs/img/chat-ui/linked-view.png)
 
@@ -29,15 +29,16 @@ it. Details: [docs/setup.md](docs/setup.md).
 ### The chat
 
 In the Agents UI, type a message, attach or drop files, and press Enter. Each file gets a card
-with its case, the reason and its result ([docs/chat-ui.md](docs/chat-ui.md)).
-`uv run resourcly serve --port 8123` picks another port. From a terminal:
+with its case, the reason and its result ([docs/chat-ui.md](docs/chat-ui.md)). It opens with two
+demo chats answered before, a drawing and a photo; `serve --no-demo` leaves them out, and
+`--port 8123` picks another port. From a terminal:
 
 ```sh
 uv run resourcly ask "read this" --file data/drawings/nist_ctc_01_asme1_rd.pdf
 uv run resourcly ask --file crack.jpg   # a photo of a part
 ```
 
-`ask` waits for every file, prints each result, and exits with 1 if any failed. A drawing page
+`ask` waits for every file, prints the results, and exits with 1 if any failed. A drawing page
 takes about a minute, a photo 25 s. The HTTP API: [docs/chat-ui.md](docs/chat-ui.md#the-api).
 
 ### A bulk upload
@@ -53,11 +54,10 @@ uv run resourcly ask --file data/drawings --out out/drawings
 
 ```sh
 uv run resourcly requests        # the latest requests, newest first
-uv run resourcly request <id>    # each item, then every step it took and what it called
+uv run resourcly request <id>    # each item, then every step and what it called
 ```
 
-In the Agents UI, the Requests tab opens one file beside its JSON, and its Trace tab lists the same
-steps.
+In the Agents UI, the Requests tab shows a file beside its JSON, and its Trace tab the same steps.
 
 ### Validating a new version: the eval harness
 
@@ -83,7 +83,7 @@ names. `make evals-quick` runs 10 dev cases of every suite. How it works:
 ### Reviewing the gold by hand
 
 A person reviews and corrects the eval gold in `evals/gold/` on the label screen: each value boxed
-on its page, with a form to fix, add or approve it. Each save is a `git diff`
+on its page, with a form to fix or approve it. Each save is a `git diff`
 ([docs/label-screen.md](docs/label-screen.md)).
 
 ```sh
@@ -111,11 +111,11 @@ RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 \
 
 | Part | Default | Measured | Doc |
 | --- | --- | --- | --- |
-| Router | `three-layer-v1`: structure rules, a DINOv2-small probe, then Qwen3-VL 8B | accuracy 0.992 on 123 dev files, 1.000 on 57 test | [docs/routing.md](docs/routing.md) |
+| Router | `three-layer-v1`: rules, a DINOv2-small probe, then Qwen3-VL 8B | accuracy 0.992 on 123 dev files, 1.000 on 57 test | [docs/routing.md](docs/routing.md) |
 | Drawing reader | `vector-crop-v2`: each callout from the vector paths read by Qwen3-VL 8B | as `vector-crop-v1` on these PDFs: F1 0.725, recall 0.862 on the 11 drawings | [experiments/drawing](experiments/drawing/README.md) |
 | Fault finder | `dinov2-base-v1`: the report figures nearest the photo | section@1 0.645, mode@3 0.942 on 154 held-out cases | [research/failure](research/failure/README.md) |
 | Photo answer | `photo-v2`: Qwen3-VL 8B answers from the 3 closest figures, keeping only cited findings | hand check 4 of 6 right; `photo-v1` correct 0.625 on 8 dev cases; no real photos tested | [NOTES.md](NOTES.md#photo-answers) |
-| Agent and API | one request per message, traced step by step | not scored as a whole | [docs/chat-ui.md](docs/chat-ui.md#the-api) |
+| Agent and API | a request per message, traced | not scored as a whole | [docs/chat-ui.md](docs/chat-ui.md#the-api) |
 
 ## Where things are
 
@@ -124,7 +124,8 @@ RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0 \
 | `outputs/` | The JSON of the 11 drawings ([NOTES.md](NOTES.md#drawing-json-for-the-11-drawings)) |
 | `evals/` | The gold cases, their splits, and the photo answers' hand checks |
 | `versions/` | Every version of every part, with the probe and figure indexes |
-| `research/`, `experiments/` | The research behind each part, and notebooks |
+| `demo/` | The two demo chats ([demo/README.md](demo/README.md)) |
+| `research/`, `experiments/` | The research behind each part |
 | `src/` | The code; the two screens are in `src/frontend/` |
 | `docs/` | Setup, the Agents UI and API, the label screen, routing, evals |
 | [NOTES.md](NOTES.md) | What was tried, measured and chosen, and why |
