@@ -24,6 +24,7 @@ def mac(cached: set[str] = MODELS, **changes) -> System:
         which=lambda tool: f"/usr/bin/{tool}",
         installed=lambda module: True,
         cached=lambda model_id: model_id in cached,
+        env={},
     )
     return replace(system, **changes)
 
@@ -104,6 +105,19 @@ def test_a_machine_that_is_not_apple_silicon_cannot_run_the_vision_model(
     assert (mlx.ok, mlx.blocker) == (False, True)
     assert "Apple silicon" in mlx.detail
     assert "RESOURCLY_READER_VERSION=textlayer-v0" in mlx.fix
+
+
+def test_uv_run_off_the_path_is_a_warning_with_the_path_to_add(settings: Settings) -> None:
+    off_path = mac(
+        which=lambda tool: None if tool == "uv" else f"/usr/bin/{tool}",
+        env={"UV": "/home/me/.local/bin/uv"},
+    )
+
+    uv = by_name(doctor.run(settings, off_path))["uv"]
+
+    assert (uv.ok, uv.blocker) == (False, False)
+    assert "/home/me/.local/bin/uv" in uv.detail
+    assert uv.fix == 'export PATH="/home/me/.local/bin:$PATH"'
 
 
 def test_a_missing_extra_says_how_to_install_it(defaults: Settings) -> None:
