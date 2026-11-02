@@ -1,6 +1,9 @@
 import json
 
-from resourcly.adapters.vlm_readers import WholePageReaderAdapter
+import pymupdf
+
+from resourcly.adapters.callout_locator import locate
+from resourcly.adapters.vlm_readers import VectorCropReaderAdapter, WholePageReaderAdapter
 from resourcly.bootstrap import PROJECT_ROOT
 from resourcly.models import ReadProgress, validate_document
 from tests.conftest import CTC01
@@ -19,6 +22,55 @@ class FakeModel:
     def generate(self, prompt: str, images: list[bytes], max_tokens: int) -> str:
         self.calls.append((prompt, images, max_tokens))
         return self.answers[min(len(self.calls), len(self.answers)) - 1]
+
+
+def _answer(lines=(), frames=()) -> str:
+    return json.dumps({"lines": list(lines), "feature_control_frames": list(frames)})
+
+
+def test_the_crop_reader_asks_once_per_callout_with_a_png_crop() -> None:
+    with pymupdf.open(DRAWINGS / f"{CTC01}.pdf") as pdf:
+        callouts = len(locate(pdf[0]))
+    model = FakeModel(_answer(["Ø25 ±0.15"]))
+
+    VectorCropReaderAdapter(DRAWINGS, model, prompt="read it", max_tokens=99).read(CTC01)
+
+    assert len(model.calls) == callouts
+    assert all(prompt == "read it" and tokens == 99 for prompt, _, tokens in model.calls)
+    assert all(len(images) == 1 and images[0].startswith(PNG) for _, images, _ in model.calls)
+
+
+def test_the_crop_reader_returns_a_valid_document_with_values_features_and_text() -> None:
+    frame = {"symbol_name": "position", "tolerance": "0.75", "datums": ["A", "B", "C"]}
+    model = FakeModel(_answer(["Ø25 ±0.15"], [frame]))
+
+    document = VectorCropReaderAdapter(DRAWINGS, model, prompt="p").read(CTC01)
+
+    valid, issues = validate_document(document, gold=False)
+    assert valid is not None, issues
+    values = document["values"]
+    dimension = next(v for v in values if v["callout"] == "dimension")
+    assert (dimension["raw"], dimension["value"], dimension["unit"]) == ("⌀25 ±0.15", 25, "mm")
+    assert dimension["limits"] == {"lower": 24.85, "upper": 25.15}
+    assert {v["callout"] for v in values} >= {"feature_control_frame", "title_block"}
+    features = {f["id"]: f for f in document["features"]}
+    assert features[dimension["feature_id"]]["type"] == "hole"
+    assert document["title_block"]["units"] == "mm"
+
+
+def test_the_crop_reader_reads_the_same_frame_in_two_boxes_once() -> None:
+    frame = {"symbol_name": "flatness", "tolerance": "0.2", "datums": []}
+    document = VectorCropReaderAdapter(DRAWINGS, FakeModel(_answer([], [frame])), "p").read(CTC01)
+
+    frames = [v for v in document["values"] if v["callout"] == "feature_control_frame"]
+    # every box says the same thing, but only boxes close to each other are merged
+    assert 1 < len(frames) < 21
+
+
+def test_a_crop_answer_that_is_not_json_reads_as_nothing() -> None:
+    document = VectorCropReaderAdapter(DRAWINGS, FakeModel("I cannot read this"), "p").read(CTC01)
+
+    assert {v["callout"] for v in document["values"]} == {"title_block"}
 
 
 def _page_answer(callouts, datums=()) -> str:
@@ -50,6 +102,64 @@ def test_the_page_reader_keeps_what_it_can_from_a_cut_off_loop() -> None:
 
     raws = [v["raw"] for v in document["values"] if v["callout"] != "title_block"]
     assert raws == ["⌀20 +0.05/-0.10", "⌀.025"]
+
+
+def test_an_empty_answer_for_a_datum_box_asks_for_its_letter() -> None:
+    model = FakeModel(_answer(), '{"letter": "A"}')
+    reader = VectorCropReaderAdapter(DRAWINGS, model, "read", letter_prompt="letter?")
+
+    document = reader.read(CTC01)
+
+    letters = [p for p, _, _ in model.calls if p == "letter?"]
+    datums = [v["raw"] for v in document["values"] if v["callout"] == "datum_feature_symbol"]
+    assert len(letters) == 3  # the A, B and C boxes on CTC-01
+    assert datums == ["A", "A", "A"]
+
+
+def test_a_frame_without_a_named_symbol_asks_for_the_symbol() -> None:
+    unnamed = {"symbol_name": "", "tolerance": "1.5", "datums": ["A"]}
+    model = FakeModel(_answer([], [unnamed]), '{"symbol_name": "perpendicularity"}')
+    reader = VectorCropReaderAdapter(DRAWINGS, model, "read", symbol_prompt="symbol?")
+
+    document = reader.read(CTC01)
+
+    frame = next(v for v in document["values"] if v["callout"] == "feature_control_frame")
+    assert (frame["raw"], frame["kind"]) == ("⊥ 1.5 | A", "perpendicularity")
+
+
+def test_a_reading_whose_numbers_do_not_parse_is_written_without_a_tolerance() -> None:
+    frame = {"symbol_name": "position", "tolerance": "±.020", "datums": ["A"]}
+    model = FakeModel(_answer(["2X Ø.562 ±."], [frame]))
+
+    document = VectorCropReaderAdapter(DRAWINGS, model, prompt="p").read(CTC01)
+
+    toleranced = {"limits", "plus_minus", "unilateral", "bilateral_unequal", "geometric_zone"}
+    unparsed = [v for v in document["values"] if v["raw"] in ("⌖ ±.020 | A", "2X ⌀.562 ±.")]
+    assert unparsed
+    assert all(v["value"] is None and v["tolerance_style"] not in toleranced for v in unparsed)
+    assert all(v["callout"] == "note" for v in unparsed if v["raw"].startswith("⌖"))
+    assert validate_document(document, gold=False)[1] == []
+
+
+def test_the_crop_reader_reports_each_callout_before_it_reads_it() -> None:
+    with pymupdf.open(DRAWINGS / f"{CTC01}.pdf") as pdf:
+        callouts = len(locate(pdf[0]))
+    model = FakeModel(_answer(["Ø25 ±0.15"]))
+    seen = []
+
+    def report(progress: ReadProgress) -> None:
+        seen.append((progress, len(model.calls)))
+
+    VectorCropReaderAdapter(DRAWINGS, model, prompt="p").read(CTC01, progress=report)
+
+    assert [(p.done, calls) for p, calls in seen] == [(n, n) for n in range(callouts + 1)]
+    assert all((p.page, p.pages, p.total) == (1, 1, callouts) for p, _ in seen)
+    first, third, last = seen[0][0], seen[2][0], seen[-1][0]
+    assert third.page_done == 2 and len(third.boxes) == callouts
+    assert all(0 <= edge <= 1 for box in third.boxes for edge in box)
+    # Each report after the first names what the callout before it read.
+    assert first.latest == [] and third.latest == ["⌀25 ±0.15"]
+    assert (last.page_done, last.latest) == (callouts, ["⌀25 ±0.15"])
 
 
 def test_the_page_reader_reports_each_page_before_it_reads_it() -> None:
