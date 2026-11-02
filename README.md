@@ -26,3 +26,8 @@ How to chat, send many drawings at once, and look up a request, from the CLI or 
 `uv run evals` scores any version of each part on its gold cases and compares it with another.
 How it works: [src/resourcly/eval_harness/README.md](src/resourcly/eval_harness/README.md). How to
 run it, and the current numbers: [docs/evals.md](docs/evals.md).
+
+## Privacy and scale
+
+How the design keeps data in-house, and how it would serve a million documents:
+[docs/privacy-and-scale.md](docs/privacy-and-scale.md).

@@ -318,3 +318,22 @@ The eval harness now scores fault finding as the research measured it, and score
   figure from another report. Eight cases do not rank the two. The `photo-v2` run is pending.
 
 Details: `docs/evals.md`.
+
+## Privacy and scale
+
+Chose to keep the ports and propose new adapters behind them: vLLM on GPU servers for Qwen3-VL
+8B, a queue with a worker pool, object storage with Postgres, and an approximate nearest neighbour
+index. SGLang is the alternative to vLLM. Both batch requests, cache a shared prompt prefix and
+constrain the output to a JSON schema.
+
+- Built: local models loaded offline, data in `var/`, a trace with only the length and hash of
+  the user's text, an async API with one job queue, and cheap router layers before the model.
+- Not built: a test that blocks the network during a run, a login, encryption, deletion and
+  blocked egress at deployment.
+- Estimate: 64 s per page on the Mac is about 2 years for a million pages. vLLM on A100s is
+  1,100 to 2,800 GPU hours, from vLLM's Qwen2.5-VL-7B example, as no source gives a number for
+  the 8B. A benchmark of real crops must replace it.
+- Open: how much a content-hash cache and template reuse save on "all very alike" drawings is
+  not measured.
+
+Details: `docs/privacy-and-scale.md`.
