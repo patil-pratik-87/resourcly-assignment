@@ -321,3 +321,7 @@ function itemOf(input: Record<string, unknown>): string | null {
   const found = input.item ?? input.drawing;
   return typeof found === "string" ? found : null;
 }
+
+/** What the Demo label on a request says when pointed at. */
+export const DEMO_NOTE =
+  "A demo: answered before by the agent's models and loaded when the server started, so it shows at once. Its trace names the versions that made it.";

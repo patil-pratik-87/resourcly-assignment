@@ -532,6 +532,20 @@ input {
   user-select: all;
 }
 
+/* A request answered before and loaded from demo/, not one the person sent */
+.demo-tag {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--slate-soft);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 17px;
+  cursor: help;
+}
+
 .tally {
   margin: 0;
   color: var(--muted);

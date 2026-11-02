@@ -51,6 +51,7 @@ export function record(overrides: Partial<RequestRecord> = {}): RequestRecord {
     created_at: "2026-11-01T10:00:00.000+00:00",
     items: [item()],
     status: "done",
+    demo: false,
     ...overrides,
   };
 }

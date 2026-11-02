@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AgentApi } from "./api";
 import { Composer } from "./Composer";
 import { ItemCard } from "./ItemCard";
-import { plural, sentAt, shortId, tally } from "./describe";
+import { DEMO_NOTE, plural, sentAt, shortId, tally } from "./describe";
 import type { AgentInfo, RequestRecord } from "./types";
 
 /** The chat shows this many of the latest requests; the requests screen has them all. */
@@ -148,6 +148,11 @@ function Exchange({
           <span className="reply-id" title={`Request ${record.request_id}`}>
             Request {shortId(record.request_id)}
           </span>
+          {record.demo && (
+            <span className="demo-tag" title={DEMO_NOTE}>
+              Demo
+            </span>
+          )}
         </div>
         {record.items.length > 1 && (
           <p className="tally" role="status" aria-label="Progress">
