@@ -36,3 +36,18 @@ def test_the_environment_can_move_the_splits_file(monkeypatch, tmp_path) -> None
     monkeypatch.setenv("RESOURCLY_SPLITS", str(tmp_path / "splits.toml"))
 
     assert Settings.from_env().splits_path == tmp_path / "splits.toml"
+
+
+def test_each_screen_is_served_from_its_own_build(monkeypatch, tmp_path) -> None:
+    frontend = PROJECT_ROOT / "src" / "frontend"
+    assert Settings().chat_ui_dist == frontend / "chat" / "dist"
+    assert Settings().annotation_ui_dist == frontend / "annotation" / "dist"
+
+    monkeypatch.setenv("RESOURCLY_CHAT_UI_DIST", str(tmp_path / "chat"))
+    monkeypatch.setenv("RESOURCLY_ANNOTATION_UI_DIST", str(tmp_path / "labels"))
+
+    settings = Settings.from_env()
+    assert (settings.chat_ui_dist, settings.annotation_ui_dist) == (
+        tmp_path / "chat",
+        tmp_path / "labels",
+    )
