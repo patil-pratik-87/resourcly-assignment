@@ -88,8 +88,8 @@ The gold was drafted from crops and overlays; the screen is where a person check
 against the page, fixes it, and approves it, or adds a value that was missed.
 
 - How: `uv run resourcly annotation-ui` shows each page with a numbered box per value and a form
-  beside it. The screen uses only the gold endpoints. The code is in `src/frontend/annotation`, so
-  the chat screen can sit beside it later.
+  beside it. The screen uses only the gold endpoints. The code is in `src/frontend/annotation`, and
+  the chat screen sits beside it in `src/frontend/chat`.
 - How saves stay safe: nothing is written until Save. The server validates the whole document
   against the gold models and refuses an invalid one, listing the issues. A valid one is written
   to a temporary file and then swapped in, so a file is never half written. Every change is
@@ -115,6 +115,23 @@ The chat is one HTTP API, made for a later chat screen; the CLI calls the same s
 - The request store and the worker sit behind ports: at scale they become a database and a queue.
 
 How to use it: `docs/usage.md`.
+
+## Chat screen
+
+The chat screen is the agent API in a browser. It is its own app in `src/frontend/chat`, beside
+the label screen, and shares no code with it.
+
+- How: `uv run resourcly serve` serves the built screen and the API on one port. One message is
+  one request, and the screen polls the requests while any of them works. Each file's card shows
+  the route, the layer that chose it, how sure it was and why. The Requests screen shows a file's
+  JSON beside its request's trace, with each router layer's verdict under the routing step.
+- Why there is no page image: the API has no endpoint that renders an uploaded page, so a
+  drawing's result is its JSON. A page with a numbered box per value, as on the label screen,
+  needs one more endpoint.
+- What comes next: a live trace stream in place of the polling, and real answers for photos and
+  text questions.
+
+How to use it: `docs/chat-ui.md`.
 
 ## One harness for every use case
 

@@ -5,13 +5,13 @@ you want. The agent decides the case for each file. A drawing comes back as JSON
 on it. A picture or a text question gets a reply that this answer is not available yet, and a
 file that fits no case, such as a whole report, gets a reply that says so.
 
-There are two ways in. The CLI runs the agent inside the command. The HTTP API is what a chat
-screen uses. Both store requests in the same place, so either one can look up the other's
-requests.
+There are two ways in. The CLI runs the agent inside the command. The HTTP API is what the chat
+screen uses ([chat-ui.md](chat-ui.md)). Both store requests in the same place, so either one can
+look up the other's requests.
 
 ```sh
 uv sync
-uv run resourcly serve            # the API on http://127.0.0.1:8000, for the curl examples
+uv run resourcly serve            # the chat screen and the API on http://127.0.0.1:8000
 ```
 
 ## Chat
@@ -86,3 +86,4 @@ curl http://127.0.0.1:8000/api/requests/<id>/trace
 | `RESOURCLY_UPLOADS_DIR` | `var/uploads` |
 | `RESOURCLY_TRACE_DB` | `var/traces.sqlite` |
 | `RESOURCLY_MAX_UPLOAD_BYTES`, `RESOURCLY_MAX_FILES` | 50 MB, 50 |
+| `RESOURCLY_CHAT_UI_DIST` | `src/frontend/chat/dist` |

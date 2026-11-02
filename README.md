@@ -11,7 +11,8 @@ uv run resourcly ask "read this" --file data/drawings/nist_ctc_01_asme1_rd.pdf
 ```
 
 How to chat, send many drawings at once, and look up a request, from the CLI or over HTTP:
-[docs/usage.md](docs/usage.md).
+[docs/usage.md](docs/usage.md). The same in a browser, with `uv run resourcly serve`:
+[docs/chat-ui.md](docs/chat-ui.md).
 
 ## Measure it
 
