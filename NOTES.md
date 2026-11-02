@@ -211,6 +211,8 @@ Qwen3-VL 8B reads one crop at a time; `whole-page-v1` sends whole pages.
   an image upload (0 values). `vector-crop-v2` reads that page whole, as `whole-page-v1` does; a
   CTC-01 page sent as a PNG gives 15 values. On the NIST PDFs, whose every page has vector
   callouts, v2 is v1 (its runs are pending).
+- Answers: each is checked as a typed Pydantic model; one with no JSON or the wrong shape reads
+  as nothing and counts as an issue of the reading.
 - Weak spot: precision 0.625 (whole-page 0.629); frame cells are read again as bare numbers.
 - Cost: 64 s per page against 36.
 
