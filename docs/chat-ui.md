@@ -14,8 +14,9 @@ uv run resourcly serve   # http://127.0.0.1:8000
 ```
 
 `serve` serves the built screen and the API on one port, or the API alone until it is built.
-`RESOURCLY_CHAT_UI_DIST` points it at another build. The label screen stays on
-`uv run resourcly annotation-ui`.
+It routes with the default `three-layer-v1` router, which needs the extras and models in
+[usage.md](usage.md); `RESOURCLY_ROUTER_VERSION=stub-v0` needs none. `RESOURCLY_CHAT_UI_DIST`
+points it at another build. The label screen stays on `uv run resourcly annotation-ui`.
 
 To work on the screen, run the API and the Vite dev server side by side. Vite reloads on each
 edit and sends every `/api` call to the API.
@@ -38,7 +39,7 @@ A drawing shows its page with a box on each callout as it is read, then buttons 
 download its JSON. A photo or a text question gets a reply that the answer is not available yet,
 and a file that fits no case gets a reply that says so. Click a page to open the file.
 
-![A bulk upload of seven files](img/chat-ui/bulk-upload.png)
+![A bulk upload of six files](img/chat-ui/bulk-upload.png)
 
 ## Requests
 
@@ -54,7 +55,7 @@ routing step is every router layer asked: whether it decided or passed the file 
 was, and why. For a bulk upload it starts on the open file's steps. The same trace is in a
 terminal with `uv run resourcly request <id>`.
 
-![The trace of one file, with the router's verdict](img/chat-ui/request-trace.png)
+![A photographed drawing: the structure rules pass it on, the probe decides](img/chat-ui/request-trace.png)
 
 The request list folds away while a file is open; the arrow on the left brings it back. Its box
 finds a request by its id or the start of it, even one too old for the list. Both screens poll
