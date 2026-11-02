@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner, Result
 
-from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation, open_services
+from resourcly.bootstrap import PROJECT_ROOT, READERS, Implementation
 from resourcly.eval_harness.cli import app
 from resourcly.eval_harness.models import Run
 from resourcly.eval_harness.store import SqliteResultStore
@@ -57,7 +57,7 @@ def test_show_lists_the_cases_of_a_run_and_explains_one(evals) -> None:
 
     assert shown.exit_code == 0, shown.output
     assert "NotFound: no drawing named partial_a" in shown.output
-    assert f"uv run evals show --request {rid}:{CTC01}" in shown.output
+    assert "--request" not in shown.output
     assert "partial_a" in failures.output
     assert "missed gold records (17)" in detail.output
     assert "page 1  diameter  '⌀35.2 / ⌀34.8'  value [34.8, 35.2]  unit mm" in detail.output
@@ -142,14 +142,12 @@ def test_runs_that_share_no_case_are_not_compared(evals, blank_reader) -> None:
     assert "error: the runs share no case that has gold now" in result.output
 
 
-def test_list_shows_components_versions_and_cases(evals) -> None:
+def test_list_shows_versions_and_cases(evals) -> None:
     evals("run", "reader", "--version", "textlayer-v0")
 
-    components = evals("list", "components").output
     versions = evals("list", "versions", "reader").output
     cases = evals("list", "cases", "reader", "--split", "all").output
 
-    assert re.search(r"reader +f1 +textlayer +1 +version\(s\)", components)
     textlayer = next(line for line in versions.splitlines() if "textlayer-v0" in line)
     assert textlayer.split()[1:3] == ["textlayer-v0", "textlayer"]
     assert "1 run(s)" in textlayer
@@ -157,38 +155,22 @@ def test_list_shows_components_versions_and_cases(evals) -> None:
     assert "partial_a             test   partial" in cases
 
 
-def test_show_out_writes_markdown_for_the_latest_run_of_each_version_and_split(
-    evals, tmp_path: Path
-) -> None:
-    evals("run", "reader", "--version", "textlayer-v0")
-    evals("run", "reader", "--version", "textlayer-v0", "--split", "test")
-    latest = run_id(evals("run", "reader", "--version", "textlayer-v0"))
+def test_show_out_writes_markdown_tables_of_the_named_runs(evals, tmp_path: Path) -> None:
+    dev = run_id(evals("run", "reader", "--version", "textlayer-v0"))
+    named = run_id(
+        evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
+    )
     out = tmp_path / "eval-results.md"
 
-    result = evals("show", "--out", str(out))
+    result = evals("show", dev, named, "--out", str(out))
 
     text = out.read_text(encoding="utf-8")
     assert result.exit_code == 0, result.output
     assert text.count("\n## ") == 2
-    assert f"## reader textlayer-v0 on dev: {latest}" in text
-    assert "| f1 (primary) | 0.160 |" in text
+    assert f"## reader textlayer-v0 on dev: {dev}" in text
+    assert f"## reader textlayer-v0 on all (--case-id {CTC01}): {named}" in text
+    assert "| metric | value |\n| --- | --- |\n| f1 (primary) | 0.160 |" in text
     assert f"| {CTC01} | full | 0.160 | 19 | 6 | 2 |  |" in text
-
-
-def test_show_out_leaves_out_partial_runs_unless_they_are_named(evals, tmp_path: Path) -> None:
-    full = run_id(evals("run", "reader", "--version", "textlayer-v0", "--split", "all"))
-    named = run_id(
-        evals("run", "reader", "--version", "textlayer-v0", "--split", "all", "--case-id", CTC01)
-    )
-
-    evals("show", "--out", str(tmp_path / "default.md"))
-    evals("show", named, "--out", str(tmp_path / "chosen.md"))
-    default = (tmp_path / "default.md").read_text(encoding="utf-8")
-    chosen = (tmp_path / "chosen.md").read_text(encoding="utf-8")
-
-    assert f"## reader textlayer-v0 on all: {full}" in default
-    assert named not in default
-    assert f"## reader textlayer-v0 on all (--case-id {CTC01}): {named}" in chosen
 
 
 def test_check_fails_on_a_case_in_two_splits_and_warns_about_missing_gold(
@@ -278,39 +260,11 @@ def test_list_runs_says_unfinished_only_for_a_run_that_did_not_finish(
     assert "unfinished" in rows["reader-cut"]
 
 
-def test_show_request_prints_what_a_request_did_and_called(
-    evals, settings, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setenv("RESOURCLY_TRACE_DB", str(settings.trace_path))
-    with open_services(settings) as services:
-        services.drawings.read(CTC01, request_id="req-1")
-
-    result = evals("show", "--request", "req-1")
-    unknown = evals("show", "--request", "nope")
-
-    assert result.exit_code == 0, result.output
-    assert "request req-1: 1 step(s)" in result.output
-    assert "drawings.read  called reader textlayer-v0 (textlayer)" in result.output
-    assert f'input   {{"drawing": "{CTC01}"}}' in result.output
-    assert 'output  {"values": 6, "schema_issues": 0}' in result.output
-    assert unknown.exit_code == 1
-    assert "no request 'nope'" in unknown.output
-
-
-def test_show_reaches_the_trace_of_each_case_of_a_run(evals) -> None:
-    rid = run_id(evals("run", "reader", "--version", "textlayer-v0"))
-
-    result = evals("show", "--request", f"{rid}:{CTC01}")
-
-    assert result.exit_code == 0, result.output
-    assert "called reader textlayer-v0 (textlayer)" in result.output
-
-
 def test_show_needs_one_run_id_without_out(evals) -> None:
-    result = evals("show")
+    result = evals("show", "a", "b")
 
     assert result.exit_code == 2
-    assert "give one run id, --request REQUEST_ID or --out FILE" in result.output
+    assert "give one run id, or --out FILE for many" in result.output
 
 
 def gold_value(gold_dir: Path, raw: str, change) -> None:
@@ -361,13 +315,3 @@ def test_check_counts_the_values_below_the_review_confidence(evals, eval_gold: P
         f"ok    reader {CTC01} (full, dev): 1 page(s), 15 features, 19 values,"
         " 1 below confidence 0.7"
     ) in result.output
-
-
-def test_show_out_with_no_full_run_writes_nothing_and_fails(evals, tmp_path: Path) -> None:
-    out = tmp_path / "eval-results.md"
-
-    result = evals("show", "--out", str(out))
-
-    assert result.exit_code == 1
-    assert "error: no finished full run to write; name run ids" in result.output
-    assert not out.exists()

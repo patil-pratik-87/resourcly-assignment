@@ -1,4 +1,3 @@
-import json
 import logging
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -10,7 +9,6 @@ from typing import Annotated, Any
 import typer
 
 from resourcly.bootstrap import (
-    IMPLEMENTATIONS,
     PROJECT_ROOT,
     Settings,
     list_versions,
@@ -175,12 +173,9 @@ def compare(
 def show(
     ctx: typer.Context,
     run_ids: Annotated[
-        list[str] | None,
-        typer.Argument(
-            help="A run id from `evals list runs`; with --out, any number of them, or none for the"
-            " latest full run of each version and split."
-        ),
-    ] = None,
+        list[str],
+        typer.Argument(help="A run id from `evals list runs`; with --out, any number of them."),
+    ],
     case: Annotated[str | None, typer.Option(help="Explain one case against the gold.")] = None,
     failures: Annotated[
         bool, typer.Option(help="Only cases that failed or scored below 1.")
@@ -188,25 +183,19 @@ def show(
     out: Annotated[
         Path | None, typer.Option(help="Write Markdown tables of the runs to this file.")
     ] = None,
-    request: Annotated[
-        str | None,
-        typer.Option(metavar="REQUEST_ID", help="What one request did and called, step by step."),
-    ] = None,
 ) -> None:
-    """A run's settings, summary and cases; a request's trace; or Markdown tables of runs."""
+    """A run's settings, summary and cases, or Markdown tables of runs.
+
+    What a case did and called: `resourcly request <run id>:<case id>`.
+    """
     context: Context = ctx.obj
-    if request is not None:
-        if run_ids or case or failures or out:
-            raise typer.BadParameter("--request takes no run id or other option")
-        _trace(context, request)
-        return
     if out is not None:
         if case or failures:
             raise typer.BadParameter("--out takes no --case or --failures")
-        _report(context, run_ids or [], out)
+        _report(context, run_ids, out)
         return
-    if not run_ids or len(run_ids) > 1:
-        raise typer.BadParameter("give one run id, --request REQUEST_ID or --out FILE")
+    if len(run_ids) > 1:
+        raise typer.BadParameter("give one run id, or --out FILE for many")
     run_id = run_ids[0]
     with SqliteResultStore.open(context.store) as store:
         run = _run(store, run_id)
@@ -237,44 +226,12 @@ def show(
         for r in shown
     ]
     _table(["case", "stratum", "case_score", "latency", "error"], rows)
-    typer.echo("")
-    typer.echo("what a case did and called:")
-    for r in shown:
-        typer.echo(f"  uv run evals show --request {r.request_id}")
-
-
-def _trace(context: Context, request_id: str) -> None:
-    with _short_errors(), open_services(context.settings) as services:
-        trace = services.traces.lookup(request_id)
-    typer.echo(f"request {trace.request_id}: {len(trace.events)} step(s)")
-    for event in trace.events:
-        typer.echo(
-            f"  {event.started_at}  {event.step}  called {event.called}  {event.duration_ms} ms"
-        )
-        typer.echo(f"    input   {json.dumps(event.input, ensure_ascii=False)}")
-        typer.echo(f"    output  {json.dumps(event.output, ensure_ascii=False)}")
-        if event.error:
-            typer.echo(f"    error   {event.error}")
 
 
 def _report(context: Context, run_ids: list[str], out: Path) -> None:
-    """Markdown tables of runs, for results that go in the repository.
-
-    Without run ids it takes the latest finished run of each version and split that ran every case
-    of the split, so a run on a few cases never replaces the full one.
-    """
+    """Markdown tables of runs, for results that go in the repository."""
     with SqliteResultStore.open(context.store) as store:
-        if run_ids:
-            runs = [_run(store, run_id) for run_id in run_ids]
-        else:
-            latest: dict[tuple[str, str, str], Run] = {}
-            for run in store.runs():
-                if run.finished_at and _selected(run) is None:
-                    latest.setdefault((run.component, run.version, run.split), run)
-            runs = [latest[key] for key in sorted(latest)]
-            if not runs:
-                typer.echo("error: no finished full run to write; name run ids", err=True)
-                raise typer.Exit(1)
+        runs = [_run(store, run_id) for run_id in run_ids]
         sections = [_markdown(run, store.cases(run.run_id)) for run in runs]
     text = "# Eval results\n\nWritten by `uv run evals show --out`.\n" + "".join(sections)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -283,7 +240,6 @@ def _report(context: Context, run_ids: list[str], out: Path) -> None:
 
 
 class Listing(StrEnum):
-    components = "components"
     versions = "versions"
     cases = "cases"
     runs = "runs"
@@ -300,11 +256,9 @@ def list_(
     version: Annotated[str | None, typer.Option(help="Only this version's runs.")] = None,
     limit: Annotated[int, typer.Option(help="How many runs.")] = 20,
 ) -> None:
-    """Components and their implementations, version files, a component's cases, or runs."""
+    """Version files, a component's cases, or runs."""
     context: Context = ctx.obj
-    if what is Listing.components:
-        _list_components(context)
-    elif what is Listing.versions:
+    if what is Listing.versions:
         _list_versions(context, component)
     elif what is Listing.cases:
         if component is None:
@@ -312,21 +266,6 @@ def list_(
         _list_cases(context, component, split)
     else:
         _list_runs(context, component, version, limit)
-
-
-def _list_components(context: Context) -> None:
-    with _short_errors():
-        counts = {name: len(list_versions(context.settings, name)) for name in SUITES}
-    rows = [
-        [
-            name,
-            suite.primary,
-            ", ".join(sorted(IMPLEMENTATIONS.get(name, {}))) or "none registered yet",
-            f"{counts[name]} version(s)",
-        ]
-        for name, suite in SUITES.items()
-    ]
-    _table(["component", "primary", "implementations", "versions"], rows)
 
 
 def _list_versions(context: Context, component: str | None) -> None:
@@ -442,7 +381,7 @@ def _explain(
     if case is None:
         raise typer.BadParameter(f"'{case_id}' has no gold now")
     typer.echo(f"{case_id}  case_score {_num(result.scores['case_score'])}")
-    typer.echo(f"request {result.request_id}  (uv run evals show --request {result.request_id})")
+    typer.echo(f"request {result.request_id}  (resourcly request {result.request_id})")
     if case.gold_hash != result.gold_hash:
         typer.echo("the gold changed since this run; compared with the current gold")
     if result.error:
@@ -453,8 +392,12 @@ def _explain(
 
 def _markdown(run: Run, results: list[CaseResult]) -> str:
     suite = SUITES[run.component]
-    summary = run.summary or {}
     selected = f" ({_selected(run)})" if _selected(run) else ""
+    columns = ["case_score", *suite.case_columns]
+    cases = [
+        [r.case_id, r.stratum, *(_num(r.scores.get(c)) for c in columns), r.error or ""]
+        for r in results
+    ]
     lines = [
         "",
         f"## {run.component} {run.version} on {run.split}{selected}: {run.run_id}",
@@ -462,20 +405,10 @@ def _markdown(run: Run, results: list[CaseResult]) -> str:
         f"Version hash {run.version_hash}, case set {run.case_set_hash}, git {_git_label(run)}, "
         f"finished {run.finished_at}, {run.errors} error(s) in {run.n_cases} case(s).",
         "",
-        "| metric | value |",
-        "| --- | --- |",
+        *_lines(["metric", "value"], _metric_rows(suite, run), markdown=True),
+        "",
+        *_lines(["case", "stratum", *columns, "error"], cases, markdown=True),
     ]
-    for name in suite.metrics:
-        label = f"{name} (primary)" if name == suite.primary else name
-        lines.append(f"| {label} | {_num(summary.get(name))} |")
-    columns = ["case_score", *suite.case_columns]
-    lines += ["", f"| case | stratum | {' | '.join(columns)} | error |"]
-    lines.append("| --- " * (len(columns) + 3) + "|")
-    for result in results:
-        cells = [_num(result.scores.get(column)) for column in columns]
-        lines.append(
-            f"| {result.case_id} | {result.stratum} | {' | '.join(cells)} | {result.error or ''} |"
-        )
     return "\n".join(lines) + "\n"
 
 
@@ -494,13 +427,18 @@ def _run(store: SqliteResultStore, run_id: str) -> Run:
 
 
 def _summary(suite: Suite, run: Run) -> None:
+    _table(
+        ["metric", "value"],
+        [*_metric_rows(suite, run), ["errors", f"{run.errors} of {run.n_cases}"]],
+    )
+
+
+def _metric_rows(suite: Suite, run: Run) -> list[list[str]]:
     summary = run.summary or {}
-    rows = [
+    return [
         [f"{name} (primary)" if name == suite.primary else name, _num(summary.get(name))]
         for name in suite.metrics
     ]
-    rows.append(["errors", f"{run.errors} of {run.n_cases}"])
-    _table(["metric", "value"], rows)
 
 
 def _suite(component: str) -> Suite:
@@ -522,10 +460,18 @@ def _num(value: Any) -> str:
 
 
 def _table(headers: list[str], rows: list[list[str]]) -> None:
+    for line in _lines(headers, rows):
+        typer.echo(line)
+
+
+def _lines(headers: list[str], rows: list[list[str]], markdown: bool = False) -> list[str]:
+    """A table as aligned columns, or as a Markdown table."""
+    if markdown:
+        return [
+            f"| {' | '.join(map(str, row))} |" for row in [headers, ["---"] * len(headers), *rows]
+        ]
     widths = [max(len(str(cell)) for cell in column) for column in zip(headers, *rows, strict=True)]
-    for row in [headers, *rows]:
-        typer.echo(
-            "  ".join(
-                str(cell).ljust(width) for cell, width in zip(row, widths, strict=True)
-            ).rstrip()
-        )
+    return [
+        "  ".join(str(cell).ljust(width) for cell, width in zip(row, widths, strict=True)).rstrip()
+        for row in [headers, *rows]
+    ]

@@ -216,7 +216,7 @@ class RouterService:
 
     The first layer that gives a route decides, and the later layers are not asked. A request
     that no layer is sure of fits no case. Every layer asked is traced under the request id with
-    what it made of the request, so `evals show --request` shows which layer decided and why. The
+    what it made of the request, so `resourcly request` shows which layer decided and why. The
     user's text is traced by length only, and it never changes the route.
     """
 

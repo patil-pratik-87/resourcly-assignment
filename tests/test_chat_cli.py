@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner, Result
 
-from resourcly.bootstrap import PROJECT_ROOT
+from resourcly.bootstrap import PROJECT_ROOT, Settings, open_services
 from resourcly.cli import app
 from tests.conftest import CTC01, png
 
@@ -107,6 +107,19 @@ def test_request_can_write_the_drawing_json(tmp_path: Path) -> None:
 
     assert result.exit_code == 0, result.output
     assert (tmp_path / "out" / f"{CTC01}.json").is_file()
+
+
+def test_a_request_with_steps_but_no_record_shows_its_steps() -> None:
+    with open_services(Settings.from_env()) as services:
+        services.drawings.read(CTC01, request_id="reader-run:case")
+
+    result = invoke("request", "reader-run:case")
+
+    assert result.exit_code == 0, result.output
+    assert "trace: 1 step(s)" in result.output
+    assert "drawings.read  called reader textlayer-v0 (textlayer)" in result.output
+    assert f'input   {{"drawing": "{CTC01}"}}' in result.output
+    assert 'output  {"values": 6, "schema_issues": 0}' in result.output
 
 
 def test_an_unknown_request_is_a_short_error() -> None:

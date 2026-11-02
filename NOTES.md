@@ -77,7 +77,7 @@ floor:
 - Why the text layer is the floor: it reads the title block and notes, which are real PDF text.
   Most callouts are drawn as vector paths, so it misses them. A real reader must raise recall
   without giving up much precision.
-- Traces: each call is stored under its request id; `evals show --request` prints it.
+- Traces: each call is stored under its request id; `resourcly request` prints it.
 
 Details: `docs/evals.md`.
 

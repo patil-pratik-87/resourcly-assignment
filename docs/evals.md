@@ -7,12 +7,11 @@ and its modules: [src/resourcly/eval_harness/README.md](../src/resourcly/eval_ha
 
 ```sh
 uv run evals check                                   # every gold file and split
-uv run evals list components                         # components, metrics and versions
 uv run evals run router --version stub-v0            # the dev split by default
 uv run evals run reader --version textlayer-v0 --split all
 uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
-uv run evals show --request REQUEST_ID               # what one call did
+uv run resourcly request RUN_ID:CASE_ID              # what one call did
 uv run evals compare failure shuffled-v0 my-finder-v1 --fail-if-worse
 uv run evals run --rescore RUN_ID                    # a stored run against corrected gold
 ```
