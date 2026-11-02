@@ -9,10 +9,11 @@ from resourcly.errors import InvalidVersion
 from resourcly.models import Attachment, Route
 
 PICTURE = Attachment("part.png", "image/png", b"\x89PNG\r\n\x1a\n")
+CLASSES = ("drawing", "other", "photo")
 
 
 class FakeEncoder:
-    """Returns a fixed embedding, so a test sets the probe's score through the weights."""
+    """Returns a fixed embedding, so a test sets the probe's answer through the weights."""
 
     model_id = "org/encoder"
     revision = "def456"
@@ -26,34 +27,49 @@ class FakeEncoder:
         return self.vector
 
 
-def probe_for(p_drawing: float) -> LinearProbe:
-    """A one-weight probe that gives the embedding [1.0] this probability of a drawing."""
+def probe_for(drawing: float, other: float, photo: float) -> LinearProbe:
+    """A one-weight probe that gives the embedding [1.0] these probabilities."""
     return LinearProbe(
-        encoder_model="org/encoder", weights=(math.log(p_drawing / (1 - p_drawing)),), bias=0.0
+        encoder_model="org/encoder",
+        classes=CLASSES,
+        weights=((math.log(drawing),), (math.log(other),), (math.log(photo),)),
+        bias=(0.0, 0.0, 0.0),
     )
 
 
-def test_a_sure_probe_decides_and_gives_both_probabilities() -> None:
+def test_a_sure_probe_decides_and_gives_every_probability() -> None:
     encoder = FakeEncoder([1.0])
-    layer = ProbeRouteAdapter(encoder, probe_for(0.97), threshold=0.9)
+    layer = ProbeRouteAdapter(encoder, probe_for(0.97, 0.01, 0.02), threshold=0.9)
 
     verdict = layer.decide(PICTURE)
 
     assert verdict.route == Route.DRAWING
     assert verdict.confidence == pytest.approx(0.97)
-    assert verdict.probabilities == pytest.approx({"drawing": 0.97, "photo": 0.03})
+    assert verdict.probabilities == pytest.approx({"drawing": 0.97, "other": 0.01, "photo": 0.02})
     assert verdict.reason == "the probe gives drawing 0.970"
     assert encoder.seen == [PICTURE]
 
 
-def test_a_low_drawing_probability_is_a_photo() -> None:
-    verdict = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.02), 0.9).decide(PICTURE)
+def test_a_high_photo_probability_is_a_photo() -> None:
+    verdict = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.01, 0.01, 0.98), 0.9).decide(
+        PICTURE
+    )
 
     assert (verdict.route, verdict.reason) == (Route.PHOTO, "the probe gives photo 0.980")
 
 
+def test_a_probe_sure_the_file_fits_no_case_routes_it_to_other() -> None:
+    verdict = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.03, 0.95, 0.02), 0.9).decide(
+        PICTURE
+    )
+
+    assert (verdict.route, verdict.reason) == (Route.OTHER, "the probe gives other 0.950")
+
+
 def test_an_unsure_probe_passes_the_request_on_with_its_guess() -> None:
-    verdict = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.83), 0.9).decide(PICTURE)
+    verdict = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.83, 0.12, 0.05), 0.9).decide(
+        PICTURE
+    )
 
     assert verdict.route is None
     assert verdict.confidence == pytest.approx(0.83)
@@ -63,58 +79,80 @@ def test_an_unsure_probe_passes_the_request_on_with_its_guess() -> None:
 def test_the_probe_has_nothing_to_judge_without_an_attachment() -> None:
     encoder = FakeEncoder([1.0])
 
-    verdict = ProbeRouteAdapter(encoder, probe_for(0.97), 0.9).decide(None)
+    verdict = ProbeRouteAdapter(encoder, probe_for(0.97, 0.01, 0.02), 0.9).decide(None)
 
     assert verdict.route is None
     assert encoder.seen == []
 
 
 def test_a_probe_trained_on_another_encoder_is_refused() -> None:
-    probe = LinearProbe(encoder_model="org/other", weights=(1.0,), bias=0.0)
+    probe = LinearProbe("org/other", ("drawing", "photo"), ((1.0,), (0.0,)), (0.0, 0.0))
 
     with pytest.raises(InvalidVersion, match="trained on org/other embeddings, not org/encoder"):
         ProbeRouteAdapter(FakeEncoder([1.0]), probe, 0.9)
 
 
 def test_an_embedding_of_the_wrong_size_is_an_error() -> None:
-    layer = ProbeRouteAdapter(FakeEncoder([1.0, 0.0]), probe_for(0.9), 0.9)
+    layer = ProbeRouteAdapter(FakeEncoder([1.0, 0.0]), probe_for(0.9, 0.05, 0.05), 0.9)
 
     with pytest.raises(ValueError, match="2 numbers, the probe takes 1"):
         layer.decide(PICTURE)
 
 
+def write_probe(path: Path, **fields) -> Path:
+    document = {
+        "encoder_model": "org/encoder",
+        "classes": ["drawing", "other", "photo"],
+        "weights": [[0.5, -0.25], [0.0, 0.0], [-0.5, 0.25]],
+        "bias": [0.1, 0.0, -0.1],
+        "trained_on": {"split": "train", "cases": {"drawing": 1, "other": 1, "photo": 1}},
+        **fields,
+    }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    return path
+
+
 def test_a_probe_loads_from_its_json_file(tmp_path: Path) -> None:
-    path = tmp_path / "probe.json"
-    path.write_text(
-        json.dumps(
-            {
-                "encoder_model": "org/encoder",
-                "positive": "drawing",
-                "negative": "photo",
-                "weights": [0.5, -0.25],
-                "bias": 0.1,
-                "trained_on": {"split": "train", "cases": 2},
-            }
-        ),
-        encoding="utf-8",
+    probe = LinearProbe.load(write_probe(tmp_path / "probe.json"))
+
+    assert probe == LinearProbe(
+        "org/encoder",
+        CLASSES,
+        ((0.5, -0.25), (0.0, 0.0), (-0.5, 0.25)),
+        (0.1, 0.0, -0.1),
     )
-
-    probe = LinearProbe.load(path)
-
-    assert probe == LinearProbe("org/encoder", (0.5, -0.25), 0.1)
-    assert probe.p_drawing([2.0, 0.0]) == pytest.approx(1 / (1 + math.exp(-1.1)))
-    assert probe.p_drawing([-1e6, 0.0]) == pytest.approx(0.0)
+    scores = [1.1, 0.0, -1.1]
+    total = sum(math.exp(score) for score in scores)
+    expected = {name: math.exp(s) / total for name, s in zip(CLASSES, scores, strict=True)}
+    assert probe.probabilities([2.0, 0.0]) == pytest.approx(expected)
+    assert probe.probabilities([1e6, 0.0])["drawing"] == pytest.approx(1.0)
 
 
 def test_a_probe_file_without_weights_is_refused(tmp_path: Path) -> None:
     path = tmp_path / "probe.json"
     path.write_text('{"encoder_model": "org/encoder"}', encoding="utf-8")
 
-    with pytest.raises(InvalidVersion, match="probe.json is not a probe: it lacks weights, bias"):
+    with pytest.raises(
+        InvalidVersion, match="probe.json is not a probe: it lacks classes, weights, bias"
+    ):
+        LinearProbe.load(path)
+
+
+def test_a_probe_whose_classes_are_not_routes_is_refused(tmp_path: Path) -> None:
+    path = write_probe(tmp_path / "probe.json", classes=["drawing", "cat", "photo"])
+
+    with pytest.raises(InvalidVersion, match="probe.json names cat, which is not a route"):
+        LinearProbe.load(path)
+
+
+def test_a_probe_whose_weights_do_not_match_its_classes_is_refused(tmp_path: Path) -> None:
+    path = write_probe(tmp_path / "probe.json", bias=[0.1, 0.0])
+
+    with pytest.raises(InvalidVersion, match="3 classes, 3 weight rows and 2 biases"):
         LinearProbe.load(path)
 
 
 def test_the_trace_names_the_encoder_snapshot() -> None:
-    layer = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.9), 0.9)
+    layer = ProbeRouteAdapter(FakeEncoder([1.0]), probe_for(0.9, 0.05, 0.05), 0.9)
 
     assert layer.called == "linear probe on org/encoder (snapshot def456), deciding at 0.9"
