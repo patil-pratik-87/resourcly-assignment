@@ -49,14 +49,17 @@ fi
 ok "macOS on Apple silicon"
 
 begin "Install uv"
+# The PATH a new shell gets, to tell at the end whether it can run uv
+user_path=$PATH
 export PATH="$HOME/.local/bin:$PATH"
 if command -v uv >/dev/null; then
   ok "$(uv --version) at $(command -v uv)"
 else
   curl -LsSf https://astral.sh/uv/install.sh | sh
   command -v uv >/dev/null || fail "uv did not install; see https://docs.astral.sh/uv/"
-  ok "$(uv --version) installed in ~/.local/bin; add it to your PATH to run uv yourself"
+  ok "$(uv --version) installed in ~/.local/bin"
 fi
+uv_dir=$(dirname "$(command -v uv)")
 
 begin "Install the Python packages (MLX for Qwen3-VL, PyTorch for DINOv2)"
 uv sync --extra vlm --extra router
@@ -67,12 +70,21 @@ if ((no_models)); then
   skip "--no-models"
 else
   models=$(uv run resourcly models)
+  # hf hides its progress bars when it thinks an agent runs it; a person at a terminal sees them
+  if [[ -t 2 ]]; then
+    export HF_HUB_DISABLE_PROGRESS_BARS=0
+  fi
+  token_said=0
   for model in $models; do
     if HF_HUB_OFFLINE=1 uv run hf download "$model" --quiet >/dev/null 2>&1; then
       ok "$model already downloaded"
     else
+      if [[ -z ${HF_TOKEN:-} ]] && ((!token_said)); then
+        echo "  HF_TOKEN is optional; setting it only makes the downloads faster"
+        token_said=1
+      fi
       echo "  downloading $model"
-      uv run hf download "$model" >/dev/null || fail "$model did not download"
+      uv run hf download "$model" || fail "$model did not download"
       ok "$model downloaded"
     fi
   done
@@ -96,5 +108,11 @@ else
 fi
 
 begin "Check everything with resourcly doctor"
-uv run resourcly doctor || fail "fix the problems above, then run scripts/setup.sh again"
-printf '\nReady. Start the app with: make serve (or uv run resourcly serve)\n'
+# With the PATH of a new shell, so it agrees with make doctor run later
+PATH=$user_path "$uv_dir/uv" run resourcly doctor ||
+  fail "fix the problems above, then run scripts/setup.sh again"
+printf '\nReady. Start the app with: make run\n'
+if [[ ":$user_path:" != *":$uv_dir:"* ]]; then
+  printf '\nuv is not on your PATH. Add this line to ~/.zshrc, then open a new shell:\n'
+  printf '  export PATH="%s:$PATH"\n' "$uv_dir"
+fi

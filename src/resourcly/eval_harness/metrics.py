@@ -221,6 +221,11 @@ def _mean(cases: Scored, name: str, keep: Callable[[str], bool]) -> float | None
     return sum(values) / len(values) if values else None
 
 
+# Words of the answer prompts that a user should never read: the private name of a figure image,
+# and the JSON fields an action's rule talks about
+PROMPT_WORDS = re.compile(r"\breference images?\b|\bbasis\b|\bquote\b", re.I)
+
+
 def score_answer(gold: dict[str, Any], answer: Any) -> dict[str, Any]:
     """How well one photo answer says what is wrong; answer is None when the call failed.
 
@@ -229,7 +234,8 @@ def score_answer(gold: dict[str, Any], answer: Any) -> dict[str, Any]:
     findings starts with one of its failure keywords, and every citation is valid. A negative is
     answered correctly when the answer says the reports say nothing about it: the gate found no
     figure close enough, or the model saw no part. An answer that only finds no match still
-    shows the closest figures, so it does not keep a negative out.
+    shows the closest figures, so it does not keep a negative out. Any answer is prompt free when
+    its text, findings and actions use none of the prompt's own words.
     """
     answer = answer if isinstance(answer, dict) else {}
     citations = _citations(answer)
@@ -239,9 +245,23 @@ def score_answer(gold: dict[str, Any], answer: Any) -> dict[str, Any]:
         "citations": len(citations),
         "valid_citations": sum(valid_citation(c, figures) for c in citations),
     }
+    shown = " ".join(
+        [
+            str(answer.get("answer") or ""),
+            *(str(f.get("statement")) for f in _findings(answer)),
+            *(str(a.get("action")) for a in answer.get("actions") or [] if isinstance(a, dict)),
+        ]
+    )
+    prompt_free = float(PROMPT_WORDS.search(shown) is None)
     if gold["kind"] != PHOTO:
         kept_out = float(answer.get("not_in_reports") is True)
-        return {"case_score": kept_out, "correct": kept_out, "kept_out": kept_out, **counts}
+        return {
+            "case_score": kept_out,
+            "correct": kept_out,
+            "kept_out": kept_out,
+            **counts,
+            "prompt_free": prompt_free,
+        }
     report_cited = float(any(c.get("report") == gold["expected_report"] for c in citations))
     text = " ".join(
         [str(answer.get("answer") or ""), *(str(f.get("statement")) for f in _findings(answer))]
@@ -262,6 +282,7 @@ def score_answer(gold: dict[str, Any], answer: Any) -> dict[str, Any]:
         "mode_named": mode_named,
         "citations": counts["citations"],
         "valid_citations": counts["valid_citations"],
+        "prompt_free": prompt_free,
     }
 
 
@@ -308,7 +329,8 @@ def valid_citation(citation: dict[str, Any], figures: list[dict[str, Any]]) -> b
 
 def summarise_answers(cases: Scored) -> dict[str, Any]:
     """The share of every case answered correctly first, then the parts of a photo's answer, the
-    share of valid citations over every case, and the share of negatives kept out."""
+    share of valid citations over every case, the share of negatives kept out, and the share of
+    every case whose answer is prompt free."""
     citations = sum(scores["citations"] for _, scores in cases)
     valid = sum(scores["valid_citations"] for _, scores in cases)
     return {
@@ -317,4 +339,5 @@ def summarise_answers(cases: Scored) -> dict[str, Any]:
         "mode_named": _mean(cases, "mode_named", lambda stratum: stratum == PHOTO),
         "citations_valid": valid / citations if citations else None,
         "kept_out": _mean(cases, "kept_out", lambda stratum: stratum != PHOTO),
+        "prompt_free": _mean(cases, "prompt_free", lambda stratum: True),
     }

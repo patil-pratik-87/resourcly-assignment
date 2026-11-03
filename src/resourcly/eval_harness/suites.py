@@ -213,6 +213,12 @@ def _answer(services: Services, case: Case, request_id: str) -> Any:
     return answer.model_dump(mode="json")
 
 
+def _answer_copy(services: Services, case: Case, request_id: str) -> Any:
+    """Ask about the case's image with its own figure in the search, as the app does."""
+    photo = services.gold.failure_photo(case.gold["image"])
+    return services.photo_answers.answer(photo, "", request_id).model_dump(mode="json")
+
+
 def _score_answer(case: Case, prediction: Any) -> dict[str, Any]:
     return metrics.score_answer(case.gold, prediction)
 
@@ -248,6 +254,15 @@ def _explain_answer(case: Case, prediction: Any) -> list[str]:
     lines.append(f"closest figures: {closest}")
     return lines
 
+
+ANSWER_METRICS = (
+    "correct",
+    "report_cited",
+    "mode_named",
+    "citations_valid",
+    "kept_out",
+    "prompt_free",
+)
 
 SUITES: dict[str, Suite] = {
     "reader": Suite(
@@ -293,12 +308,23 @@ SUITES: dict[str, Suite] = {
     ),
     "answer": Suite(
         component="answer",
-        metrics=("correct", "report_cited", "mode_named", "citations_valid", "kept_out"),
-        case_columns=("matched", "report_cited", "mode_named"),
+        metrics=ANSWER_METRICS,
+        case_columns=("matched", "report_cited", "mode_named", "prompt_free"),
         load=failure_cases,
         call=_answer,
         score=_score_answer,
         summarise=metrics.summarise_answers,
         explain=_explain_answer,
+    ),
+    "answer-copy": Suite(
+        component="answer-copy",
+        metrics=ANSWER_METRICS,
+        case_columns=("matched", "report_cited", "mode_named", "prompt_free"),
+        load=failure_cases,
+        call=_answer_copy,
+        score=_score_answer,
+        summarise=metrics.summarise_answers,
+        explain=_explain_answer,
+        setting_of="answer",
     ),
 }

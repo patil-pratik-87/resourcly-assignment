@@ -16,11 +16,11 @@ from fastapi.testclient import TestClient
 
 from resourcly.api import create_app
 from resourcly.bootstrap import PROJECT_ROOT, Settings
+from resourcly.eval_harness.metrics import PROMPT_WORDS
 from resourcly.models import RequestRecord, TraceEvent
 
 DEMO = PROJECT_ROOT / "demo"
 DEMO_IDS = sorted(path.parent.name for path in DEMO.glob("*/request.json"))
-PHOTO_RUNS = PROJECT_ROOT / "evals" / "photo-answers" / "runs" / "photo-v2-spot.jsonl"
 
 
 def demo_record(route: str) -> RequestRecord:
@@ -83,21 +83,19 @@ def test_the_drawing_demo_is_the_vector_crop_v2_reading_in_outputs() -> None:
     assert (read.step, read.called) == ("drawings.read", "reader vector-crop-v2 (vector-crop)")
 
 
-def test_the_photo_demo_is_the_stored_photo_v2_answer() -> None:
+def test_the_photo_demo_is_a_photo_v3_answer_free_of_the_prompts_words() -> None:
     record = demo_record("photo")
     item = record.items[0]
-    stored = next(
-        json.loads(line)
-        for line in PHOTO_RUNS.read_text(encoding="utf-8").splitlines()
-        if json.loads(line)["case_id"] == "pos_18-061_fig05_v1"
-    )
 
-    assert item.answer is not None
-    assert item.answer.model_dump(mode="json") == stored["answer"]
+    assert item.answer is not None and item.answer.matched
     answer = demo_trace(record.request_id)[-1]
     assert answer.step == "answer.photo"
-    assert answer.called.startswith("answer photo-v2 (vlm): ")
-    assert answer.output["text"] == stored["model_text"]
+    assert answer.called.startswith("answer photo-v3 (vlm): ")
+    assert (answer.output["findings"], answer.output["actions"]) == (
+        len(item.answer.findings),
+        len(item.answer.actions),
+    )
+    assert PROMPT_WORDS.search(item.reply or "") is None
 
 
 def test_serve_opens_the_chat_with_the_demos(client: TestClient) -> None:

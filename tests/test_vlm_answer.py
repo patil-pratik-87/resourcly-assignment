@@ -65,7 +65,8 @@ def test_the_prompt_holds_the_question_and_every_source_with_its_labels() -> Non
     prompt = model.calls[0][0]
     assert prompt.startswith("Answer from this.")
     assert "<question>\nWhy did it crack?\n</question>" in prompt
-    assert "[18-061 fig05] reference image 1; section spar_fatigue_N106ER, failure mode" in prompt
+    assert "[18-061 fig05] shown as an image; section spar_fatigue_N106ER, failure mode" in prompt
+    assert "reference image" not in prompt
     assert "[24-013 fig03] not shown as an image;" in prompt
     assert "Caption: Figure 5. Closer views of the fracture surfaces" in prompt
     assert "[18-061 p2] " in prompt and "[18-061 p9] " in prompt
@@ -123,3 +124,21 @@ def test_a_match_written_as_text_is_read(written: str, matched: bool) -> None:
     adapter = VlmPhotoAnswerAdapter(model, PROMPT, max_tokens=500)
 
     assert adapter.answer(evidence()).matched is matched
+
+
+def test_an_action_that_repeats_the_prompt_is_dropped() -> None:
+    prompt = f'{PROMPT}\nOtherwise set basis to "inferred" and leave quote empty.'
+    model = FakeModel(
+        '{"match": true, "what_is_wrong": "x", "actions": ['
+        '{"action": "Set basis to \'inferred\' and leave quote empty.", "basis": "inferred"},'
+        ' {"action": "Answer from this.", "basis": "inferred"},'
+        ' {"action": "Replace the spar cap.", "basis": "inferred"}]}'
+    )
+
+    draft = VlmPhotoAnswerAdapter(model, prompt, max_tokens=500).answer(evidence())
+
+    # "Answer from this." is too short to tell from an action the evidence gave
+    assert [action.action for action in draft.actions] == [
+        "Answer from this.",
+        "Replace the spar cap.",
+    ]

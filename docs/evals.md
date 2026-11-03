@@ -12,6 +12,7 @@ uv run evals run reader --version textlayer-v0 --split all
 uv run evals run failure --version shuffled-v0 --limit 10   # a partial run of 10 cases
 uv run evals run failure-copy --version dinov2-base-v1      # the photo's own figure kept
 uv run --extra vlm evals run answer --version photo-v2 --limit 8
+uv run evals run answer-copy --case-id pos_18-061_fig05_v0  # as the app answers an upload
 uv run evals show RUN_ID --failures                  # the cases that scored below 1
 uv run evals show RUN_ID --case CASE_ID              # one case against its gold
 uv run resourcly request RUN_ID:CASE_ID              # what one call did
@@ -34,7 +35,7 @@ Four components are measured today; a score for the whole agent is planned.
 The failure and answer suites run held out: each photo is a perturbed copy of a report figure,
 so its own figure is hidden from the search and the best hit must be another figure of its
 section. `failure-copy` keeps the figure in, which only checks that the perturbations do not
-break matching. The answer runs the failure version the settings name
+break matching, and `answer-copy` keeps it in as the app does for an uploaded photo. The answer runs the failure version the settings name
 (`RESOURCLY_FAILURE_VERSION`, `dinov2-base-v1` by default), and `photo-v1` took 18 to 35 s per
 photo with Qwen3-VL 8B, so run it with `--limit`.
 
@@ -57,6 +58,8 @@ The model-free version of each component sets its floor. The two vision readers 
 | answer `captions-v0` | dev, 86 cases | correct 0.535 | report_cited 0.987, mode_named 0.564, citations_valid 1.000, kept_out 0.375 |
 | answer `captions-v0` | dev, `--limit 8` | correct 0.500 | report_cited 1.000, mode_named 0.500, citations_valid 1.000, kept_out 0.500 |
 | answer `photo-v1` | dev, `--limit 8` | correct 0.625 | report_cited 0.667, mode_named 0.667, citations_valid 1.000, kept_out 0.500 |
+| answer `photo-v2` | dev, 86 cases | correct 0.500 | report_cited 0.526, mode_named 0.782, citations_valid 1.000, kept_out 0.500, prompt_free 0.442 |
+| answer `photo-v3` | dev, 86 cases | correct 0.523 | report_cited 0.551, mode_named 0.769, citations_valid 1.000, kept_out 0.500, prompt_free 1.000 |
 
 A failure split's cases are photos of report figures and negatives: 78 and 8 in dev, 60 and 8 in
 test. Held out, `dinov2-base-v1` repeats the research exactly (`research/failure/README.md`):
@@ -68,9 +71,10 @@ No finder keeps a drawing out: the 0.28 gate is below what drawings reach (0.42)
 must keep them out. `dinov2-base-v1` keeps all 5 unrelated images out, and `dinov2-small-v1`
 keeps 1.
 
-The answer numbers were measured on `photo-v1`. `photo-v2`, now the default, asks for the same
-failure and can keep out a photo it sees no part in; its run on the same 8 cases is pending. The
-`photo-v1` runs score the same under the current rules, since none of its actions is stated.
+`photo-v2` told users about "reference image 1" or copied the prompt's rule for an inferred
+action in 48 of 86 answers. `photo-v3`, now the default, names figures by their source and shows
+that rule as a JSON example; every answer is prompt free, and correct moves from 0.500 to 0.523.
+The `photo-v1` runs score the same under the current rules, since none of its actions is stated.
 
 On its 8 cases, `photo-v1` answers 4 of 6 photos correctly and the captions floor 3. Both photos
 it gets wrong had a top figure from another report, and the model followed it. It keeps the logo
@@ -94,5 +98,6 @@ two versions.
 | `report_cited` | Photo answers with a citation in the photo's report. |
 | `mode_named` | Photo answers whose text or findings have a word starting with one of the failure keywords. |
 | `citations_valid` | Citations that name a figure the finder returned, or a page of their reports, and whose source agrees; a stated action's must cite a page and quote at least three words. |
+| `prompt_free` | Answers whose text, findings and actions use none of the prompt's own words, such as "reference image" or the `basis` and `quote` fields. |
 
 A failed call is scored as an empty answer, so a crash lowers the score.
