@@ -142,3 +142,6 @@ holds the words of the cited page that say to do it.
 | `GET /api/requests/<id>/items/<item>/pages/<n>.png` | Page `n` of a file as an image, a photo too; `dpi` from 36 to 400. |
 | `GET /api/reports/<report>/figures/<n>.png` | Figure `n` of a report, such as `18-061/figures/5.png`; `max_side` from 32 to 2048 pixels, 1024 by default. |
 | `GET /api/agent` | The reader, router, failure finder and answer versions in use, and the upload caps. |
+
+A message takes at most 50 files of 50 MB each. `RESOURCLY_MAX_FILES` and
+`RESOURCLY_MAX_UPLOAD_BYTES` change the caps.
