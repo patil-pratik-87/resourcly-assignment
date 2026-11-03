@@ -11,9 +11,11 @@ EPSILON = 1e-9
 
 
 class Scoring(Protocol):
-    """What compare needs of a suite: its metrics, primary first, and how it scores."""
+    """What compare needs of a suite: its metrics, primary first, those better when they fall,
+    and how it scores."""
 
     metrics: tuple[str, ...]
+    lower_better: tuple[str, ...]
     score: Callable[[Case, Any], dict[str, Any]]
     summarise: Callable[[Scored], dict[str, Any]]
 
@@ -69,8 +71,9 @@ def compare_runs(
     Both sides are scored the same way on the same cases, so the verdict holds even when the gold
     changed after a run. Runs on other splits or other cases are refused, since their numbers do
     not measure the same thing; with `force`, a case only one run has, or one with no gold now, is
-    left out with a warning. A metric is better when it rises; any change counts. The first is
-    the primary one.
+    left out with a warning. A metric is better when it rises, or when it falls for one the
+    suite counts as lower is better, such as a share of wrong answers; any change counts. The
+    first is the primary one.
     """
     if base.component != candidate.component:
         raise ValueError(f"cannot compare a {base.component} run with a {candidate.component} run")
@@ -101,15 +104,18 @@ def compare_runs(
     old_summary = suite.summarise([(gold[c].stratum, old[c]) for c in scored])
     new_summary = suite.summarise([(gold[c].stratum, new[c]) for c in scored])
     return Comparison(
-        metrics=[_metric(name, old_summary, new_summary) for name in suite.metrics],
+        metrics=[
+            _metric(name, old_summary, new_summary, name in suite.lower_better)
+            for name in suite.metrics
+        ],
         cases=[CaseChange(c, old[c]["case_score"], new[c]["case_score"]) for c in scored],
         warnings=warnings,
     )
 
 
-def _metric(name: str, base: dict, candidate: dict) -> MetricChange:
+def _metric(name: str, base: dict, candidate: dict, lower_better: bool) -> MetricChange:
     old, new = base.get(name), candidate.get(name)
-    gain = None if old is None or new is None else new - old
+    gain = None if old is None or new is None else (old - new if lower_better else new - old)
     if gain is None:
         verdict = "not measured"
     elif gain > EPSILON:

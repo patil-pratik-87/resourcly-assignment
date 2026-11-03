@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Bbox } from "./bbox";
-import { boxStyle } from "./ItemCard";
+import { boxStyle } from "./bbox";
 
 export interface Placed {
   index: number;

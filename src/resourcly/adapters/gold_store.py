@@ -14,8 +14,10 @@ class JsonGoldStoreAdapter:
     """One JSON document per drawing under <root>/drawings and <root>/partial.
 
     The splits file sits apart from the gold, at `splits_path`. Router rows are
-    <root>/routes/routes.jsonl and failure rows <root>/failure/cases.jsonl; the files they name
-    are under their folders.
+    <root>/routes/routes.jsonl, failure rows <root>/failure/cases.jsonl and question rows
+    <root>/answers/questions.jsonl; the files they name are under their folders, a question's
+    photo under failure/. Agent rows are <root>/agent/messages.jsonl, naming files anywhere under
+    the gold folder.
     """
 
     def __init__(self, root: Path, splits_path: Path):
@@ -65,6 +67,12 @@ class JsonGoldStoreAdapter:
 
     def load_failure_cases(self) -> list[dict[str, Any]]:
         return self._rows(self.root / "failure" / "cases.jsonl")
+
+    def load_question_cases(self) -> list[dict[str, Any]]:
+        return self._rows(self.root / "answers" / "questions.jsonl")
+
+    def load_agent_cases(self) -> list[dict[str, Any]]:
+        return self._rows(self.root / "agent" / "messages.jsonl")
 
     def _rows(self, path: Path) -> list[dict[str, Any]]:
         """One JSON value per line of a JSONL file; no file, no rows."""

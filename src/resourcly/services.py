@@ -103,6 +103,16 @@ class GoldService:
     def failure_cases(self) -> list[dict[str, Any]]:
         return self.store.load_failure_cases()
 
+    def question_cases(self) -> list[dict[str, Any]]:
+        return self.store.load_question_cases()
+
+    def agent_cases(self) -> list[dict[str, Any]]:
+        return self.store.load_agent_cases()
+
+    def gold_file(self, path: str) -> bytes:
+        """A file the gold names, by its path under the gold folder."""
+        return self.store.load_file(path)
+
     def failure_photo(self, image: str) -> Attachment:
         """An image the failure gold names, as the photo of a request."""
         data = self.store.load_file(f"failure/{image}")

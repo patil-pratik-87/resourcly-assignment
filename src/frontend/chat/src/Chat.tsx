@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { AgentApi } from "./api";
-import { Composer } from "./Composer";
+import type { AgentApi, SendOptions } from "./api";
+import { type About, Composer } from "./Composer";
 import { ItemCard } from "./ItemCard";
 import { DEMO_NOTE, plural, sentAt, shortId, tally } from "./describe";
-import type { AgentInfo, RequestRecord } from "./types";
+import type { AgentInfo, RequestItem, RequestRecord } from "./types";
 
 /** The chat shows this many of the latest requests; the requests screen has them all. */
 const SHOWN = 30;
@@ -14,7 +14,7 @@ interface Props {
   api: AgentApi;
   requests: RequestRecord[];
   loaded: boolean;
-  onSend: (text: string, files: File[]) => Promise<RequestRecord>;
+  onSend: (text: string, files: File[], options?: SendOptions) => Promise<RequestRecord>;
   onOpen: (requestId: string, itemId: string) => void;
   info: AgentInfo | null;
 }
@@ -23,8 +23,18 @@ export function Chat({ api, requests, loaded, onSend, onOpen, info }: Props) {
   const thread = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [about, setAbout] = useState<About | null>(null);
+  // The next message joins the newest message's conversation, unless asked to start a new one.
+  const [fresh, setFresh] = useState(false);
   const shown = requests.slice(0, SHOWN).reverse();
   const newest = requests[0]?.request_id;
+  const conversationId = fresh ? null : (requests[0]?.conversation_id ?? null);
+
+  async function send(text: string, sent: File[], ask: string[] = []) {
+    const record = await onSend(text, sent, { conversationId, about: ask });
+    setFresh(false);
+    return record;
+  }
 
   // Keep the newest message in view when one is sent or arrives, and while its cards grow,
   // unless the person has scrolled up to read.
@@ -94,12 +104,43 @@ export function Chat({ api, requests, loaded, onSend, onOpen, info }: Props) {
       <div className="chat-thread" ref={thread}>
         <div className="chat-column">
           {loaded && shown.length === 0 && <Welcome />}
-          {shown.map((record) => (
-            <Exchange key={record.request_id} api={api} record={record} onOpen={onOpen} />
+          {shown.map((record, index) => (
+            <Exchange
+              key={record.request_id}
+              api={api}
+              record={record}
+              requests={requests}
+              opensConversation={
+                index > 0 && record.conversation_id !== shown[index - 1]!.conversation_id
+              }
+              onOpen={onOpen}
+              onAsk={(text, ref) => void send(text, [], [ref]).catch(() => {})}
+              onAskAbout={setAbout}
+            />
           ))}
         </div>
       </div>
-      <Composer onSend={onSend} files={files} onFiles={setFiles} dragging={dragging} caps={info} />
+      <Composer
+        onSend={async (text, sent) => {
+          const record = await send(text, sent, about && sent.length === 0 ? [about.ref] : []);
+          setAbout(null);
+          return record;
+        }}
+        files={files}
+        onFiles={setFiles}
+        dragging={dragging}
+        caps={info}
+        about={about}
+        onClearAbout={() => setAbout(null)}
+        onNewConversation={
+          requests.length > 0 && !fresh
+            ? () => {
+                setFresh(true);
+                setAbout(null);
+              }
+            : undefined
+        }
+      />
       {dragging && (
         <div className="chat-drop" aria-hidden>
           <div className="chat-drop-sheet">
@@ -115,22 +156,44 @@ export function Chat({ api, requests, loaded, onSend, onOpen, info }: Props) {
 function Exchange({
   api,
   record,
+  requests,
+  opensConversation,
   onOpen,
+  onAsk,
+  onAskAbout,
 }: {
   api: AgentApi;
   record: RequestRecord;
+  /** Every request, to name the earlier items this one is about. */
+  requests: RequestRecord[];
+  /** Whether it starts a conversation after an earlier one in the thread. */
+  opensConversation: boolean;
   onOpen: (requestId: string, itemId: string) => void;
+  /** Ask a question about an earlier item or value, named as the API's `about` names it. */
+  onAsk: (text: string, about: string) => void;
+  /** Make an item of this request what the next message asks about. */
+  onAskAbout: (about: About) => void;
 }) {
   const files = record.items.filter((item) => item.kind === "file");
   const named = files.length > NAMED_FILES + 1 ? NAMED_FILES : files.length;
   return (
     <article className="exchange" aria-label={`Request ${record.request_id}`}>
+      {opensConversation && (
+        <p className="conversation-break">
+          <span>New conversation</span>
+        </p>
+      )}
       <div className="said">
         <div className="said-meta">
           <span>You</span>
           <time dateTime={record.created_at}>{sentAt(record.created_at)}</time>
         </div>
         {record.text && <p className="said-text">{record.text}</p>}
+        {(record.about ?? []).length > 0 && (
+          <p className="said-about">
+            About {(record.about ?? []).map((ref) => aboutLabel(ref, requests)).join(", ")}
+          </p>
+        )}
         {files.length > 0 && (
           <ul className="said-files">
             {files.slice(0, named).map((item) => (
@@ -166,11 +229,37 @@ function Exchange({
             requestId={record.request_id}
             item={item}
             onOpen={() => onOpen(record.request_id, item.item_id)}
+            onPick={(cited) =>
+              onAsk(record.text, `${cited.request_id}/${cited.item_id}/${cited.ref}`)
+            }
+            onAskAbout={
+              askable(item)
+                ? () =>
+                    onAskAbout({ ref: `${record.request_id}/${item.item_id}`, label: item.name })
+                : undefined
+            }
           />
         ))}
       </div>
     </article>
   );
+}
+
+/** Whether a later message can ask about an item: a drawing read, or a photo answered. */
+function askable(item: RequestItem): boolean {
+  if (item.kind !== "file") return false;
+  if (item.route?.route === "drawing") return item.values !== null && item.status === "done";
+  return item.route?.route === "photo" && item.status === "answered";
+}
+
+/** An earlier item or value as a person reads it: the file's name, and the value's id. */
+export function aboutLabel(ref: string, requests: RequestRecord[]): string {
+  const [requestId, itemId, valueId] = ref.split("/");
+  const found = requests
+    .find((record) => record.request_id === requestId)
+    ?.items.find((item) => item.item_id === itemId);
+  const name = found?.name ?? itemId ?? ref;
+  return valueId ? `${valueId} of ${name}` : name;
 }
 
 function Welcome() {
@@ -179,8 +268,9 @@ function Welcome() {
       <h1>Send a drawing, a photo, or a question.</h1>
       <p>
         The agent decides what each file is. A technical drawing comes back as JSON with every value
-        on it, and a photo of a part with what the NTSB reports say about it. Attach many files at
-        once and each is done in turn while you watch.
+        on it, and a photo of a part with what the NTSB reports say about it. Ask about a file in
+        the same message, or later with Ask about this. Attach many files at once and each is done
+        in turn while you watch.
       </p>
       <ul className="welcome-cases">
         <li>
@@ -193,7 +283,7 @@ function Welcome() {
         </li>
         <li>
           <span className="route-tag text">Text question</span>
-          An answer from the reports. Not available yet.
+          An answer from the reports, each fact citing its page
         </li>
         <li>
           <span className="route-tag other">Fits no case</span>

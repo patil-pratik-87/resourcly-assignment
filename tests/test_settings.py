@@ -10,7 +10,7 @@ def test_the_eval_data_defaults_to_the_evals_folder_and_the_versions_to_the_root
 
 
 def test_the_app_runs_the_researched_version_of_each_component_by_default(monkeypatch) -> None:
-    for component in ("READER", "FAILURE", "ANSWER"):
+    for component in ("READER", "FAILURE", "ANSWER", "QA"):
         monkeypatch.delenv(f"RESOURCLY_{component}_VERSION")
 
     assert Settings().versions == {
@@ -18,6 +18,7 @@ def test_the_app_runs_the_researched_version_of_each_component_by_default(monkey
         "router": "three-layer-v1",
         "failure": "dinov2-base-v1",
         "answer": "photo-v3",
+        "qa": "select-v1",
     }
     assert Settings.from_env().versions == Settings().versions
 
@@ -33,12 +34,14 @@ def test_the_environment_can_pick_the_versions(monkeypatch) -> None:
     monkeypatch.setenv("RESOURCLY_ROUTER_VERSION", "my-router-v1")
     monkeypatch.setenv("RESOURCLY_FAILURE_VERSION", "my-finder-v1")
     monkeypatch.setenv("RESOURCLY_ANSWER_VERSION", "my-answer-v1")
+    monkeypatch.setenv("RESOURCLY_QA_VERSION", "my-qa-v1")
 
     assert Settings.from_env().versions == {
         "reader": "my-reader-v1",
         "router": "my-router-v1",
         "failure": "my-finder-v1",
         "answer": "my-answer-v1",
+        "qa": "my-qa-v1",
     }
 
 

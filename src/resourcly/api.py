@@ -12,6 +12,7 @@ from resourcly.errors import (
     EmptyRequest,
     InvalidDocument,
     NotFound,
+    UnknownTarget,
     UnreadableDrawing,
     UploadTooLarge,
 )
@@ -50,6 +51,10 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
 
     @app.exception_handler(EmptyRequest)
     async def empty(_: Request, error: EmptyRequest) -> JSONResponse:
+        return JSONResponse({"detail": str(error)}, status_code=422)
+
+    @app.exception_handler(UnknownTarget)
+    async def unknown_target(_: Request, error: UnknownTarget) -> JSONResponse:
         return JSONResponse({"detail": str(error)}, status_code=422)
 
     @app.exception_handler(UploadTooLarge)
@@ -96,6 +101,7 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
             "router": found.router_name,
             "failure": found.failure_name,
             "answer": found.answer_name,
+            "qa": found.qa_name,
             "max_file_mb": round(settings.max_upload_bytes / MB, 2),
             "max_files": settings.max_files,
         }
@@ -105,8 +111,14 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
         request: Request,
         text: Annotated[str, Form()] = "",
         files: Annotated[list[UploadFile], File()] = [],  # noqa: B006 - FastAPI copies defaults
+        conversation_id: Annotated[str, Form()] = "",
+        about: Annotated[list[str], Form()] = [],  # noqa: B006 - FastAPI copies defaults
     ) -> RequestRecord:
-        """One chat message: text, files, or both. The work runs in the background; poll it."""
+        """One chat message: text, files, or both. The work runs in the background; poll it.
+
+        It joins the conversation named, or starts one; a message without files may be about
+        earlier items or values, each `<request id>/<item id>[/<value id>]`.
+        """
         if len(files) > settings.max_files:
             raise UploadTooLarge(
                 f"A message can carry at most {settings.max_files} files;"
@@ -125,7 +137,9 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
                     f" each file can be at most {round(limit / MB, 2):g} MB."
                 )
             contents.append((name, data))
-        return await run_in_threadpool(services(request).agent.submit, text, contents)
+        return await run_in_threadpool(
+            services(request).agent.submit, text, contents, conversation_id or None, about
+        )
 
     @app.get("/api/requests")
     def list_requests(
@@ -155,6 +169,16 @@ def create_app(settings: Settings | None = None, screen: Screen = "chat") -> Fas
     ) -> Response:
         """One page of an uploaded file, a photo included, for a screen to place values on."""
         png = services(request).agent.page(request_id, item_id, page, dpi)
+        return Response(
+            png, media_type="image/png", headers={"Cache-Control": "public, max-age=3600"}
+        )
+
+    @app.get("/api/requests/{request_id}/items/{item_id}/crops/{value_id}.png")
+    def value_crop(
+        request: Request, request_id: str, item_id: str, value_id: str, dpi: Dpi = 300
+    ) -> Response:
+        """One value of a read drawing cut from its page, for an answer to show beside it."""
+        png = services(request).agent.crop(request_id, item_id, value_id, dpi)
         return Response(
             png, media_type="image/png", headers={"Cache-Control": "public, max-age=3600"}
         )

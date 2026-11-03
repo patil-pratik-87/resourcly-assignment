@@ -46,8 +46,35 @@ one message is a bulk upload: each file gets a card, and a line over them counts
 
 Each card shows the router's answer: the case, the layer that chose it, how sure it was, and why.
 A drawing shows its page with a box on each callout as it is read, then buttons to show or
-download its JSON. A text question gets a reply that the answer is not available yet, and a file
-that fits no case gets a reply that says so. Click a page to open the file.
+download its JSON. A file that fits no case gets a reply that says so. Click a page to open the
+file.
+
+## Questions
+
+The file decides the route; the text never does. The text shapes the answer:
+
+- **A question with a drawing** is answered on the drawing's card, under the JSON. The model picks
+  the values that answer and names the kind of value asked about; code prints the answer from the
+  JSON, never from the model's words. One value of that kind is the answer, cut from the page and
+  boxed on it. Several are candidates, numbered as their boxes on the page; tap one to ask about
+  it, and that value is the answer, with no model call. None is "Not on this drawing"; when the
+  question names a frame symbol, every frame is shown too, in case the reader misread one. A
+  picture of a drawing is read whole, so its values have no exact box and the answer says so.
+- **A question alone** is answered from the three NTSB reports: each statement cites the report
+  page it comes from, and a click on the page shows the passage. When the reports do not say, the
+  answer says that.
+- **A question with a photo** is the photo's question; the answer is the photo's answer below.
+- **Text that only asks for the files**, such as "read these", gets no answer of its own.
+- **A question over several drawings**, or with a file that fits no case, is answered once on a
+  card of its own.
+
+![Two flatness values on CTC-01: candidates numbered as their boxes, each cut from the page](img/chat-ui/question-candidates.png)
+
+![A question alone, answered from a report page it cites](img/chat-ui/question-reports.png)
+
+Ask about this, on a read drawing or an answered photo, makes the next message about it: its JSON
+or its figures are used again, never read again. Messages in a row are one conversation, and the
+last three turns go into each answer as context. New conversation starts another.
 
 ![A bulk upload of six files](img/chat-ui/bulk-upload.png)
 
@@ -104,8 +131,32 @@ curl -OJ "http://127.0.0.1:8000/api/requests/<id>/items/nist_ctc_01_asme1_rd/res
 Each file is one item, and its `route` is the case the router picked: `drawing`, `photo`, `text`,
 or `other` for a file that fits no case. A drawing goes from `routing` to `queued`, `reading` and
 `done`; a photo from `routing` to `queued`, `answering` and `answered`; the other cases straight to
-`answered`. Any step can end in `failed`, with the reason in `error`. A photo's item carries its
-`answer`, and `reply` holds the same answer as text:
+`answered`. A drawing whose message asks a question goes from `done` to `answering` and back to
+`done` with its answer. Any step can end in `failed`, with the reason in `error`. A question's
+answer is the item's `qa`, and `reply` holds it as text:
+
+```json
+{
+  "route": "drawing",
+  "outcome": "candidates",
+  "reply": "2 values on the drawing could be the flatness. Tap the one you mean.\n- ▱ 0.2 ...",
+  "kind": "flatness",
+  "citations": [],
+  "candidates": [
+    {"kind": "value", "ref": "ctc01-02", "request_id": "<id>", "item_id": "ctc", "page": 1,
+     "bbox": [0.18, 0.2, 0.24, 0.25], "quote": "▱ 0.2", "said": "Flatness tolerance of 0.2 mm."}
+  ],
+  "cites": ["ctc01-02"],
+  "dropped": [],
+  "checked": true,
+  "picture": false
+}
+```
+
+`outcome` is `answer`, `candidates` or `none`. A text answer cites `passage` sources such as
+`16-006 p4`, with the passage in `quote` and the statement in `said`. `dropped` lists what the
+model cited that it was not shown. A photo's item carries its `answer`, and `reply` holds the same
+answer as text:
 
 ```json
 {
@@ -134,14 +185,15 @@ holds the words of the cited page that say to do it.
 
 | Endpoint | What it does |
 | --- | --- |
-| `POST /api/requests` | Send a message: form fields `text` and `files` (repeat for many). |
+| `POST /api/requests` | Send a message: form fields `text` and `files` (repeat for many), `conversation_id` to join a conversation, and `about` (repeat for many) for earlier items, `<id>/<item>`, or values, `<id>/<item>/<value id>`. |
 | `GET /api/requests` | The latest requests; `limit` from 1 to 1000. |
 | `GET /api/requests/<id>` | One request and the state of each item. |
 | `GET /api/requests/<id>/trace` | Every step the request took. |
 | `GET /api/requests/<id>/items/<item>/result` | A drawing's JSON; `download=true` saves it. |
 | `GET /api/requests/<id>/items/<item>/pages/<n>.png` | Page `n` of a file as an image, a photo too; `dpi` from 36 to 400. |
+| `GET /api/requests/<id>/items/<item>/crops/<value id>.png` | One value of a read drawing cut from its page; `dpi` 300 by default. |
 | `GET /api/reports/<report>/figures/<n>.png` | Figure `n` of a report, such as `18-061/figures/5.png`; `max_side` from 32 to 2048 pixels, 1024 by default. |
-| `GET /api/agent` | The reader, router, failure finder and answer versions in use, and the upload caps. |
+| `GET /api/agent` | The reader, router, failure finder, answer and qa versions in use, and the upload caps. |
 
 A message takes at most 50 files of 50 MB each. `RESOURCLY_MAX_FILES` and
 `RESOURCLY_MAX_UPLOAD_BYTES` change the caps.

@@ -1,0 +1,5 @@
+description = "rules-v0 answering from the hand-checked drawing values instead of the reader's JSON, to separate answer errors from reader errors"
+impl = "rules"
+# The drawing values the evals answer from: "gold", the hand-checked values, or "reader", the JSON
+# in outputs/ that the reader wrote. The app always answers from the JSON its reader wrote.
+evidence = "gold"

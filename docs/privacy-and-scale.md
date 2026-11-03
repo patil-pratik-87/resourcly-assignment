@@ -10,7 +10,7 @@ million similar documents the ports stay and their adapters change. Code paths a
 | --- | --- |
 | Models load only from the local cache, with `HF_HUB_OFFLINE=1` | `adapters/mlx_vlm_model.py`, `adapters/dinov2_encoder.py` |
 | Uploads, requests and drawing JSON in `var/uploads/`, traces in `var/traces.sqlite` | `bootstrap.py` |
-| The trace keeps the length and SHA-256 of the user's text, never the words | `agent.py`, `answers.py` |
+| The trace keeps the length and SHA-256 of the user's text, never the words | `agent.py`, `answers.py`, `questions.py` |
 | The server listens on `127.0.0.1`, and there is no telemetry code | `cli.py` |
 
 | Not built | Proposal |

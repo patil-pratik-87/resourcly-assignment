@@ -108,6 +108,12 @@ export default function App({ api = browserApi }: { api?: AgentApi }) {
                 <dd>{info.answer}</dd>
               </div>
             )}
+            {info.qa && (
+              <div>
+                <dt>Questions</dt>
+                <dd>{info.qa}</dd>
+              </div>
+            )}
           </dl>
         )}
       </header>

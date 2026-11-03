@@ -118,3 +118,33 @@ test = [
     "neg_unrelated_logo_24013_x159",
     "neg_unrelated_report_18061_page3",
 ]
+
+# The qa splits name units (the `unit` field of answers/questions.jsonl): a drawing with all its
+# questions, the text questions of one report, a report figure as the failure split has it, or one
+# unanswerable question. Each photo question sits on the side its figure has in the failure split.
+[qa]
+dev = [
+    "ctc01",
+    "ctc03",
+    "text-16-006",
+    "text-24-013",
+    "16-006/fig01", "16-006/fig05", "16-006/fig08", "16-006/fig12", "18-061/fig03",
+    "18-061/fig05", "18-061/fig13", "18-061/fig23", "18-061/fig26", "24-013/fig03",
+    "n-text-pilot",
+    "n-text-weather",
+    "neg_drawing_nist_ctc_01_asme1_rd",
+    "neg_unrelated_logo_18061_x677",
+]
+test = [
+    "ftc06",
+    "text-18-061",
+    "16-006/fig02", "16-006/fig09", "18-061/fig02", "18-061/fig06", "18-061/fig08",
+    "18-061/fig10", "18-061/fig16", "18-061/fig19", "24-013/fig02", "24-013/fig04",
+    "n-text-cost",
+    "n-text-propeller",
+    "neg_unrelated_report_18061_page3",
+]
+
+# The agent eval is small and runs whole: every conversation is in dev.
+[agent]
+dev = ["a-text", "a-photo", "a-drawing", "a-picture", "a-other", "a-many", "a-follow"]

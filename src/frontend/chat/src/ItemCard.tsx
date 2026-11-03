@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import type { Bbox } from "./bbox";
+import { boxStyle, type Bbox } from "./bbox";
 import type { AgentApi } from "./api";
 import { FileGlyph } from "./Composer";
 import { JsonView } from "./JsonView";
 import { AnswerProgress, PhotoAnswerView } from "./PhotoAnswer";
+import { AnswerMark, QuestionAnswerView, shownValues } from "./QuestionAnswer";
 import {
   ROUTE_LABELS,
   chosenBy,
@@ -13,27 +14,32 @@ import {
   isPhoto,
   plural,
   progressShare,
+  readSummary,
   sentence,
   statusLine,
   valuesOnPage,
 } from "./describe";
-import type { ReadDocument, RequestItem, Routing } from "./types";
+import type { Cited, ReadDocument, RequestItem, Routing } from "./types";
 
 interface Props {
   api: AgentApi;
   requestId: string;
   item: RequestItem;
   onOpen: () => void;
+  /** Ask the message's question again about one value, when a tap on a candidate can. */
+  onPick?: (cited: Cited) => void;
+  /** Make this item what the next message asks about; left out when it cannot be asked about. */
+  onAskAbout?: () => void;
 }
 
 /** Pages in the chat render small: enough to see the callouts light up, quick to load. */
 const CARD_DPI = 96;
 
 /** The agent's answer about one file, or about the text alone: the case, then the result. */
-export function ItemCard({ api, requestId, item, onOpen }: Props) {
+export function ItemCard({ api, requestId, item, onOpen, onPick, onAskAbout }: Props) {
   const [showJson, setShowJson] = useState(false);
   const route = item.route;
-  const read = item.status === "done";
+  const read = item.values !== null && (item.status === "done" || item.status === "answering");
   const title = item.kind === "file" ? item.name : "Your message";
   const drawing = route?.route === "drawing" && item.kind === "file";
   const picture = item.kind === "file" && !drawing && item.status !== "failed" && item.pages > 0;
@@ -76,11 +82,11 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
       {isPhoto(item) && (item.status === "queued" || item.status === "answering") && (
         <AnswerProgress item={item} />
       )}
-      {!isPhoto(item) && (item.status === "reading" || item.status === "queued") && (
-        <ReadProgressView item={item} />
-      )}
+      {item.kind === "file" &&
+        !isPhoto(item) &&
+        (item.status === "reading" || item.status === "queued") && <ReadProgressView item={item} />}
       {item.answer && <PhotoAnswerView api={api} name={item.name} answer={item.answer} />}
-      {item.reply && !item.answer && (
+      {item.reply && !item.answer && !item.qa && (
         <p className="item-reply" role="note">
           {item.reply}
         </p>
@@ -88,7 +94,7 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
       {item.status === "failed" && <p className="item-error">{item.error}</p>}
       {read && (
         <div className="item-result">
-          <p className="read-line">{statusLine(item)}</p>
+          <p className="read-line">{readSummary(item)}</p>
           <button
             type="button"
             aria-expanded={showJson}
@@ -99,12 +105,33 @@ export function ItemCard({ api, requestId, item, onOpen }: Props) {
           <a className="button" href={api.downloadUrl(requestId, item.item_id)} download>
             Download JSON
           </a>
+          {onAskAbout && <AskAbout onAskAbout={onAskAbout} />}
+        </div>
+      )}
+      {!read && onAskAbout && (
+        <div className="item-result ask-only">
+          <AskAbout onAskAbout={onAskAbout} />
         </div>
       )}
       {read && showJson && (
         <InlineJson api={api} requestId={requestId} itemId={item.item_id} name={title} />
       )}
+      {!isPhoto(item) &&
+        (item.status === "answering" || (item.kind === "text" && item.status === "queued")) && (
+          <AnswerProgress item={item} />
+        )}
+      {item.qa && (
+        <QuestionAnswerView api={api} answer={item.qa} onPick={onPick} withPage={!drawing} />
+      )}
     </section>
+  );
+}
+
+function AskAbout({ onAskAbout }: { onAskAbout: () => void }) {
+  return (
+    <button type="button" className="ask-about" onClick={onAskAbout}>
+      Ask about this
+    </button>
   );
 }
 
@@ -199,24 +226,31 @@ export function JustRead({ latest }: { latest: string[] }) {
 
 /**
  * The drawing's page with its callouts: while reading, the found callouts with the one being read
- * marked; when done, every value the reader placed on the first page. A click opens the viewer.
+ * marked; when done, every value the reader placed on the page. When the message's question is
+ * answered, the page is the one with the answer's values, which stand out, numbered when they are
+ * candidates. A click opens the viewer.
  */
 function SheetPreview({ api, requestId, item, onOpen }: Props) {
   const [placed, setPlaced] = useState<{ index: number; bbox: Bbox }[]>([]);
   const progress = item.progress;
-  const page = progress?.page ?? 1;
+  const answered = item.qa
+    ? shownValues(item.qa).filter((cited) => cited.item_id === item.item_id && cited.bbox)
+    : [];
+  const numbered = item.qa?.outcome !== "answer";
+  const page = answered[0]?.page ?? progress?.page ?? 1;
+  const read = item.values !== null && (item.status === "done" || item.status === "answering");
 
   useEffect(() => {
-    if (item.status !== "done") return;
+    if (!read) return;
     let alive = true;
     api
       .result(requestId, item.item_id)
-      .then((document) => alive && setPlaced(valuesOnPage(document, 1)))
+      .then((document) => alive && setPlaced(valuesOnPage(document, page)))
       .catch(() => {});
     return () => {
       alive = false;
     };
-  }, [api, requestId, item.item_id, item.status]);
+  }, [api, requestId, item.item_id, read, page]);
 
   const boxes =
     item.status === "reading" && progress
@@ -226,7 +260,11 @@ function SheetPreview({ api, requestId, item, onOpen }: Props) {
           state:
             index < progress.page_done ? "read" : index === progress.page_done ? "now" : "next",
         }))
-      : placed.map(({ bbox, index }) => ({ bbox, key: index, state: "read" }));
+      : placed.map(({ bbox, index }) => ({
+          bbox,
+          key: index,
+          state: answered.length ? "dim" : "read",
+        }));
 
   return (
     <button
@@ -241,20 +279,16 @@ function SheetPreview({ api, requestId, item, onOpen }: Props) {
           {boxes.map(({ bbox, key, state }) => (
             <span key={key} className={`mark ${state}`} style={boxStyle(bbox)} />
           ))}
+          {answered.map((cited, index) =>
+            cited.page === page ? (
+              <AnswerMark key={cited.ref} cited={cited} number={numbered ? index + 1 : null} />
+            ) : null,
+          )}
         </span>
       </span>
       {item.status === "queued" && <span className="sheet-note">Waiting for the reader</span>}
     </button>
   );
-}
-
-export function boxStyle([x0, y0, x1, y1]: Bbox): React.CSSProperties {
-  return {
-    left: `${x0 * 100}%`,
-    top: `${y0 * 100}%`,
-    width: `${(x1 - x0) * 100}%`,
-    height: `${(y1 - y0) * 100}%`,
-  };
 }
 
 /** A read drawing's JSON in the chat, fetched when first shown. */

@@ -25,15 +25,31 @@ class PyMuPDFPageAdapter:
         with self._lock:
             return self._document(drawing).page_count
 
-    def render(self, drawing: str, page: int, dpi: int) -> bytes:
+    def render(
+        self,
+        drawing: str,
+        page: int,
+        dpi: int,
+        clip: tuple[float, float, float, float] | None = None,
+    ) -> bytes:
         with self._lock:
-            pdf = self._document(drawing)
-            if not 1 <= page <= pdf.page_count:
-                raise NotFound(f"{drawing} has no page {page}")
+            found = self._page(drawing, page)
+            area = pymupdf.Rect(clip) & found.rect if clip else None
             try:
-                return pdf[page - 1].get_pixmap(dpi=dpi).tobytes("png")
+                return found.get_pixmap(dpi=dpi, clip=area).tobytes("png")
             except RuntimeError as error:
                 raise UnreadableDrawing(f"{drawing} page {page} cannot be rendered") from error
+
+    def page_size(self, drawing: str, page: int) -> tuple[float, float]:
+        with self._lock:
+            rect = self._page(drawing, page).rect
+            return rect.width, rect.height
+
+    def _page(self, drawing: str, page: int) -> pymupdf.Page:
+        pdf = self._document(drawing)
+        if not 1 <= page <= pdf.page_count:
+            raise NotFound(f"{drawing} has no page {page}")
+        return pdf[page - 1]
 
     def close(self) -> None:
         with self._lock:

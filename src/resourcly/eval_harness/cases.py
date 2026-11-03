@@ -1,4 +1,5 @@
 import logging
+import re
 from collections.abc import Iterable
 from typing import Any
 
@@ -106,6 +107,64 @@ def _failure_rows(rows: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
     return sound, problems
 
 
+QA_KINDS = ("drawing", "place", "photo", "text", "none")
+QA_FIELDS = ("case_id", "kind", "unit", "question")
+# what each kind of question needs beside its question, by the route it goes to
+QA_NEEDS = {
+    "drawing": ("drawing", "expected"),
+    "photo": ("image", "expected_report", "expected_figure", "section", "failure_mode"),
+    "text": ("pages",),
+}
+QA_NONE_NEEDS = {"drawing": ("drawing",), "photo": ("image",), "text": ()}
+
+
+def qa_cases(services: Services, split: str) -> list[Case]:
+    """One case per row of evals/gold/answers/questions.jsonl, stratified by its kind.
+
+    A drawing question asks about one of the gold drawings, a place question names where on the
+    part, a photo question comes with a failure gold image, a text question is about the reports,
+    and a none question has no answer in what its route can see. A qa split names units, a
+    drawing, a report's text questions, a report figure or one unanswerable question, and takes
+    every case of those units. A row that `evals check` reports as broken is skipped with a
+    warning.
+    """
+    splits = _splits(services, "qa", split)
+    rows, problems = _qa_rows(services.gold.question_cases())
+    for problem in problems:
+        log.warning("qa %s; skipped", problem)
+    cases = [
+        Case(row["case_id"], name, row["kind"], row) for row, name in _in_split(rows, splits, split)
+    ]
+    return sorted(cases, key=lambda case: case.case_id)
+
+
+def _qa_rows(rows: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    """The sound question rows, and what is wrong with each of the others."""
+    sound, problems = [], []
+    for number, row in enumerate(rows, start=1):
+        missing = [name for name in QA_FIELDS if not isinstance(row, dict) or not row.get(name)]
+        if missing:
+            problems.append(f"questions.jsonl line {number} lacks {', '.join(missing)}")
+            continue
+        if row["kind"] not in QA_KINDS:
+            problems.append(f"{row['case_id']} has kind '{row['kind']}'; use {', '.join(QA_KINDS)}")
+            continue
+        if row["kind"] == "none":
+            route = row.get("route")
+            if route not in QA_NONE_NEEDS:
+                problems.append(f"{row['case_id']} has route '{route}'; use drawing, photo or text")
+                continue
+            needs = QA_NONE_NEEDS[route]
+        else:
+            needs = QA_NEEDS["drawing" if row["kind"] == "place" else row["kind"]]
+        lacking = [name for name in needs if not row.get(name)]
+        if lacking:
+            problems.append(f"{row['case_id']} lacks {', '.join(lacking)}")
+        else:
+            sound.append(row)
+    return sound, problems
+
+
 def _in_split(
     rows: list[dict[str, Any]], splits: dict[str, list[str]], split: str
 ) -> list[tuple[dict[str, Any], str]]:
@@ -138,6 +197,82 @@ def reader_cases(services: Services, split: str) -> list[Case]:
             document = services.gold.load(drawing)
             cases.append(Case(drawing, split_of.get(drawing, "unsplit"), stratum, document))
     return cases
+
+
+AGENT_KINDS = ("text", "photo", "drawing", "picture", "other", "many", "follow-up")
+
+
+def agent_cases(services: Services, split: str) -> list[Case]:
+    """One case per conversation of evals/gold/agent/messages.jsonl, stratified by its kind.
+
+    A case is the turns of one conversation, each a text with files, or about an earlier turn's
+    item (`@<turn>/<item id>`), and what each item of the last turn gets: its route, its JSON's
+    gold, and its answer, in the shape of a qa gold row, or none. A drawing item's gold values,
+    on its page for a picture, go into the case, so the run scores its JSON too.
+    """
+    splits = _splits(services, "agent", split)
+    rows = [row for row in services.gold.agent_cases() if row.get("kind") in AGENT_KINDS]
+    cases = []
+    for row, name in _in_split(rows, splits, split):
+        items = []
+        for item in row["items"]:
+            if item.get("reader_gold"):
+                values = services.gold.load(item["reader_gold"])["values"]
+                if item.get("page"):
+                    values = [{**v, "page": 1} for v in values if v["page"] == item["page"]]
+                item = {**item, "gold_values": values}
+            items.append(item)
+        cases.append(Case(row["case_id"], name, row["kind"], {**row, "items": items}))
+    return sorted(cases, key=lambda case: case.case_id)
+
+
+PICTURE_PAGE = re.compile(r"_p(\d+)_")
+# The router gold's variants that are a picture of one page: an image, or a scan as a PDF
+PICTURE_VARIANTS = ("jpeg", "photo", "rotate", "crop", "scan_pdf", "ocr_scan_pdf")
+
+
+def picture_cases(services: Services, split: str) -> list[Case]:
+    """One case per picture of a NIST drawing page in the router gold whose drawing has gold.
+
+    A picture, an image or a scan, has no vector paths, so the reader must read it as an image
+    upload is read. Its gold is the drawing's gold values on the pictured page, moved to page 1.
+    It takes the reader's split of its drawing, and its stratum from that gold: full, or partial
+    for recall only.
+    """
+    splits = _splits(services, "reader", split)
+    split_of = {drawing: name for name, drawings in splits.items() for drawing in drawings}
+    gold = {row.drawing: row.source for row in services.gold.list_drawings() if row.has_gold}
+    by_group = {_group(drawing): drawing for drawing in gold}
+    rows, _ = _route_rows(services.gold.route_cases())
+    cases = []
+    for row in rows:
+        drawing = by_group.get(row.get("group"))
+        variant = row.get("variant") or ""
+        page = PICTURE_PAGE.search(row.get("file") or "")
+        pictured = variant in PICTURE_VARIANTS or variant.startswith("render_")
+        if row["label"] != "drawing" or not drawing or not pictured or not page:
+            continue
+        name = split_of.get(drawing, "unsplit")
+        if split != "all" and name != split:
+            continue
+        document = services.gold.load(drawing)
+        number = int(page.group(1))
+        values = [{**v, "page": 1} for v in document["values"] if v["page"] == number]
+        picture = {
+            **{k: v for k, v in document.items() if k != "page_coverage"},
+            "page_count": 1,
+            "values": values,
+            "file": row["file"],
+        }
+        stratum = "full" if gold[drawing] == "drawings" else "partial"
+        cases.append(Case(row["id"], name, stratum, picture))
+    return sorted(cases, key=lambda case: case.case_id)
+
+
+def _group(drawing: str) -> str | None:
+    """A NIST drawing's short name, as the router gold groups its pictures: ctc01, ftc06."""
+    found = re.match(r"nist_([a-z]+)_(\d+)_", drawing)
+    return f"{found[1]}{found[2]}" if found else None
 
 
 def _splits(services: Services, component: str, split: str) -> dict[str, list[str]]:
@@ -184,6 +319,8 @@ def check_gold(services: Services, components: Iterable[str]) -> list[tuple[str,
     _unmatched("reader", reader, set(sources), found)
     _check_routes(services, _split_of("router", splits.get("router", {}), found), found)
     _check_failures(services, _split_of("failure", splits.get("failure", {}), found), found)
+    _check_questions(services, _split_of("qa", splits.get("qa", {}), found), found)
+    _check_agent(services, _split_of("agent", splits.get("agent", {}), found), found)
     return found
 
 
@@ -222,6 +359,45 @@ def _check_failures(
         )
     _absent("failure", services, {f"failure/{row['image']}" for row in rows}, found)
     _unmatched("failure", split_of, {row["unit"] for row in rows}, found)
+
+
+def _check_questions(
+    services: Services, split_of: dict[str, str], found: list[tuple[str, str]]
+) -> None:
+    raw = services.gold.question_cases()
+    rows, problems = _qa_rows(raw)
+    found.extend(("error", f"qa {problem}") for problem in problems)
+    for case_id in gold_rules.duplicates(_ids(raw, "case_id")):
+        found.append(("error", f"qa case id {case_id} is used more than once"))
+    drawings = {row.drawing for row in services.gold.list_drawings() if row.has_gold}
+    for row in rows:
+        if row.get("drawing") and row["drawing"] not in drawings:
+            found.append(
+                ("error", f"qa {row['case_id']} asks about {row['drawing']}, which has no gold")
+            )
+    if rows:
+        kinds = ", ".join(f"{sum(r['kind'] == k for r in rows)} {k}" for k in QA_KINDS)
+        found.append(("ok", f"qa {len(rows)} question(s): {kinds}"))
+    images = {f"failure/{row['image']}" for row in rows if row.get("image")}
+    _absent("qa", services, images, found)
+    _unmatched("qa", split_of, {row["unit"] for row in rows}, found)
+
+
+def _check_agent(
+    services: Services, split_of: dict[str, str], found: list[tuple[str, str]]
+) -> None:
+    rows = services.gold.agent_cases()
+    for case_id in gold_rules.duplicates(_ids(rows, "case_id")):
+        found.append(("error", f"agent case id {case_id} is used more than once"))
+    for row in rows:
+        if row.get("kind") not in AGENT_KINDS:
+            found.append(("error", f"agent {row.get('case_id')} has kind '{row.get('kind')}'"))
+    if rows:
+        turns = sum(len(row.get("turns", [])) for row in rows)
+        found.append(("ok", f"agent {len(rows)} conversation(s), {turns} message(s)"))
+    files = {path for row in rows for turn in row.get("turns", []) for path in turn["files"]}
+    _absent("agent", services, files, found)
+    _unmatched("agent", split_of, {row["unit"] for row in rows}, found)
 
 
 def _ids(rows: list[Any], key: str) -> list[str]:

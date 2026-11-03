@@ -45,12 +45,15 @@ The file name, without `.toml`, is the version's name. Any key other than `descr
 | `answer/photo-v1` | Qwen3-VL 8B answers from the photo and the closest figures, citing each fact. | Its hand check is stored; replaced by v2. |
 | `answer/photo-v2` | `photo-v1` asking for the same failure, saying what the photo is, and quoting the report for a stated action ([NOTES.md](../NOTES.md#photo-answers)). | Measured; replaced by v3. |
 | `answer/photo-v3` | `photo-v2` naming each figure by its source, with an inferred action shown as a JSON example, not a rule the answer could copy. | The default photo answer. |
+| `qa/rules-v0` | The kind a question asks from a word list; the best report passage's first sentences. No model. | For tests and machines without the model; the floor any answerer must beat. |
+| `qa/rules-gold-v0` | `rules-v0` answering the evals from the gold values instead of the reader's JSON. | To tell answer errors from reader errors. |
+| `qa/select-v1` | Qwen3-VL 8B picks a drawing's values and names the kind asked, and code answers from the JSON; it writes text answers from 6 report passages, each statement citing one. One call per question, no image. | The default answerer of questions. |
 
 The vision readers need `uv sync --extra vlm` and Qwen3-VL 8B in the local Hugging Face cache
 (`uv run hf download mlx-community/Qwen3-VL-8B-Instruct-4bit`). `router/three-layer-v1` needs
 `uv sync --extra router --extra vlm` and both models in the local Hugging Face cache ([docs/routing.md](../docs/routing.md#run-it)).
 `failure/dinov2-base-v1` needs `--extra router` and `facebook/dinov2-base`, and the `answer/photo-*`
-versions need Qwen3-VL 8B.
+versions and `qa/select-v1` need Qwen3-VL 8B.
 
 ## Which version runs
 
@@ -60,10 +63,11 @@ versions need Qwen3-VL 8B.
 | router | `three-layer-v1` | `RESOURCLY_ROUTER_VERSION` |
 | failure | `dinov2-base-v1` | `RESOURCLY_FAILURE_VERSION` |
 | answer | `photo-v3` | `RESOURCLY_ANSWER_VERSION` |
+| qa | `select-v1` | `RESOURCLY_QA_VERSION` |
 
 For example, `RESOURCLY_READER_VERSION=textlayer-v0 RESOURCLY_ROUTER_VERSION=stub-v0
-RESOURCLY_FAILURE_VERSION=shuffled-v0 RESOURCLY_ANSWER_VERSION=captions-v0 uv run resourcly serve`
-runs without any model. The defaults are in `Settings` in `src/resourcly/bootstrap.py`. A file with an unknown
+RESOURCLY_FAILURE_VERSION=shuffled-v0 RESOURCLY_ANSWER_VERSION=captions-v0
+RESOURCLY_QA_VERSION=rules-v0 uv run resourcly serve` runs without any model. The defaults are in `Settings` in `src/resourcly/bootstrap.py`. A file with an unknown
 `impl` or setting, or a missing named file, refuses to load.
 
 ## How the app code uses a version
@@ -73,7 +77,7 @@ All of it is in `src/resourcly/bootstrap.py`.
 1. `Settings.versions` holds the version name of each component: the default, or the
    environment variable.
 2. `load_version` reads `versions/<component>/<name>.toml` and checks it against the
-   `Implementation` registered for its `impl` in `READERS`, `ROUTERS`, `FINDERS` or `ANSWERERS`.
+   `Implementation` registered for its `impl` in `READERS`, `ROUTERS`, `FINDERS`, `ANSWERERS` or `QUESTIONERS`.
    It returns a `Version` whose hash covers the settings and any file they name.
 3. `Services` builds the component on first use: the `Implementation`'s `build` turns the
    settings into an adapter, such as `StubRouteAdapter(min_paths=300)`.
@@ -97,6 +101,6 @@ cp versions/router/three-layer-v1.toml versions/router/my-router-v2.toml
 uv run evals list versions router
 ```
 
-Edit the copy. `impl` must be in `READERS`, `ROUTERS`, `FINDERS` or `ANSWERERS` in `bootstrap.py`, and other
+Edit the copy. `impl` must be in `READERS`, `ROUTERS`, `FINDERS`, `ANSWERERS` or `QUESTIONERS` in `bootstrap.py`, and other
 keys must be settings it lists. `evals compare` warns about a version edited after its runs. More
 in the [eval harness README](../src/resourcly/eval_harness/README.md#add-a-version).

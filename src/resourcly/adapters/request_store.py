@@ -9,13 +9,15 @@ from resourcly.errors import NotFound
 from resourcly.models import RequestRecord
 
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+CACHE = "read-cache"  # the reads kept by file and reader; not a request, as it has no request.json
 
 
 class JsonRequestStoreAdapter:
     """Chat requests as JSON beside their files: `<root>/<request id>/request.json`.
 
-    Each drawing's document is `<root>/<request id>/results/<item id>.json`. A file is written to a
-    temporary name and renamed into place, so a reader never sees half a file.
+    Each drawing's document is `<root>/<request id>/results/<item id>.json`, and each read is kept
+    by its file and reader under `<root>/read-cache/`, so the same file is not read twice. A file
+    is written to a temporary name and renamed into place, so a reader never sees half a file.
     """
 
     def __init__(self, root: Path):
@@ -33,11 +35,13 @@ class JsonRequestStoreAdapter:
             raise NotFound(f"no request '{request_id}'")
         return RequestRecord.model_validate_json(path.read_text(encoding="utf-8"))
 
-    def list(self, limit: int) -> list[RequestRecord]:
+    def list(self, limit: int, conversation_id: str | None = None) -> list[RequestRecord]:
         records = [
             RequestRecord.model_validate_json(path.read_text(encoding="utf-8"))
             for path in self.root.glob("*/request.json")
         ]
+        if conversation_id is not None:
+            records = [r for r in records if r.conversation_id == conversation_id]
         records.sort(key=lambda record: record.created_at, reverse=True)
         return records[:limit]
 
@@ -49,6 +53,13 @@ class JsonRequestStoreAdapter:
         if not path.is_file():
             raise NotFound(f"request {request_id} has no result for {item_id}")
         return json.loads(path.read_text(encoding="utf-8"))
+
+    def save_cached(self, key: str, reading: dict[str, Any]) -> None:
+        self._write(self.root / CACHE / f"{_safe(key)}.json", reading)
+
+    def load_cached(self, key: str) -> dict[str, Any] | None:
+        path = self.root / CACHE / f"{_safe(key)}.json"
+        return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
 
     def _folder(self, request_id: str) -> Path:
         return self.root / _safe(request_id)

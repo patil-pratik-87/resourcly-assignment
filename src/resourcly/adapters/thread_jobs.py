@@ -15,10 +15,10 @@ class ThreadJobsAdapter:
     waiting at close are dropped.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, name: str = "resourcly-jobs") -> None:
         self._queue: queue.PriorityQueue = queue.PriorityQueue()
         self._order = itertools.count()
-        self._thread = threading.Thread(target=self._work, name="resourcly-jobs", daemon=True)
+        self._thread = threading.Thread(target=self._work, name=name, daemon=True)
         self._thread.start()
 
     def submit(self, job: Callable[[], None], priority: int = 0) -> None:

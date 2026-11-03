@@ -58,12 +58,22 @@ def test_ask_with_a_folder_uploads_every_file_in_it_as_one_request(tmp_path: Pat
     assert ".DS_Store" not in result.output
 
 
-def test_ask_with_text_alone_gets_the_text_reply() -> None:
-    result = invoke("ask", "why did the bracket crack?")
+def test_ask_with_text_alone_gets_an_answer_citing_the_reports() -> None:
+    result = invoke("ask", "What throttle position was measured on the accident control?")
 
     assert result.exit_code == 0, result.output
     assert "message: text (stub, 1.0), answered" in result.output
-    assert "Answering questions from the NTSB reports is not available yet." in result.output
+    assert "[16-006 p2]" in result.output
+
+
+def test_ask_can_follow_up_about_an_earlier_drawing() -> None:
+    first = request_id(invoke("ask", "read", "--file", str(DRAWING)))
+
+    result = invoke("ask", "What revision is it?", "--about", f"{first}/{CTC01}")
+
+    assert result.exit_code == 0, result.output
+    assert f"about: {first}/{CTC01}" in result.output
+    assert "message: text (stub, 1.0), answered" in result.output
 
 
 def test_ask_with_nothing_is_refused() -> None:
@@ -96,6 +106,10 @@ def test_request_shows_the_record_and_every_step_it_took() -> None:
     assert steps == [
         ("requests.receive", "agent"),
         ("uploads.save", "upload store"),
+        (
+            "answer.gate",
+            "qa rules-v0 (rules): no model: the word list, and the best passage's first sentences",
+        ),
         ("route.stub", "router stub-v0 (stub): stand-in structure rule, no model"),
         ("router.route", "router stub-v0 (stub)"),
         ("drawings.read", "reader textlayer-v0 (textlayer)"),

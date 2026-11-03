@@ -60,6 +60,8 @@ flowchart LR
 | `router` | file to its case | accuracy |
 | `failure` | photo to report figure, with its own figure hidden | section@1 |
 | `answer` | photo to a cited answer | correct |
+| `qa` | a question to a checked answer | answer_score |
+| `agent` | a whole conversation, all parts together | fully_right |
 
 Try it by comparing two fault finders. It takes seconds and needs only DINOv2-base.
 
@@ -99,6 +101,8 @@ running a model ([demo/README.md](demo/README.md)). Then try:
 - **A drawing:** `data/drawings/nist_ctc_01_asme1_rd.pdf`, about a minute.
 - **A photo:** `evals/gold/failure/images/pos_18-061_fig05_v0.jpg`.
 - **A bulk upload:** CTC-01, CTC-03, CTC-04 and the photo together.
+- **A question:** CTC-01 with "What is the flatness tolerance?", then tap a candidate; or a
+  question alone, such as "Where did the fatigue cracks start?".
 - **A trace:** open a file, then its Trace tab.
 
 Setup details are in [docs/setup.md](docs/setup.md), and terminal use is in
@@ -107,7 +111,8 @@ Setup details are in [docs/setup.md](docs/setup.md), and terminal use is in
 
 ## Known limits
 
-- Text questions are not answered yet.
+- A question about a place on a drawing ("the hole in the right lobe") gets candidates to tap,
+  not an answer: the reader does not yet link a callout to its feature.
 - Test photos and scans are made by code ([routing](docs/routing.md#limits),
   [photo answers](NOTES.md#photo-answers)).
 - The photo gate lets drawings and most real photos of other parts through.

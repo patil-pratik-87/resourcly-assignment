@@ -13,6 +13,10 @@ class EmptyRequest(ValueError):
     """A chat message with neither text nor a file."""
 
 
+class UnknownTarget(ValueError):
+    """A message about an earlier item or value that the request store does not hold."""
+
+
 class UploadTooLarge(ValueError):
     """A message with a file over the size cap, or with more files than the cap allows."""
 

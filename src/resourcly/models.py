@@ -660,6 +660,110 @@ class AnswerDraft:
     image_type: str = ""
 
 
+@dataclass(frozen=True)
+class ItemRef:
+    """One item of one chat request, such as the drawing a question is about."""
+
+    request_id: str
+    item_id: str
+
+
+@dataclass(frozen=True)
+class EvidenceValue:
+    """A value of a read drawing an answer may cite, under the key the model is shown.
+
+    The key is the value's id, or `<item_id>:<id>` when two drawings share the id. `picture` says
+    the drawing was read from a picture, so its boxes are not exact.
+    """
+
+    key: str
+    record: dict[str, Any]
+    source: ItemRef
+    picture: bool = False
+
+
+@dataclass(frozen=True)
+class Selection:
+    """What a model picked from a drawing's values: the kind asked about and the values that
+    answer, by key. `kind` is None when the answerer names none; `text` is its whole answer."""
+
+    kind: str | None
+    cites: list[str]
+    text: str
+
+
+@dataclass(frozen=True)
+class SelectEvidence:
+    """What a model is shown to pick values: the question, the values, and the marked prompt
+    blocks made from them and the earlier turns."""
+
+    question: str
+    values: list[EvidenceValue]
+    blocks: str
+
+
+@dataclass(frozen=True)
+class TextEvidence:
+    """What a model is shown to answer from the reports: the question, the passages, and the
+    marked prompt blocks made from them and the earlier turns."""
+
+    question: str
+    passages: list[Passage]
+    blocks: str
+
+
+@dataclass(frozen=True)
+class TextDraft:
+    """An answer from report passages as the model gave it, before its sources are checked."""
+
+    not_in_reports: bool
+    answer: str
+    statements: list[DraftFinding]
+    text: str
+
+
+class Cited(BaseModel):
+    """What an answer cites or offers: a drawing's value, a report figure or a report page.
+
+    `ref` is the value id (ctc01-06), the figure (18-061/fig05) or the page (18-061 p3). A value
+    names the request item it is from, its page and its box; `quote` is the value's printed text
+    or the passage's words, and `said` what the answer takes from it: the value's meaning, or the
+    statement the passage supports.
+    """
+
+    kind: Literal["value", "figure", "passage"]
+    ref: str
+    request_id: str | None = None
+    item_id: str | None = None
+    page: int | None = None
+    bbox: tuple[float, float, float, float] | None = None
+    quote: str | None = None
+    said: str | None = None
+
+
+class QuestionAnswer(BaseModel):
+    """The answer to a question about drawings or the reports, made by code from the records.
+
+    `outcome` is an answer, candidates for the user to tap (several values of the kind asked), or
+    none. A drawing's numbers come from its JSON, never from the model's words. `kind` is the kind
+    of value asked about. `cites` are the sources the model cited that it was shown, and
+    `dropped` those it was not shown; `checked` says every citation was checked against the
+    evidence. `picture` says the values
+    were read from a picture of a drawing, so their boxes are not exact.
+    """
+
+    route: Literal["drawing", "text", "value"]
+    outcome: Literal["answer", "candidates", "none"]
+    reply: str
+    kind: str | None = None
+    citations: list[Cited] = []
+    candidates: list[Cited] = []
+    cites: list[str] = []
+    dropped: list[str] = []
+    checked: bool = True
+    picture: bool = False
+
+
 class FailureMatches(BaseModel):
     """The figures a finder matched to one photo, best first; none when no report shows it."""
 
@@ -708,9 +812,10 @@ class RequestItem(BaseModel):
     """One file of a chat request, or its text when it has no file, and what the agent did.
 
     An item is routed, then a drawing is queued and read, and a photo is queued and answered
-    from the reports; the other cases are answered at once. `values` counts the read document's
-    values, and `issues` its schema issues and the model answers the reader could not use.
-    `answer` is a photo's answer, and `reply` its text.
+    from the reports; the other cases are answered at once. A drawing whose message asks a
+    question is answered after its read. `values` counts the read document's values, and `issues`
+    its schema issues and the model answers the reader could not use. `answer` is a photo's
+    answer, `qa` the answer to the message's question, and `reply` the text of either.
     """
 
     item_id: str
@@ -724,6 +829,7 @@ class RequestItem(BaseModel):
     progress: ReadProgress | None = None
     reply: str | None = None
     answer: PhotoAnswer | None = None
+    qa: QuestionAnswer | None = None
     values: int | None = None
     issues: int | None = None
     error: str | None = None
@@ -734,15 +840,21 @@ class RequestItem(BaseModel):
 class RequestRecord(BaseModel):
     """One chat message: its text, its items, and when it was sent.
 
-    A demo request was answered before and is loaded from demo/ when the server starts, so the
-    chat opens with something to look at.
+    The messages of one conversation share its id, and a message without files may be `about`
+    earlier items or values, each named `<request id>/<item id>` or `<request id>/<item id>/<value
+    id>`. A demo request was answered before and is loaded from demo/ when the server starts, so
+    the chat opens with something to look at.
     """
 
     request_id: str
     text: str
     created_at: str
     items: list[RequestItem]
+    conversation_id: str = ""
+    about: list[str] = []
     demo: bool = False
+    # whether the text sent with files asks for more than reading them; None until decided
+    needs_answer: bool | None = None
 
     @computed_field
     @property

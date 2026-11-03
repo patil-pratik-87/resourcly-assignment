@@ -1,12 +1,21 @@
 """One suite per component: how to load its gold cases, call it, and score what it returned."""
 
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import PurePath
 from typing import Any
 
 from resourcly.bootstrap import Services
 from resourcly.eval_harness import metrics
-from resourcly.eval_harness.cases import failure_cases, reader_cases, route_cases
+from resourcly.eval_harness.cases import (
+    agent_cases,
+    failure_cases,
+    picture_cases,
+    qa_cases,
+    reader_cases,
+    route_cases,
+)
 from resourcly.eval_harness.models import Case
 
 
@@ -28,6 +37,7 @@ class Suite:
     summarise: Callable[[metrics.Scored], dict[str, Any]]
     explain: Callable[[Case, Any], list[str]]
     setting_of: str | None = None
+    lower_better: tuple[str, ...] = ()  # metrics that are better when they fall
 
     @property
     def primary(self) -> str:
@@ -41,6 +51,12 @@ class Suite:
 
 def _read(services: Services, case: Case, request_id: str) -> Any:
     return services.drawings.read(case.case_id, request_id=request_id).model_dump(mode="json")
+
+
+def _read_picture(services: Services, case: Case, request_id: str) -> Any:
+    """Read the picture as the chat reads an image upload: kept as a one-page PDF first."""
+    picture = services.gold.route_attachment(case.gold["file"])
+    return services.read_file(picture.name, picture.data, request_id).model_dump(mode="json")
 
 
 def _predicted_values(prediction: Any) -> list[Any]:
@@ -255,6 +271,125 @@ def _explain_answer(case: Case, prediction: Any) -> list[str]:
     return lines
 
 
+def _ask(services: Services, case: Case, request_id: str) -> Any:
+    """Ask the qa version under test the case's question, by the route its file would get.
+
+    A drawing question is answered from the drawing's gold values or the reader's JSON, as the
+    version says, and its prediction lists the records it showed. A photo question goes to the
+    photo answer the settings name, held out like the answer suite.
+    """
+    gold = case.gold
+    route = metrics.question_route(gold)
+    if route == "drawing":
+        evidence = services.question_evidence(gold["drawing"], request_id)
+        answer = services.questions.drawing(gold["question"], [evidence], request_id)
+        records = {r.get("id"): r for r in evidence[1].get("values") or []}
+        shown = [records.get(c.ref) for c in [*answer.citations, *answer.candidates]]
+        return {
+            **answer.model_dump(mode="json"),
+            "shown_values": [
+                {key: record.get(key) for key in ("id", "raw", "kind", "value", "unit")}
+                for record in shown
+                if record
+            ],
+        }
+    if route == "text":
+        return services.questions.text(gold["question"], request_id).model_dump(mode="json")
+    photo = services.gold.failure_photo(gold["image"])
+    hidden = {gold["expected_figure"]} if gold["kind"] == "photo" else set()
+    answer = services.photo_answers.answer(photo, gold["question"], request_id, exclude=hidden)
+    return answer.model_dump(mode="json")
+
+
+def _score_question(case: Case, prediction: Any) -> dict[str, Any]:
+    return metrics.score_question(case.gold, prediction)
+
+
+def _explain_question(case: Case, prediction: Any) -> list[str]:
+    gold = case.gold
+    route = metrics.question_route(gold)
+    if gold["kind"] == "none":
+        expected = f"nothing to answer ({gold.get('notes', '')})"
+    elif route == "drawing":
+        expected = ", ".join(
+            str(e.get("raw") or f"{e['value']} {e['unit']}") for e in gold["expected"]
+        )
+    elif route == "text":
+        expected = ", ".join(gold["pages"])
+    else:
+        expected = f"{gold['expected_report']} {gold['section']}, {gold['failure_mode']}"
+    lines = [f"{route}: {gold['question']}", f"expected {expected}"]
+    if not isinstance(prediction, dict):
+        return [*lines, "no answer"]
+    if route == "photo":
+        said = "matched" if prediction.get("matched") else "no match"
+        cited = [
+            c["citation"]["source"]
+            for c in prediction.get("findings") or []
+            if isinstance(c, dict) and isinstance(c.get("citation"), dict)
+        ]
+        return [*lines, f"{said}: {prediction.get('answer')}", f"cited {', '.join(cited) or '-'}"]
+    lines.append(f"{prediction.get('outcome')} (kind {prediction.get('kind')}):")
+    lines += [f"  {line}" for line in str(prediction.get("reply") or "").splitlines()]
+    if prediction.get("dropped"):
+        lines.append(f"dropped citations {', '.join(prediction['dropped'])}")
+    return lines
+
+
+AGENT_WAIT_S = 1800  # how long one message may take before the run gives up on it
+
+
+def _converse(services: Services, case: Case, request_id: str) -> Any:
+    """Send the case's turns to the agent as one conversation, each after the one before ends.
+
+    The agent keeps these requests apart from the chat's. The prediction is every request, and
+    the values of each drawing item they read, by `<request id>/<item id>`.
+    """
+    agent = services.eval_agent
+    records: list[Any] = []
+    conversation = None
+    for turn in case.gold["turns"]:
+        files = [(PurePath(path).name, services.gold.gold_file(path)) for path in turn["files"]]
+        about = [_earlier_ref(ref, records) for ref in turn.get("about", [])]
+        record = agent.submit(turn["text"], files, conversation, about)
+        conversation = record.conversation_id
+        deadline = time.monotonic() + AGENT_WAIT_S
+        while record.status == "working":
+            if time.monotonic() > deadline:
+                raise TimeoutError(f"request {record.request_id} took over {AGENT_WAIT_S} s")
+            time.sleep(0.5)
+            record = agent.load(record.request_id)
+        records.append(record)
+    results = {
+        f"{record.request_id}/{item.item_id}": agent.result(record.request_id, item.item_id)
+        for record in records
+        for item in record.items
+        if item.values is not None
+    }
+    return {
+        "requests": [record.model_dump(mode="json") for record in records],
+        "results": {key: document.get("values") or [] for key, document in results.items()},
+    }
+
+
+def _earlier_ref(ref: str, records: list[Any]) -> str:
+    """`@<turn>/<item id>` as the request id of that turn and the item."""
+    turn, rest = ref[1:].split("/", 1)
+    return f"{records[int(turn)].request_id}/{rest}"
+
+
+def _score_agent(case: Case, prediction: Any) -> dict[str, Any]:
+    return metrics.score_agent(case.gold, prediction)
+
+
+def _explain_agent(case: Case, prediction: Any) -> list[str]:
+    scores = metrics.score_agent(case.gold, prediction)
+    turns = case.gold["turns"]
+    lines = [f"{len(turns)} turn(s); the last: {turns[-1]['text']!r} with {turns[-1]['files']}"]
+    lines += [f"  {line}" for line in scores["notes"]]
+    return lines
+
+
 ANSWER_METRICS = (
     "correct",
     "report_cited",
@@ -274,6 +409,17 @@ SUITES: dict[str, Suite] = {
         score=_score_reading,
         summarise=metrics.summarise_readings,
         explain=_explain_reading,
+    ),
+    "reader-pictures": Suite(
+        component="reader-pictures",
+        metrics=("f1", "precision", "recall", "partial_recall"),
+        case_columns=("gold", "predicted", "matched"),
+        load=picture_cases,
+        call=_read_picture,
+        score=_score_reading,
+        summarise=metrics.summarise_readings,
+        explain=_explain_reading,
+        setting_of="reader",
     ),
     "router": Suite(
         component="router",
@@ -315,6 +461,35 @@ SUITES: dict[str, Suite] = {
         score=_score_answer,
         summarise=metrics.summarise_answers,
         explain=_explain_answer,
+    ),
+    "qa": Suite(
+        component="qa",
+        metrics=("answer_score", "wrong_shown", "citations_valid", *metrics.QA_STRATA),
+        case_columns=("outcome", "wrong"),
+        load=qa_cases,
+        call=_ask,
+        score=_score_question,
+        summarise=metrics.summarise_questions,
+        explain=_explain_question,
+        lower_better=("wrong_shown",),
+    ),
+    "agent": Suite(
+        component="agent",
+        metrics=(
+            "fully_right",
+            "routes",
+            "cards",
+            "answer_score",
+            "json_f1",
+            *metrics.AGENT_STRATA,
+        ),
+        case_columns=("routes", "cards", "answer_score"),
+        load=agent_cases,
+        call=_converse,
+        score=_score_agent,
+        summarise=metrics.summarise_agent,
+        explain=_explain_agent,
+        setting_of="qa",
     ),
     "answer-copy": Suite(
         component="answer-copy",

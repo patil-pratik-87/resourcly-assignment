@@ -12,7 +12,7 @@ import uvicorn
 from resourcly import doctor as checks
 from resourcly.api import create_app
 from resourcly.bootstrap import Services, Settings, open_services
-from resourcly.errors import EmptyRequest, NotFound
+from resourcly.errors import EmptyRequest, NotFound, UnknownTarget
 from resourcly.models import RequestRecord, RequestTrace
 
 app = typer.Typer(
@@ -71,6 +71,16 @@ def ask(
         ),
     ] = None,
     out: Out = None,
+    conversation: Annotated[
+        str | None, typer.Option(help="Join this conversation, from an earlier `ask`.")
+    ] = None,
+    about: Annotated[
+        list[str] | None,
+        typer.Option(
+            help="Ask about an earlier item, <request id>/<item id>, or one of its values,"
+            " <request id>/<item id>/<value id>. Repeat for more."
+        ),
+    ] = None,
 ) -> None:
     """Send one message to the agent, wait for every item, and print what it did.
 
@@ -78,7 +88,7 @@ def ask(
     """
     files = [(path.name, path.read_bytes()) for path in _expand(file or [])]
     with _short_errors(), open_services(Settings.from_env()) as services:
-        record = services.agent.submit(text, files)
+        record = services.agent.submit(text, files, conversation, about or [])
         typer.echo(f"request {record.request_id}: {len(record.items)} item(s), working", err=True)
         while record.status == "working":
             time.sleep(0.2)
@@ -178,8 +188,12 @@ def _expand(paths: list[Path]) -> list[Path]:
 
 def _show(record: RequestRecord) -> None:
     typer.echo(f"request {record.request_id}  {record.status}  {record.created_at}")
+    if record.conversation_id:
+        typer.echo(f"  conversation: {record.conversation_id}")
     if record.text:
         typer.echo(f'  text: "{_shorten(record.text)}"')
+    for ref in record.about:
+        typer.echo(f"  about: {ref}")
     for item in record.items:
         route = item.route
         case = f"{route.route.value} ({route.layer}, {route.confidence}), " if route else ""
@@ -226,7 +240,7 @@ def _short_errors() -> Iterator[None]:
     """A refused message or an unknown request as one line, not a traceback."""
     try:
         yield
-    except (EmptyRequest, NotFound) as error:
+    except (EmptyRequest, NotFound, UnknownTarget) as error:
         typer.echo(f"error: {error}", err=True)
         raise typer.Exit(1) from error
 

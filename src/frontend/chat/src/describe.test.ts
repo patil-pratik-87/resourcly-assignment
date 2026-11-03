@@ -157,6 +157,13 @@ describe("linking values and pages", () => {
     expect(pageOf(document, 2)).toBe(2);
   });
 
+  it("leaves out a value read from the whole page, whose box is the page", () => {
+    const document = readDocument();
+    document.values![0]!.bbox = [0, 0, 1, 1];
+
+    expect(valuesOnPage(document, 1).map(({ index }) => index)).toEqual([1]);
+  });
+
   it("leaves out a value without a usable box", () => {
     const document = readDocument();
     document.values![0]!.bbox = "somewhere";

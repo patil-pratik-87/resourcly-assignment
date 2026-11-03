@@ -9,6 +9,7 @@ from dataclasses import dataclass, field, replace
 from functools import cached_property
 from importlib.util import find_spec
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 from resourcly.adapters.captions_answer import CaptionsAnswerAdapter
@@ -19,10 +20,12 @@ from resourcly.adapters.gold_store import JsonGoldStoreAdapter
 from resourcly.adapters.mlx_vlm_model import MlxVlmModelAdapter, cached_snapshot
 from resourcly.adapters.nearest_figures import NearestFiguresAdapter
 from resourcly.adapters.pdf_pages import PyMuPDFPageAdapter
+from resourcly.adapters.report_passages import ReportPassagesAdapter
 from resourcly.adapters.request_store import JsonRequestStoreAdapter
 from resourcly.adapters.route_probe import LinearProbe, ProbeRouteAdapter
 from resourcly.adapters.route_structure import StructureRouteAdapter
 from resourcly.adapters.route_vlm import VlmRouteAdapter
+from resourcly.adapters.rules_answer import RulesAnswerAdapter
 from resourcly.adapters.shuffled_figures import ShuffledFiguresAdapter
 from resourcly.adapters.sqlite_trace import SqliteTraceAdapter
 from resourcly.adapters.stub_router import StubRouteAdapter
@@ -30,11 +33,14 @@ from resourcly.adapters.text_reader import PyMuPDFTextReaderAdapter
 from resourcly.adapters.thread_jobs import ThreadJobsAdapter
 from resourcly.adapters.upload_store import FileUploadStoreAdapter
 from resourcly.adapters.vlm_answer import VlmPhotoAnswerAdapter
+from resourcly.adapters.vlm_answerer import VlmAnswerAdapter
 from resourcly.adapters.vlm_readers import VectorCropReaderAdapter, WholePageReaderAdapter
 from resourcly.agent import AgentService, recover
 from resourcly.answers import PhotoAnswerService
 from resourcly.errors import InvalidVersion, ModelNotCached, NotFound
+from resourcly.models import ItemRef, Reading
 from resourcly.ports import ImageEncoderPort, RouteLayerPort, RouterPort
+from resourcly.questions import QuestionService
 from resourcly.services import (
     DrawingService,
     FailureService,
@@ -53,12 +59,16 @@ class Settings:
     splits_path: Path = PROJECT_ROOT / "evals" / "splits.toml"
     drawings_dir: Path = PROJECT_ROOT / "data" / "drawings"
     reports_dir: Path = PROJECT_ROOT / "data" / "reports"
+    # The reader's JSON of the 11 drawings, which the qa evals answer from
+    outputs_dir: Path = PROJECT_ROOT / "outputs"
     # The built screens: `resourcly serve` serves the chat, `resourcly annotation-ui` the labels
     chat_ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "chat" / "dist"
     annotation_ui_dist: Path = PROJECT_ROOT / "src" / "frontend" / "annotation" / "dist"
     versions_dir: Path = PROJECT_ROOT / "versions"
     trace_path: Path = PROJECT_ROOT / "var" / "traces.sqlite"
     uploads_dir: Path = PROJECT_ROOT / "var" / "uploads"
+    # Where the agent eval keeps the requests it sends, apart from the chat's
+    eval_uploads_dir: Path = PROJECT_ROOT / "runs" / "agent-uploads"
     # The demo chats `resourcly serve` adds to the request store, or None for none
     demo_dir: Path | None = PROJECT_ROOT / "demo"
     # A chat message's files are read into memory whole, so each file's size is capped, and so is
@@ -72,6 +82,7 @@ class Settings:
             "router": "three-layer-v1",
             "failure": "dinov2-base-v1",
             "answer": "photo-v3",
+            "qa": "select-v1",
         }
     )
 
@@ -83,6 +94,7 @@ class Settings:
             splits_path=Path(os.environ.get("RESOURCLY_SPLITS", defaults.splits_path)),
             drawings_dir=Path(os.environ.get("RESOURCLY_DRAWINGS_DIR", defaults.drawings_dir)),
             reports_dir=Path(os.environ.get("RESOURCLY_REPORTS_DIR", defaults.reports_dir)),
+            outputs_dir=Path(os.environ.get("RESOURCLY_OUTPUTS_DIR", defaults.outputs_dir)),
             chat_ui_dist=Path(os.environ.get("RESOURCLY_CHAT_UI_DIST", defaults.chat_ui_dist)),
             annotation_ui_dist=Path(
                 os.environ.get("RESOURCLY_ANNOTATION_UI_DIST", defaults.annotation_ui_dist)
@@ -90,6 +102,9 @@ class Settings:
             versions_dir=Path(os.environ.get("RESOURCLY_VERSIONS_DIR", defaults.versions_dir)),
             trace_path=Path(os.environ.get("RESOURCLY_TRACE_DB", defaults.trace_path)),
             uploads_dir=Path(os.environ.get("RESOURCLY_UPLOADS_DIR", defaults.uploads_dir)),
+            eval_uploads_dir=Path(
+                os.environ.get("RESOURCLY_EVAL_UPLOADS_DIR", defaults.eval_uploads_dir)
+            ),
             demo_dir=None if _off(os.environ.get("RESOURCLY_DEMO_CHATS")) else defaults.demo_dir,
             max_upload_bytes=int(
                 os.environ.get("RESOURCLY_MAX_UPLOAD_BYTES", defaults.max_upload_bytes)
@@ -150,8 +165,8 @@ class Implementation:
 
 
 FALLBACK = (
-    "or run without it: RESOURCLY_READER_VERSION=textlayer-v0, RESOURCLY_ROUTER_VERSION=stub-v0"
-    " and RESOURCLY_ANSWER_VERSION=captions-v0 need no model"
+    "or run without it: RESOURCLY_READER_VERSION=textlayer-v0, RESOURCLY_ROUTER_VERSION=stub-v0,"
+    " RESOURCLY_ANSWER_VERSION=captions-v0 and RESOURCLY_QA_VERSION=rules-v0 need no model"
 )
 
 
@@ -357,11 +372,51 @@ ANSWERERS: dict[str, Implementation] = {
         models=("model",),
     ),
 }
+
+
+def _known_evidence(params: dict[str, Any]) -> None:
+    if params.get("evidence", "reader") not in ("gold", "reader"):
+        raise InvalidVersion(f"evidence '{params['evidence']}' is not gold or reader")
+
+
+# Every qa version may set the drawing values the evals answer from, and how many values and
+# report passages an answer is shown.
+QA_SETTINGS = ("evidence", "max_values", "passages")
+QUESTIONERS: dict[str, Implementation] = {
+    # No model: a word list names the kind asked about, and the best passage is the text answer.
+    "rules": Implementation(
+        lambda settings, params: RulesAnswerAdapter(), settings=QA_SETTINGS, check=_known_evidence
+    ),
+    # One model call per question: it selects a drawing's values or writes from report passages.
+    "vlm": Implementation(
+        lambda settings, params: VlmAnswerAdapter(
+            vision_model(params["model"]),
+            params["select_prompt"],
+            params["write_prompt"],
+            params["gate_prompt"],
+            params.get("select_tokens", 80),
+            params.get("write_tokens", 400),
+        ),
+        settings=(
+            *QA_SETTINGS,
+            "model",
+            "select_prompt",
+            "write_prompt",
+            "gate_prompt",
+            "select_tokens",
+            "write_tokens",
+        ),
+        required=("model", "select_prompt", "write_prompt", "gate_prompt"),
+        models=("model",),
+        check=_known_evidence,
+    ),
+}
 IMPLEMENTATIONS: dict[str, dict[str, Implementation]] = {
     "reader": READERS,
     "router": ROUTERS,
     "failure": FINDERS,
     "answer": ANSWERERS,
+    "qa": QUESTIONERS,
 }
 
 
@@ -469,24 +524,37 @@ class Services:
 
     @property
     def agent(self) -> AgentService:
-        """The chat agent and its background worker, built once even when threads ask at once."""
+        """The chat agent and its background workers, built once even when threads ask at once."""
         with self._agent_lock:
             if self._agent is None:
-                trace = self._trace()  # first, so it closes after the worker that writes to it
-                jobs = ThreadJobsAdapter()
-                self._stack.callback(jobs.close)
-                self._agent = AgentService(
-                    uploads=FileUploadStoreAdapter(self._settings.uploads_dir),
-                    requests=self._requests,
-                    router=self.router,
-                    router_name=self.router_name,
-                    drawings_in=self._drawings_in,
-                    photos=lambda: self.photo_answers,
-                    pages_in=PyMuPDFPageAdapter,
-                    trace=trace,
-                    jobs=jobs,
-                )
+                self._agent = self._build_agent(self._settings.uploads_dir, self._requests)
             return self._agent
+
+    @cached_property
+    def eval_agent(self) -> AgentService:
+        """The chat agent with its uploads and requests apart from the chat's, for the evals."""
+        folder = self._settings.eval_uploads_dir
+        return self._build_agent(folder, JsonRequestStoreAdapter(folder))
+
+    def _build_agent(self, uploads: Path, requests: JsonRequestStoreAdapter) -> AgentService:
+        trace = self._trace()  # first, so it closes after the workers that write to it
+        jobs, answer_jobs = ThreadJobsAdapter(), ThreadJobsAdapter("resourcly-answers")
+        self._stack.callback(jobs.close)
+        self._stack.callback(answer_jobs.close)
+        return AgentService(
+            uploads=FileUploadStoreAdapter(uploads),
+            requests=requests,
+            router=self.router,
+            router_name=self.router_name,
+            drawings_in=self._drawings_in,
+            photos=lambda: self.photo_answers,
+            questions=lambda: self.questions,
+            pages_in=PyMuPDFPageAdapter,
+            trace=trace,
+            jobs=jobs,
+            answer_jobs=answer_jobs,
+            reader_key=self._reader_key,
+        )
 
     def recover(self) -> None:
         """Mark the chat work a previous server left unfinished as failed."""
@@ -501,10 +569,23 @@ class Services:
     def _requests(self) -> JsonRequestStoreAdapter:
         return JsonRequestStoreAdapter(self._settings.uploads_dir)
 
+    def _reader_key(self) -> str:
+        reader = load_version(self._settings, "reader", self._settings.versions["reader"])
+        return f"{reader.name}-{reader.hash}"
+
     @property
     def reader_name(self) -> str:
         reader = load_version(self._settings, "reader", self._settings.versions["reader"])
         return f"{reader.name} ({reader.impl})"
+
+    def read_file(self, name: str, data: bytes, request_id: str) -> Reading:
+        """Read a file as the chat reads an upload: an image is kept as a one-page PDF first."""
+        with TemporaryDirectory() as folder:
+            uploads = FileUploadStoreAdapter(Path(folder))
+            stored = uploads.save_file("file", name, data)
+            return self._drawings_in(uploads.folder("file")).read(
+                stored.item_id, request_id=request_id
+            )
 
     def _drawings_in(self, folder: Path) -> DrawingService:
         """A drawing service whose reader reads the PDFs in `folder`."""
@@ -583,6 +664,48 @@ class Services:
             images=version.params.get("images", 2),
             figure_side=version.params.get("figure_side", 768),
         )
+
+    @cached_property
+    def _qa_version(self) -> Version:
+        return load_version(self._settings, "qa", self._settings.versions["qa"])
+
+    @property
+    def qa_name(self) -> str:
+        return f"{self._qa_version.name} ({self._qa_version.impl})"
+
+    @property
+    def qa_evidence(self) -> str:
+        """The drawing values the qa evals answer from: "gold" or "reader"."""
+        return self._qa_version.params.get("evidence", "reader")
+
+    @cached_property
+    def report_passages(self) -> ReportPassagesAdapter:
+        return ReportPassagesAdapter(self._settings.reports_dir)
+
+    @cached_property
+    def questions(self) -> QuestionService:
+        """Answers questions about drawings and the reports; loads no model yet."""
+        version = self._qa_version
+        return QuestionService(
+            answerer=QUESTIONERS[version.impl].build(self._settings, version.params),
+            search=self.report_passages,
+            trace=self._trace(),
+            qa_name=self.qa_name,
+            max_values=version.params.get("max_values", 60),
+            passages=version.params.get("passages", 6),
+        )
+
+    def question_evidence(
+        self, drawing: str, request_id: str
+    ) -> tuple[ItemRef, dict[str, Any], bool]:
+        """One of the 11 drawings as the qa evals answer from it: its gold values, or the JSON
+        the reader wrote to outputs/, as the qa version says."""
+        if self.qa_evidence == "gold":
+            return ItemRef(request_id, drawing), self.gold.load(drawing), False
+        path = self._settings.outputs_dir / f"{drawing}.json"
+        if not path.is_file():
+            raise NotFound(f"no reader JSON for {drawing} in {self._settings.outputs_dir}")
+        return ItemRef(request_id, drawing), json.loads(path.read_text(encoding="utf-8")), False
 
     @cached_property
     def traces(self) -> TraceService:

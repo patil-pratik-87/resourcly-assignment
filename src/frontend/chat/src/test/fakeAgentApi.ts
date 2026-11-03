@@ -1,6 +1,8 @@
-import type { AgentApi } from "../api";
+import type { AgentApi, SendOptions } from "../api";
 import type {
+  Cited,
   PhotoAnswer,
+  QuestionAnswer,
   ReadDocument,
   RequestItem,
   RequestRecord,
@@ -52,6 +54,8 @@ export function record(overrides: Partial<RequestRecord> = {}): RequestRecord {
     items: [item()],
     status: "done",
     demo: false,
+    conversation_id: "c1",
+    about: [],
     ...overrides,
   };
 }
@@ -113,6 +117,36 @@ export function photoAnswer(overrides: Partial<PhotoAnswer> = {}): PhotoAnswer {
         score: 0.4102,
       },
     ],
+    ...overrides,
+  };
+}
+
+/** A value of the drawing ctc of request r1, as an answer cites it. */
+export function citedValue(overrides: Partial<Cited> = {}): Cited {
+  return {
+    kind: "value",
+    ref: "ctc01-02",
+    request_id: "r1",
+    item_id: "ctc",
+    page: 1,
+    bbox: [0.5, 0.5, 0.6, 0.6],
+    quote: "▱ 0.2",
+    said: "Flatness tolerance of 0.2 mm.",
+    ...overrides,
+  };
+}
+
+/** The answer to "What is the flatness tolerance?": one value of that kind on the drawing. */
+export function questionAnswer(overrides: Partial<QuestionAnswer> = {}): QuestionAnswer {
+  return {
+    route: "drawing",
+    outcome: "answer",
+    reply: "▱ 0.2 (ctc01-02, page 1). Flatness tolerance of 0.2 mm.",
+    kind: "flatness",
+    citations: [citedValue()],
+    candidates: [],
+    checked: true,
+    picture: false,
     ...overrides,
   };
 }
@@ -219,11 +253,13 @@ export function fakeAgentApi(initial: RequestRecord[] = []) {
   const state = {
     requests: initial,
     stored: [] as RequestRecord[],
-    sent: [] as { text: string; files: File[] }[],
-    reply: (text: string, files: File[]): RequestRecord =>
+    sent: [] as { text: string; files: File[]; options: SendOptions }[],
+    reply: (text: string, files: File[], options: SendOptions = {}): RequestRecord =>
       record({
         request_id: "new",
         text,
+        conversation_id: options.conversationId ?? "c-new",
+        about: options.about ?? [],
         status: "working",
         items: files.map((file) =>
           item({
@@ -242,12 +278,13 @@ export function fakeAgentApi(initial: RequestRecord[] = []) {
       router: "stub-v0 (stub)",
       failure: "dinov2-base-v1 (nearest-figures)",
       answer: "captions-v0 (captions)",
+      qa: "rules-v0 (rules)",
       max_file_mb: 25,
       max_files: 50,
     }),
-    send: async (text, files) => {
-      state.sent.push({ text, files });
-      const created = state.reply(text, files);
+    send: async (text, files, options = {}) => {
+      state.sent.push({ text, files, options });
+      const created = state.reply(text, files, options);
       state.requests = [created, ...state.requests];
       return created;
     },
@@ -261,6 +298,7 @@ export function fakeAgentApi(initial: RequestRecord[] = []) {
     result: async () => readDocument(),
     downloadUrl: (requestId, itemId) => `/download/${requestId}/${itemId}`,
     pageUrl: (requestId, itemId, page) => `/pages/${requestId}/${itemId}/${page}.png`,
+    cropUrl: (requestId, itemId, valueId) => `/crops/${requestId}/${itemId}/${valueId}.png`,
     figureUrl: (figure, maxSide) => `/figures/${figure}.png?max_side=${maxSide}`,
   };
   return { api, state };

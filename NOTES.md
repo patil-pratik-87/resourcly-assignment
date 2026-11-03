@@ -105,13 +105,14 @@ The chat is one HTTP API, made for a later chat screen; the CLI calls the same s
   Each file is an item with its own case, status and result.
 - `POST /api/requests` returns 202 with the request record at once. One background worker routes
   every item, then reads the drawings one at a time, and the client polls the record. A read can
-  take minutes with a vision model, so a held request would time out.
+  take minutes with a vision model, so a held request would time out. Answers to questions run on
+  a second worker, so one waits behind at most one model call, never behind a whole read.
 - The record holds what a chat screen shows: status, progress, reply or error per item,
   and the drawing JSON beside it.
 - Each step is written to the trace store when it ends, not when the request ends, so a live
   trace stream can be added without changing the agent.
-- The router is `three-layer-v1` (see "The router"). Photos and text questions get a "not
-  available yet" reply, so an answerer can be swapped in later without changing the shape.
+- The router is `three-layer-v1` (see "The router"). A file that fits no case gets a fixed reply;
+  photos and questions get answers (see "Photo answers" and "Questions").
 - The request store and the worker sit behind ports: at scale they become a database and a queue.
 
 How to use it: `README.md`, and the API in `docs/chat-ui.md`.
@@ -135,8 +136,7 @@ the label screen, and shares no code with it.
   close figure, the card only says the failure is not in the reports.
 - The screen follows the system's light or dark mode. Every colour is a token, and pages and
   figures keep their white paper in both.
-- What comes next: a live trace stream in place of the polling, and real answers for text
-  questions.
+- What comes next: a live trace stream in place of the polling.
 
 How to use it: `docs/chat-ui.md`.
 
@@ -303,6 +303,48 @@ defaults; the answer shares the reader's Qwen adapter.
   can pass the gate, and the model may then answer it as a report's failure.
 
 Details: `evals/photo-answers/`; the code is `answers.py` and `adapters/vlm_answer.py`.
+
+## Questions
+
+The file picks the route, and the text never does: it is the question. Qwen3-VL 8B, already
+loaded for the reader, the router and the photo answers, is the one answer engine, called once
+per question with no image. The code is `questions.py`, `adapters/vlm_answerer.py` and
+`adapters/report_passages.py`.
+
+- Drawings: the model picks the values of the stored JSON that answer and names the kind asked
+  about; code decides what to show. One value of that kind is the answer, several are
+  candidates to tap, none is "Not on this drawing", with every frame shown when the question
+  names a frame symbol. The number shown is printed from the JSON, never from the model's words.
+- Reports: BM25 over the paragraphs and captions finds 6 passages; the model writes statements
+  that each cite one, and code keeps only those whose page it was shown.
+- Photos: the photo answer, with the text as its question when the one-token gate says the text
+  asks something.
+- Follow-ups: `about` names an earlier item or value. Its JSON or photo matches are used again,
+  never read again, and a picked value is the answer with no model call. The last 3 turns of the
+  conversation go into the prompt.
+
+| Version | Questions | answer_score | wrong_shown | drawing | place | text | none |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `rules-v0`, no model | 80 | 0.356 | 0.200 | 0.214 | 0.469 | 0.500 | 0.000 |
+| `select-v1` | 80 | 0.644 | 0.050 | 0.643 | 0.469 | 0.950 | 1.000 |
+
+- No wrong drawing value is shown: a wrong answer is worse than one tap, so several values of the
+  kind asked stay candidates. Place questions ("the hole in the right lobe") therefore stay at
+  0.5 each; candidates become answers once the reader links each callout to its feature.
+- Four drawing questions fail because the reader misread or missed the value (two on CTC-03,
+  two on FTC-06), and CTC-01's perpendicularity frame is read as flatness (`outputs/`, ctc01-12),
+  so it answers "Not on this drawing" and shows every frame.
+- Photo questions score 0.300 with the question and 0.500 with the default question, on 20
+  photos whose finder section@1 is 0.650; the question turns 4 matches into no match or a wrong
+  match. A prompt that judged the match as if asked what is wrong, and answered the question in a
+  field of its own, scored the same 0.300 and matched a drawing, so it was not kept.
+- The floor's photo cases ran `captions-v0`, which always matches its top figure: 0.400.
+- The whole agent (`agent` eval, 29 conversations over the seven cases) is fully right on 24:
+  every route and card is right; the misses are a units question twice, where the model names
+  the wrong kind and the answer is candidates, and three values the reader misread or missed.
+- Leaders: tracing each callout's leader from the vector paths finds where 10 of 17 CTC-01
+  callouts point, and with those points in the evidence one more place question of 16 is
+  answered. Too thin to change the reader's schema for; not built.
 
 ## Fault evals
 

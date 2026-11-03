@@ -6,6 +6,15 @@ type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 
 export type AgentApi = ReturnType<typeof createAgentApi>;
 
+/**
+ * Where a message belongs: its conversation, and the earlier items or values it asks about, each
+ * as `<request id>/<item id>` or `<request id>/<item id>/<value id>`.
+ */
+export interface SendOptions {
+  conversationId?: string | null;
+  about?: string[];
+}
+
 export function createAgentApi(fetch: Fetch) {
   const request = (requestId: string) => `/api/requests/${encodeURIComponent(requestId)}`;
   const item = (requestId: string, itemId: string) =>
@@ -29,11 +38,16 @@ export function createAgentApi(fetch: Fetch) {
   return {
     agent: () => json<AgentInfo>("/api/agent"),
 
-    /** One message: its text and every file, sent as one request. */
-    send(text: string, files: File[]): Promise<RequestRecord> {
+    /**
+     * One message: its text and every file, sent as one request, in a conversation when one is
+     * named, about the earlier items or values `about` names.
+     */
+    send(text: string, files: File[], options: SendOptions = {}): Promise<RequestRecord> {
       const form = new FormData();
       form.append("text", text);
       for (const file of files) form.append("files", file, file.name);
+      if (options.conversationId) form.append("conversation_id", options.conversationId);
+      for (const ref of options.about ?? []) form.append("about", ref);
       return json<RequestRecord>("/api/requests", { method: "POST", body: form });
     },
 
@@ -52,6 +66,10 @@ export function createAgentApi(fetch: Fetch) {
     /** A page of an uploaded file as an image; a photo is its one page. */
     pageUrl: (requestId: string, itemId: string, page: number, dpi = 150) =>
       `${item(requestId, itemId)}/pages/${page}.png?dpi=${dpi}`,
+
+    /** A value of a read drawing cut from its page, with a margin. */
+    cropUrl: (requestId: string, itemId: string, valueId: string) =>
+      `${item(requestId, itemId)}/crops/${encodeURIComponent(valueId)}.png`,
 
     /** A report figure, such as 18-061/fig05, as an image of at most `maxSide` pixels a side. */
     figureUrl(figure: string, maxSide: number) {

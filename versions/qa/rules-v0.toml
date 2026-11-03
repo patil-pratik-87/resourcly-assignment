@@ -1,0 +1,5 @@
+description = "No model: the kind a question asks from a word list, and the best report passage's first sentences; the floor any answerer must beat"
+impl = "rules"
+# The drawing values the evals answer from: "gold", the hand-checked values, or "reader", the JSON
+# in outputs/ that the reader wrote. The app always answers from the JSON its reader wrote.
+evidence = "reader"

@@ -1,6 +1,6 @@
 // Plain words and numbers for what the agent did, kept apart from the components so they can be
 // tested on their own.
-import { type Bbox, isBbox } from "./bbox";
+import { type Bbox, isBbox, isWholePage } from "./bbox";
 import type {
   ReadDocument,
   ReadProgress,
@@ -23,6 +23,7 @@ const LAYER_LABELS: Record<string, string> = {
   structure: "structure rules",
   probe: "image probe",
   vlm: "vision-language model",
+  gate: "answer gate",
   none: "no layer, none was sure",
 };
 
@@ -57,21 +58,29 @@ export function statusLine(item: RequestItem): string {
     case "routing":
       return "Choosing the case";
     case "queued":
+      if (item.kind === "text") return "Waiting for the drawings to be read";
       return isPhoto(item) ? "Waiting for the answerer" : "Waiting for the reader";
     case "reading":
       return item.progress ? progressLine(item.progress) : "Opening the drawing";
     case "answering":
-      return "Finding the closest report figures and answering";
-    case "done": {
-      const values = plural(item.values ?? 0, "value");
-      const issues = item.issues ? `, ${plural(item.issues, "issue")}` : "";
-      return `${values} read${issues}`;
-    }
+      if (isPhoto(item)) return "Finding the closest report figures and answering";
+      return item.kind === "file"
+        ? "Answering your question from the JSON"
+        : "Finding the report passages and answering";
+    case "done":
+      return readSummary(item);
     case "answered":
       return "Answered";
     case "failed":
       return item.error ?? "Failed";
   }
+}
+
+/** How many values a drawing's read found, and how many issues it has. */
+export function readSummary(item: RequestItem): string {
+  const values = plural(item.values ?? 0, "value");
+  const issues = item.issues ? `, ${plural(item.issues, "issue")}` : "";
+  return `${values} read${issues}`;
 }
 
 export function progressLine(progress: ReadProgress): string {
@@ -217,14 +226,20 @@ export function duration(ms: number): string {
   return `${(ms / 1000).toFixed(1)} s`;
 }
 
-/** Every value of a read document that can be placed on `page`, with its index in the document. */
+/**
+ * Every value of a read document that can be placed on `page`, with its index in the document. A
+ * value read from a whole page, such as a picture of a drawing, has the page as its box, which
+ * says nothing of where it is, so it is left out.
+ */
 export function valuesOnPage(
   document: ReadDocument | null,
   page: number,
 ): { index: number; bbox: Bbox }[] {
   const found: { index: number; bbox: Bbox }[] = [];
   (document?.values ?? []).forEach((value, index) => {
-    if ((value.page ?? 1) === page && isBbox(value.bbox)) found.push({ index, bbox: value.bbox });
+    if ((value.page ?? 1) === page && isBbox(value.bbox) && !isWholePage(value.bbox)) {
+      found.push({ index, bbox: value.bbox });
+    }
   });
   return found;
 }

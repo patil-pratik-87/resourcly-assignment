@@ -198,7 +198,9 @@ def test_text_alone_is_one_item_routed_and_answered(client: TestClient) -> None:
         "why did the bracket crack?",
     )
     assert (item["route"]["route"], item["status"]) == ("text", "answered")
-    assert "not available yet" in item["reply"]
+    # The rules answer: the best report passage for the question, which cites its page
+    assert item["qa"]["route"] == "text"
+    assert item["reply"].endswith(f"[{item['qa']['citations'][0]['ref']}]")
 
 
 def test_a_file_that_fits_no_case_says_so(client: TestClient) -> None:
@@ -327,11 +329,13 @@ def test_every_step_is_traced_under_the_request_id(client: TestClient) -> None:
     trace = client.get(f"/api/requests/{sent['request_id']}/trace").json()
 
     steps = [(event["step"], event["input"].get("item")) for event in trace["events"]]
-    # The router traces each layer it asks, then the agent traces the item's routing.
+    # The gate asks whether the text needs an answer of its own, then the router traces each
+    # layer it asks, then the agent traces the item's routing.
     assert steps == [
         ("requests.receive", None),
         ("uploads.save", "ctc"),
         ("uploads.save", "crack"),
+        ("answer.gate", None),
         ("route.stub", None),
         ("router.route", "ctc"),
         ("route.stub", None),
@@ -348,11 +352,14 @@ def test_every_step_is_traced_under_the_request_id(client: TestClient) -> None:
     assert events["answer.photo"]["called"] == (
         "answer captions-v0 (captions): no model: the closest figures' captions"
     )
-    assert events["answer.photo"]["input"]["question_chars"] == 10
+    # "two things" asks nothing, so the photo is asked the default question
+    assert events["answer.photo"]["input"]["question"] == "default"
     assert events["requests.receive"]["input"] == {
         "text_chars": 10,
         "text_sha256": hashlib.sha256(b"two things").hexdigest(),
         "files": ["ctc.pdf", "crack.png"],
+        "conversation_id": sent["conversation_id"],
+        "about": [],
     }
 
 
@@ -463,6 +470,7 @@ def test_the_agent_names_its_versions_and_its_upload_caps(client: TestClient) ->
         "router": "stub-v0 (stub)",
         "failure": "shuffled-v0 (shuffled)",
         "answer": "captions-v0 (captions)",
+        "qa": "rules-v0 (rules)",
         "max_file_mb": 50,
         "max_files": 50,
     }

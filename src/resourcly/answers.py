@@ -76,10 +76,20 @@ class PhotoAnswerService:
         self.figure_side = figure_side
 
     def answer(
-        self, photo: Attachment, text: str, request_id: str, exclude: Collection[str] = ()
+        self,
+        photo: Attachment,
+        text: str,
+        request_id: str,
+        exclude: Collection[str] = (),
+        matches: list[FigureMatch] | None = None,
     ) -> PhotoAnswer:
-        """The answer; the figures in `exclude` are left out, as if no report held them."""
-        matches = self.failures.find(photo, request_id=request_id, exclude=exclude).figures
+        """The answer; the figures in `exclude` are left out, as if no report held them.
+
+        The `matches` an earlier answer about the photo found are used again, when given, instead
+        of searching the figures again.
+        """
+        if matches is None:
+            matches = self.failures.find(photo, request_id=request_id, exclude=exclude).figures
         started, began = now(), time.perf_counter()
         step: dict[str, Any] = {"input": {}, "output": {}, "error": None}
         try:

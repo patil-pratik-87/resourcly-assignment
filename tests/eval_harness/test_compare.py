@@ -112,3 +112,25 @@ def test_runs_of_two_components_are_refused() -> None:
 
     with pytest.raises(ValueError, match="cannot compare a reader run with a router run"):
         compare_runs(READER, GOLD, BASE, [], router, [])
+
+
+def test_a_share_of_wrong_answers_is_better_when_it_falls() -> None:
+    qa = SUITES["qa"]
+    gold = {
+        "q": Case("q", "dev", "drawing", {"kind": "drawing", "expected": [{"raw": "Rev D"}]}),
+    }
+    wrong = {"outcome": "answer", "shown_values": [{"raw": "Rev C"}]}
+    right = {"outcome": "answer", "shown_values": [{"raw": "Rev D"}]}
+    base = replace(BASE, component="qa")
+
+    result = compare_runs(
+        qa,
+        gold,
+        base,
+        [CaseResult("q", "drawing", "old", "r:q", 1.0, None, wrong, {})],
+        replace(base, run_id="cand"),
+        [CaseResult("q", "drawing", "old", "r:q", 1.0, None, right, {})],
+    )
+
+    verdicts = {metric.name: metric.verdict for metric in result.metrics}
+    assert (verdicts["answer_score"], verdicts["wrong_shown"]) == ("better", "better")

@@ -90,7 +90,7 @@ def build_index(
     or a label without a figure, raises ValueError. `on_report` hears each report's number and
     figure count once its figures are embedded.
     """
-    labels = _labels(sections)
+    labels = figure_labels(sections)
     reports, figures = [], []
     for pdf in sorted(reports_dir.glob("*.pdf")):
         cut = cut_report(pdf)
@@ -169,7 +169,7 @@ class IndexedEvidenceAdapter:
         return self._figures[figure]
 
 
-def _labels(sections: Path) -> dict[str, tuple[str, str]]:
+def figure_labels(sections: Path) -> dict[str, tuple[str, str]]:
     """The section and failure mode of each figure, by figure id, from sections.toml."""
     table = tomllib.loads(sections.read_text(encoding="utf-8"))
     labels = {}

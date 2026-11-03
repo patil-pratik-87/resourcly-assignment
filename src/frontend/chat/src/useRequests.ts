@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { AgentApi } from "./api";
+import type { AgentApi, SendOptions } from "./api";
 import type { RequestRecord } from "./types";
 
 /** How often to ask for the requests while one is still working. */
@@ -48,8 +48,8 @@ export function useRequests(api: AgentApi) {
 
   /** Send one message; its request shows at once and then updates as the agent works. */
   const send = useCallback(
-    async (text: string, files: File[]) => {
-      const record = await api.send(text, files);
+    async (text: string, files: File[], options?: SendOptions) => {
+      const record = await api.send(text, files, options);
       setListed((current) => [
         record,
         ...current.filter((other) => other.request_id !== record.request_id),

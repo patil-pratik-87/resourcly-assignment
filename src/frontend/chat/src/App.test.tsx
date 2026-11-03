@@ -3,7 +3,16 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
 import { createAgentApi } from "./api";
-import { event, fakeAgentApi, item, photoAnswer, record, routing } from "./test/fakeAgentApi";
+import {
+  citedValue,
+  event,
+  fakeAgentApi,
+  item,
+  photoAnswer,
+  questionAnswer,
+  record,
+  routing,
+} from "./test/fakeAgentApi";
 
 afterEach(() => {
   window.history.replaceState(null, "", "/");
@@ -206,7 +215,7 @@ describe("the agent's answer for each item", () => {
       status: "answered",
       values: null,
       route: routing({ route: "text", confidence: 1, reason: "A message without a file is text." }),
-      reply: "Answering questions from the NTSB reports is not available yet.",
+      reply: "The three NTSB reports do not say.",
     });
     const { api } = fakeAgentApi([
       record({ text: "why did the bracket crack?", items: [question] }),
@@ -215,7 +224,7 @@ describe("the agent's answer for each item", () => {
 
     const card = await screen.findByRole("region", { name: "Your message" });
     expect(card).toHaveTextContent("Text question");
-    expect(within(card).getByRole("note")).toHaveTextContent("not available yet");
+    expect(within(card).getByRole("note")).toHaveTextContent("The three NTSB reports do not say.");
   });
 
   it("shows a routing no layer was sure of without a confidence", async () => {
@@ -277,6 +286,190 @@ describe("the agent's answer for each item", () => {
         .getAllByRole("listitem")
         .map((li) => li.textContent),
     ).toEqual(shown);
+  });
+});
+
+describe("the answer to a question", () => {
+  const asked = (overrides = {}) =>
+    record({
+      text: "What is the flatness tolerance?",
+      items: [item({ qa: questionAnswer(overrides) })],
+    });
+
+  it("shows the one value that answers, cut from its page, boxed on it, checked", async () => {
+    open("/chat");
+    const { api } = fakeAgentApi([asked()]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "ctc.pdf" });
+    const answer = within(card).getByRole("region", { name: "Answer to your question" });
+    expect(answer).toHaveTextContent("▱ 0.2");
+    expect(answer).toHaveTextContent("Flatness tolerance of 0.2 mm.");
+    expect(answer).toHaveTextContent("ctc01-02 · p1");
+    // on the file's own card the file is not named again
+    expect(answer.querySelector(".qa-file")).toBeNull();
+    expect(answer).toHaveTextContent("Checked against the JSON");
+    expect(answer.querySelector("img")).toHaveAttribute("src", "/crops/r1/ctc/ctc01-02.png");
+    // The card's page stands the answer's box out from the other values.
+    await waitFor(() => expect(card.querySelectorAll(".mark.dim")).toHaveLength(2));
+    expect(card.querySelectorAll(".mark.answer")).toHaveLength(1);
+    expect(card.querySelector(".mark.answer .mark-number")).toBeNull();
+  });
+
+  it("lists candidates numbered as their boxes, and a tap asks about that one", async () => {
+    open("/chat");
+    const user = userEvent.setup();
+    const candidates = [
+      citedValue({ ref: "ctc01-01", quote: "⌀10 ±0.1", bbox: [0.1, 0.1, 0.2, 0.2] }),
+      citedValue({ ref: "ctc01-02", quote: "⌀20 ±0.1" }),
+    ];
+    const { api, state } = fakeAgentApi([
+      asked({ outcome: "candidates", citations: [], candidates, kind: "diameter" }),
+    ]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "ctc.pdf" });
+    const list = within(card).getByRole("list", { name: "Candidates" });
+    expect(within(list).getAllByRole("button")).toHaveLength(2);
+    expect(card.querySelectorAll(".mark.answer .mark-number")).toHaveLength(2);
+    expect(card.querySelectorAll(".mark.answer .mark-number")[1]).toHaveTextContent("2");
+    await user.click(within(list).getByRole("button", { name: /^2: ⌀20 ±0.1, ctc01-02/ }));
+
+    expect(state.sent).toHaveLength(1);
+    expect(state.sent[0]!.text).toBe("What is the flatness tolerance?");
+    expect(state.sent[0]!.options.about).toEqual(["r1/ctc/ctc01-02"]);
+  });
+
+  it("says a value is not on the drawing, and offers every frame in case one was misread", async () => {
+    open("/chat");
+    const frames = [citedValue({ ref: "ctc01-02", quote: "▱ 1.5" })];
+    const { api } = fakeAgentApi([
+      asked({
+        outcome: "none",
+        citations: [],
+        candidates: frames,
+        reply: "Not on this drawing. No perpendicularity was read. The reader may have misread",
+      }),
+    ]);
+    render(<App api={api} />);
+
+    const answer = await screen.findByRole("region", { name: "Answer to your question" });
+    expect(answer).toHaveTextContent("Not on this drawing.");
+    expect(answer).not.toHaveTextContent("Checked against the JSON");
+    expect(within(answer).getByRole("list", { name: "Every frame on the drawing" })).toBeVisible();
+  });
+
+  it("shows a text answer with the report page of each statement, which opens it", async () => {
+    open("/chat");
+    const user = userEvent.setup();
+    const passage = {
+      kind: "passage" as const,
+      ref: "16-006 p4",
+      page: 4,
+      quote: "On the side opposite from the lock ball hole, corrosion was observed.",
+      said: "Corrosion was found inside the control tube.",
+    };
+    const message = item({
+      item_id: "message",
+      kind: "text",
+      name: "Where was the corrosion?",
+      media_type: null,
+      size: 0,
+      status: "answered",
+      values: null,
+      route: routing({ route: "text", confidence: 1, reason: "A message without a file is text." }),
+      reply: "Inside the mixture control tube.",
+      qa: questionAnswer({
+        route: "text",
+        reply: "Inside the mixture control tube.\n\n- Corrosion ... [16-006 p4]",
+        citations: [passage],
+      }),
+    });
+    const { api } = fakeAgentApi([record({ text: "Where was the corrosion?", items: [message] })]);
+    render(<App api={api} />);
+
+    const answer = await screen.findByRole("region", { name: "Answer to your question" });
+    expect(answer).toHaveTextContent("Inside the mixture control tube.");
+    expect(answer).toHaveTextContent("Checked against the reports");
+    expect(answer).not.toHaveTextContent("[16-006 p4]");
+    await user.click(within(answer).getByRole("button", { name: "16-006 p4" }));
+    expect(answer).toHaveTextContent("corrosion was observed");
+  });
+
+  it("marks values read from a picture, which have no boxes to show", async () => {
+    open("/chat");
+    const { api } = fakeAgentApi([
+      asked({ picture: true, citations: [citedValue({ bbox: null })] }),
+    ]);
+    render(<App api={api} />);
+
+    const answer = await screen.findByRole("region", { name: "Answer to your question" });
+    expect(answer).toHaveTextContent("Read from a picture");
+    expect(answer.querySelector("img")).toBeNull();
+  });
+});
+
+describe("a conversation", () => {
+  it("asks about an earlier file from its card, and the next message is about it", async () => {
+    open("/chat");
+    const user = userEvent.setup();
+    const { api, state } = fakeAgentApi([record()]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "ctc.pdf" });
+    await user.click(within(card).getByRole("button", { name: "Ask about this" }));
+    expect(screen.getByText("ctc.pdf", { selector: ".about-chip strong" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Message")).toHaveFocus();
+    await user.type(screen.getByLabelText("Message"), "What is the flatness?{Enter}");
+
+    expect(state.sent[0]!.options).toEqual({ conversationId: "c1", about: ["r1/ctc"] });
+    expect(screen.queryByRole("button", { name: "Stop asking about ctc.pdf" })).toBeNull();
+    const asked = await screen.findByRole("article", { name: "Request new" });
+    expect(asked).toHaveTextContent("About ctc.pdf");
+  });
+
+  it("drops the earlier file when asked to stop asking about it", async () => {
+    open("/chat");
+    const user = userEvent.setup();
+    const { api, state } = fakeAgentApi([record()]);
+    render(<App api={api} />);
+
+    const card = await screen.findByRole("region", { name: "ctc.pdf" });
+    await user.click(within(card).getByRole("button", { name: "Ask about this" }));
+    await user.click(screen.getByRole("button", { name: "Stop asking about ctc.pdf" }));
+    await user.type(screen.getByLabelText("Message"), "hello{Enter}");
+
+    expect(state.sent[0]!.options.about).toEqual([]);
+  });
+
+  it("starts a new conversation, and shows where it begins", async () => {
+    open("/chat");
+    const user = userEvent.setup();
+    const { api, state } = fakeAgentApi([record()]);
+    render(<App api={api} />);
+
+    await user.click(await screen.findByRole("button", { name: "New conversation" }));
+    expect(screen.queryByRole("button", { name: "New conversation" })).toBeNull();
+    await user.type(screen.getByLabelText("Message"), "hello{Enter}");
+
+    expect(state.sent[0]!.options.conversationId).toBeNull();
+    const started = await screen.findByRole("article", { name: "Request new" });
+    expect(started).toHaveTextContent("New conversation");
+    expect(screen.getByRole("article", { name: "Request r1" })).not.toHaveTextContent(
+      "New conversation",
+    );
+  });
+
+  it("names the value a picked candidate asked about", async () => {
+    open("/chat");
+    const { api } = fakeAgentApi([
+      record({ request_id: "r2", text: "Is it flat?", about: ["r1/ctc/ctc01-12"], items: [] }),
+      record(),
+    ]);
+    render(<App api={api} />);
+
+    const asked = await screen.findByRole("article", { name: "Request r2" });
+    expect(asked).toHaveTextContent("About ctc01-12 of ctc.pdf");
   });
 });
 

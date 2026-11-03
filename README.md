@@ -9,8 +9,12 @@ You send text, files or both, and the agent decides what to do with each file:
   means.
 - **Photo of a failed part** → what is wrong and what to do, from the three NTSB reports, with a
   citation for each fact.
-- **Text-only question** → a note that text answers are not available yet.
+- **Text-only question** → an answer from the three NTSB reports, each fact citing its page.
 - **File that fits no case** → a note that says so.
+
+Text sent with a file is a question about it, and never changes how the file is handled. A
+question about a drawing is answered from its JSON: the number shown is printed from the JSON,
+never from the model's words, and when several values could be meant, you tap the one you mean.
 
 The agent stores every step of every request, and an eval harness scores each part.
 
@@ -42,9 +46,12 @@ In the Agents UI, type a message, attach or drop one or more files, and press En
 uv run resourcly ask "read this" --file data/drawings/nist_ctc_01_asme1_rd.pdf
 uv run resourcly ask --file crack.jpg                          # a photo of a part
 uv run resourcly ask --file data/drawings --out out/drawings   # a folder, JSON saved to out/
+uv run resourcly ask "Where did the fatigue cracks start?"     # a question about the reports
+uv run resourcly ask "What angle is dimensioned?" --about <request id>/nist_ctc_01_asme1_rd
 ```
 
-A drawing page takes about a minute, and a photo about 25 s.
+A drawing page takes about a minute, a photo about 25 s, and a question 5 to 15 s. `--about`
+asks about a file of an earlier request, which is not read again.
 
 To look up past requests and every step they took:
 
@@ -81,20 +88,19 @@ uv run resourcly annotation-ui
 
 ## The parts
 
-| Part           | Default                                                                                 | Measured                                                                     | Doc                                                  |
-| -------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Router         | `three-layer-v1`: rules, a DINOv2-small probe, then Qwen3-VL 8B                         | accuracy 0.992 on 123 dev files, 1.000 on 57 test                            | [docs/routing.md](docs/routing.md)                   |
-| Drawing reader | `vector-crop-v2`: each callout from the vector paths read by Qwen3-VL 8B                | as `vector-crop-v1` on these PDFs: F1 0.725, recall 0.862 on the 11 drawings | [experiments/drawing](experiments/drawing/README.md) |
-| Fault finder   | `dinov2-base-v1`: the report figures nearest the photo                                  | section@1 0.645, mode@3 0.942 on 154 held-out cases                          | [research/failure](research/failure/README.md)       |
-| Photo answer   | `photo-v3`: Qwen3-VL 8B answers from the 3 closest figures, keeping only cited findings | correct 0.523 on 86 dev cases (`photo-v2` 0.500); no real photos tested      | [NOTES.md](NOTES.md#photo-answers)                   |
-| Agent and API  | a request per message, traced                                                           | not scored as a whole                                                        | [docs/chat-ui.md](docs/chat-ui.md#the-api)           |
+| Part           | Default                                                                                          | Measured                                                                       | Doc                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| Router         | `three-layer-v1`: rules, a DINOv2-small probe, then Qwen3-VL 8B                                  | accuracy 0.992 on 123 dev files, 1.000 on 57 test                              | [docs/routing.md](docs/routing.md)                   |
+| Drawing reader | `vector-crop-v2`: each callout from the vector paths read by Qwen3-VL 8B                         | as `vector-crop-v1` on these PDFs: F1 0.725, recall 0.862 on the 11 drawings   | [experiments/drawing](experiments/drawing/README.md) |
+| Fault finder   | `dinov2-base-v1`: the report figures nearest the photo                                           | section@1 0.645, mode@3 0.942 on 154 held-out cases                            | [research/failure](research/failure/README.md)       |
+| Photo answer   | `photo-v3`: Qwen3-VL 8B answers from the 3 closest figures, keeping only cited findings          | correct 0.523 on 86 dev cases (`photo-v2` 0.500); no real photos tested        | [NOTES.md](NOTES.md#photo-answers)                   |
+| Questions      | `select-v1`: Qwen3-VL 8B picks a drawing's values or writes from report passages; code checks it | answer_score 0.644 on 80 questions (floor 0.356), no wrong drawing value shown | [NOTES.md](NOTES.md#questions)                       |
+| Agent and API  | a request per message, traced                                                                    | fully right on 24 of 29 conversations over the 7 cases                         | [docs/chat-ui.md](docs/chat-ui.md#the-api)           |
 
 ## Out of scope
 
 Left out because of the time limit:
 
-- **Text answering.** A text question alone gets a fixed reply, and text sent with a drawing does
-  not change its JSON. Only a photo uses the text, as its question.
 - **Scale.** Everything runs on one Mac, one request at a time. The design for more than a million
   documents is in [docs/privacy-and-scale.md](docs/privacy-and-scale.md), not built.
 

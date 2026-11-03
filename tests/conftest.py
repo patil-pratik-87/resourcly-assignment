@@ -27,6 +27,7 @@ def model_free_versions(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("RESOURCLY_READER_VERSION", "textlayer-v0")
     monkeypatch.setenv("RESOURCLY_FAILURE_VERSION", "shuffled-v0")
     monkeypatch.setenv("RESOURCLY_ANSWER_VERSION", "captions-v0")
+    monkeypatch.setenv("RESOURCLY_QA_VERSION", "rules-v0")
 
 
 @pytest.fixture
@@ -53,6 +54,7 @@ def settings(gold_dir: Path, tmp_path: Path) -> Settings:
             "router": "stub-v0",
             "failure": "shuffled-v0",
             "answer": "captions-v0",
+            "qa": "rules-v0",
         },
     )
 

@@ -341,3 +341,214 @@ def summarise_answers(cases: Scored) -> dict[str, Any]:
         "kept_out": _mean(cases, "kept_out", lambda stratum: stratum != PHOTO),
         "prompt_free": _mean(cases, "prompt_free", lambda stratum: True),
     }
+
+
+# How one answer to a question scores: right, the right value among candidates to tap, no answer,
+# or a wrong answer shown, which is worse than none.
+RIGHT, AMONG_CANDIDATES, NO_ANSWER, WRONG_SHOWN = 1.0, 0.5, 0.0, -1.0
+QA_STRATA = ("drawing", "place", "photo", "text", "none")
+
+
+def question_route(gold: dict[str, Any]) -> str:
+    """The route a question case goes to: drawing, text or photo."""
+    if gold["kind"] == "none":
+        return gold["route"]
+    return {"drawing": "drawing", "place": "drawing"}.get(gold["kind"], gold["kind"])
+
+
+def score_question(gold: dict[str, Any], prediction: Any) -> dict[str, Any]:
+    """How well one answer answers its question; prediction is None when the call failed.
+
+    A drawing answer is right when the value it shows has the expected number and unit (or, for
+    words such as a title block line, the expected text); candidates score 0.5 when the right
+    value is among them. A text answer is right when it cites a gold page. A photo answer is right
+    when it matches and the first figure it cites (or its top figure, when it cites none) is in the
+    expected section, or in the expected report with the expected failure mode, as section@1 asks
+    of the finder; citing more figures earns nothing. An unanswerable
+    question is right when nothing is answered. A wrong value, page or figure shown scores -1.
+    """
+    answer = prediction if isinstance(prediction, dict) else {}
+    route = question_route(gold)
+    if route == "photo":
+        score = _photo_score(gold, answer)
+        cites = [c.get("source") for c in _citations(answer)]
+        valid = sum(valid_citation(c, _photo_figures(answer)) for c in _citations(answer))
+        dropped = len(cites) - valid
+    else:
+        score = (_drawing_score if route == "drawing" else _text_score)(gold, answer)
+        valid = len(answer.get("cites") or [])
+        dropped = len(answer.get("dropped") or [])
+    return {
+        "case_score": score,
+        "outcome": _outcome(answer, route),
+        "wrong": float(score == WRONG_SHOWN),
+        "valid_cites": valid,
+        "dropped_cites": dropped,
+    }
+
+
+def _outcome(answer: dict[str, Any], route: str) -> str | None:
+    if route != "photo":
+        return answer.get("outcome")
+    if not answer:
+        return None
+    return "answer" if answer.get("matched") is True else "none"
+
+
+def _drawing_score(gold: dict[str, Any], answer: dict[str, Any]) -> float:
+    outcome = answer.get("outcome")
+    shown = [r for r in answer.get("shown_values") or [] if isinstance(r, dict)]
+    if gold["kind"] == "none":
+        return {"none": RIGHT, "answer": WRONG_SHOWN}.get(outcome, NO_ANSWER)
+    if outcome == "answer" and shown:
+        return RIGHT if _expected(gold, shown[0]) else WRONG_SHOWN
+    if outcome == "candidates" and any(_expected(gold, record) for record in shown):
+        return AMONG_CANDIDATES
+    return NO_ANSWER
+
+
+def _expected(gold: dict[str, Any], record: dict[str, Any]) -> bool:
+    """Whether a shown record is one the gold expects: its number and unit, or its text."""
+    for expected in gold["expected"]:
+        if "raw" in expected:
+            if normalise_raw(str(record.get("raw") or "")) == normalise_raw(expected["raw"]):
+                return True
+        elif normalise_value(record.get("value")) == normalise_value(
+            expected["value"]
+        ) and normalise_unit(record.get("unit")) == normalise_unit(expected["unit"]):
+            return True
+    return False
+
+
+def _text_score(gold: dict[str, Any], answer: dict[str, Any]) -> float:
+    outcome = answer.get("outcome")
+    if gold["kind"] == "none":
+        return {"none": RIGHT, "answer": WRONG_SHOWN}.get(outcome, NO_ANSWER)
+    if outcome != "answer":
+        return NO_ANSWER
+    cited = {c.get("ref") for c in answer.get("citations") or [] if isinstance(c, dict)}
+    return RIGHT if cited & set(gold["pages"]) else WRONG_SHOWN
+
+
+def _photo_figures(answer: dict[str, Any]) -> list[dict[str, Any]]:
+    return [f for f in answer.get("figures") or [] if isinstance(f, dict)]
+
+
+def _photo_score(gold: dict[str, Any], answer: dict[str, Any]) -> float:
+    matched = answer.get("matched") is True and answer.get("not_in_reports") is not True
+    if gold["kind"] == "none":
+        return WRONG_SHOWN if matched else (RIGHT if answer else NO_ANSWER)
+    if not matched:
+        return NO_ANSWER
+    figures = {f.get("figure"): f for f in _photo_figures(answer)}
+    cited = [figures[c["figure"]] for c in _citations(answer) if c.get("figure") in figures]
+    first = (cited or list(figures.values()) or [{}])[0]
+    right = (first.get("report"), first.get("section")) == (
+        gold["expected_report"],
+        gold["section"],
+    ) or (first.get("report"), first.get("failure_mode")) == (
+        gold["expected_report"],
+        gold["failure_mode"],
+    )
+    return RIGHT if right else WRONG_SHOWN
+
+
+def summarise_questions(cases: Scored) -> dict[str, Any]:
+    """The mean case score first, the share of cases that showed a wrong answer, the share of the
+    model's citations that named its evidence, then the mean score of each kind of question."""
+    valid = sum(scores["valid_cites"] for _, scores in cases)
+    cited = valid + sum(scores["dropped_cites"] for _, scores in cases)
+    return {
+        "answer_score": _mean(cases, "case_score", lambda stratum: True),
+        "wrong_shown": _mean(cases, "wrong", lambda stratum: True),
+        "citations_valid": valid / cited if cited else None,
+        **{
+            stratum: _mean(cases, "case_score", lambda found, wanted=stratum: found == wanted)
+            for stratum in QA_STRATA
+        },
+    }
+
+
+AGENT_STRATA = ("text", "photo", "drawing", "picture", "other", "many", "follow-up")
+
+
+def score_agent(gold: dict[str, Any], prediction: Any) -> dict[str, Any]:
+    """How the agent handled the last turn of one conversation; prediction is None on a crash.
+
+    Each item the gold lists must get its route, and an answer exactly when the gold gives one,
+    on its own card; a message card no item lists is wrong. Each answer scores as a qa answer.
+    The conversation is fully right when every route and card is right and every answer scores
+    1. A drawing's JSON is scored against its gold as the reader suite scores it, apart.
+    """
+    found = prediction if isinstance(prediction, dict) else {}
+    requests = [r for r in found.get("requests") or [] if isinstance(r, dict)]
+    results = found.get("results") or {}
+    last = requests[-1] if requests else {"request_id": "", "items": []}
+    items = {item["item_id"]: item for item in last["items"]}
+    listed = {spec["item"] for spec in gold["items"]}
+    notes: list[str] = []
+    routes, answers, counts = [], [], Counts()
+    cards = bool(requests) and all(
+        item["kind"] == "file" or item["item_id"] in listed for item in items.values()
+    )
+    if requests and not cards:
+        notes.append("a message card the gold does not list")
+    for spec in gold["items"]:
+        item = items.get(spec["item"]) or {}
+        route = (item.get("route") or {}).get("route")
+        routes.append(float(route == spec["route"]))
+        answered = bool(item.get("qa") or item.get("answer"))
+        if answered != (spec["answer"] is not None):
+            cards = False
+            notes.append(f"{spec['item']}: {'an answer' if answered else 'no answer'} on its card")
+        if spec["answer"] is not None:
+            answers.append(
+                score_question(spec["answer"], _agent_answer(item, results))["case_score"]
+            )
+            notes.append(f"{spec['item']}: route {route}, answer score {answers[-1]}")
+        if spec.get("gold_values") is not None:
+            read = results.get(f"{last['request_id']}/{spec['item']}")
+            counts += score_reading(spec["gold_values"], read if isinstance(read, list) else [])
+    route_ok = bool(routes) and all(routes)
+    right = route_ok and cards and all(score == RIGHT for score in answers)
+    return {
+        "case_score": float(right),
+        "routes": sum(routes) / len(routes) if routes else 0.0,
+        "cards": float(cards),
+        "answer_score": sum(answers) / len(answers) if answers else None,
+        "gold": counts.gold,
+        "predicted": counts.predicted,
+        "matched": counts.matched,
+        "notes": notes,
+    }
+
+
+def _agent_answer(item: dict[str, Any], results: dict[str, Any]) -> dict[str, Any] | None:
+    """An item's answer as the qa suite stores one: a question's with the records it showed, or
+    a photo's."""
+    qa = item.get("qa")
+    if not isinstance(qa, dict):
+        return item.get("answer")
+    shown = []
+    for cited in [*(qa.get("citations") or []), *(qa.get("candidates") or [])]:
+        values = results.get(f"{cited.get('request_id')}/{cited.get('item_id')}") or []
+        shown += [v for v in values if isinstance(v, dict) and v.get("id") == cited.get("ref")]
+    return {**qa, "shown_values": shown}
+
+
+def summarise_agent(cases: Scored) -> dict[str, Any]:
+    """The share of conversations fully right first; then routes, cards and answers, the JSON's
+    micro F1 over the drawings with gold, and the share fully right of each kind of message."""
+    json_counts = sum((_counts(scores) for _, scores in cases), Counts())
+    answered = [s["answer_score"] for _, s in cases if s["answer_score"] is not None]
+    return {
+        "fully_right": _mean(cases, "case_score", lambda stratum: True),
+        "routes": _mean(cases, "routes", lambda stratum: True),
+        "cards": _mean(cases, "cards", lambda stratum: True),
+        "answer_score": sum(answered) / len(answered) if answered else None,
+        "json_f1": json_counts.f1 if json_counts.gold else None,
+        **{
+            stratum: _mean(cases, "case_score", lambda found, wanted=stratum: found == wanted)
+            for stratum in AGENT_STRATA
+        },
+    }

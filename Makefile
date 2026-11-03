@@ -9,8 +9,8 @@
 UV := $(shell command -v uv 2>/dev/null || echo $(HOME)/.local/bin/uv)
 
 PORT ?= 8000
-# Every suite the evals have
-SUITES := reader router failure failure-copy answer answer-copy
+# Every suite the evals have, but agent, which runs whole conversations and has a dev split only
+SUITES := reader reader-pictures router failure failure-copy answer answer-copy qa
 CHAT := src/frontend/chat
 # The reader whose answers outputs/ holds
 OUTPUTS_READER := vector-crop-v1

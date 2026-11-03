@@ -10,13 +10,18 @@ from resourcly.models import (
     FigureMatch,
     GoldDocument,
     LayerVerdict,
+    Passage,
     PhotoEvidence,
     ReaderOutput,
     ReadProgress,
     ReportEvidence,
     RequestRecord,
     Routing,
+    SelectEvidence,
+    Selection,
     StoredFile,
+    TextDraft,
+    TextEvidence,
     TraceEvent,
 )
 
@@ -46,6 +51,14 @@ class GoldStorePort(Protocol):
         """Failure gold rows, one per photo: case_id, image, kind, unit and the expected answer."""
         ...
 
+    def load_question_cases(self) -> list[dict[str, Any]]:
+        """Question gold rows: case_id, kind, unit, question and what a right answer shows."""
+        ...
+
+    def load_agent_cases(self) -> list[dict[str, Any]]:
+        """Agent gold rows: the turns of one conversation and what its last turn's items get."""
+        ...
+
     def file_exists(self, path: str) -> bool: ...
 
     def load_file(self, path: str) -> bytes:
@@ -58,7 +71,19 @@ class DrawingPagePort(Protocol):
 
     def page_count(self, drawing: str) -> int: ...
 
-    def render(self, drawing: str, page: int, dpi: int) -> bytes: ...
+    def render(
+        self,
+        drawing: str,
+        page: int,
+        dpi: int,
+        clip: tuple[float, float, float, float] | None = None,
+    ) -> bytes:
+        """The page as a PNG, or only its `clip`: [x0, y0, x1, y1] in points from the top left."""
+        ...
+
+    def page_size(self, drawing: str, page: int) -> tuple[float, float]:
+        """The page's width and height in points."""
+        ...
 
     def close(self) -> None: ...
 
@@ -165,6 +190,32 @@ class PhotoAnswererPort(Protocol):
         ...
 
 
+class ReportSearchPort(Protocol):
+    """Finds the report passages a question is about."""
+
+    def search(self, query: str, k: int) -> list[Passage]:
+        """The `k` passages that best match the query, best first; none when nothing matches."""
+        ...
+
+
+class QuestionAnswererPort(Protocol):
+    """Answers a question from the evidence it is shown; code checks what it cites."""
+
+    called: str  # what it runs, for the trace
+
+    def select(self, evidence: SelectEvidence) -> Selection:
+        """The values of a drawing that answer the question, and the kind of value it asks about."""
+        ...
+
+    def write(self, evidence: TextEvidence) -> TextDraft:
+        """An answer from report passages, each statement citing the passage it comes from."""
+        ...
+
+    def gate(self, text: str) -> float:
+        """The probability that a message sent with files asks for more than reading them."""
+        ...
+
+
 class UploadStorePort(Protocol):
     """The files of each chat request."""
 
@@ -188,13 +239,21 @@ class RequestStorePort(Protocol):
 
     def load(self, request_id: str) -> RequestRecord: ...
 
-    def list(self, limit: int) -> list[RequestRecord]:
-        """The latest requests, newest first."""
+    def list(self, limit: int, conversation_id: str | None = None) -> list[RequestRecord]:
+        """The latest requests, newest first; only those of one conversation when it is named."""
         ...
 
     def save_result(self, request_id: str, item_id: str, document: dict[str, Any]) -> None: ...
 
     def load_result(self, request_id: str, item_id: str) -> dict[str, Any]: ...
+
+    def save_cached(self, key: str, reading: dict[str, Any]) -> None:
+        """Keep a read under a key made of the file and the reader, for the next read of both."""
+        ...
+
+    def load_cached(self, key: str) -> dict[str, Any] | None:
+        """The read kept under the key, or None."""
+        ...
 
 
 class JobsPort(Protocol):

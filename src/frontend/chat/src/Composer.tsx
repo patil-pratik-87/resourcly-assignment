@@ -1,8 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fileKind, fileSize, middleCut, overCap } from "./describe";
 import type { AgentInfo, RequestRecord } from "./types";
 
 const ACCEPT = ".pdf,.png,.jpg,.jpeg,.tif,.tiff,application/pdf,image/png,image/jpeg,image/tiff";
+
+/** An earlier item or value the next message asks about, as the API names it, and its label. */
+export interface About {
+  ref: string;
+  label: string;
+}
 
 interface Props {
   onSend: (text: string, files: File[]) => Promise<RequestRecord>;
@@ -12,10 +18,24 @@ interface Props {
   dragging: boolean;
   /** The server's upload caps, checked before sending; null until the agent has answered. */
   caps: Pick<AgentInfo, "max_file_mb" | "max_files"> | null;
+  /** The earlier item the next message asks about, and how to stop asking about it. */
+  about?: About | null;
+  onClearAbout?: () => void;
+  /** Start the next message in a new conversation; left out when there is none to leave. */
+  onNewConversation?: () => void;
 }
 
 /** The message being written: text and any number of files, sent as one request. */
-export function Composer({ onSend, files, onFiles: setFiles, dragging, caps }: Props) {
+export function Composer({
+  onSend,
+  files,
+  onFiles: setFiles,
+  dragging,
+  caps,
+  about = null,
+  onClearAbout,
+  onNewConversation,
+}: Props) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +43,11 @@ export function Composer({ onSend, files, onFiles: setFiles, dragging, caps }: P
   const field = useRef<HTMLTextAreaElement>(null);
 
   const empty = text.trim() === "" && files.length === 0;
+
+  // Asked about an earlier item, the person types next.
+  useEffect(() => {
+    if (about) field.current?.focus();
+  }, [about]);
 
   async function send() {
     if (empty || sending) return;
@@ -54,6 +79,24 @@ export function Composer({ onSend, files, onFiles: setFiles, dragging, caps }: P
       }}
     >
       <div className="composer-box">
+        {about && (
+          <div className="about-chip">
+            <span>
+              About <strong title={about.label}>{middleCut(about.label, 40)}</strong>
+              {files.length > 0 && <span className="muted"> (not with new files)</span>}
+            </span>
+            <button
+              type="button"
+              aria-label={`Stop asking about ${about.label}`}
+              onClick={() => {
+                onClearAbout?.();
+                field.current?.focus();
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
         {files.length > 0 && (
           <ul className="composer-files" aria-label="Attached files">
             {files.map((file, index) => (
@@ -108,8 +151,10 @@ export function Composer({ onSend, files, onFiles: setFiles, dragging, caps }: P
             value={text}
             placeholder={
               files.length > 0
-                ? "Add a note, or just send"
-                : "Ask something, or drop drawings and photos anywhere"
+                ? "Add a note or a question, or just send"
+                : about
+                  ? "Ask about it"
+                  : "Ask something, or drop drawings and photos anywhere"
             }
             onChange={(event) => setText(event.target.value)}
             onKeyDown={(event) => {
@@ -124,10 +169,26 @@ export function Composer({ onSend, files, onFiles: setFiles, dragging, caps }: P
           </button>
         </div>
       </div>
-      {error && (
-        <p className="composer-error" role="alert">
-          {error}
-        </p>
+      {(error || onNewConversation) && (
+        <div className="composer-foot">
+          {error && (
+            <p className="composer-error" role="alert">
+              {error}
+            </p>
+          )}
+          {onNewConversation && (
+            <button
+              type="button"
+              className="quiet new-conversation"
+              onClick={() => {
+                onNewConversation();
+                field.current?.focus();
+              }}
+            >
+              New conversation
+            </button>
+          )}
+        </div>
       )}
     </form>
   );

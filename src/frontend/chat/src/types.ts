@@ -80,6 +80,42 @@ export interface PhotoAnswer {
   figures: FigureMatch[];
 }
 
+/**
+ * What an answer to a question cites or offers: a drawing's value, a report figure or a report
+ * page; see Cited in src/resourcly/models.py.
+ */
+export interface Cited {
+  kind: "value" | "figure" | "passage";
+  /** The value id (ctc01-06), the figure (18-061/fig05) or the page (18-061 p3). */
+  ref: string;
+  /** The request item a value is from. */
+  request_id?: string | null;
+  item_id?: string | null;
+  page?: number | null;
+  /** A value's box on its page; none when it was read from a picture. */
+  bbox?: Bbox | null;
+  /** The value's printed text, or the passage's words. */
+  quote?: string | null;
+  /** What the answer takes from it: the value's meaning, or the statement the passage supports. */
+  said?: string | null;
+}
+
+/** The answer to a question, made by code from the records; see QuestionAnswer in models.py. */
+export interface QuestionAnswer {
+  route: "drawing" | "text" | "value";
+  /** An answer, candidates for the person to tap, or none. */
+  outcome: "answer" | "candidates" | "none";
+  reply: string;
+  /** The kind of value asked about, such as flatness. */
+  kind?: string | null;
+  citations: Cited[];
+  candidates: Cited[];
+  /** Whether every citation was checked against the evidence. */
+  checked: boolean;
+  /** The values were read from a picture of a drawing, so their boxes are not exact. */
+  picture: boolean;
+}
+
 export interface RequestItem {
   item_id: string;
   kind: "file" | "text";
@@ -93,6 +129,8 @@ export interface RequestItem {
   reply: string | null;
   /** A photo's answer; `reply` is the same as text. */
   answer: PhotoAnswer | null;
+  /** The answer to the message's question; `reply` is the same as text. */
+  qa?: QuestionAnswer | null;
   values: number | null;
   issues: number | null;
   error: string | null;
@@ -105,6 +143,10 @@ export interface RequestRecord {
   text: string;
   created_at: string;
   items: RequestItem[];
+  /** The messages of one conversation share it; older requests may have none. */
+  conversation_id?: string;
+  /** The earlier items or values a message without files asks about. */
+  about?: string[];
   status: "working" | "failed" | "done";
   /** Answered before and loaded from demo/ when the server started; see demo/README.md. */
   demo: boolean;
@@ -132,6 +174,8 @@ export interface AgentInfo {
   /** The figure finder and the photo answerer. */
   failure?: string;
   answer?: string;
+  /** The answerer of questions about drawings and the reports. */
+  qa?: string;
   /** The upload caps: the server refuses a message over either one. */
   max_file_mb: number;
   max_files: number;
